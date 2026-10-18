@@ -1,4 +1,4 @@
-<title>Bright Tree Design Map</title>
+<title>Design Map</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -52,6 +52,7 @@ h2:first-child{margin-top:4px}
 .tool span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tool[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--chip)}
 .hint{font-size:12.5px;color:var(--muted);line-height:1.45}
+.setup{margin:6px 0 0;padding-left:20px;font-size:13px}.setup li{margin:0 0 10px}.setup li b{display:block;font-weight:600}.setup li.done b{color:var(--muted);font-weight:500}.setup li .hint{display:block;margin:1px 0 4px}.setup .btn{font-size:12px;padding:3px 9px}
 .facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
 .facts dt{color:var(--muted)} .facts dd{margin:0;font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
 .bar{height:8px;border-radius:2px;display:flex;overflow:hidden;margin:6px 0}
@@ -133,8 +134,8 @@ details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset
 <div id="app">
   <aside id="panel">
     <header class="brand">
-      <h1>Bright Tree Design Map</h1>
-      <div class="sub">Sunshine Coast hinterland · LiDAR 2022, 1 m</div>
+      <h1 id="siteName">Design Map</h1>
+      <div class="sub" id="siteSub">Loading…</div>
       <div class="hdrrow"><div class="sync" id="sync"><i></i><span>Connecting…</span></div><button class="btn fb" id="fbBtn" hidden title="Comment on the map for the map owner">Send feedback</button></div>
     </header>
     <nav class="tabs" role="tablist">
@@ -153,7 +154,7 @@ details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset
     <div class="tabbody" id="tab-site" hidden></div>
   </aside>
   <main id="mapwrap">
-    <canvas id="map" aria-label="Terrain and design map of Bright Tree"></canvas>
+    <canvas id="map" aria-label="Terrain and design map"></canvas>
     <div class="loading" id="loading">Loading LiDAR terrain…</div>
     <div class="zoom">
       <button id="zin" aria-label="Zoom in">+</button>
@@ -170,8 +171,13 @@ details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset
 <script>
 "use strict";
 /* ---------------- constants ---------------- */
-const E0=492000, N0=7043000; // local x = E - E0, y = N0 - N  (GDA2020 / MGA zone 56)
-const LAT=-26.7435;
+let E0=492000, N0=7043000; // local x = E - E0, y = N0 - N  (GDA2020 / MGA zone); replaced by terrain.json on load
+let LAT=-26.7435, LON=152.93, ZONE=56;
+let SITE={name:'Bright Tree',subtitle:'Sunshine Coast hinterland',state:'QLD',council:'Sunshine Coast',lfw:true,main:'2022',res:'1 m',years:['2022','2014','2008'],changeYears:['2014','2008'],
+  boundaryNote:'Lot boundary traced from the Department of Resources vegetation report map (10.0 ha title area) and accurate to about 5 m; the surveyed cadastre would tighten it.',
+  source:'Sunshine Coast 2022 LiDAR, 1 m bare-earth DEM (ELVIS)',
+  soilNote:'Land for Wildlife assessment: low-fertility sands on Landsborough Sandstone, extremely erosion prone, sandier up the hill and richer in the gullies where basalt washes down from the ridge above.'};
+const slug=()=>String(SITE.name||'site').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'site';
 const KINDS={
   zone0:{g:'Zones',label:'Zone 0 · Home',geom:'polygon',color:'#7d5aa6'},
   zone1:{g:'Zones',label:'Zone 1 · Daily',geom:'polygon',color:'#d6453d'},
@@ -245,14 +251,14 @@ function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.pa
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 
 /* ---------------- projection (Krüger, GRS80, MGA56) ---------------- */
-const PJ=(()=>{const a=6378137,f=1/298.257222101,k0=.9996,lon0=153*Math.PI/180,FE=5e5,FN=1e7;
+const PJ=(()=>{const a=6378137,f=1/298.257222101,k0=.9996,FE=5e5,FN=1e7;
  const n=f/(2-f),A=a/(1+n)*(1+n*n/4+n**4/64),e=Math.sqrt(f*(2-f));
  const al=[n/2-2*n*n/3+5*n**3/16,13*n*n/48-3*n**3/5,61*n**3/240],be=[n/2-2*n*n/3+37*n**3/96,n*n/48+n**3/15,17*n**3/480];
  function toLL(E,N){const xi=(N-FN)/(k0*A),eta=(E-FE)/(k0*A);let xp=xi,ep=eta;
   for(let j=0;j<3;j++){const k=2*(j+1);xp-=be[j]*Math.sin(k*xi)*Math.cosh(k*eta);ep-=be[j]*Math.cos(k*xi)*Math.sinh(k*eta)}
   const chi=Math.asin(Math.sin(xp)/Math.cosh(ep));let lat=chi;
   for(let i=0;i<6;i++)lat=Math.asin(Math.tanh(Math.atanh(Math.sin(chi))+e*Math.atanh(e*Math.sin(lat))));
-  return [(lon0+Math.atan2(Math.sinh(ep),Math.cos(xp)))*180/Math.PI,lat*180/Math.PI]}
+  return [((ZONE*6-183)*Math.PI/180+Math.atan2(Math.sinh(ep),Math.cos(xp)))*180/Math.PI,lat*180/Math.PI]}
  return {toLL}})();
 const xy2ll=(x,y)=>PJ.toLL(x+E0,N0-y);
 
@@ -271,12 +277,25 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
 function loadImg(k,src){return new Promise(r=>{const im=new Image();im.onload=()=>{IMG[k]=im;r()};im.onerror=()=>r();im.src=src})}
+/* site settings come from terrain.json (meta.site), so the same page serves any block */
+function applySite(){const ms=T&&T.meta&&T.meta.site;
+  if(ms){SITE=Object.assign({name:'Our block',subtitle:'',state:'',council:'',lfw:false,years:[],changeYears:[],boundaryNote:'',source:'',soilNote:''},ms)}
+  if(T){E0=T.E0;N0=T.N0}if(ms){LAT=ms.lat;LON=ms.lon;ZONE=ms.zone;if(ms.rain)RAIN=ms.rain;else{RAIN=Object.assign({},RAIN,{placeholder:true,station:RAIN.station+' (placeholder until your nearest station is added)'})}}
+  document.title=SITE.name+' Design Map';$('#siteName').textContent=SITE.name+' Design Map';
+  $('#siteSub').textContent=[SITE.subtitle,'LiDAR '+SITE.main+', '+SITE.res].filter(Boolean).join(' · ');
+  cv.setAttribute('aria-label','Terrain and design map of '+SITE.name);
+  const R3n=SITE.state==='NSW'?'Weed in NSW: under the Biosecurity Act 2015 every landholder has a general biosecurity duty to prevent, eliminate or minimise its risk; check NSW WeedWise for what your region requires.':SITE.state==='QLD'||!SITE.state?R3:'Declared or environmental weed in many parts of Australia: check your state weed list.';
+  const LOCn=SITE.council==='Sunshine Coast'?LOC:SITE.council?`Check ${SITE.council} Council's local weed list; control it and don't plant it.`:'Check your council\'s local weed list; control it and don\'t plant it.';
+  for(const k in WEEDS){let t=WEEDS[k][1].replace(R3,R3n).replace(LOC,LOCn);if(!SITE.lfw){t=t.replace(' '+LFW,'').replace(LFW+' ','').replace(LFW,'').replace(/^Land for Wildlife[^:]*: ?/,'Common advice: ').replace('Land for Wildlife medium priority.','Environmental weed; remove seedlings.')}WEEDS[k][1]=t||'Environmental weed.'}
+  const ch=OVERLAYS[1].items;for(let i=ch.length-1;i>=0;i--)if(ch[i][0].startsWith('change_'))ch.splice(i,1);
+  for(const y of (SITE.changeYears||[]).slice().sort()){ch.push(['change_'+y,'Ground change since '+y]);OVNAME['change_'+y]='Ground change since '+y}}
 async function boot(){
   resize(); fitLot(); draw();
-  const imgs=['relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png','change_2008.png','change_2014.png'];
-  const pImgs=Promise.all(imgs.map(f=>loadImg(f.split('.')[0],f)));
+  const imgs=['relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png'];
   try{T=await (await fetch('terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
-  buildPaths(); fitLot();
+  const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
+  const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],f)));
+  applySite(); buildPaths(); fitLot();
   dem2=new Int16Array(await inflate(T.meta.dem.b64));
   const d1=T.meta.dem1; dem1={x0:d1.x0,y0:d1.y0,w:d1.w,h:d1.h,a:new Int16Array(await inflate(d1.b64))};
   for(const k of ['winter','equinox','summer']) sunGrid[k]=new Uint8Array(await inflate(T.meta['sunh_'+k]));
@@ -484,12 +503,14 @@ cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pointers
   if(penOn()){freeStroke=[s2w(e.offsetX,e.offsetY)];dragStart=null;draw();return}
   dragStart={x:e.offsetX,y:e.offsetY,cx:view.cx,cy:view.cy};
   if(align&&align.mode==='move'){const im=imagery.get(align.id);if(im){imgDrag={x:e.offsetX,y:e.offsetY,c:im.c,d:im.d};dragStart=null}return}
+  if(mt&&mt.type==='bound'){const hb=boundHit(e.offsetX,e.offsetY);if(hb){if(hb.insert)mt.pts.splice(hb.i,0,r1(s2w(e.offsetX,e.offsetY)));bdrag=hb;mt.dirty=true;dragStart=null;draw()}return}
   if(!tool&&selected){const h=hitVertex(e.offsetX,e.offsetY);if(h){vdrag=h;dragStart=null}}});
 cv.addEventListener('pointermove',e=>{const pt=[e.offsetX,e.offsetY];if(pointers.has(e.pointerId))pointers.set(e.pointerId,pt);
   const w=s2w(...pt);hud(w);
   if(freeStroke&&pointers.size===1){if(dist(freeStroke[freeStroke.length-1],w)*view.s>2)freeStroke.push(w);draw();return}
   if(pinch&&pointers.size===2){const [a,b]=[...pointers.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);view.s=clampS(pinch.s*d/pinch.d);const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];view.cx=pinch.c[0]-(m[0]-W/2)/view.s;view.cy=pinch.c[1]-(m[1]-H/2)/view.s;moved=true;draw();return}
   if(imgDrag){const im=imagery.get(align&&align.id);if(im){moved=true;im.c=imgDrag.c+(pt[0]-imgDrag.x)/view.s;im.d=imgDrag.d+(pt[1]-imgDrag.y)/view.s;draw()}return}
+  if(bdrag){moved=true;mt.pts[bdrag.i]=r1(w);renderMTBar();draw();return}
   if(vdrag){moved=true;const f=features.get(selected);if(!f)return;const g=structuredClone(f.geom);if(vdrag.scale){const k=Math.max(.05,dist(w,vdrag.c)/vdrag.d0),o=vdrag.orig,c=vdrag.c;
     if(o.g==='polygon')g.pts=o.pts.map(q=>r1([c[0]+(q[0]-c[0])*k,c[1]+(q[1]-c[1])*k]));else if(o.g==='point')g.r=+Math.max(.3,o.r*k).toFixed(1);else g.r=+Math.max(5,o.r*k).toFixed(1)}
   else if(vdrag.center){g.cx=w[0];g.cy=w[1]}else g.pts[vdrag.i]=[+w[0].toFixed(1),+w[1].toFixed(1)];features.set(selected,{...f,geom:g});draw();return}
@@ -499,10 +520,11 @@ cv.addEventListener('pointermove',e=>{const pt=[e.offsetX,e.offsetY];if(pointers
 function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;
   if(freeStroke){const s=freeStroke;freeStroke=null;if(e.type==='pointerup')finishFree(s);draw();return}
   if(imgDrag){imgDrag=null;if(moved)saveImageryLater(align.id);moved=false;return}
+  if(bdrag){bdrag=null;moved=false;return}
   if(vdrag){const f=features.get(selected);if(f&&moved)saveGeom(selected,f.geom);vdrag=null;moved=false;renderFeatures();return}
   if(dragStart&&!moved&&e.type==='pointerup')click(s2w(e.offsetX,e.offsetY),e);dragStart=null}
 cv.addEventListener('pointerup',endPointer);cv.addEventListener('pointercancel',endPointer);
-cv.addEventListener('dblclick',e=>{if(draft){e.preventDefault();finishDraft()}});
+cv.addEventListener('dblclick',e=>{if(mt&&mt.type==='bound'){const hb=boundHit(e.offsetX,e.offsetY);if(hb&&!hb.insert&&mt.pts.length>3){mt.pts.splice(hb.i,1);mt.dirty=true;renderMTBar();draw()}return}if(draft){e.preventDefault();finishDraft()}});
 cv.addEventListener('wheel',e=>{e.preventDefault();const w=s2w(e.offsetX,e.offsetY);view.s=clampS(view.s*Math.exp(-e.deltaY*0.0015));view.cx=w[0]-(e.offsetX-W/2)/view.s;view.cy=w[1]-(e.offsetY-H/2)/view.s;draw()},{passive:false});
 const clampS=s=>Math.max(0.2,Math.min(12,s));
 $('#zin').onclick=()=>{view.s=clampS(view.s*1.5);draw()};$('#zout').onclick=()=>{view.s=clampS(view.s/1.5);draw()};$('#zfit').onclick=()=>{fitLot();draw()};
@@ -575,12 +597,13 @@ async function connect(){
   try{assets=window.claude?await window.claude.use('assets'):null}catch(e){}
   try{const cm=window.claude?await window.claude.use('comments'):null;if(cm){const b=$('#fbBtn');b.hidden=false;b.onclick=async()=>{try{const r=await cm.openComposer({element:$('#mapwrap')});if(!r||!r.opened)toast('Click anywhere on the map, then press Send feedback again.');else toast('Tip: for a spot on the land, add a Note on the map instead.')}catch(e){b.hidden=true;toast('Feedback comments are not available in this view.')}}}}catch(e){}
   if(T)renderLayers();
-  if(db)db.collection('tasks').onSnapshot(sn=>{tasks.clear();for(const d of sn.docs){const v=d.data();if(v)tasks.set(d.id,v)}renderPlan();if(selected)renderFeatures(true)},()=>{});
+  if(db)db.collection('tasks').onSnapshot(sn=>{tasks.clear();for(const d of sn.docs){const v=d.data();if(v)tasks.set(d.id,v)}renderPlan();if(selected)renderFeatures(true);if(T)renderSite()},()=>{});
+  if(db)db.doc('meta/lot').onSnapshot(sn=>{if(sn.exists){lotDoc=sn.data();if(lotDoc&&Array.isArray(lotDoc.pts)&&lotDoc.pts.length>=6)applyLot(lotDoc.pts)}},()=>{});
   if(db)db.doc('settings/water').onSnapshot(sn=>{if(sn.exists){WB=Object.assign(WB,sn.data());if(!$('#tab-tools').contains(document.activeElement))renderTools()}},()=>{});
   if(db)db.collection('imagery').onSnapshot(snap=>{const keepLocal=[...imagery.entries()].filter(([k,v])=>v.local);imagery.clear();for(const [k,v] of keepLocal)imagery.set(k,v);
     for(const d of snap.docs){const v=d.data();if(!v||!v.assetId)continue;const cur={...v,src:'/_blob/'+v.assetId};if(align&&align.id===d.id){const mine=imagery.get(d.id);if(mine)continue}imagery.set(d.id,cur);loadImageryEl(d.id,cur)}
     if(!(document.activeElement&&document.activeElement.matches('#tab-layers input[type=range]')))renderLayers();draw()},()=>{});
-  if(!db){const loc=lsGet('bt.features',{});for(const [k,v] of Object.entries(loc))features.set(k,v);const lt=lsGet('bt.tasks',{});for(const [k,v] of Object.entries(lt))tasks.set(k,v);renderPlan();sync.className='sync off';sync.querySelector('span').textContent='Not shared: changes stay in this browser';renderFeatures();draw();return}
+  if(!db){const loc=lsGet('bt.features',{});for(const [k,v] of Object.entries(loc))features.set(k,v);const lt=lsGet('bt.tasks',{});const ll=lsGet('bt.lot',null);if(ll&&ll.pts){lotDoc=ll;applyLot(ll.pts)}for(const [k,v] of Object.entries(lt))tasks.set(k,v);renderPlan();sync.className='sync off';sync.querySelector('span').textContent='Not shared: changes stay in this browser';renderFeatures();draw();return}
   live=true;sync.className='sync on';sync.querySelector('span').textContent='Shared with the team · saves automatically';
   db.collection('features').onSnapshot(snap=>{features.clear();for(const d of snap.docs){const v=d.data();if(v&&v.geom)features.set(d.id,structuredClone(v))}if(selected&&!features.has(selected))selected=null;renderFeatures(true);if(!$('#tab-tools').contains(document.activeElement))renderTools();if(T)renderSite();draw()},
     err=>{sync.className='sync off';sync.querySelector('span').textContent='Sync stopped. Reload to reconnect.'});
@@ -629,7 +652,7 @@ async function deleteImage(id){const im=imagery.get(id);imagery.delete(id);delet
 function imageryHTML(){const rows=[...imagery.entries()].map(([id,im])=>`<div class="row"><label><input type="checkbox" data-img="${id}" ${im.on?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#6b8f4e,#a7926a)"></i>${esc(im.name)}${im.local?' <span class="pill">this browser</span>':''}</label><input type="range" min="0.2" max="1" step="0.05" value="${im.op}" data-imgop="${id}" aria-label="Opacity of ${esc(im.name)}"></div>
    <div class="seg" style="padding-left:22px"><button class="btn" data-imgalign="${id}">Align</button><button class="btn" data-imgdel="${id}">Remove</button></div><div data-imgconf="${id}"></div>`).join('');
   return `${rows}<input type="file" id="imgfile" accept="image/png,image/jpeg,image/webp" hidden><button class="btn" id="imgadd">Add aerial image…</button>
-   <p class="hint">${imagery.size?'':'Satellite tiles can’t stream into this page, so bring your own: '}In Queensland Globe switch to <b>2D</b>, north up, imagery on, zoom so the lot fills the screen, and take a screenshot (a drone orthomosaic or Google Earth “Save image” also works). Upload it, then click two matching points, such as lot corners, on the image and then on the pink boundary.${assets?'':' <b>Not shared:</b> uploads stay in this browser until the page can store files.'}</p>`}
+   <p class="hint">${imagery.size?'':'Satellite tiles can’t stream into this page, so bring your own: '}In ${SITE.state==='NSW'?'the NSW Spatial Viewer':'Queensland Globe'} switch to <b>2D</b>, north up, imagery on, zoom so the lot fills the screen, and take a screenshot (a drone orthomosaic or Google Earth “Save image” also works). Upload it, then click two matching points, such as lot corners, on the image and then on the pink boundary.${assets?'':' <b>Not shared:</b> uploads stay in this browser until the page can store files.'}</p>`}
 function wireImagery(el){el.querySelector('#imgadd').onclick=()=>el.querySelector('#imgfile').click();el.querySelector('#imgfile').onchange=e=>{addImage(e.target.files[0]);e.target.value=''};
   el.querySelectorAll('[data-img]').forEach(c=>c.onchange=()=>{const im=imagery.get(c.dataset.img);im.on=c.checked;draw();saveImageryLater(c.dataset.img)});
   el.querySelectorAll('[data-imgop]').forEach(r=>r.oninput=()=>{const im=imagery.get(r.dataset.imgop);im.op=+r.value;draw();saveImageryLater(r.dataset.imgop)});
@@ -714,12 +737,12 @@ function zipStore(files){const enc=new TextEncoder();const parts=[],cd=[];let of
   const cdLen=cd.reduce((s,a)=>s+a.length,0);const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cdLen,true);e.setUint32(16,off,true);
   return new Blob([...parts,...cd,new Uint8Array(e.buffer)],{type:'model/3mf'})}
 function to3MF(r){const enc=new TextEncoder();const out=[];
-  out.push('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><metadata name="Title">Bright Tree terrain</metadata><resources><basematerials id="1">');
+  out.push('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><metadata name="Title">'+esc(SITE.name)+' terrain</metadata><resources><basematerials id="1">');
   r.meshes.forEach(m=>out.push(`<base name="${esc(m.name)}" displaycolor="${m.color}FF"/>`));out.push('</basematerials>');
   r.meshes.forEach((m,mi)=>{out.push(`<object id="${mi+2}" name="${esc(m.name)}" type="model" pid="1" pindex="${mi}"><mesh><vertices>`);const v=m.v;let buf=[];
     for(let i=0;i<v.length;i+=3){buf.push(`<vertex x="${v[i]}" y="${v[i+1]}" z="${v[i+2]}"/>`);if(buf.length>5000){out.push(buf.join(''));buf=[]}}out.push(buf.join(''));buf=[];out.push('</vertices><triangles>');
     const t=m.t;for(let i=0;i<t.length;i+=3){buf.push(`<triangle v1="${t[i]}" v2="${t[i+1]}" v3="${t[i+2]}"/>`);if(buf.length>5000){out.push(buf.join(''));buf=[]}}out.push(buf.join(''));out.push('</triangles></mesh></object>')});
-  const pid=r.meshes.length+2;out.push(`<object id="${pid}" name="Bright Tree model" type="model"><components>${r.meshes.map((m,mi)=>`<component objectid="${mi+2}"/>`).join('')}</components></object></resources><build><item objectid="${pid}"/></build></model>`);
+  const pid=r.meshes.length+2;out.push(`<object id="${pid}" name="${esc(SITE.name)} model" type="model"><components>${r.meshes.map((m,mi)=>`<component objectid="${mi+2}"/>`).join('')}</components></object></resources><build><item objectid="${pid}"/></build></model>`);
   const model=enc.encode(out.join(''));
   const ct=enc.encode('<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>');
   const rels=enc.encode('<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>');
@@ -731,7 +754,7 @@ async function export3D(fmt){const st=$('#p3status');st.textContent='Building th
   let r;try{r=build3D()}catch(e){st.textContent='The model could not be built: '+e.message;return}
   const blob=fmt==='3mf'?to3MF(r):toSTL(r);const tris=r.meshes.reduce((s,m)=>s+m.t.length/3,0);
   st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')}) · ${(blob.size/1e6).toFixed(1)} MB`;
-  window.__bt3d={r,blob};const name=`bright-tree-terrain${+P3.terrace?'-terraced':''}.${fmt}`;
+  window.__bt3d={r,blob};const name=`${slug()}-terrain${+P3.terrace?'-terraced':''}.${fmt}`;
   if(downloads){try{await downloads.save({filename:name,data:blob});toast('Saved '+name)}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start: '+(e&&e.code||'error'))}}else toast('Downloads are not available in this view')}
 function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`<option value="${k}" ${String(v)===String(k)?'selected':''}>${l}</option>`).join('')}</select>`;
   return `<p class="hint">A printable model of the land with the boundary, creeks and your design raised on top. The 3MF file keeps each layer as its own part, so a multi-colour printer can give terrain, water, zones and features different colours.</p>
@@ -751,7 +774,7 @@ function wireP3(el){const set=(k,v)=>{P3[k]=v;lsSet('bt.p3',P3)};
   el.querySelector('#p3mf').onclick=()=>export3D('3mf');el.querySelector('#p3stl').onclick=()=>export3D('stl')}
 
 /* ---------------- water balance: roofs, tanks, household use, BoM rainfall ---------------- */
-const RAIN={station:'Nambour DAFF – Hillside (040988)',period:'2007–2026',
+let RAIN={station:'Nambour DAFF – Hillside (040988)',period:'2007–2026',
   mean:[238.1,282.7,295.7,160.8,138.7,94.4,53.6,52.8,46.8,115.2,116.8,166.2],
   median:[181.0,222.0,248.3,142.0,101.4,60.8,40.2,28.4,35.9,70.6,86.6,112.5],
   days:[10.6,11.6,12.7,8.3,8.1,6.1,5.8,3.9,4.7,7.9,8.5,8.4],
@@ -888,7 +911,6 @@ function drawRoute(px){const r=mt.res;if(r&&!r.err){const p=new Path2D();r.pts.f
 function climateSVG(){const W=300,H=130,bw=W/12,mx=300;return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Monthly rainfall and minimum temperature">${RAIN.mean.map((v,i)=>{const h=v/mx*(H-30),hm=RAIN.median[i]/mx*(H-30);return `<rect x="${i*bw+3}" y="${H-16-h}" width="${bw-6}" height="${h}" fill="#9cc6ea" rx="2"><title>${MON[i]}: ${v} mm average, ${RAIN.median[i]} mm median, min ${RAIN.tmin[i]} °C</title></rect><rect x="${i*bw+6}" y="${H-16-hm}" width="${bw-12}" height="${hm}" fill="#2d8fd5" rx="1"></rect><text x="${i*bw+bw/2}" y="${H-4}" font-size="9" text-anchor="middle" fill="var(--muted)">${MON[i][0]}</text><text x="${i*bw+bw/2}" y="${H-19-h}" font-size="7.5" text-anchor="middle" fill="var(--muted)">${Math.round(v)}</text>`}).join('')}</svg>`}
 /* ---------------- shade at a chosen date and time (terrain only) ---------------- */
 const SH=Object.assign({doy:172,t:9},lsGet('bt.sh',{}));let SHZ=null,SHC=null,shTimer=null;
-const LON=152.93;
 function declOf(doy){return 23.44*Math.sin(2*Math.PI*(284+doy)/365)}
 function sunAtTime(doy,clock){const solar=clock+(LON-150)/15; // AEST to local solar time (ignores the equation of time, ±15 min)
   const d=declOf(doy)*Math.PI/180,phi=LAT*Math.PI/180,h=15*(solar-12)*Math.PI/180;
@@ -942,7 +964,7 @@ function wireObsExtra(f){const n=(id,k,num)=>{const e=$('#'+id);if(e)e.onchange=
   n('fph','ph',1);n('ftex','tex');n('ftop','top',1);n('fom','om');n('fweed','weed')}
 function soilSiteHTML(){const tests=[...features.values()].filter(f=>f.kind==='obs'&&(f.cat||'Soil test')==='Soil test'&&(f.ph||f.tex));const weeds=[...features.values()].filter(f=>f.kind==='obs'&&f.cat==='Weed');
   const wc={};weeds.forEach(f=>{const k=f.weed||'other';wc[k]=(wc[k]||0)+1});
-  return `<h2>Soil</h2><p class="hint">Land for Wildlife assessment: low-fertility sands on Landsborough Sandstone, extremely erosion prone, sandier up the hill and richer in the gullies where basalt washes down from the ridge above. Record soil tests as Observations (category Soil test) to build a picture across the site.</p>
+  return `<h2>Soil</h2><p class="hint">${SITE.soilNote?esc(SITE.soilNote)+' ':''}Record soil tests as Observations (category Soil test) to build a picture across the site.</p>
    ${tests.length?`<dl class="facts">${tests.map(f=>`<dt>${esc(f.name)}</dt><dd>${f.ph?'pH '+f.ph:''}${f.tex?' · '+esc(f.tex):''}${f.top?' · '+f.top+' cm topsoil':''}</dd>`).join('')}</dl>`:'<p class="hint">No soil tests recorded yet.</p>'}
    <h2>Weed watch</h2>${weeds.length?`<dl class="facts">${Object.entries(wc).map(([k,n])=>`<dt>${esc((WEEDS[k]||WEEDS.other)[0])}</dt><dd>${n} site${n>1?'s':''}${(WEEDS[k]||[])[1]&&WEEDS[k][1].startsWith('Restricted')?' · restricted':''}</dd>`).join('')}</dl>`:'<p class="hint">No weeds recorded yet. Add them as Observations (category Weed) and pick the species to see its legal status.</p>'}`}
 
@@ -995,7 +1017,7 @@ function featTasksHTML(id){const list=[...tasks.entries()].filter(([i,t])=>t.fea
 let mt=null; // active measuring tool
 function startMT(type){cancelDraft();if(align)endAlign();selected=null;mt={type,pts:[],H:+lsGet('bt.damH',3)};cv.classList.add('drawing');renderMTBar();renderFeatures();draw();if(matchMedia('(max-width:760px)').matches)$('#panel').classList.add('min')}
 function endMT(){if(!mt)return;mt=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;draw()}
-function mtClick(w){if(mt.type==='route'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){$('#drawbar .hint')&&($('#drawbar .hint').textContent='Finding a route…');setTimeout(()=>{mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade);renderMTBar();draw()},20)}renderMTBar();draw();return}
+function mtClick(w){if(mt.type==='bound')return;if(mt.type==='route'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){$('#drawbar .hint')&&($('#drawbar .hint').textContent='Finding a route…');setTimeout(()=>{mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade);renderMTBar();draw()},20)}renderMTBar();draw();return}
   if(mt.type==='fire'){let foot=null;for(const f of features.values()){if(['building','shed','greenhouse','futurebuilding','carport'].includes(f.kind)&&f.geom.g==='polygon'&&inPoly(w,f.geom.pts)){foot=f.geom.pts;break}}mt.res=fireCheck(foot?centroid({geom:{g:'polygon',pts:foot}}):r1(w),foot);renderMTBar();renderTools();draw();return}
   if(mt.type==='ruler'){if(mt.closed){mt.pts=[];mt.closed=false}mt.pts.push(r1(w));renderMTBar();draw();return}
   if(mt.type==='measure'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2)mt.res=headCalc(mt.pts[0],mt.pts[1])}
@@ -1005,6 +1027,7 @@ function headText(r){const hi=r.dz>=0?'A':'B',lo=r.dz>=0?'B':'A';return `${hi} i
 const fmtLen=m=>m<1000?m.toFixed(m<100?1:0)+' m':(m/1000).toFixed(2)+' km';
 function rulerStats(){const p=mt.pts;if(p.length<2)return null;const ring=mt.closed?p.concat([p[0]]):p;const L=lineLen(ring);const d=densify(ring,1);let S=0;for(let i=1;i<d.length;i++)S+=Math.hypot(d[i].d-d[i-1].d,(d[i].z-d[i-1].z)||0);return {L,S,A:mt.closed&&p.length>=3?polyArea(p):0}}
 function renderMTBar(){const b=$('#drawbar');if(!mt){b.hidden=true;return}b.hidden=false;
+  if(mt.type==='bound'){boundBar(b);return}
   if(mt.type==='route'){routeBar(b);return}
   if(mt.type==='fire'){const r=mt.res;b.innerHTML=`<span class="what">Bushfire site check</span><span class="hint">${r?(r.closest?`Vegetation ${Math.round(r.closest.dv)} m away at the closest (${dirName(r.closest.az)}); land falls away up to ${r.steep.deg.toFixed(0)}° (${dirName(r.steep.az)}).${r.over20?' Over 20° in '+r.over20+' directions: detailed assessment needed.':''} Click another building to compare.`:'No unmanaged vegetation within 100 m.'):'Click a building (or any point)'}</span><button class="btn" id="mtClose">Close</button>`;
     $('#mtClose').onclick=()=>{endMT();renderTools()};return}
@@ -1027,6 +1050,7 @@ function renderMTBar(){const b=$('#drawbar');if(!mt){b.hidden=true;return}b.hidd
     if($('#mtSave'))$('#mtSave').onclick=()=>saveDam()}
   $('#mtClose').onclick=()=>{endMT();renderTools()}}
 function drawMT(px){if(!mt)return;ctx.setLineDash([]);
+  if(mt.type==='bound'){drawBound(px);return}
   if(mt.type==='fire'){drawFire(px);return}
   if(mt.type==='route'){drawRoute(px);return}
   if(mt.type==='ruler'){const p=mt.pts;if(!p.length)return;const path=new Path2D();p.forEach((q,i)=>i?path.lineTo(...q):path.moveTo(...q));if(mt.closed)path.closePath();else if(mt.hover)path.lineTo(...mt.hover);
@@ -1075,7 +1099,7 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
    sec('t-dam','Dam & pond calculator',`<p class="hint">Draw a wall line across a gully, set its height, and the LiDAR gives the storage, the flooded area and the catchment that feeds it. Try it at the keypoint candidates and the planned rock pool.</p><button class="btn primary" id="tDam">Draw a dam wall</button>
      ${dr?`<dl class="facts" style="margin-top:10px"><dt>Storage</dt><dd>${(dr.vol/1000).toFixed(1)} ML (${Math.round(dr.vol).toLocaleString()} m³)</dd><dt>Flooded area</dt><dd>${fmtArea(dr.area)}</dd><dt>Full level</dt><dd>${dr.fsl.toFixed(1)} m, ${dr.maxD.toFixed(1)} m deep at the wall</dd><dt>Catchment</dt><dd>${dr.catchHa.toFixed(1)} ha</dd><dt>Rain on catchment</dt><dd>about ${Math.round(rain)} ML a year</dd><dt>Wall earthworks</dt><dd>about ${Math.round(dr.fill)} m³</dd></dl>
      <p class="hint">If 10–20% of that rain runs off, inflow is about ${Math.round(rain*.1)}–${Math.round(rain*.2)} ML a year, filling the pond ${(rain*.1/(dr.vol/1000)).toFixed(0)}–${(rain*.2/(dr.vol/1000)).toFixed(0)} times. Forested catchments yield less runoff than cleared ones. Dams on watercourses need state and council approval.</p>`:''}`)+
-   sec('t-route','Track route finder',`<p class="hint">Click a start and an end. The map finds the route with the least earthworks that never gets steeper than your limit (10% is the Land for Wildlife guide for these soils), avoiding buildings, tanks and ponds you have drawn. Switchbacks appear where the slope demands them.</p><button class="btn primary" id="tRoute">Find a route</button><p class="hint">For level pads, select a building, shed, greenhouse or parking area: its details show the cut and fill to level it.</p>`)+
+   sec('t-route','Track route finder',`<p class="hint">Click a start and an end. The map finds the route with the least earthworks that never gets steeper than your limit (10% is a common limit on erodible soils), avoiding buildings, tanks and ponds you have drawn. Switchbacks appear where the slope demands them.</p><button class="btn primary" id="tRoute">Find a route</button><p class="hint">For level pads, select a building, shed, greenhouse or parking area: its details show the cut and fill to level it.</p>`)+
    sec('t-fire','Bushfire site check',fireHTML())+
    sec('t-graze','Grazing & paddocks',grazeHTML(),false)+
    sec('t-3d','3D print',p3HTML())+
@@ -1091,7 +1115,7 @@ async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textCo
     const sh=document.createElement('canvas');sh.width=SW;sh.height=SH;const g=sh.getContext('2d');g.fillStyle='#ffffff';g.fillRect(0,0,SW,SH);g.drawImage(cv,0,0);
     const mapWm=W/view.s,scale=Math.round(mapWm*1000/(420*MW/SW)/10)*10;
     let y=90;const X=MW+70;g.fillStyle='#1d2621';g.textAlign='left';g.textBaseline='alphabetic';
-    g.font='700 64px "Barlow Condensed","Arial Narrow",sans-serif';const title=($('#shTitle')&&$('#shTitle').value)||'Bright Tree';
+    g.font='700 64px "Barlow Condensed","Arial Narrow",sans-serif';const title=($('#shTitle')&&$('#shTitle').value)||SITE.name;
     const wrap=(t,f,maxW,lh)=>{g.font=f;const ws=t.split(' ');let line='';for(const w of ws){const tt=line?line+' '+w:w;if(g.measureText(tt).width>maxW&&line){g.fillText(line,X,y);y+=lh;line=w}else line=tt}if(line){g.fillText(line,X,y);y+=lh}};
     wrap(title,'700 64px "Barlow Condensed","Arial Narrow",sans-serif',SW-X-60,68);
     g.fillStyle='#5d6a62';wrap(`${new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})} · scale about 1:${scale.toLocaleString()} at A3`,'400 30px "IBM Plex Sans",sans-serif',SW-X-60,40);
@@ -1101,11 +1125,69 @@ async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textCo
     const lg=[['#c2185b','Lot boundary',''],['#1969c8','Flow lines',''],['#8a6a45','Contours (1 m and 5 m)','']];
     Object.keys(KINDS).filter(k=>used[k]).forEach(k=>lg.push([KINDS[k].color,KINDS[k].label,used[k].a?fmtArea(used[k].a):(used[k].n>1?'× '+used[k].n:'')]));
     g.font='400 28px "IBM Plex Sans",sans-serif';for(const [c,l,v] of lg){if(y>SH-200)break;g.fillStyle=c;g.fillRect(X,y-22,30,26);g.fillStyle='#1d2621';g.fillText(l,X+46,y);if(v){g.fillStyle='#5d6a62';g.textAlign='right';g.fillText(v,SW-60,y);g.textAlign='left'}y+=42}
-    y=SH-120;g.fillStyle='#5d6a62';g.font='400 22px "IBM Plex Sans",sans-serif';g.fillText('Terrain: Queensland Government LiDAR 2022, 1 m.',X,y);g.fillText('Boundary approximate (±5 m). Concept design only.',X,y+30);
+    y=SH-120;g.fillStyle='#5d6a62';g.font='400 22px "IBM Plex Sans",sans-serif';g.fillText(`Terrain: ${SITE.source||('LiDAR '+SITE.main+', '+SITE.res)}.`,X,y);g.fillText('Boundary approximate (±5 m). Concept design only.',X,y+30);
     g.strokeStyle='#d3d9d0';g.lineWidth=3;g.beginPath();g.moveTo(MW+30,40);g.lineTo(MW+30,SH-40);g.stroke();
     const blob=await new Promise(r=>sh.toBlob(r,'image/png'));
-    if(downloads){try{await downloads.save({filename:'bright-tree-design-sheet.png',data:blob});toast('Saved the A3 sheet')}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start')}}else{window.__sheet=blob;toast('Downloads are not available in this view')}
+    if(downloads){try{await downloads.save({filename:slug()+'-design-sheet.png',data:blob});toast('Saved the A3 sheet')}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start')}}else{window.__sheet=blob;toast('Downloads are not available in this view')}
   }finally{W=sv.W;H=sv.H;DPR=sv.DPR;view.cx=sv.cx;view.cy=sv.cy;view.s=sv.s;selected=sv.sel;resize();btn.disabled=false;btn.textContent='Download A3 sheet (PNG)'}}
+
+
+/* ---------------- set-up checklist and boundary editing (any block) ---------------- */
+let lotDoc=null;
+function setupItems(){const fs=[...features.values()];const g=f=>(KINDS[f.kind]||{}).g;
+  return [
+   {k:'bound',t:'Check the boundary',d:'Compare the pink line with your title plan or council map; drag corners to fix it, or confirm it.',ok:!!(lotDoc&&lotDoc.ok),btn:'Check boundary',go:()=>startBound()},
+   {k:'aerial',t:'Add an aerial photo',d:'Upload a screenshot or drone image and line it up with the terrain (Layers tab).',ok:[...imagery.values()].some(i=>i.aligned),btn:'Open Layers',go:()=>{showTab('layers');const d=document.querySelector('details[data-sec="photo"]');if(d){d.open=true;d.scrollIntoView({block:'start'})}}},
+   {k:'existing',t:'Mark what is already there',d:'House, sheds, tanks, tracks, dams, big trees: draw them with stage “Existing”.',ok:fs.some(f=>(f.stage||defStage(f.kind))==='existing'&&g(f)!=='Sectors'),btn:'Open Draw',go:()=>showTab('draw')},
+   {k:'sectors',t:'Add sun, wind and fire sectors',d:'The energies coming onto the site (Draw → Sectors).',ok:fs.some(f=>g(f)==='Sectors'),btn:'Open Draw',go:()=>showTab('draw')},
+   {k:'water',t:'Set up water',d:'Mark which buildings have gutters, enter tank sizes, and set household use (Tools → Water balance).',ok:fs.some(f=>f.roof||+f.litres>0),btn:'Open Tools',go:()=>showTab('tools')},
+   {k:'zones',t:'Sketch zones 0–5',d:'Start with Zone 0 (home) and Zone 1 (daily visits).',ok:fs.some(f=>g(f)==='Zones'),btn:'Open Draw',go:()=>showTab('draw')},
+   {k:'plan',t:'List the first jobs',d:'Add tasks with owners and stages in the Plan tab.',ok:tasks.size>0,btn:'Open Plan',go:()=>showTab('plan')}]}
+function setupHTML(){const it=setupItems();const n=it.filter(i=>i.ok).length;const st=lsGet('bt.sec',{});const open=st.setup??(n<it.length);
+  return `<details class="sec" data-sec="setup" ${open?'open':''}><summary>Set-up checklist · ${n} of ${it.length}</summary><div class="secbody"><p class="hint">The terrain is ready. These steps turn it into a base map for designing${RAIN.placeholder?'. Rainfall is still a placeholder: send the map owner the nearest Bureau of Meteorology station.':'.'}</p>
+   <ol class="setup">${it.map(i=>`<li class="${i.ok?'done':''}"><b>${i.ok?'✓ ':''}${i.t}</b><span class="hint">${i.d}</span>${i.ok&&i.k!=='bound'?'':`<button class="btn" data-go="${i.k}">${i.btn}</button>`}</li>`).join('')}</ol></div></details>`}
+function wireSetup(el){const it=setupItems();el.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const i=it.find(x=>x.k===b.dataset.go);if(i)i.go()})}
+
+function startBound(){showTab('layers');startMT('bound');mt.pts=flat(T.lot).map(r1);layers.lot=true;renderMTBar();
+  const p=mt.pts,xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);fitBox(Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys),70);draw()}
+let bdrag=null;
+function boundHit(sx,sy){const p=mt.pts;for(let i=0;i<p.length;i++){const [x,y]=w2s(...p[i]);if(Math.hypot(x-sx,y-sy)<13)return {i}}
+  for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];const [x,y]=w2s((a[0]+b[0])/2,(a[1]+b[1])/2);if(Math.hypot(x-sx,y-sy)<11)return {i:i+1,insert:true}}return null}
+function drawBound(px){const p=mt.pts;if(p.length<3)return;const path=new Path2D();p.forEach((q,i)=>i?path.lineTo(...q):path.moveTo(...q));path.closePath();
+  ctx.fillStyle='rgba(214,51,132,.08)';ctx.fill(path);ctx.setLineDash([]);ctx.lineWidth=3*px;ctx.strokeStyle='#fff';ctx.stroke(path);ctx.lineWidth=1.8*px;ctx.strokeStyle='#d63384';ctx.setLineDash([6*px,4*px]);ctx.stroke(path);ctx.setLineDash([]);
+  p.forEach((q,i)=>{const b=p[(i+1)%p.length];ctx.fillStyle='rgba(255,255,255,.85)';ctx.strokeStyle='#d63384';ctx.lineWidth=1.2*px;ctx.beginPath();ctx.arc((q[0]+b[0])/2,(q[1]+b[1])/2,3.5*px,0,7);ctx.fill();ctx.stroke()});
+  p.forEach(q=>{ctx.fillStyle='#d63384';ctx.strokeStyle='#fff';ctx.lineWidth=2*px;ctx.beginPath();ctx.arc(q[0],q[1],6.5*px,0,7);ctx.fill();ctx.stroke()})}
+function boundBar(b){const a=polyArea(mt.pts);
+  b.innerHTML=`<span class="what">Boundary · ${fmtArea(a)}${a>=2000?` · ${(a/1e4).toFixed(2)} ha`:''}</span><span class="hint">Drag a corner to move it, drag a small dot to add a corner, double-click a corner to remove it.</span><button class="btn primary" id="bSave">${lotDoc&&lotDoc.ok&&!mt.dirty?'Looks right':'Save boundary'}</button>${T.lot0?'<button class="btn" id="bReset">Original</button>':''}<button class="btn" id="mtClose">Cancel</button>`;
+  $('#bSave').onclick=()=>saveLot(mt.pts);$('#mtClose').onclick=()=>{endMT()};
+  if($('#bReset'))$('#bReset').onclick=()=>{mt.pts=flat(T.lot0).map(r1);mt.dirty=true;renderMTBar();draw()}}
+async function saveLot(pts){const body={pts:pts.flat().map(v=>+(+v).toFixed(1)),ok:true,by:myId||null,at:new Date().toISOString(),area:Math.round(polyArea(pts))};endMT();
+  if(live){try{await db.doc('meta/lot').set(body);toast('Boundary saved for everyone')}catch(e){toast('Boundary did not save.');return}}else{lsSet('bt.lot',body);toast('Boundary saved in this browser')}
+  lotDoc=body;applyLot(body.pts)}
+function applyLot(arr){if(!T)return;if(!T.lot0)T.lot0=T.lot.slice();const same=arr.length===T.lot.length&&arr.every((v,i)=>Math.abs(v-T.lot[i])<.05);T.lot=arr.slice();
+  if(!same){buildPaths();recomputeLot()}renderSite();draw()}
+function recomputeLot(){if(!EXTRA||!EXTRA.d8||!dem2)return;const N=1000,d8=EXTRA.d8,lp=flat(T.lot),NN=N*N;
+  const DR=[-1,-1,-1,0,0,1,1,1],DC=[-1,0,1,-1,1,-1,0,1];const rec=new Int32Array(NN).fill(-1),indeg=new Uint8Array(NN);
+  for(let i=0;i<NN;i++){const k=d8[i];if(k<8){const r=((i/N)|0)+DR[k],c=i%N+DC[k];if(r>=0&&r<N&&c>=0&&c<N){rec[i]=r*N+c;indeg[r*N+c]++}}}
+  const order=new Int32Array(NN);let h=0,t=0;for(let i=0;i<NN;i++)if(!indeg[i])order[t++]=i;
+  const acc=new Float32Array(NN).fill(4);while(h<t){const i=order[h++],j=rec[i];if(j>=0){acc[j]+=acc[i];if(--indeg[j]===0)order[t++]=j}}
+  const xs=lp.map(q=>q[0]),ys=lp.map(q=>q[1]);const c0=Math.max(0,Math.floor(Math.min(...xs)/2)),c1=Math.min(N-1,Math.ceil(Math.max(...xs)/2)),r0=Math.max(0,Math.floor(Math.min(...ys)/2)),r1_=Math.min(N-1,Math.ceil(Math.max(...ys)/2));
+  const inL=new Uint8Array(NN);const lotCells=[];for(let r=r0;r<=r1_;r++)for(let c=c0;c<=c1;c++)if(inPoly([(c+.5)*2,(r+.5)*2],lp)){inL[r*N+c]=1;lotCells.push(r*N+c)}
+  if(!lotCells.length)return;
+  const upOf=seed=>{const up=new Uint8Array(NN);for(const i of seed)up[i]=1;for(let k=t-1;k>=0;k--){const i=order[k],j=rec[i];if(j>=0&&up[j])up[i]=1}const cells=[];for(let i=0;i<NN;i++)if(up[i])cells.push(i);return {up,cells}};
+  const main=upOf(lotCells);const name=(T.catch[0]&&T.catch[0].name)||'Everything that drains into the lot';
+  const cat=[{name,ha:+(main.cells.length*4/1e4).toFixed(1),p:maskOutline(main.up,main.cells).flat(),main:true}];
+  const inf=[];for(let i=0;i<NN;i++){if(!inL[i]&&rec[i]>=0&&inL[rec[i]]&&acc[i]>=8000)inf.push(i)}inf.sort((a,b)=>acc[b]-acc[a]);const used=[];
+  for(const i of inf){if(used.length>=8)break;const r=(i/N)|0,c=i%N;if(used.some(([r2,c2])=>Math.abs(r-r2)+Math.abs(c-c2)<15))continue;used.push([r,c]);const u=upOf([i]);cat.push({name:'Inflow',ha:+(acc[i]/1e4).toFixed(1),p:maskOutline(u.up,u.cells).flat(),at:[c*2+1,r*2+1]})}
+  let best=-1;for(const i of lotCells)if(rec[i]>=0&&!inL[rec[i]]&&(best<0||acc[i]>acc[best]))best=i;
+  if(best>=0)T.meta.outlet={at:[(best%N)*2+1,((best/N)|0)*2+1],ha:+(acc[best]/1e4).toFixed(1)};
+  T.catch=cat;
+  const cls=T.meta.slopeClasses,cnt=cls.map(()=>0);const z=i=>dem2[i]/10;
+  for(const i of lotCells){const r=(i/N)|0,c=i%N;if(r<1||c<1||r>N-2||c>N-2)continue;const gx=(z(i+1)-z(i-1))/4,gy=(z(i+N)-z(i-N))/4,p=Math.hypot(gx,gy)*100;const k=cls.findIndex(([lo,hi])=>p>=lo&&(hi==null||p<hi));if(k>=0)cnt[k]++}
+  const tot=cnt.reduce((a,b)=>a+b,0)||1;T.meta.lotSlopeShare=cls.map(([lo,hi],k)=>[lo,hi,cnt[k]/tot]);
+  for(const s of ['winter','equinox','summer']){const g=sunGrid[s];if(!g)continue;let a=0;for(const i of lotCells){const r=(i/N)|0,c=i%N;a+=g[(r>>1)*500+(c>>1)]/10}T.meta['sun_'+s+'_lotmean']=a/lotCells.length}
+  for(const k of T.kp)k.inLot=inPoly([k.x,k.y],lp);
+  buildPaths()}
 
 /* ---------------- panels ---------------- */
 function showTab(t){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));for(const id of ['layers','draw','feat','plan','tools','site'])$('#tab-'+id).hidden=id!==t;$('#panel').classList.remove('min');lsSet('bt.tab',t)}
@@ -1134,16 +1216,16 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
     <div class="row"><label for="ovop">Overlay strength</label><input type="range" id="ovop" min="0.2" max="1" step="0.05" value="${layers.ovOp}"></div>
     <div id="ovLegend" class="hint"></div>`)+
    sec('lines','Water, contours & labels',lines.map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join(''))+
-   `<p class="hint">Terrain from the Queensland Government 2022 LiDAR survey (bare earth, 1 m). Sun hours count terrain shading only, not trees.</p>`;
+   `<p class="hint">Terrain from the ${SITE.main} LiDAR survey (bare earth, ${SITE.res}). Sun hours count terrain shading only, not trees.</p>`;
   const ch=EXTRA&&EXTRA.change;
   const legends={slope:`<div class="legend">${sc}</div>Under 10% suits tracks and beds; 10–25% contour beds and terraces; 25–50% tree crops on contour with groundcover; over 50% keep in forest.`,
    aspect:`<div class="legend">${ac}</div>North-facing slopes are the warm, winter-sunny side in the southern hemisphere.`,
    sun_winter:'Direct sun on 21 June, blocked by terrain only. Mean across the lot: '+m.sun_winter_lotmean.toFixed(1)+' h.',sun_equinox:'Direct sun at the equinox. Mean across the lot: '+m.sun_equinox_lotmean.toFixed(1)+' h.',sun_summer:'Direct sun on 21 December. Mean across the lot: '+m.sun_summer_lotmean.toFixed(1)+' h.',
-   shadow:'Shade cast by the hills (not trees) at the chosen date and time. Clock times are Queensland time, give or take 15 minutes. Drag the time slider or play the day to see when each spot gets sun.',
+   shadow:'Shade cast by the hills (not trees) at the chosen date and time. Clock times are Australian Eastern Standard Time (no daylight saving), give or take 15 minutes. Drag the time slider or play the day to see when each spot gets sun.',
    cold:'Valley floors where cold air settles on still winter nights. Frost-tender plants belong upslope on the thermal belt.',
    fire:'Where terrain alone would speed a fire: steep slopes facing the hot, dry north-west to west winds of late winter and spring (fire speed roughly doubles with every 10° of upslope). It ignores fuel, so read it with the canopy and your fire plan. A design aid, not a bushfire rating.',
-   change_2008:'Ground that has moved since the 2008 survey, after removing survey-wide offsets: red is lower now (cut, erosion, slips, gully incision), blue is higher (fill, deposition, new pads). Much of the faint scatter under forest is survey noise; treat patches as leads to check on the ground.'+(ch?` Inside the lot: ${ch['2008'].lotLossHa} ha lowered and ${ch['2008'].lotGainHa} ha raised by more than 1 m.`:''),
-   change_2014:'Ground that has moved since the 2014 survey. Red is lower now, blue is higher. Treat patches as leads to check on the ground.'+(ch?` Inside the lot: ${ch['2014'].lotLossHa} ha lowered and ${ch['2014'].lotGainHa} ha raised by more than 1 m.`:''),none:''};
+   none:''};
+  for(const y of SITE.changeYears||[])legends['change_'+y]=`Ground that has moved since the ${y} survey, after removing survey-wide offsets: red is lower now (cut, erosion, slips, gully incision), blue is higher (fill, deposition, new pads). Faint scatter under forest is survey noise; treat patches as leads to check on the ground.`+(ch&&ch[y]?` Inside the lot: ${ch[y].lotLossHa} ha lowered and ${ch[y].lotGainHa} ha raised by more than 1 m.`:'');
   const setLeg=()=>{$('#ovLegend').innerHTML=legends[layers.overlay]||'';const sw=$('#shWrap');if(layers.overlay==='shadow'){if(!sw.innerHTML){sw.innerHTML=shadowCtl();wireShadow(el)}computeShadow()}else sw.innerHTML='';mapLegend()};setLeg();if(layers.overlay==='shadow')wireShadow(el);
   el.querySelectorAll('#baseSeg button').forEach(b=>b.onclick=()=>{setLayer('base',b.dataset.v);el.querySelectorAll('#baseSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
   el.querySelectorAll('.ovs button').forEach(b=>b.onclick=()=>{setLayer('overlay',b.dataset.v);el.querySelectorAll('.ovs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===b.dataset.v));setLeg()});
@@ -1231,7 +1313,7 @@ const SPECIES={
  greygum:['Grey gum','tree',30,12,4,'hardy','Koala food tree.'],
  flametree:['Flame tree','tree',15,8,4,'light','Native feature tree.'],
  birdwing:['Richmond birdwing vine','vine',8,2,2,'light','Host plant for the birdwing butterfly; part shade.'],
- taro:['Taro','ground',1.5,1,4,'tender','Sunshine Coast locally significant weed when it escapes into creeks: keep it contained and away from waterways.','weed'],
+ taro:['Taro','ground',1.5,1,4,'tender','Listed as a local weed by some SE Queensland and northern NSW councils when it escapes into creeks: keep it contained and away from waterways.','weed'],
  turmeric:['Turmeric','ground',1,0.5,3,'tender','Ginger family spice for warm, moist part shade.'],
  gingerEdible:['Edible ginger','ground',1,0.5,2,'tender','Edible ginger (Zingiber), not the restricted ornamental Hedychium gingers.'],
 };
@@ -1314,26 +1396,28 @@ function geoOf(f){const g=f.geom,ll=q=>xy2ll(q[0],q[1]).map(v=>+v.toFixed(7));
   if(g.g==='point')return {type:'Point',coordinates:ll(g.pts[0])};if(g.g==='line')return {type:'LineString',coordinates:g.pts.map(ll)};if(g.g==='polygon')return {type:'Polygon',coordinates:[g.pts.concat([g.pts[0]]).map(ll)]};
   let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(KINDS[f.kind].decl);a0=b.set;a1=b.rise}if(a1<=a0)a1+=360;const ring=[[g.cx,g.cy]];for(let a=a0;a<=a1+.01;a+=5){const r=a*Math.PI/180;ring.push([g.cx+Math.sin(r)*g.r,g.cy-Math.cos(r)*g.r])}ring.push([g.cx,g.cy]);return {type:'Polygon',coordinates:[ring.map(ll)]}}
 async function exportFile(fmt){const feats=[...features.values()].map(f=>({type:'Feature',properties:{name:f.name,type:(KINDS[f.kind]||{}).label,status:f.status,notes:f.notes},geometry:geoOf(f)}));
-  let data,name;if(fmt==='geojson'){data=JSON.stringify({type:'FeatureCollection',features:feats},null,1);name='bright-tree-design.geojson'}
+  let data,name;if(fmt==='geojson'){data=JSON.stringify({type:'FeatureCollection',features:feats},null,1);name=slug()+'-design.geojson'}
   else{const coords=c=>c.map(p=>p.join(',')+',0').join(' ');const pm=f=>{const g=f.geometry;let geo=g.type==='Point'?`<Point><coordinates>${g.coordinates.join(',')},0</coordinates></Point>`:g.type==='LineString'?`<LineString><tessellate>1</tessellate><coordinates>${coords(g.coordinates)}</coordinates></LineString>`:`<Polygon><outerBoundaryIs><LinearRing><coordinates>${coords(g.coordinates[0])}</coordinates></LinearRing></outerBoundaryIs></Polygon>`;return `<Placemark><name>${esc(f.properties.name)}</name><description>${esc((f.properties.type||'')+' · '+f.properties.status+(f.properties.notes?' · '+f.properties.notes:''))}</description>${geo}</Placemark>`};
-    data=`<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Bright Tree design</name>${feats.map(pm).join('')}</Document></kml>`;name='bright-tree-design.kml'}
+    data=`<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${esc(SITE.name)} design</name>${feats.map(pm).join('')}</Document></kml>`;name=slug()+'-design.kml'}
   if(downloads){try{await downloads.save({filename:name,data});toast('Saved '+name);return}catch(e){if(e&&e.code==='declined')return}}
   try{await navigator.clipboard.writeText(data);toast('Copied to the clipboard (download not available here)')}catch(e){toast('Export is not available in this view')}}
 function renderSite(){const el=$('#tab-site');const m=T.meta;const lot=T.catch[0];const inf=T.catch.slice(1);
   const lc=flat(T.lot);const cx=lc.reduce((s,q)=>s+q[0],0)/lc.length,cy=lc.reduce((s,q)=>s+q[1],0)/lc.length;
   const sl=m.lotSlopeShare;const bar=sl.map(([lo,hi,sh],i)=>{const c=m.slopeClasses[i][2];return `<span style="width:${sh*100}%;background:rgb(${c[0]},${c[1]},${c[2]})" title="${hi?lo+'–'+hi:'>'+lo}%: ${(sh*100).toFixed(0)}%"></span>`}).join('');
-  const lotZ=flat(T.lot).map(q=>zAt(...q));
-  el.innerHTML=`<h2>Water</h2><dl class="facts"><dt>Whole catchment</dt><dd>${lot.ha} ha drains through the lot</dd><dt>From upstream</dt><dd>${(lot.ha-10).toFixed(1)} ha of neighbours’ land</dd>
+  const DL={N:'north',NE:'north-east',E:'east',SE:'south-east',S:'south',SW:'south-west',W:'west',NW:'north-west'};const lotZ=flat(T.lot).map(q=>zAt(...q));const lotHa=polyArea(lc)/1e4;const annual=RAIN.mean.reduce((a,b)=>a+b,0);
+  const big=inf.slice().sort((a,b)=>b.ha-a.ha)[0];const wet=RAIN.mean.indexOf(Math.max(...RAIN.mean)),dry=RAIN.mean.indexOf(Math.min(...RAIN.mean)),coldM=Math.min(...RAIN.tmin);
+  el.innerHTML=setupHTML()+`<h2>Water</h2><dl class="facts"><dt>Whole catchment</dt><dd>${lot.ha} ha drains through the lot</dd><dt>From upstream</dt><dd>${Math.max(0,lot.ha-lotHa).toFixed(1)} ha of neighbours’ land</dd>
    ${inf.map(c=>`<dt>Inflow from ${dirName(bear([cx,cy],c.at))}</dt><dd>${c.ha} ha · enters at ${zAt(...c.at).toFixed(0)} m</dd>`).join('')}
-   <dt>Leaves the lot</dt><dd>${m.outlet.ha} ha, north boundary at ${zAt(...m.outlet.at).toFixed(0)} m</dd></dl>
-   <p class="hint">At about 1,700 mm a year, every hectare of catchment receives about 17 million litres. The biggest single inflow is the eastern gully.</p>
-   <h2>Slope across the lot</h2><div class="bar">${bar}</div><p class="hint">${(sl.slice(0,3).reduce((s,v)=>s+v[2],0)*100).toFixed(0)}% of the lot is under 25%; ${(sl[5][2]*100).toFixed(0)}% is steeper than 50% (27°). Productive ground will be pockets and benches, so the slope layer is the first filter for every placement.</p>
+   ${m.outlet?`<dt>Leaves the lot</dt><dd>${m.outlet.ha} ha, ${dirName(bear([cx,cy],m.outlet.at))} boundary at ${zAt(...m.outlet.at).toFixed(0)} m</dd>`:''}</dl>
+   <p class="hint">At about ${(Math.round(annual/50)*50).toLocaleString()} mm a year, every hectare of catchment receives about ${(annual/100).toFixed(0)} million litres.${big?` The biggest single inflow comes from the ${DL[dirName(bear([cx,cy],big.at))]} (${big.ha} ha).`:''}</p>
+   <h2>Slope across the lot</h2><div class="bar">${bar}</div><p class="hint">${(sl.slice(0,3).reduce((s,v)=>s+v[2],0)*100).toFixed(0)}% of the lot is under 25%; ${(sl[5][2]*100).toFixed(0)}% is steeper than 50% (27°). ${sl[5][2]>.4?'Productive ground will be pockets and benches, so the slope':'The slope'} layer is the first filter for every placement.</p>
    <h2>Keypoint candidates</h2><p class="hint">Where a gully’s fall flattens sharply, the classic spot to slow and store water. Computed from the LiDAR; check each on the ground.</p>
    <div class="kpl">${T.kp.map((k,i)=>`<button data-i="${i}">KP ${i+1} · ${k.z} m · ${k.ha} ha above<br><small>gully falls ${k.above}% above, ${k.below}% below · ${k.inLot?'inside the lot':'upstream, outside the lot'}</small></button>`).join('')}</div>
    <h2>Sun (terrain only)</h2><dl class="facts"><dt>Winter, 21 Jun</dt><dd>${m.sun_winter_lotmean.toFixed(1)} h average</dd><dt>Equinox</dt><dd>${m.sun_equinox_lotmean.toFixed(1)} h</dd><dt>Summer, 21 Dec</dt><dd>${m.sun_summer_lotmean.toFixed(1)} h</dd></dl>
    ${soilSiteHTML()}
-   <h2>Climate</h2>${climateSVG()}<p class="hint">${RAIN.station}, ${RAIN.period}. Bars are average monthly rain (darker: the typical, median month). Over half the year's rain falls January to April; August and September are the driest. Mean winter minimums near 10–11 °C at the station, but cold air pools in the valley floors, so frost is possible there on still, clear nights.</p>
-   <h2>Sources and accuracy</h2><p class="hint">Elevation: Sunshine Coast 2022 LiDAR, 1 m bare-earth DEM (ELVIS), GDA2020 / MGA zone 56. Lot boundary traced from the Department of Resources vegetation report map (10.0 ha title area) and accurate to about 5 m; the surveyed cadastre would tighten it. Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.</p>`;
+   <h2>Climate</h2>${climateSVG()}<p class="hint">${RAIN.station}, ${RAIN.period}. Bars are average monthly rain (darker: the typical, median month). ${MON[wet]} is the wettest month and ${MON[dry]} the driest. The coldest month's mean minimum is ${coldM} °C at the station, and cold air pools in valley floors, so frost comes earlier and harder there on still, clear nights.</p>
+   <h2>Sources and accuracy</h2><p class="hint">Elevation: ${esc(SITE.source||('LiDAR '+SITE.main+', '+SITE.res+' bare-earth DEM (ELVIS)'))}, GDA2020 / MGA zone ${ZONE}. ${esc(SITE.boundaryNote||'Lot boundary is approximate: check it against the title plan and fix it under Set-up above.')} Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.</p>`;
+  wireSetup(el);wireSecs(el);
   el.querySelectorAll('.kpl button').forEach(b=>b.onclick=()=>{const k=T.kp[+b.dataset.i];view.cx=k.x;view.cy=k.y;view.s=Math.max(view.s,2.5);layers.kp=true;draw()})}
 showTab(lsGet('bt.tab','layers')==='feat'?'layers':lsGet('bt.tab','layers'));
 if(matchMedia('(max-width:760px)').matches)$('#panel').classList.add('min');
