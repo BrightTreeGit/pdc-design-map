@@ -1,0 +1,805 @@
+<title>Bright Tree Design Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-height map with a docked side panel (bottom sheet on phones). Survey-sheet feel: condensed labels, mono readouts. */
+:root{
+  --bg:#eef0ea; --panel:#f8f9f5; --ink:#1d2621; --muted:#5d6a62; --line:#d3d9d0; --chip:#e4e9e1;
+  --accent:#1f6a57; --accent-ink:#ffffff; --warn:#b4471f; --ok:#2c7a3f; --mapbg:#dfe3da;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a17; --panel:#1b2320; --ink:#e3e9e4; --muted:#9aa89f; --line:#2f3a35; --chip:#26302c;
+  --accent:#5fbf9f; --accent-ink:#0d1714; --warn:#f08a5d; --ok:#7ccf8d; --mapbg:#202825; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a17; --panel:#1b2320; --ink:#e3e9e4; --muted:#9aa89f; --line:#2f3a35; --chip:#26302c;
+  --accent:#5fbf9f; --accent-ink:#0d1714; --warn:#f08a5d; --ok:#7ccf8d; --mapbg:#202825; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;overflow:hidden}
+#app{display:grid;grid-template-columns:340px 1fr;height:100%}
+#panel{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;min-width:0}
+header.brand{padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.02em;margin:0;line-height:1}
+.brand .sub{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-top:4px}
+.hdrrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px}
+.hdrrow .sync{margin-top:0}
+.btn.fb{font-size:12.5px;padding:4px 10px;border-color:var(--accent);color:var(--accent);background:transparent}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);margin-top:8px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.sync.on i{background:var(--ok)} .sync.off i{background:var(--warn)}
+nav.tabs{display:flex;border-bottom:1px solid var(--line)}
+nav.tabs button{flex:1;background:none;border:0;border-bottom:2px solid transparent;padding:10px 4px;font-family:var(--f-display);font-size:16px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabbody{flex:1;overflow:auto;padding:12px 16px 24px;min-height:0}
+h2{font-family:var(--f-display);font-size:15px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+h2:first-child{margin-top:4px}
+.row{display:flex;align-items:center;gap:8px;padding:5px 0}
+.row label{flex:1;cursor:pointer;display:flex;align-items:center;gap:8px;min-width:0;overflow-wrap:anywhere}
+.row input[type=range]{width:90px;flex:none}
+.swatch{width:14px;height:14px;border-radius:3px;flex:none;border:1px solid rgba(0,0,0,.2)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11.5px;color:var(--muted);padding:2px 0 6px 22px}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button,.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--warn)}
+.btn:focus-visible,.seg button:focus-visible,.tool:focus-visible,nav.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tool{display:flex;align-items:center;gap:8px;text-align:left;font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:7px 8px;cursor:pointer;min-width:0}
+.tool span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tool[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--chip)}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.45}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
+.facts dt{color:var(--muted)} .facts dd{margin:0;font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:2px;display:flex;overflow:hidden;margin:6px 0}
+.flist button{display:flex;width:100%;align-items:center;gap:8px;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 2px;font:inherit;color:var(--ink);cursor:pointer;text-align:left}
+.flist button:hover{background:var(--chip)}
+.flist .meta{margin-left:auto;font-family:var(--f-mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.pill{font-size:10.5px;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.05em;padding:1px 6px;border-radius:9px;background:var(--chip);color:var(--muted)}
+.pill.agreed{background:color-mix(in srgb,var(--ok) 22%,transparent);color:var(--ok)}
+.pill.built{background:var(--accent);color:var(--accent-ink)}
+.pill.proposed{background:color-mix(in srgb,#d9a227 25%,transparent);color:#a77700}
+.field{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.field label{font-size:12px;color:var(--muted)}
+.field input,.field select,.field textarea{font:inherit;font-size:13.5px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+.field textarea{min-height:80px;resize:vertical}
+canvas#profile{width:100%;height:110px;display:block;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+#mapwrap{position:relative;min-width:0;min-height:0;background:var(--mapbg);overflow:hidden}
+canvas#map{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+canvas#map.drawing{cursor:crosshair}
+.hud{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-family:var(--f-mono);font-size:11.5px;line-height:1.5;font-variant-numeric:tabular-nums;pointer-events:none;max-width:calc(100% - 140px)}
+.hud b{font-weight:500;color:var(--ink)} .hud{color:var(--muted)}
+.zoom{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:4px}
+.zoom button{width:36px;height:36px;font-size:18px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;cursor:pointer}
+.drawbar{position:absolute;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 18px rgba(0,0,0,.15);max-width:calc(100% - 80px)}
+.drawbar .what{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.03em;padding:0 4px}
+.drawbar .gp{display:flex;align-items:center;gap:4px;font-size:12.5px}
+.drawbar input[type=number]{width:52px;font:inherit;padding:4px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)}
+.maplegend{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));background:color-mix(in srgb,var(--panel) 94%,transparent);border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:11.5px;max-width:min(260px,calc(100% - 80px));box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.maplegend b{display:block;font-family:var(--f-display);font-size:13.5px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.maplegend .grad{height:10px;border-radius:2px;margin:2px 0}
+.maplegend .ends{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:10.5px;color:var(--muted)}
+.maplegend .legend{padding:0}
+.toast{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 12px;border-radius:6px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80%}
+.toast.show{opacity:1}
+.loading{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:var(--muted)}
+.empty ol{margin:6px 0 0 18px;padding:0}
+.kpl button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 0;font:inherit;color:var(--ink);cursor:pointer}
+.kpl small{color:var(--muted);font-family:var(--f-mono);font-size:11px}
+@media (max-width:760px){
+  #app{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  #mapwrap{grid-row:1}
+  #panel{grid-row:2;border-right:0;border-top:1px solid var(--line);max-height:46vh}
+  #panel.min .tabbody{display:none}
+  header.brand{padding:8px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .brand h1{font-size:20px} .brand .sub{display:none} .sync{margin-top:0}
+  .tabbody{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  .hud{bottom:10px;font-size:10.5px}
+  .drawbar{max-width:calc(100% - 70px);left:calc(8px + env(safe-area-inset-left,0px));transform:none}
+}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+
+<div id="app">
+  <aside id="panel">
+    <header class="brand">
+      <h1>Bright Tree Design Map</h1>
+      <div class="sub">Sunshine Coast hinterland · LiDAR 2022, 1 m</div>
+      <div class="hdrrow"><div class="sync" id="sync"><i></i><span>Connecting…</span></div><button class="btn fb" id="fbBtn" hidden title="Comment on the map for the map owner">Send feedback</button></div>
+    </header>
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="t-layers" aria-selected="true" data-tab="layers">Layers</button>
+      <button role="tab" id="t-draw" aria-selected="false" data-tab="draw">Draw</button>
+      <button role="tab" id="t-feat" aria-selected="false" data-tab="feat">Design</button>
+      <button role="tab" id="t-site" aria-selected="false" data-tab="site">Site</button>
+    </nav>
+    <div class="tabbody" id="tab-layers"></div>
+    <div class="tabbody" id="tab-draw" hidden></div>
+    <div class="tabbody" id="tab-feat" hidden></div>
+    <div class="tabbody" id="tab-site" hidden></div>
+  </aside>
+  <main id="mapwrap">
+    <canvas id="map" aria-label="Terrain and design map of Bright Tree"></canvas>
+    <div class="loading" id="loading">Loading LiDAR terrain…</div>
+    <div class="zoom">
+      <button id="zin" aria-label="Zoom in">+</button>
+      <button id="zout" aria-label="Zoom out">−</button>
+      <button id="zfit" aria-label="Zoom to the lot" title="Zoom to the lot">⌂</button>
+    </div>
+    <div class="drawbar" id="drawbar" hidden></div>
+    <div class="maplegend" id="mapLegend" hidden></div>
+    <div class="hud" id="hud">Move over the map for elevation, slope and sun</div>
+    <div class="toast" id="toast"></div>
+  </main>
+</div>
+
+<script>
+"use strict";
+/* ---------------- constants ---------------- */
+const E0=492000, N0=7043000; // local x = E - E0, y = N0 - N  (GDA2020 / MGA zone 56)
+const LAT=-26.7435;
+const KINDS={
+  zone0:{g:'Zones',label:'Zone 0 · Home',geom:'polygon',color:'#7d5aa6'},
+  zone1:{g:'Zones',label:'Zone 1 · Daily',geom:'polygon',color:'#d6453d'},
+  zone2:{g:'Zones',label:'Zone 2 · Orchard',geom:'polygon',color:'#e8862a'},
+  zone3:{g:'Zones',label:'Zone 3 · Broadacre',geom:'polygon',color:'#d9b81f'},
+  zone4:{g:'Zones',label:'Zone 4 · Managed bush',geom:'polygon',color:'#7cab3a'},
+  zone5:{g:'Zones',label:'Zone 5 · Wild',geom:'polygon',color:'#2f7a46'},
+  sunW:{g:'Sectors',label:'Winter sun 21 Jun',geom:'sun',decl:23.44,color:'#e0a400'},
+  sunS:{g:'Sectors',label:'Summer sun 21 Dec',geom:'sun',decl:-23.44,color:'#e2572b'},
+  fire:{g:'Sectors',label:'Fire sector',geom:'sector',color:'#c0311f'},
+  wind:{g:'Sectors',label:'Wind sector',geom:'sector',color:'#4f86b8'},
+  coldair:{g:'Sectors',label:'Cold air flow',geom:'line',color:'#5aa0e6',arrow:true},
+  view:{g:'Sectors',label:'View / noise',geom:'sector',color:'#8a6fb0'},
+  tank:{g:'Water',label:'Tank',geom:'point',color:'#1d6fb8',sym:'tank'},
+  pond:{g:'Water',label:'Pond / dam',geom:'polygon',color:'#2d8fd5'},
+  swale:{g:'Water',label:'Swale (level)',geom:'line',color:'#1aa3c7',grade:0},
+  diversion:{g:'Water',label:'Diversion drain',geom:'line',color:'#3b7fd9',grade:1},
+  keypoint:{g:'Water',label:'Keypoint',geom:'point',color:'#0b5c8f',sym:'diamond'},
+  flow:{g:'Water',label:'Water flow',geom:'line',color:'#2878c8',arrow:true},
+  pipe:{g:'Water',label:'Pipe / hose',geom:'line',color:'#5c6f80',dash:[6,4]},
+  track:{g:'Access',label:'Track (≤10%)',geom:'line',color:'#8a5a2b',grade:8,checkGrade:10},
+  path:{g:'Access',label:'Footpath',geom:'line',color:'#a8794a',dash:[3,3],checkGrade:15},
+  building:{g:'Built',label:'Building',geom:'polygon',color:'#575757'},
+  structure:{g:'Built',label:'Structure / asset',geom:'point',color:'#444',sym:'square'},
+  foodforest:{g:'Plants',label:'Food forest / bed',geom:'polygon',color:'#5f9e2f'},
+  guild:{g:'Plants',label:'Guild',geom:'point',color:'#3f8f3a',sym:'guild'},
+  tree:{g:'Plants',label:'Tree',geom:'point',color:'#2e6b2a',sym:'tree'},
+  row:{g:'Plants',label:'Planting row',geom:'line',color:'#4e9a3c',grade:0},
+  futurebuilding:{g:'Built',label:'Future building',geom:'polygon',color:'#6b6b6b',dash:[5,4]},
+  bed:{g:'Landscape',label:'Garden bed',geom:'polygon',color:'#9a7420'},
+  lawn:{g:'Landscape',label:'Lawn / open space',geom:'polygon',color:'#7fb24a'},
+  paving:{g:'Landscape',label:'Deck / paving',geom:'polygon',color:'#8d8d8d'},
+  animals:{g:'Landscape',label:'Animal area',geom:'polygon',color:'#b06f3c'},
+  hedge:{g:'Landscape',label:'Hedgerow / windbreak',geom:'line',color:'#3b7a3a',w:6},
+  fence:{g:'Landscape',label:'Fence',geom:'line',color:'#6d5a4b',dash:[8,3]},
+  gathering:{g:'Landscape',label:'Gathering / fire pit',geom:'point',color:'#d0682f',sym:'circle'},
+  compost:{g:'Landscape',label:'Compost / nursery',geom:'point',color:'#7a5c2e',sym:'square'},
+  note:{g:'Notes',label:'Note',geom:'point',color:'#b0306a',sym:'pin'},
+};
+const STATUS=['idea','proposed','agreed','built'];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600)}
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+/* ---------------- projection (Krüger, GRS80, MGA56) ---------------- */
+const PJ=(()=>{const a=6378137,f=1/298.257222101,k0=.9996,lon0=153*Math.PI/180,FE=5e5,FN=1e7;
+ const n=f/(2-f),A=a/(1+n)*(1+n*n/4+n**4/64),e=Math.sqrt(f*(2-f));
+ const al=[n/2-2*n*n/3+5*n**3/16,13*n*n/48-3*n**3/5,61*n**3/240],be=[n/2-2*n*n/3+37*n**3/96,n*n/48+n**3/15,17*n**3/480];
+ function toLL(E,N){const xi=(N-FN)/(k0*A),eta=(E-FE)/(k0*A);let xp=xi,ep=eta;
+  for(let j=0;j<3;j++){const k=2*(j+1);xp-=be[j]*Math.sin(k*xi)*Math.cosh(k*eta);ep-=be[j]*Math.cos(k*xi)*Math.sinh(k*eta)}
+  const chi=Math.asin(Math.sin(xp)/Math.cosh(ep));let lat=chi;
+  for(let i=0;i<6;i++)lat=Math.asin(Math.tanh(Math.atanh(Math.sin(chi))+e*Math.atanh(e*Math.sin(lat))));
+  return [(lon0+Math.atan2(Math.sinh(ep),Math.cos(xp)))*180/Math.PI,lat*180/Math.PI]}
+ return {toLL}})();
+const xy2ll=(x,y)=>PJ.toLL(x+E0,N0-y);
+
+/* ---------------- state ---------------- */
+let T=null; const IMG={};
+let dem2=null, dem1=null, sunGrid={};
+const view={cx:960,cy:960,s:1};
+const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,design:true,labels:true},lsGet('bt.layers',{}));
+const features=new Map(); // id -> data
+let selected=null, tool=null, draft=null, gradePen=lsGet('bt.gradePen',{on:false,grade:0,dir:'down'});
+let db=null, userCap=null, myId=null, downloads=null, live=false, assets=null;
+let penMode=lsGet('bt.penMode',matchMedia('(pointer:coarse)').matches?'snap':'off'), freeStroke=null;
+const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
+
+/* ---------------- data loading ---------------- */
+async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
+function loadImg(k,src){return new Promise(r=>{const im=new Image();im.onload=()=>{IMG[k]=im;r()};im.onerror=()=>r();im.src=src})}
+async function boot(){
+  resize(); fitLot(); draw();
+  const imgs=['relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png'];
+  const pImgs=Promise.all(imgs.map(f=>loadImg(f.split('.')[0],f)));
+  try{T=await (await fetch('terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
+  buildPaths(); fitLot();
+  dem2=new Int16Array(await inflate(T.meta.dem.b64));
+  const d1=T.meta.dem1; dem1={x0:d1.x0,y0:d1.y0,w:d1.w,h:d1.h,a:new Int16Array(await inflate(d1.b64))};
+  for(const k of ['winter','equinox','summer']) sunGrid[k]=new Uint8Array(await inflate(T.meta['sunh_'+k]));
+  await pImgs; $('#loading').hidden=true;
+  renderLayers(); renderDraw(); renderFeatures(); renderSite(); draw();
+  connect();
+}
+
+/* ---------------- terrain queries ---------------- */
+function zAt(x,y){
+  if(dem1){const u=x-dem1.x0-.5,v=y-dem1.y0-.5;if(u>=0&&v>=0&&u<dem1.w-1&&v<dem1.h-1){const i=u|0,j=v|0,fx=u-i,fy=v-j,w=dem1.w,a=dem1.a;
+    return ((a[j*w+i]*(1-fx)+a[j*w+i+1]*fx)*(1-fy)+(a[(j+1)*w+i]*(1-fx)+a[(j+1)*w+i+1]*fx)*fy)/10}}
+  if(!dem2)return NaN; const u=x/2-.5,v=y/2-.5; if(u<0||v<0||u>=999||v>=999)return NaN;
+  const i=u|0,j=v|0,fx=u-i,fy=v-j,a=dem2;
+  return ((a[j*1000+i]*(1-fx)+a[j*1000+i+1]*fx)*(1-fy)+(a[(j+1)*1000+i]*(1-fx)+a[(j+1)*1000+i+1]*fx)*fy)/10}
+function slopeAt(x,y){const d=3,gx=(zAt(x+d,y)-zAt(x-d,y))/(2*d),gy=(zAt(x,y-d)-zAt(x,y+d))/(2*d);
+  const pct=Math.hypot(gx,gy)*100; let asp=(Math.atan2(-gx,-gy)*180/Math.PI+360)%360; return {pct,deg:Math.atan(pct/100)*180/Math.PI,asp}}
+const DIRS=['N','NE','E','SE','S','SW','W','NW'];
+const dirName=a=>DIRS[Math.round(((a%360)+360)%360/45)%8];
+function sunAt(k,x,y){const g=sunGrid[k];if(!g)return NaN;const i=Math.floor(x/4),j=Math.floor(y/4);if(i<0||j<0||i>=500||j>=500)return NaN;return g[j*500+i]/10}
+
+/* ---------------- geometry helpers ---------------- */
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+function polyArea(p){let s=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];s+=a[0]*b[1]-b[0]*a[1]}return Math.abs(s)/2}
+function lineLen(p){let s=0;for(let i=1;i<p.length;i++)s+=dist(p[i-1],p[i]);return s}
+function inPoly(pt,p){let c=false;for(let i=0,j=p.length-1;i<p.length;j=i++){const a=p[i],b=p[j];if(((a[1]>pt[1])!=(b[1]>pt[1]))&&(pt[0]<(b[0]-a[0])*(pt[1]-a[1])/(b[1]-a[1])+a[0]))c=!c}return c}
+function segDist(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy;let t=L?((p[0]-a[0])*dx+(p[1]-a[1])*dy)/L:0;t=Math.max(0,Math.min(1,t));return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)}
+function densify(p,step=2){const out=[];let acc=0;out.push({x:p[0][0],y:p[0][1],d:0});
+  for(let i=1;i<p.length;i++){const L=dist(p[i-1],p[i]),n=Math.max(1,Math.ceil(L/step));for(let k=1;k<=n;k++){const t=k/n;out.push({x:p[i-1][0]+(p[i][0]-p[i-1][0])*t,y:p[i-1][1]+(p[i][1]-p[i-1][1])*t,d:acc+L*t})}acc+=L}
+  for(const q of out)q.z=zAt(q.x,q.y);return out}
+const flat=a=>{const o=[];for(let i=0;i<a.length;i+=2)o.push([a[i],a[i+1]]);return o};
+function sunBearings(decl){const d=decl*Math.PI/180,phi=LAT*Math.PI/180;const c=Math.sin(d)/Math.cos(phi);const az=Math.acos(Math.max(-1,Math.min(1,c)))*180/Math.PI;
+  const noonAlt=90-Math.abs(LAT-decl);return {rise:az,set:360-az,noonAlt}}
+
+/* ---------------- canvas / view ---------------- */
+const cv=$('#map'), ctx=cv.getContext('2d'); let W=0,H=0,DPR=1;
+function resize(){const r=cv.getBoundingClientRect();DPR=Math.min(2,window.devicePixelRatio||1);W=r.width;H=r.height;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);draw()}
+const w2s=(x,y)=>[(x-view.cx)*view.s+W/2,(y-view.cy)*view.s+H/2];
+const s2w=(sx,sy)=>[(sx-W/2)/view.s+view.cx,(sy-H/2)/view.s+view.cy];
+function fitBox(x0,y0,x1,y1,pad=40){view.cx=(x0+x1)/2;view.cy=(y0+y1)/2;view.s=Math.min((W-pad*2)/(x1-x0),(H-pad*2)/(y1-y0));if(!isFinite(view.s)||view.s<=0)view.s=1}
+function fitLot(){if(!T){fitBox(700,850,1150,1220);return}const p=flat(T.lot);const xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);fitBox(Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys),50)}
+let raf=0; function draw(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
+const P={};
+function pathFrom(arr,close){const p=new Path2D();p.moveTo(arr[0],arr[1]);for(let i=2;i<arr.length;i+=2)p.lineTo(arr[i],arr[i+1]);if(close)p.closePath();return p}
+function buildPaths(){
+  P.lot=pathFrom(T.lot,true);
+  P.c5=new Path2D();P.c5i=new Path2D();for(const c of T.c5){(c.z%10===0?P.c5i:P.c5).addPath(pathFrom(c.p))}
+  P.c1=new Path2D();P.c1f=new Path2D();P.c1i=new Path2D();
+  for(const c of T.c1){const p=pathFrom(c.p);(c.z%10===0?P.c1i:c.z%5===0?P.c1f:P.c1).addPath(p)}
+  P.st=[0,1,2,3].map(()=>new Path2D());for(const s of T.streams)P.st[s.k].addPath(pathFrom(s.p));
+  const b=T.meta.c1box;P.c1box=new Path2D();P.c1box.rect(b[0],b[1],b[2]-b[0],b[3]-b[1]);
+  P.notBox=new Path2D();P.notBox.rect(-500,-500,3000,3000);P.notBox.rect(b[0],b[1],b[2]-b[0],b[3]-b[1]);
+  P.catch=T.catch.map(c=>({...c,path:pathFrom(c.p,true)}));
+  T.labels=T.c5.filter(c=>c.z%10===0&&c.p.length>60).map(c=>{const p=flat(c.p);const m=Math.floor(p.length/2);return {z:c.z,a:p[m],b:p[Math.min(p.length-1,m+2)]}});
+}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function render(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=css('--mapbg');ctx.fillRect(0,0,W,H);
+  const s=view.s;
+  ctx.setTransform(DPR*s,0,0,DPR*s,DPR*(W/2-view.cx*s),DPR*(H/2-view.cy*s));
+  ctx.imageSmoothingEnabled=true;
+  for(const [id,im] of imagery){const el=IMGX[id];if(!el||!el.complete||!el.naturalWidth)continue;if(!im.on&&!(align&&align.id===id))continue;
+    ctx.save();ctx.transform(im.a,im.b,-im.b,im.a,im.c,im.d);ctx.globalAlpha=im.op;ctx.drawImage(el,0,0);ctx.restore()}
+  ctx.globalAlpha=1;
+  // base terrain sits ON TOP of the photo, so Base strength blends relief <-> photo
+  if(layers.base!=='none'&&IMG[layers.base]){ctx.globalAlpha=align?Math.min(layers.baseOp,.5):layers.baseOp;ctx.drawImage(IMG[layers.base],0,0,2000,2000);ctx.globalAlpha=1}
+  if(layers.overlay!=='none'&&IMG[layers.overlay]){ctx.globalAlpha=layers.ovOp;ctx.imageSmoothingEnabled=layers.overlay.startsWith('sun')||layers.overlay==='cold';ctx.drawImage(IMG[layers.overlay],0,0,2000,2000);ctx.globalAlpha=1;ctx.imageSmoothingEnabled=true}
+  if(!T){return}
+  const px=1/s;
+  if(layers.catch){for(const c of P.catch){ctx.lineWidth=(c.main?2.2:1.3)*px;ctx.setLineDash(c.main?[8*px,5*px]:[3*px,4*px]);ctx.strokeStyle=c.main?'rgba(20,90,170,.9)':'rgba(20,90,170,.65)';if(c.main){ctx.fillStyle='rgba(60,140,220,.07)';ctx.fill(c.path)}ctx.stroke(c.path)}ctx.setLineDash([])}
+  const showC1=layers.c1&&s>=0.9;
+  if(layers.c5){ctx.save();if(showC1)ctx.clip(P.notBox,'evenodd');ctx.strokeStyle='rgba(80,55,30,.55)';ctx.lineWidth=.8*px;ctx.stroke(P.c5);ctx.lineWidth=1.5*px;ctx.strokeStyle='rgba(80,55,30,.75)';ctx.stroke(P.c5i);ctx.restore()}
+  if(showC1){ctx.strokeStyle='rgba(80,55,30,.32)';ctx.lineWidth=.6*px;ctx.stroke(P.c1);ctx.strokeStyle='rgba(80,55,30,.6)';ctx.lineWidth=1*px;ctx.stroke(P.c1f);ctx.strokeStyle='rgba(80,55,30,.8)';ctx.lineWidth=1.6*px;ctx.stroke(P.c1i)}
+  if(layers.streams){const wd=[.8,1.3,2.2,3.4],al=[.45,.65,.85,.95];for(let k=0;k<4;k++){ctx.strokeStyle=`rgba(25,105,200,${al[k]})`;ctx.lineWidth=wd[k]*px;ctx.lineCap='round';ctx.stroke(P.st[k])}}
+  if(layers.lot){ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke(P.lot);ctx.lineWidth=1.6*px;ctx.strokeStyle='#c2185b';ctx.setLineDash([10*px,4*px]);ctx.stroke(P.lot);ctx.setLineDash([])}
+  if(layers.design)drawFeatures(px);
+  if(draft)drawDraft(px);
+  if(freeStroke&&freeStroke.length>1&&draft){ctx.strokeStyle=KINDS[draft.kind].color;ctx.lineWidth=3*px;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([]);ctx.beginPath();freeStroke.forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q));ctx.stroke()}
+  // screen-space overlays
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(layers.labels)drawLabels();
+  drawScale();
+}
+function haloText(t,x,y,size=11,color='#3a2a14',font='IBM Plex Mono'){ctx.font=`500 ${size}px "${font}",monospace`;ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.strokeText(t,x,y);ctx.fillStyle=color;ctx.fillText(t,x,y)}
+function drawLabels(){
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  if(layers.c5&&view.s>0.45)for(const l of T.labels){const [x,y]=w2s(...l.a),[x2,y2]=w2s(...l.b);if(x<-20||y<-20||x>W+20||y>H+20)continue;let a=Math.atan2(y2-y,x2-x);if(a>Math.PI/2)a-=Math.PI;if(a<-Math.PI/2)a+=Math.PI;ctx.save();ctx.translate(x,y);ctx.rotate(a);haloText(l.z+'',0,0,10,'#5a3d1c');ctx.restore()}
+  if(layers.catch)for(const c of T.catch){if(!c.at)continue;const [x,y]=w2s(...c.at);haloText(`↓ ${c.ha} ha in`,x,y-12,11,'#0f4f96')}
+  if(layers.catch&&T.meta.outlet){const [x,y]=w2s(...T.meta.outlet.at);haloText(`${T.meta.outlet.ha} ha out ↑`,x,y+14,11,'#0f4f96')}
+  if(layers.kp)for(const k of T.kp){const [x,y]=w2s(k.x,k.y);ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/4);ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.strokeRect(-6,-6,12,12);ctx.strokeStyle='#0b5c8f';ctx.lineWidth=1.6;ctx.setLineDash([3,2]);ctx.strokeRect(-6,-6,12,12);ctx.restore();ctx.setLineDash([]);if(view.s>0.6)haloText(`KP? ${k.z.toFixed(0)} m`,x,y-14,10.5,'#0b5c8f')}
+  if(layers.design&&view.s>0.5)for(const [id,f] of features){const c=centroid(f);if(!c)continue;const [x,y]=w2s(...c);const k=KINDS[f.kind]||KINDS.note;
+    if(f.geom.g==='polygon'){haloText(f.name||k.label,x,y-8,11.5,'#1d2621','IBM Plex Sans');ctx.font='600 12.5px "IBM Plex Mono",monospace';const t=fmtArea(polyArea(f.geom.pts));ctx.lineWidth=3.5;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.strokeText(t,x,y+8);ctx.fillStyle=k.color;ctx.fillText(t,x,y+8)}
+    else haloText(f.name||k.label,x,y+(f.geom.g==='point'?16:0),11.5,'#1d2621','IBM Plex Sans')}
+}
+function drawScale(){const target=110/view.s;const nice=[1,2,5,10,20,25,50,100,200,250,500,1000];let m=nice[0];for(const n of nice)if(n<=target)m=n;const L=m*view.s;
+  const x=W-L-16,y=H-18;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(x-6,y-16,L+12,24);ctx.strokeStyle='#222';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y-4);ctx.lineTo(x,y);ctx.lineTo(x+L,y);ctx.lineTo(x+L,y-4);ctx.stroke();
+  ctx.font='500 11px "IBM Plex Mono",monospace';ctx.fillStyle='#222';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText(m+' m',x+L/2,y-5);
+  const nx=W-30,ny=H-60;ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.arc(nx,ny,14,0,7);ctx.fill();ctx.fillStyle='#222';ctx.beginPath();ctx.moveTo(nx,ny-10);ctx.lineTo(nx+5,ny+5);ctx.lineTo(nx,ny+2);ctx.lineTo(nx-5,ny+5);ctx.fill();ctx.font='600 9px "IBM Plex Sans",sans-serif';ctx.fillText('N',nx,ny+12.5)}
+
+/* ---------------- features drawing ---------------- */
+function centroid(f){const g=f.geom;if(!g)return null;if(g.g==='point')return g.pts[0];if(g.g==='sector'||g.g==='sun')return [g.cx,g.cy];const p=g.pts;if(!p||!p.length)return null;if(g.g==='line')return p[Math.floor(p.length/2)];
+  let A=0,x=0,y=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length],c=a[0]*b[1]-b[0]*a[1];A+=c;x+=(a[0]+b[0])*c;y+=(a[1]+b[1])*c}
+  if(Math.abs(A)>1e-6)return [x/(3*A),y/(3*A)];x=0;y=0;for(const q of p){x+=q[0];y+=q[1]}return [x/p.length,y/p.length]}
+function handlePos(f){const g=f.geom;if(g.g==='polygon'){const c=centroid(f);let R=0;for(const q of g.pts)R=Math.max(R,dist(q,c));return [c[0]+R+6/view.s,c[1]]}
+  if(g.g==='point'&&g.r)return [g.pts[0][0]+g.r,g.pts[0][1]];if(g.g==='sector'||g.g==='sun')return [g.cx+g.r,g.cy];return null}
+function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16},${n>>8&255},${n&255},${a})`}
+function wedge(cx,cy,r,a0,a1){const p=new Path2D();p.moveTo(cx,cy);const s=(a0-90)*Math.PI/180;let e=(a1-90)*Math.PI/180;if(e<=s)e+=2*Math.PI;p.arc(cx,cy,r,s,e);p.closePath();return p}
+function drawFeature(f,px,sel){
+  const k=KINDS[f.kind]||KINDS.note,g=f.geom,col=k.color;ctx.setLineDash([]);
+  if(g.g==='polygon'){const p=new Path2D();g.pts.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));p.closePath();
+    ctx.fillStyle=hexA(col,k.g==='Zones'?.18:.35);ctx.fill(p);ctx.lineWidth=(sel?3:2)*px;ctx.strokeStyle=col;if(k.g==='Zones'||k.dash)ctx.setLineDash((k.dash||[7,4]).map(v=>v*px));ctx.stroke(p);ctx.setLineDash([])}
+  else if(g.g==='line'){const p=new Path2D();g.pts.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=(k.w?k.w+2+(sel?1.5:0):(sel?6:4.5))*px;ctx.strokeStyle='rgba(255,255,255,.75)';ctx.stroke(p);
+    if(k.checkGrade&&!sel){ // colour by grade
+      const d=densify(g.pts,2);for(let i=1;i<d.length;i++){const gr=Math.abs(d[i].z-d[i-1].z)/(d[i].d-d[i-1].d||1)*100;ctx.strokeStyle=gr>k.checkGrade?'#d32f2f':col;ctx.lineWidth=3*px;if(k.dash)ctx.setLineDash(k.dash.map(v=>v*px));ctx.beginPath();ctx.moveTo(d[i-1].x,d[i-1].y);ctx.lineTo(d[i].x,d[i].y);ctx.stroke()}ctx.setLineDash([])}
+    else{ctx.lineWidth=((k.w||2.6)+(sel?1:0))*px;ctx.strokeStyle=col;if(k.dash)ctx.setLineDash(k.dash.map(v=>v*px));ctx.stroke(p);ctx.setLineDash([])}
+    if(k.arrow&&g.pts.length>1){const a=g.pts[g.pts.length-2],b=g.pts[g.pts.length-1],an=Math.atan2(b[1]-a[1],b[0]-a[0]),L=12*px;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(b[0],b[1]);ctx.lineTo(b[0]-L*Math.cos(an-.45),b[1]-L*Math.sin(an-.45));ctx.lineTo(b[0]-L*Math.cos(an+.45),b[1]-L*Math.sin(an+.45));ctx.fill()}}
+  else if(g.g==='point'){const [x,y]=g.pts[0],r=(sel?9:7)*px;ctx.lineWidth=2*px;ctx.strokeStyle='#fff';ctx.fillStyle=col;
+    if(g.r){ctx.beginPath();ctx.arc(x,y,g.r,0,7);ctx.fillStyle=hexA(col,.22);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=1.5*px;ctx.stroke();ctx.fillStyle=col;ctx.strokeStyle='#fff';ctx.lineWidth=2*px}
+    ctx.beginPath();if(k.sym==='square'||k.sym==='tank'){ctx.rect(x-r,y-r,2*r,2*r)}else if(k.sym==='diamond'){ctx.moveTo(x,y-r*1.2);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r*1.2);ctx.lineTo(x-r,y);ctx.closePath()}else if(k.sym==='pin'){ctx.arc(x,y-r,r*.8,0,7);ctx.moveTo(x,y);ctx.lineTo(x-r*.5,y-r*.6);ctx.lineTo(x+r*.5,y-r*.6)}else ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();
+    if(k.sym==='tank'){ctx.strokeStyle='#fff';ctx.lineWidth=1.2*px;ctx.beginPath();ctx.moveTo(x-r*.6,y);ctx.lineTo(x+r*.6,y);ctx.stroke()}}
+  else if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1,extra='';if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}
+    const p=wedge(g.cx,g.cy,g.r,a0,a1);ctx.fillStyle=hexA(col,.16);ctx.fill(p);ctx.lineWidth=(sel?2.6:1.6)*px;ctx.strokeStyle=col;ctx.setLineDash([5*px,3*px]);ctx.stroke(p);ctx.setLineDash([]);
+    if(g.g==='sun'){ctx.lineWidth=1.2*px;for(const az of [a0,a1,0]){const r=az*Math.PI/180;ctx.beginPath();ctx.moveTo(g.cx,g.cy);ctx.lineTo(g.cx+Math.sin(r)*g.r*1.08,g.cy-Math.cos(r)*g.r*1.08);ctx.stroke()}}}
+  if(sel&&g.pts&&g.g!=='point'){for(const q of g.pts){ctx.fillStyle='#fff';ctx.strokeStyle='#111';ctx.lineWidth=1.5*px;ctx.beginPath();ctx.rect(q[0]-4*px,q[1]-4*px,8*px,8*px);ctx.fill();ctx.stroke()}}
+  if(sel&&(g.g==='sector'||g.g==='sun')){ctx.fillStyle='#fff';ctx.strokeStyle='#111';ctx.beginPath();ctx.arc(g.cx,g.cy,5*px,0,7);ctx.fill();ctx.stroke()}
+  if(sel){const h=handlePos(f);if(h){const c=centroid(f);ctx.setLineDash([3*px,3*px]);ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=1*px;ctx.beginPath();ctx.moveTo(...c);ctx.lineTo(...h);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=col;ctx.strokeStyle='#fff';ctx.lineWidth=2*px;ctx.beginPath();ctx.arc(h[0],h[1],7*px,0,7);ctx.fill();ctx.stroke();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5*px;ctx.beginPath();ctx.moveTo(h[0]-3.5*px,h[1]);ctx.lineTo(h[0]+3.5*px,h[1]);ctx.moveTo(h[0]+1.5*px,h[1]-2*px);ctx.lineTo(h[0]+3.5*px,h[1]);ctx.lineTo(h[0]+1.5*px,h[1]+2*px);ctx.stroke()}}
+}
+const ORDER={Zones:0,Sectors:1,Landscape:2,Plants:3,Built:4,Water:5,Access:6,Notes:7};
+function fmtArea(a){return a<2000?Math.round(a).toLocaleString()+' m²':(a/4046.86).toFixed(a<40469?2:1)+' ac'}
+function drawFeatures(px){const arr=[...features.entries()].sort((a,b)=>(ORDER[(KINDS[a[1].kind]||{}).g]??9)-(ORDER[(KINDS[b[1].kind]||{}).g]??9));for(const [id,f] of arr){try{drawFeature(f,px,id===selected)}catch(e){}}}
+function drawDraft(px){const k=KINDS[draft.kind];const pts=draft.pts.concat(draft.preview||[]);
+  if(k.geom==='sector'&&draft.pts.length){const c=draft.pts[0];const m=draft.hover||c;ctx.strokeStyle=k.color;ctx.lineWidth=1.5*px;ctx.setLineDash([4*px,3*px]);
+    if(draft.pts.length===1){ctx.beginPath();ctx.moveTo(...c);ctx.lineTo(...m);ctx.stroke()}else{const r=dist(c,draft.pts[1]);const a0=bear(c,draft.pts[1]),a1=bear(c,m);ctx.fillStyle=hexA(k.color,.15);const p=wedge(c[0],c[1],r,a0,a1);ctx.fill(p);ctx.stroke(p)}ctx.setLineDash([]);return}
+  if(!pts.length)return;ctx.strokeStyle=k.color;ctx.lineWidth=2.5*px;ctx.setLineDash([6*px,4*px]);ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q));if(k.geom==='polygon'&&draft.hover)ctx.lineTo(...draft.hover);ctx.stroke();ctx.setLineDash([]);
+  for(const q of draft.pts){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(q[0],q[1],3.5*px,0,7);ctx.fill();ctx.strokeStyle=k.color;ctx.lineWidth=1.5*px;ctx.stroke()}}
+const bear=(c,p)=>((Math.atan2(p[0]-c[0],-(p[1]-c[1]))*180/Math.PI)+360)%360;
+
+/* ---------------- grade pen: follow a fixed grade toward the cursor ---------------- */
+function gradePath(start,target,grade,dir){
+  const step=2,out=[];let p=start.slice(),z=zAt(...p),prevH=null;const sign=dir==='up'?1:-1;const tz=grade/100*step*sign;
+  const maxN=Math.min(600,Math.ceil(dist(start,target)/step*2.2)+5);
+  for(let n=0;n<maxN;n++){if(dist(p,target)<step*1.5)break;const want=Math.atan2(target[0]-p[0],-(target[1]-p[1]));let best=null;
+    let prev=null;for(let h=0;h<=360;h+=6){const r=h*Math.PI/180,q=[p[0]+Math.sin(r)*step,p[1]-Math.cos(r)*step],dz=zAt(...q)-z-tz;
+      if(prev&&Math.sign(prev.dz)!==Math.sign(dz)){const t=prev.dz/(prev.dz-dz),hh=(prev.h+(h-prev.h)*t)*Math.PI/180;let dev=Math.abs(((hh-want+3*Math.PI)%(2*Math.PI))-Math.PI);
+        if(prevH!==null){const back=Math.abs(((hh-prevH+3*Math.PI)%(2*Math.PI))-Math.PI);if(back>Math.PI*0.6)dev+=10}if(!best||dev<best.dev)best={hh,dev}}prev={h,dz}}
+    if(!best||best.dev>Math.PI*0.75)break;p=[p[0]+Math.sin(best.hh)*step,p[1]-Math.cos(best.hh)*step];z=z+tz;prevH=best.hh;out.push([+p[0].toFixed(1),+p[1].toFixed(1)])}
+  // thin to every ~6 m
+  return out.filter((q,i)=>i%2===1||i===out.length-1)}
+
+/* ---------------- freehand pen: sketch, then tidy into a shape ---------------- */
+function penOn(){if(!draft)return false;const k=KINDS[draft.kind];return (k.geom==='polygon'||k.geom==='line')&&penMode!=='off'&&!draft.pen}
+function resamp(p,n,closed){const q=closed?p.concat([p[0]]):p;const seg=[];let L=0;for(let i=1;i<q.length;i++){const d=dist(q[i-1],q[i]);seg.push(d);L+=d}
+  const out=[];let i=0,t=0;const m=closed?n:n-1;for(let k=0;k<n;k++){const target=k*L/m;while(i<seg.length-1&&t+seg[i]<target){t+=seg[i];i++}const f=seg[i]?Math.min(1,(target-t)/seg[i]):0;out.push([q[i][0]+(q[i+1][0]-q[i][0])*f,q[i][1]+(q[i+1][1]-q[i][1])*f])}return out}
+function chaikin(p,closed,it=2){for(let r=0;r<it;r++){const o=[];const n=p.length;for(let i=0;i<(closed?n:n-1);i++){const a=p[i],b=p[(i+1)%n];o.push([.75*a[0]+.25*b[0],.75*a[1]+.25*b[1]],[.25*a[0]+.75*b[0],.25*a[1]+.75*b[1]])}if(!closed){o.unshift(p[0]);o.push(p[n-1])}p=o}return p}
+function dp(p,tol){if(p.length<3)return p.slice();let md=0,mi=0;const a=p[0],b=p[p.length-1];for(let i=1;i<p.length-1;i++){const d=segDist(p[i],a,b);if(d>md){md=d;mi=i}}
+  if(md>tol){const l=dp(p.slice(0,mi+1),tol),r=dp(p.slice(mi),tol);return l.slice(0,-1).concat(r)}return [a,b]}
+function ringDP(p,tol){let c=[0,0];p.forEach(q=>{c[0]+=q[0]/p.length;c[1]+=q[1]/p.length});let s=0,md=0;p.forEach((q,i)=>{const d=dist(q,c);if(d>md){md=d;s=i}});const r=p.slice(s).concat(p.slice(0,s));r.push(r[0]);return dp(r,tol).slice(0,-1)}
+function fitShape(stroke,snap){
+  const xs=stroke.map(q=>q[0]),ys=stroke.map(q=>q[1]);const D=Math.hypot(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys));
+  const ring=resamp(stroke,120,true);
+  const free=()=>({shape:'freeform',pts:ringDP(chaikin(ring,true,2),D*.006).map(r1)});
+  if(!snap)return free();
+  let cx=0,cy=0;ring.forEach(q=>{cx+=q[0];cy+=q[1]});cx/=ring.length;cy/=ring.length;let sxx=0,syy=0,sxy=0;ring.forEach(q=>{const dx=q[0]-cx,dy=q[1]-cy;sxx+=dx*dx;syy+=dy*dy;sxy+=dx*dy});sxx/=ring.length;syy/=ring.length;sxy/=ring.length;
+  let th=.5*Math.atan2(2*sxy,sxx-syy);
+  const proj=t=>{const c=Math.cos(t),s=Math.sin(t);return ring.map(q=>{const dx=q[0]-cx,dy=q[1]-cy;return [dx*c+dy*s,-dx*s+dy*c]})};
+  const c0=Math.cos(th),s0=Math.sin(th);const l1=c0*c0*sxx+2*s0*c0*sxy+s0*s0*syy,l2=s0*s0*sxx-2*s0*c0*sxy+c0*c0*syy;
+  let a=Math.sqrt(2*Math.max(l1,1e-6)),b=Math.sqrt(2*Math.max(l2,1e-6));const P=proj(th);
+  const eErr=P.reduce((s,[u,v])=>s+Math.abs(Math.hypot(u/a,v/b)-1),0)/P.length*Math.sqrt(a*b);
+  // rectangle: snap to the nearest compass axis when close
+  let tr=th;const deg=((th*180/Math.PI)%90+90)%90;if(deg<7||deg>83)tr=Math.round(th/(Math.PI/2))*(Math.PI/2);
+  const R=proj(tr);const us=R.map(q=>q[0]).sort((x,y)=>x-y),vs=R.map(q=>q[1]).sort((x,y)=>x-y);const pc=(arr,f)=>arr[Math.floor(f*(arr.length-1))];
+  const u0=pc(us,.04),u1=pc(us,.96),v0=pc(vs,.04),v1=pc(vs,.96);
+  const rErr=R.reduce((s,[u,v])=>{const ins=u>=u0&&u<=u1&&v>=v0&&v<=v1;const d=ins?Math.min(u-u0,u1-u,v-v0,v1-v):Math.hypot(Math.max(u0-u,0,u-u1),Math.max(v0-v,0,v-v1));return s+d},0)/R.length;
+  const tri=ringDP(ring,D*.09);let tErr=Infinity;if(tri.length===3)tErr=ring.reduce((s,q)=>s+Math.min(segDist(q,tri[0],tri[1]),segDist(q,tri[1],tri[2]),segDist(q,tri[2],tri[0])),0)/ring.length;
+  const best=[['ellipse',eErr],['rectangle',rErr],['triangle',tErr]].sort((x,y)=>x[1]-y[1])[0];
+  if(best[1]>D*.05)return free();
+  const back=(t,u,v)=>{const c=Math.cos(t),s=Math.sin(t);return r1([cx+u*c-v*s,cy+u*s+v*c])};
+  if(best[0]==='ellipse'){let shape='oval';if(b/a>.85){a=b=(a+b)/2;shape='circle'}const pts=[];for(let i=0;i<48;i++){const t=i/48*2*Math.PI;pts.push(back(th,a*Math.cos(t),b*Math.sin(t)))}return {shape,pts}}
+  if(best[0]==='rectangle')return {shape:'rectangle',pts:[[u0,v0],[u1,v0],[u1,v1],[u0,v1]].map(([u,v])=>back(tr,u,v))};
+  return {shape:'triangle',pts:tri.map(r1)}}
+function finishFree(stroke){if(!draft||stroke.length<3)return;const k=KINDS[draft.kind];const L=lineLen(stroke);if(L*view.s<15)return;
+  if(k.geom==='line'){const p=dp(chaikin(resamp(stroke,Math.max(8,Math.round(L/3)),false),false,2),Math.max(.4,L*.004)).map(r1);commit({g:'line',pts:p});return}
+  const r=fitShape(stroke,penMode==='snap');if(r.pts.length<3)return;toast(`Drawn as ${r.shape === 'freeform' ? 'a smoothed shape' : (r.shape==='oval'?'an ':'a ')+r.shape} · ${fmtArea(polyArea(r.pts))}`);commit({g:'polygon',pts:r.pts})}
+
+/* ---------------- interaction ---------------- */
+const pointers=new Map();let dragStart=null,pinch=null,vdrag=null,moved=false;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,[e.offsetX,e.offsetY]);moved=false;
+  if(pointers.size===2){const [a,b]=[...pointers.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),s:view.s,c:s2w((a[0]+b[0])/2,(a[1]+b[1])/2)};dragStart=null;freeStroke=null;return}
+  if(penOn()){freeStroke=[s2w(e.offsetX,e.offsetY)];dragStart=null;draw();return}
+  dragStart={x:e.offsetX,y:e.offsetY,cx:view.cx,cy:view.cy};
+  if(align&&align.mode==='move'){const im=imagery.get(align.id);if(im){imgDrag={x:e.offsetX,y:e.offsetY,c:im.c,d:im.d};dragStart=null}return}
+  if(!tool&&selected){const h=hitVertex(e.offsetX,e.offsetY);if(h){vdrag=h;dragStart=null}}});
+cv.addEventListener('pointermove',e=>{const pt=[e.offsetX,e.offsetY];if(pointers.has(e.pointerId))pointers.set(e.pointerId,pt);
+  const w=s2w(...pt);hud(w);
+  if(freeStroke&&pointers.size===1){if(dist(freeStroke[freeStroke.length-1],w)*view.s>2)freeStroke.push(w);draw();return}
+  if(pinch&&pointers.size===2){const [a,b]=[...pointers.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);view.s=clampS(pinch.s*d/pinch.d);const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];view.cx=pinch.c[0]-(m[0]-W/2)/view.s;view.cy=pinch.c[1]-(m[1]-H/2)/view.s;moved=true;draw();return}
+  if(imgDrag){const im=imagery.get(align&&align.id);if(im){moved=true;im.c=imgDrag.c+(pt[0]-imgDrag.x)/view.s;im.d=imgDrag.d+(pt[1]-imgDrag.y)/view.s;draw()}return}
+  if(vdrag){moved=true;const f=features.get(selected);if(!f)return;const g=structuredClone(f.geom);if(vdrag.scale){const k=Math.max(.05,dist(w,vdrag.c)/vdrag.d0),o=vdrag.orig,c=vdrag.c;
+    if(o.g==='polygon')g.pts=o.pts.map(q=>r1([c[0]+(q[0]-c[0])*k,c[1]+(q[1]-c[1])*k]));else if(o.g==='point')g.r=+Math.max(.3,o.r*k).toFixed(1);else g.r=+Math.max(5,o.r*k).toFixed(1)}
+  else if(vdrag.center){g.cx=w[0];g.cy=w[1]}else g.pts[vdrag.i]=[+w[0].toFixed(1),+w[1].toFixed(1)];features.set(selected,{...f,geom:g});draw();return}
+  if(dragStart){const dx=pt[0]-dragStart.x,dy=pt[1]-dragStart.y;if(Math.hypot(dx,dy)>4)moved=true;if(moved){view.cx=dragStart.cx-dx/view.s;view.cy=dragStart.cy-dy/view.s;draw()}}
+  if(draft){draft.hover=w;if(draft.pen&&draft.pts.length){draft.preview=gradePath(draft.pts[draft.pts.length-1],w,gradePen.grade,gradePen.dir)}draw()}});
+function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;
+  if(freeStroke){const s=freeStroke;freeStroke=null;if(e.type==='pointerup')finishFree(s);draw();return}
+  if(imgDrag){imgDrag=null;if(moved)saveImageryLater(align.id);moved=false;return}
+  if(vdrag){const f=features.get(selected);if(f&&moved)saveGeom(selected,f.geom);vdrag=null;moved=false;renderFeatures();return}
+  if(dragStart&&!moved&&e.type==='pointerup')click(s2w(e.offsetX,e.offsetY),e);dragStart=null}
+cv.addEventListener('pointerup',endPointer);cv.addEventListener('pointercancel',endPointer);
+cv.addEventListener('dblclick',e=>{if(draft){e.preventDefault();finishDraft()}});
+cv.addEventListener('wheel',e=>{e.preventDefault();const w=s2w(e.offsetX,e.offsetY);view.s=clampS(view.s*Math.exp(-e.deltaY*0.0015));view.cx=w[0]-(e.offsetX-W/2)/view.s;view.cy=w[1]-(e.offsetY-H/2)/view.s;draw()},{passive:false});
+const clampS=s=>Math.max(0.2,Math.min(12,s));
+$('#zin').onclick=()=>{view.s=clampS(view.s*1.5);draw()};$('#zout').onclick=()=>{view.s=clampS(view.s/1.5);draw()};$('#zfit').onclick=()=>{fitLot();draw()};
+window.addEventListener('resize',resize);
+document.addEventListener('keydown',e=>{if(e.target.closest('input,textarea,select'))return;if(e.key==='Escape'){if(align)endAlign();else if(draft)cancelDraft();else{selected=null;renderFeatures();draw()}}if(e.key==='Enter'&&draft)finishDraft();if((e.key==='Backspace'||e.key==='z')&&draft){e.preventDefault();undoPoint()}});
+function hud(w){if(!dem2)return;const z=zAt(...w);if(!isFinite(z)){$('#hud').textContent='Outside the LiDAR area';return}const s=slopeAt(...w),ll=xy2ll(...w);
+  $('#hud').innerHTML=`<b>${z.toFixed(1)} m</b> · slope <b>${s.pct.toFixed(0)}%</b> (${s.deg.toFixed(0)}°) faces ${dirName(s.asp)} · winter sun <b>${sunAt('winter',...w).toFixed(1)} h</b><br>${ll[1].toFixed(6)}, ${ll[0].toFixed(6)}`}
+function hitVertex(sx,sy){const f=features.get(selected);if(!f)return null;const g=f.geom;
+  const hp=handlePos(f);if(hp){const [x,y]=w2s(...hp);if(Math.hypot(x-sx,y-sy)<14){const c=centroid(f);return {scale:true,c,d0:Math.max(.01,dist(hp,c)),orig:structuredClone(g)}}}if((g.g==='sector'||g.g==='sun')){const [x,y]=w2s(g.cx,g.cy);if(Math.hypot(x-sx,y-sy)<10)return {center:true}}
+  if(!g.pts||g.g==='point'){if(g.g==='point'){const [x,y]=w2s(...g.pts[0]);if(Math.hypot(x-sx,y-sy)<12)return {i:0}}return null}
+  for(let i=0;i<g.pts.length;i++){const [x,y]=w2s(...g.pts[i]);if(Math.hypot(x-sx,y-sy)<10)return {i}}return null}
+function hitFeature(w){const tol=8/view.s;let best=null;
+  for(const [id,f] of features){const g=f.geom;let d=Infinity;
+    if(g.g==='point'){d=dist(w,g.pts[0]);if(g.r&&d<g.r)d=Math.min(d,tol*.9)}
+    else if(g.g==='line'){for(let i=1;i<g.pts.length;i++)d=Math.min(d,segDist(w,g.pts[i-1],g.pts[i]))}
+    else if(g.g==='polygon'){for(let i=0;i<g.pts.length;i++)d=Math.min(d,segDist(w,g.pts[i],g.pts[(i+1)%g.pts.length]));if(inPoly(w,g.pts))d=Math.min(d,tol*.95)}
+    else {const r=dist(w,[g.cx,g.cy]);d=r<g.r?tol*.97:Infinity}
+    const pri=(KINDS[f.kind]||{}).g==='Zones'?0.01:0;if(d<=tol&&(!best||d+pri<best.d))best={id,d:d+pri}}
+  return best&&best.id}
+function click(w,e){
+  if(align&&align.mode==='pts'){alignClick(w);return}
+  if(draft){const k=KINDS[draft.kind];
+    if(k.geom==='point'){commit({g:'point',pts:[r1(w)],...(draft.kind==='guild'?{r:3}:draft.kind==='tree'?{r:4}:{})});return}
+    if(k.geom==='sun'){commit({g:'sun',cx:+w[0].toFixed(1),cy:+w[1].toFixed(1),r:90});return}
+    if(k.geom==='sector'){draft.pts.push(r1(w));if(draft.pts.length===3){const c=draft.pts[0];commit({g:'sector',cx:c[0],cy:c[1],r:+dist(c,draft.pts[1]).toFixed(1),a0:+bear(c,draft.pts[1]).toFixed(1),a1:+bear(c,draft.pts[2]).toFixed(1)})}draw();updateDrawbar();return}
+    if(draft.pen&&draft.pts.length&&draft.preview&&draft.preview.length){draft.pts.push(...draft.preview);draft.preview=[]}else draft.pts.push(r1(w));
+    draw();updateDrawbar();return}
+  const id=hitFeature(w);selected=id||null;if(id)showTab('feat');renderFeatures();draw()}
+const r1=w=>[+w[0].toFixed(1),+w[1].toFixed(1)];
+
+/* ---------------- drawing workflow ---------------- */
+function startTool(kind){tool=kind;selected=null;const k=KINDS[kind];draft={kind,pts:[],pen:!!(k.geom==='line'&&gradePen.on&&k.grade!==undefined)};if(draft.pen&&k.grade!==undefined&&gradePen.kind!==kind){gradePen.grade=k.grade;gradePen.kind=kind}cv.classList.add('drawing');updateDrawbar();renderDraw();draw()}
+function cancelDraft(){draft=null;tool=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;renderDraw();draw()}
+function undoPoint(){if(!draft)return;draft.pts.pop();draft.preview=[];updateDrawbar();draw()}
+function finishDraft(){if(!draft)return;const k=KINDS[draft.kind];if(draft.preview&&draft.preview.length&&draft.pen){draft.pts.push(...draft.preview)}
+  if(k.geom==='line'&&draft.pts.length>=2)commit({g:'line',pts:draft.pts});else if(k.geom==='polygon'&&draft.pts.length>=3)commit({g:'polygon',pts:draft.pts});else toast(k.geom==='polygon'?'A shape needs at least 3 points':'A line needs at least 2 points')}
+function updateDrawbar(){const b=$('#drawbar');if(!draft){b.hidden=true;return}const k=KINDS[draft.kind];b.hidden=false;
+  const help={point:'Click to place',sun:'Click the centre (e.g. the house)',sector:['Click the centre','Click where the sector starts (sets the radius)','Click where it ends (clockwise)'][Math.min(2,draft.pts.length)],line:draft.pen?'Click to fix each stretch along the grade':'Click to add points',polygon:'Click to add corners'}[k.geom];
+  const pen=k.geom==='line'&&k.grade!==undefined;
+  const canFree=(k.geom==='polygon'||k.geom==='line')&&!draft.pen;
+  const freeOpts=k.geom==='polygon'?[['off','Click points'],['snap','✎ Sketch & tidy'],['smooth','✎ Sketch freeform']]:[['off','Click points'],['smooth','✎ Sketch']];
+  const freeUI=canFree?`<div class="seg">${freeOpts.map(([v,l])=>`<button data-pm="${v}" aria-pressed="${v==='off'?penMode==='off':(k.geom==='line'?penMode!=='off':penMode===v)}">${l}</button>`).join('')}</div>`:'';
+  const helpTxt=penOn()?(k.geom==='polygon'&&penMode==='snap'?'Sketch the shape and lift: rough boxes become rectangles, loops become circles or ovals':'Sketch with your finger or mouse and lift to finish'):help;
+  b.innerHTML=`<span class="what">${esc(k.label)}</span><span class="hint">${helpTxt}</span>`+freeUI+
+   (pen?`<label class="gp"><input type="checkbox" id="penon" ${gradePen.on?'checked':''}> Follow grade</label><span class="gp"><input type="number" id="pengr" min="0" max="20" step="0.5" value="${gradePen.grade}" aria-label="Grade percent">%</span><button class="btn" id="pendir" aria-label="Direction">${gradePen.dir==='down'?'↘ downhill':'↗ uphill'}</button>`:'')+
+   (['line','polygon'].includes(k.geom)?`<button class="btn" id="dbUndo">Undo</button><button class="btn primary" id="dbFin">Finish</button>`:'')+`<button class="btn" id="dbCancel">Cancel</button>`;
+  b.querySelectorAll('[data-pm]').forEach(x=>x.onclick=()=>{penMode=x.dataset.pm;lsSet('bt.penMode',penMode);updateDrawbar()});
+  b.querySelector('#dbCancel').onclick=cancelDraft;const u=b.querySelector('#dbUndo');if(u)u.onclick=undoPoint;const fi=b.querySelector('#dbFin');if(fi)fi.onclick=finishDraft;
+  if(pen){b.querySelector('#penon').onchange=e=>{gradePen.on=e.target.checked;draft.pen=gradePen.on;draft.preview=[];lsSet('bt.gradePen',gradePen);updateDrawbar();draw()};
+    b.querySelector('#pengr').onchange=e=>{gradePen.grade=Math.max(0,Math.min(20,+e.target.value||0));lsSet('bt.gradePen',gradePen)};
+    b.querySelector('#pendir').onclick=()=>{gradePen.dir=gradePen.dir==='down'?'up':'down';lsSet('bt.gradePen',gradePen);updateDrawbar()}}}
+function nextName(kind){const k=KINDS[kind];let n=1;for(const f of features.values())if(f.kind===kind)n++;return k.g==='Zones'||k.geom==='sun'?k.label:`${k.label} ${n}`}
+async function commit(geom){const kind=draft.kind;const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const doc={kind,name:nextName(kind),status:'idea',notes:'',geom,createdBy:myId||null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'map'};
+  features.set(id,doc);selected=id;draft=null;tool=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;showTab('feat');renderDraw();renderFeatures();draw();
+  await persist(id,doc)}
+
+/* ---------------- persistence ---------------- */
+async function persist(id,doc){if(live){try{await db.collection('features').doc(id).set(doc)}catch(e){toast(e&&e.code==='invalid_argument'?'You can view this map but not change it.':'That change did not save. Try again in a moment.')}}else{saveLocal()}}
+async function saveGeom(id,geom){const f=features.get(id);if(!f)return;f.updatedAt=new Date().toISOString();if(live){try{await db.collection('features').doc(id).update({geom,updatedAt:f.updatedAt})}catch(e){toast('That change did not save.')}}else saveLocal()}
+async function saveFields(id,fields){const f=features.get(id);if(!f)return;Object.assign(f,fields,{updatedAt:new Date().toISOString()});if(live){try{await db.collection('features').doc(id).update({...fields,updatedAt:f.updatedAt})}catch(e){toast('That change did not save.')}}else saveLocal();draw()}
+async function removeFeature(id){features.delete(id);selected=null;renderFeatures();draw();if(live){try{await db.collection('features').doc(id).delete()}catch(e){toast('Delete did not save.')}}else saveLocal()}
+function saveLocal(){lsSet('bt.features',Object.fromEntries(features))}
+async function connect(){
+  const sync=$('#sync');
+  try{db=window.claude?await window.claude.use('db'):null}catch(e){db=null}
+  try{userCap=window.claude?await window.claude.use('user'):null;myId=userCap?await userCap.id():null}catch(e){}
+  try{downloads=window.claude?await window.claude.use('downloads'):null}catch(e){}
+  try{assets=window.claude?await window.claude.use('assets'):null}catch(e){}
+  try{const cm=window.claude?await window.claude.use('comments'):null;if(cm){const b=$('#fbBtn');b.hidden=false;b.onclick=async()=>{try{const r=await cm.openComposer({element:$('#mapwrap')});if(!r||!r.opened)toast('Click anywhere on the map, then press Send feedback again.');else toast('Tip: for a spot on the land, add a Note on the map instead.')}catch(e){b.hidden=true;toast('Feedback comments are not available in this view.')}}}}catch(e){}
+  if(T)renderLayers();
+  if(db)db.collection('imagery').onSnapshot(snap=>{const keepLocal=[...imagery.entries()].filter(([k,v])=>v.local);imagery.clear();for(const [k,v] of keepLocal)imagery.set(k,v);
+    for(const d of snap.docs){const v=d.data();if(!v||!v.assetId)continue;const cur={...v,src:'/_blob/'+v.assetId};if(align&&align.id===d.id){const mine=imagery.get(d.id);if(mine)continue}imagery.set(d.id,cur);loadImageryEl(d.id,cur)}
+    if(!(document.activeElement&&document.activeElement.matches('#tab-layers input[type=range]')))renderLayers();draw()},()=>{});
+  if(!db){const loc=lsGet('bt.features',{});for(const [k,v] of Object.entries(loc))features.set(k,v);sync.className='sync off';sync.querySelector('span').textContent='Not shared: changes stay in this browser';renderFeatures();draw();return}
+  live=true;sync.className='sync on';sync.querySelector('span').textContent='Shared with the team · saves automatically';
+  db.collection('features').onSnapshot(snap=>{features.clear();for(const d of snap.docs){const v=d.data();if(v&&v.geom)features.set(d.id,structuredClone(v))}if(selected&&!features.has(selected))selected=null;renderFeatures(true);draw()},
+    err=>{sync.className='sync off';sync.querySelector('span').textContent='Sync stopped. Reload to reconnect.'});
+}
+
+/* ---------------- aerial imagery: upload, align (similarity transform), share ---------------- */
+// image pixel (u,v) -> map (x,y): x = a*u - b*v + c, y = b*u + a*v + d
+function imgToWorld(im,u,v){return [im.a*u-im.b*v+im.c,im.b*u+im.a*v+im.d]}
+function worldToImg(im,x,y){const k=im.a*im.a+im.b*im.b,dx=x-im.c,dy=y-im.d;return [(im.a*dx+im.b*dy)/k,(-im.b*dx+im.a*dy)/k]}
+function loadImageryEl(id,im){if(IMGX[id]&&IMGX[id]._src===im.src)return;const el=new Image();el._src=im.src;el.onload=()=>{draw();renderLayers()};el.src=im.src;IMGX[id]=el}
+function imgSrc(im){return im.assetId?'/_blob/'+im.assetId:im.local||''}
+let imgSaveT={};
+function saveImageryLater(id){clearTimeout(imgSaveT[id]);imgSaveT[id]=setTimeout(()=>saveImagery(id),500)}
+async function saveImagery(id){const im=imagery.get(id);if(!im)return;const body={name:im.name,assetId:im.assetId||null,w:im.w,h:im.h,a:im.a,b:im.b,c:im.c,d:im.d,op:im.op,on:im.on,aligned:!!im.aligned,createdBy:im.createdBy||null,createdAt:im.createdAt,updatedAt:new Date().toISOString()};
+  if(live&&im.assetId){try{await db.collection('imagery').doc(id).set(body)}catch(e){toast('Image position did not save.')}}}
+async function addImage(file){
+  if(!file)return;if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Use a PNG, JPEG or WebP image');return}
+  const id='img'+Date.now().toString(36);let assetId=null,local=null;
+  if(assets){toast('Uploading '+file.name+'…');try{const r=await assets.upload(file);assetId=r.id}catch(e){toast(e&&e.code==='too_large'?'That image is over 20 MB. Export a smaller one.':'Upload failed. Showing it in this browser only.');}}
+  if(!assetId)local=URL.createObjectURL(file);
+  const el=new Image();el.src=assetId?'/_blob/'+assetId:local;await el.decode().catch(()=>{});
+  const w=el.naturalWidth||1000,h=el.naturalHeight||1000;const sc=Math.min(W*0.7/view.s/w,H*0.7/view.s/h);
+  const im={name:file.name.replace(/\.[^.]+$/,''),assetId,local,src:assetId?'/_blob/'+assetId:local,w,h,a:sc,b:0,c:view.cx-w*sc/2,d:view.cy-h*sc/2,op:0.85,on:true,aligned:false,createdBy:myId,createdAt:new Date().toISOString()};
+  imagery.set(id,im);IMGX[id]=el;el._src=im.src;await saveImagery(id);startAlign(id)}
+function startAlign(id){cancelDraft();align={id,mode:'pts',pairs:[],step:0};showTab('layers');renderAlignBar();draw()}
+function endAlign(){if(align){const im=imagery.get(align.id);if(im){im.aligned=true;saveImagery(align.id)}}align=null;$('#drawbar').hidden=true;cv.classList.remove('drawing');renderLayers();draw()}
+function alignClick(w){const im=imagery.get(align.id);if(!im)return;
+  if(align.step===0){align.cur={q:worldToImg(im,...w)};align.step=1}
+  else{align.cur.w=w;align.pairs.push(align.cur);align.cur=null;align.step=0;
+    if(align.pairs.length===1){const p=align.pairs[0];const at=imgToWorld(im,...p.q);im.c+=p.w[0]-at[0];im.d+=p.w[1]-at[1]}
+    else{const [p1,p2]=align.pairs.slice(-2);const qx=p2.q[0]-p1.q[0],qy=p2.q[1]-p1.q[1],wx=p2.w[0]-p1.w[0],wy=p2.w[1]-p1.w[1];const k=qx*qx+qy*qy;if(k<1){toast('Pick two points further apart');align.pairs.pop();renderAlignBar();return}
+      im.a=(wx*qx+wy*qy)/k;im.b=(wy*qx-wx*qy)/k;im.c=p1.w[0]-(im.a*p1.q[0]-im.b*p1.q[1]);im.d=p1.w[1]-(im.b*p1.q[0]+im.a*p1.q[1]);
+      const m=Math.hypot(im.a,im.b);toast(`Aligned: ${(1/m).toFixed(2)} image px per m, rotated ${(Math.atan2(im.b,im.a)*180/Math.PI).toFixed(1)}°`)}
+    saveImagery(align.id)}
+  renderAlignBar();draw()}
+function nudge(scale,rot){const im=imagery.get(align.id);if(!im)return;const cx=im.w/2,cy=im.h/2,ctr=imgToWorld(im,cx,cy);const r=rot*Math.PI/180,ca=Math.cos(r)*scale,sa=Math.sin(r)*scale;const a=im.a*ca-im.b*sa,b=im.a*sa+im.b*ca;im.a=a;im.b=b;const now=imgToWorld(im,cx,cy);im.c+=ctr[0]-now[0];im.d+=ctr[1]-now[1];saveImageryLater(align.id);draw()}
+function renderAlignBar(){const b=$('#drawbar');const im=imagery.get(align.id);if(!im){endAlign();return}b.hidden=false;cv.classList.add('drawing');
+  const n=align.pairs.length;const help=align.mode==='move'?'Drag the image into place':align.step===0?`Point ${n%2+1} of 2: click a feature on the image (a lot corner, road bend, building)`:'Now click where that feature really is on the terrain';
+  b.innerHTML=`<span class="what">Align ${esc(im.name)}</span><span class="hint">${help}</span>
+   <div class="seg"><button aria-pressed="${align.mode==='pts'}" id="amPts">Match points</button><button aria-pressed="${align.mode==='move'}" id="amMove">Drag</button></div>
+   <button class="btn" id="aSm" title="Smaller">−</button><button class="btn" id="aSp" title="Larger">+</button><button class="btn" id="aRl" title="Rotate left">⟲</button><button class="btn" id="aRr" title="Rotate right">⟳</button>
+   <button class="btn primary" id="aDone">Done</button>`;
+  $('#amPts').onclick=()=>{align.mode='pts';align.step=0;renderAlignBar()};$('#amMove').onclick=()=>{align.mode='move';renderAlignBar()};
+  $('#aSm').onclick=()=>nudge(1/1.02,0);$('#aSp').onclick=()=>nudge(1.02,0);$('#aRl').onclick=()=>nudge(1,-0.5);$('#aRr').onclick=()=>nudge(1,0.5);$('#aDone').onclick=endAlign}
+async function deleteImage(id){const im=imagery.get(id);imagery.delete(id);delete IMGX[id];renderLayers();draw();if(live){try{await db.collection('imagery').doc(id).delete()}catch(e){}if(im&&im.assetId&&assets){try{await assets.delete(im.assetId)}catch(e){}}}}
+function imageryHTML(){const rows=[...imagery.entries()].map(([id,im])=>`<div class="row"><label><input type="checkbox" data-img="${id}" ${im.on?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#6b8f4e,#a7926a)"></i>${esc(im.name)}${im.local?' <span class="pill">this browser</span>':''}</label><input type="range" min="0.2" max="1" step="0.05" value="${im.op}" data-imgop="${id}" aria-label="Opacity of ${esc(im.name)}"></div>
+   <div class="seg" style="padding-left:22px"><button class="btn" data-imgalign="${id}">Align</button><button class="btn" data-imgdel="${id}">Remove</button></div><div data-imgconf="${id}"></div>`).join('');
+  return `<h2>Aerial imagery</h2>${rows}<input type="file" id="imgfile" accept="image/png,image/jpeg,image/webp" hidden><button class="btn" id="imgadd">Add aerial image…</button>
+   <p class="hint">${imagery.size?'':'Satellite tiles can’t stream into this page, so bring your own: '}In Queensland Globe switch to <b>2D</b>, north up, imagery on, zoom so the lot fills the screen, and take a screenshot (a drone orthomosaic or Google Earth “Save image” also works). Upload it, then click two matching points, such as lot corners, on the image and then on the pink boundary.${assets?'':' <b>Not shared:</b> uploads stay in this browser until the page can store files.'}</p>`}
+function wireImagery(el){el.querySelector('#imgadd').onclick=()=>el.querySelector('#imgfile').click();el.querySelector('#imgfile').onchange=e=>{addImage(e.target.files[0]);e.target.value=''};
+  el.querySelectorAll('[data-img]').forEach(c=>c.onchange=()=>{const im=imagery.get(c.dataset.img);im.on=c.checked;draw();saveImageryLater(c.dataset.img)});
+  el.querySelectorAll('[data-imgop]').forEach(r=>r.oninput=()=>{const im=imagery.get(r.dataset.imgop);im.op=+r.value;draw();saveImageryLater(r.dataset.imgop)});
+  el.querySelectorAll('[data-imgalign]').forEach(b=>b.onclick=()=>startAlign(b.dataset.imgalign));
+  el.querySelectorAll('[data-imgdel]').forEach(b=>b.onclick=()=>{const id=b.dataset.imgdel;const box=el.querySelector(`[data-imgconf="${id}"]`);box.innerHTML=`<p class="hint">Remove this image for everyone?</p><div class="seg"><button class="btn danger">Remove</button><button class="btn">Keep</button></div>`;const [y,n]=box.querySelectorAll('button');y.onclick=()=>deleteImage(id);n.onclick=()=>box.innerHTML=''})}
+
+/* ---------------- 3D print export (3MF with one part per colour, or STL) ---------------- */
+const P3=Object.assign({area:'lot',clip:true,size:180,exag:1,base:4,terrace:0,bound:true,water:true,design:true,zones:true,trees:true},lsGet('bt.p3',{}));
+class Mesh3{constructor(name,color){this.name=name;this.color=color;this.v=[];this.t=[];this.key=new Map()}
+  vert(k,x,y,z){let i=this.key.get(k);if(i===undefined){i=this.v.length/3;this.v.push(x,y,z);this.key.set(k,i)}return i}
+  tri(a,b,c,nx,ny,nz){if(a===b||b===c||a===c)return;const v=this.v,ax=v[3*a],ay=v[3*a+1],az=v[3*a+2],ux=v[3*b]-ax,uy=v[3*b+1]-ay,uz=v[3*b+2]-az,wx=v[3*c]-ax,wy=v[3*c+1]-ay,wz=v[3*c+2]-az;
+    const cx=uy*wz-uz*wy,cy=uz*wx-ux*wz,cz=ux*wy-uy*wx;if(cx*nx+cy*ny+cz*nz<0)this.t.push(a,c,b);else this.t.push(a,b,c)}
+  quad(a,b,c,d,n){this.tri(a,b,c,...n);this.tri(a,c,d,...n)}}
+const EDGES=[[-1,0,[-1,0,0],[0,0],[0,1]],[1,0,[1,0,0],[1,0],[1,1]],[0,-1,[0,1,0],[0,0],[1,0]],[0,1,[0,-1,0],[0,1],[1,1]]];
+function padSmooth(m,own,id,nx,ny,X,Y,topV,botV){const W=nx+1;
+  const Tv=(i,j)=>m.vert((j*W+i)*2,X(i),Y(j),topV(i,j)),Bv=(i,j)=>m.vert((j*W+i)*2+1,X(i),Y(j),botV(i,j));
+  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){if(own[j*nx+i]!==id)continue;
+    m.quad(Tv(i,j),Tv(i+1,j),Tv(i+1,j+1),Tv(i,j+1),[0,0,1]);m.quad(Bv(i,j),Bv(i+1,j),Bv(i+1,j+1),Bv(i,j+1),[0,0,-1]);
+    for(const [di,dj,n,p,q] of EDGES){const ii=i+di,jj=j+dj;if(ii>=0&&jj>=0&&ii<nx&&jj<ny&&own[jj*nx+ii]===id)continue;
+      const pi=i+p[0],pj=j+p[1],qi=i+q[0],qj=j+q[1];m.quad(Tv(pi,pj),Tv(qi,qj),Bv(qi,qj),Bv(pi,pj),n)}}}
+function padCols(m,own,id,nx,ny,X,Y,cb,ct){const V=(i,j,z)=>m.vert(i+','+j+','+z.toFixed(3),X(i),Y(j),z);
+  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(own[k]!==id)continue;const zb=cb[k],zt=ct[k];
+    m.quad(V(i,j,zt),V(i+1,j,zt),V(i+1,j+1,zt),V(i,j+1,zt),[0,0,1]);m.quad(V(i,j,zb),V(i+1,j,zb),V(i+1,j+1,zb),V(i,j+1,zb),[0,0,-1]);
+    for(const [di,dj,n,p,q] of EDGES){const ii=i+di,jj=j+dj;let parts=[[zb,zt]];
+      if(ii>=0&&jj>=0&&ii<nx&&jj<ny&&own[jj*nx+ii]===id){const nb=cb[jj*nx+ii],nt=ct[jj*nx+ii];parts=[];if(nb>zb)parts.push([zb,Math.min(nb,zt)]);if(nt<zt)parts.push([Math.max(nt,zb),zt])}
+      for(const [lo,hi] of parts){if(hi-lo<1e-4)continue;const pi=i+p[0],pj=j+p[1],qi=i+q[0],qj=j+q[1];m.quad(V(pi,pj,lo),V(qi,qj,lo),V(qi,qj,hi),V(pi,pj,hi),n)}}}}
+function build3D(){
+  const lp=flat(T.lot);let src=lp,mg=8;if(P3.area==='context')mg=60;if(P3.area==='catch'){src=flat(T.catch[0].p);mg=20}
+  const xs=src.map(q=>q[0]),ys=src.map(q=>q[1]);const x0=Math.min(...xs)-mg,y0=Math.min(...ys)-mg,x1=Math.max(...xs)+mg,y1=Math.max(...ys)+mg;
+  const terr=+P3.terrace>0;const N=terr?150:200;const c=Math.max(x1-x0,y1-y0)/N;const nx=Math.round((x1-x0)/c),ny=Math.round((y1-y0)/c);
+  const s=P3.size/Math.max(x1-x0,y1-y0);const ex=+P3.exag,I=+P3.terrace;
+  const X=i=>+(i*c*s).toFixed(3),Y=j=>+((ny-j)*c*s).toFixed(3);
+  const clip=P3.clip&&P3.area!=='catch';
+  const cells=nx*ny;const own=new Int16Array(cells).fill(-2);
+  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const p=[x0+(i+.5)*c,y0+(j+.5)*c];if(!clip||inPoly(p,lp))own[j*nx+i]=-1}
+  const q=z=>I>0?Math.floor(z/I)*I:z;
+  let zmin=Infinity;const zc=new Float32Array(cells);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const z=q(zAt(x0+(i+.5)*c,y0+(j+.5)*c));zc[j*nx+i]=z;if(own[j*nx+i]!==-2&&z<zmin)zmin=z}
+  const mm=z=>+(+P3.base+(z-zmin)*s*ex).toFixed(3);
+  const zv=(i,j)=>mm(zAt(x0+i*c,y0+j*c));
+  // layers in priority order (first claim wins)
+  const L=[];const add=(name,color,h,items)=>{if(items.length)L.push({name,color,h,items})};
+  const hw=mmw=>mmw/2/s; // half width in metres for a printed width in mm
+  if(P3.bound)add('Boundary','#C2185B',1.2,[{t:'line',p:lp.concat([lp[0]]),r:hw(1.4)}]);
+  if(P3.water){const it=T.streams.filter(st=>st.k>=1).map(st=>({t:'line',p:flat(st.p),r:hw([0,1,1.4,2][st.k])}));
+    for(const f of features.values()){const k=KINDS[f.kind];if(!k||k.g!=='Water')continue;it.push(featItem(f,hw))}add('Water','#2D8FD5',0.8,it.filter(Boolean))}
+  if(P3.design)for(const g of ['Access','Built','Landscape','Plants']){const col={Access:'#8A5A2B',Built:'#5A5A5A',Landscape:'#9A7420',Plants:'#3F8F3A'}[g];
+    add(g,col,0.8,[...features.values()].filter(f=>(KINDS[f.kind]||{}).g===g&&!(P3.trees&&(f.kind==='tree'||f.kind==='guild'))).map(f=>featItem(f,hw)).filter(Boolean))}
+  if(P3.zones)for(let z=0;z<=5;z++){const kk='zone'+z;add(KINDS[kk].label,KINDS[kk].color,0.4,[...features.values()].filter(f=>f.kind===kk).map(f=>featItem(f,hw)).filter(Boolean))}
+  L.forEach((ly,li)=>{for(const it of ly.items){let bx0,by0,bx1,by1;const pts=it.p||[it.c];bx0=Math.min(...pts.map(p=>p[0]))-(it.r||0);bx1=Math.max(...pts.map(p=>p[0]))+(it.r||0);by0=Math.min(...pts.map(p=>p[1]))-(it.r||0);by1=Math.max(...pts.map(p=>p[1]))+(it.r||0);
+    const i0=Math.max(0,Math.floor((bx0-x0)/c)),i1=Math.min(nx-1,Math.ceil((bx1-x0)/c)),j0=Math.max(0,Math.floor((by0-y0)/c)),j1=Math.min(ny-1,Math.ceil((by1-y0)/c));
+    for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=j*nx+i;if(own[k]!==-1)continue;const p=[x0+(i+.5)*c,y0+(j+.5)*c];let hit=false;
+      if(it.t==='poly')hit=inPoly(p,it.p);else if(it.t==='pt')hit=dist(p,it.c)<=it.r;else{for(let a=1;a<it.p.length&&!hit;a++)hit=segDist(p,it.p[a-1],it.p[a])<=it.r}
+      if(hit)own[k]=li}}});
+  // terrain body owns everything inside the shape
+  const tOwn=new Int16Array(cells);for(let k=0;k<cells;k++)tOwn[k]=own[k]===-2?-2:0;
+  const meshes=[];const terrM=new Mesh3('Terrain','#C9B48A');
+  if(terr){const cb=new Float32Array(cells).fill(0),ct=new Float32Array(cells);for(let k=0;k<cells;k++)ct[k]=mm(zc[k]);padCols(terrM,tOwn,0,nx,ny,X,Y,cb,ct);
+    meshes.push(terrM);L.forEach((ly,li)=>{const m=new Mesh3(ly.name,ly.color);const top=new Float32Array(cells);for(let k=0;k<cells;k++)top[k]=ct[k]+ly.h;padCols(m,own,li,nx,ny,X,Y,ct,top);if(m.t.length)meshes.push(m)})}
+  else{padSmooth(terrM,tOwn,0,nx,ny,X,Y,zv,()=>0);meshes.push(terrM);L.forEach((ly,li)=>{const m=new Mesh3(ly.name,ly.color);padSmooth(m,own,li,nx,ny,X,Y,(i,j)=>zv(i,j)+ly.h,zv);if(m.t.length)meshes.push(m)})}
+  // planned trees and guilds as domes at their mature height and canopy width
+  const tr=[...features.values()].filter(f=>P3.trees&&(f.kind==='tree'||f.kind==='guild')&&f.geom.g==='point');
+  if(tr.length){const m=new Mesh3('Planned trees & guilds','#2E6B2A');const S=20,R=6;
+    tr.forEach((f,ti)=>{const [wx,wy]=f.geom.pts[0];if(wx<x0||wy<y0||wx>x1||wy>y1)return;if(clip&&!inPoly([wx,wy],lp))return;
+      const rw=Math.max(f.geom.r||(f.kind==='tree'?4:3),.5),hgt=f.height||(f.kind==='tree'?8:3);let zb=Infinity;
+      for(let a=0;a<8;a++){const an=a/8*2*Math.PI;zb=Math.min(zb,q(zAt(wx+Math.cos(an)*rw,wy+Math.sin(an)*rw)))}zb=Math.min(zb,q(zAt(wx,wy)));
+      const cx=+((wx-x0)*s).toFixed(3),cy=+((y1-wy)*s).toFixed(3),rr=Math.max(rw*s,1),z0=mm(zb)-.3,hh=Math.max(hgt*s*ex,1.2);
+      const ring=[];for(let k=0;k<R;k++){const ph=k/R*Math.PI/2,row=[];for(let i2=0;i2<S;i2++){const th=i2/S*2*Math.PI;row.push(m.vert(`t${ti}r${k}i${i2}`,+(cx+rr*Math.cos(ph)*Math.cos(th)).toFixed(3),+(cy+rr*Math.cos(ph)*Math.sin(th)).toFixed(3),+(z0+hh*Math.sin(ph)).toFixed(3)))}ring.push(row)}
+      const top=m.vert(`t${ti}top`,cx,cy,+(z0+hh).toFixed(3)),bot=m.vert(`t${ti}bot`,cx,cy,z0);
+      const out=(a,b,c)=>{const v=m.v;const mx=(v[3*a]+v[3*b]+v[3*c])/3-cx,my=(v[3*a+1]+v[3*b+1]+v[3*c+1])/3-cy,mz=(v[3*a+2]+v[3*b+2]+v[3*c+2])/3-z0;m.tri(a,b,c,mx,my,mz)};
+      for(let k=0;k<R;k++)for(let i2=0;i2<S;i2++){const a=ring[k][i2],b=ring[k][(i2+1)%S];if(k<R-1){const c2=ring[k+1][(i2+1)%S],d=ring[k+1][i2];out(a,b,c2);out(a,c2,d)}else out(a,b,top);if(k===0)m.tri(bot,ring[0][(i2+1)%S],ring[0][i2],0,0,-1)}
+    });if(m.t.length)meshes.push(m)}
+  let zmax=0;for(const v of terrM.v.filter((_,i)=>i%3===2))if(v>zmax)zmax=v;
+  return {meshes,wmm:+(nx*c*s).toFixed(1),hmm:+(ny*c*s).toFixed(1),zmm:+zmax.toFixed(1),scale:Math.round(1000/s),c}}
+function featItem(f,hw){const g=f.geom;if(g.g==='polygon')return {t:'poly',p:g.pts};if(g.g==='line')return {t:'line',p:g.pts,r:hw((KINDS[f.kind]||{}).w?2:1.2)};if(g.g==='point')return {t:'pt',c:g.pts[0],r:Math.max(g.r||0,hw(3))};return null}
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function zipStore(files){const enc=new TextEncoder();const parts=[],cd=[];let off=0;
+  for(const f of files){const name=enc.encode(f.name),data=f.data,crc=crc32(data);const h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(8,0,true);h.setUint16(12,0x21,true);h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);
+    parts.push(new Uint8Array(h.buffer),name,data);const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(14,0x21,true);c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+    cd.push(new Uint8Array(c.buffer),name);off+=30+name.length+data.length}
+  const cdLen=cd.reduce((s,a)=>s+a.length,0);const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cdLen,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...cd,new Uint8Array(e.buffer)],{type:'model/3mf'})}
+function to3MF(r){const enc=new TextEncoder();const out=[];
+  out.push('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><metadata name="Title">Bright Tree terrain</metadata><resources><basematerials id="1">');
+  r.meshes.forEach(m=>out.push(`<base name="${esc(m.name)}" displaycolor="${m.color}FF"/>`));out.push('</basematerials>');
+  r.meshes.forEach((m,mi)=>{out.push(`<object id="${mi+2}" name="${esc(m.name)}" type="model" pid="1" pindex="${mi}"><mesh><vertices>`);const v=m.v;let buf=[];
+    for(let i=0;i<v.length;i+=3){buf.push(`<vertex x="${v[i]}" y="${v[i+1]}" z="${v[i+2]}"/>`);if(buf.length>5000){out.push(buf.join(''));buf=[]}}out.push(buf.join(''));buf=[];out.push('</vertices><triangles>');
+    const t=m.t;for(let i=0;i<t.length;i+=3){buf.push(`<triangle v1="${t[i]}" v2="${t[i+1]}" v3="${t[i+2]}"/>`);if(buf.length>5000){out.push(buf.join(''));buf=[]}}out.push(buf.join(''));out.push('</triangles></mesh></object>')});
+  const pid=r.meshes.length+2;out.push(`<object id="${pid}" name="Bright Tree model" type="model"><components>${r.meshes.map((m,mi)=>`<component objectid="${mi+2}"/>`).join('')}</components></object></resources><build><item objectid="${pid}"/></build></model>`);
+  const model=enc.encode(out.join(''));
+  const ct=enc.encode('<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>');
+  const rels=enc.encode('<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>');
+  return zipStore([{name:'[Content_Types].xml',data:ct},{name:'_rels/.rels',data:rels},{name:'3D/3dmodel.model',data:model}])}
+function toSTL(r){const n=r.meshes.reduce((s,m)=>s+m.t.length/3,0);const b=new ArrayBuffer(84+n*50),d=new DataView(b);d.setUint32(80,n,true);let o=84;
+  for(const m of r.meshes){const v=m.v,t=m.t;for(let i=0;i<t.length;i+=3){o+=12;for(const k of [t[i],t[i+1],t[i+2]]){d.setFloat32(o,v[3*k],true);d.setFloat32(o+4,v[3*k+1],true);d.setFloat32(o+8,v[3*k+2],true);o+=12}o+=2}}
+  return new Blob([b],{type:'model/stl'})}
+async function export3D(fmt){const st=$('#p3status');st.textContent='Building the model…';await new Promise(r=>setTimeout(r,30));
+  let r;try{r=build3D()}catch(e){st.textContent='The model could not be built: '+e.message;return}
+  const blob=fmt==='3mf'?to3MF(r):toSTL(r);const tris=r.meshes.reduce((s,m)=>s+m.t.length/3,0);
+  st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')}) · ${(blob.size/1e6).toFixed(1)} MB`;
+  window.__bt3d={r,blob};const name=`bright-tree-terrain${+P3.terrace?'-terraced':''}.${fmt}`;
+  if(downloads){try{await downloads.save({filename:name,data:blob});toast('Saved '+name)}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start: '+(e&&e.code||'error'))}}else toast('Downloads are not available in this view')}
+function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`<option value="${k}" ${String(v)===String(k)?'selected':''}>${l}</option>`).join('')}</select>`;
+  return `<h2>3D print</h2><p class="hint">A printable model of the land with the boundary, creeks and your design raised on top. The 3MF file keeps each layer as its own part, so a multi-colour printer can give terrain, water, zones and features different colours.</p>
+  <div class="field"><label for="p3area">Area</label>${o('p3area',[['lot','The lot'],['context','The lot and 60 m around it'],['catch','The whole catchment (40 ha)']],P3.area)}</div>
+  <div class="row"><label><input type="checkbox" id="p3clip" ${P3.clip?'checked':''}> Cut to the lot boundary shape</label></div>
+  <div class="field"><label for="p3size">Longest side</label>${o('p3size',[[120,'120 mm (fits A1 mini)'],[180,'180 mm'],[220,'220 mm'],[250,'250 mm (A1, K2)']],P3.size)}</div>
+  <div class="field"><label for="p3exag">Height</label>${o('p3exag',[[1,'True to scale'],[1.5,'1.5× exaggerated'],[2,'2× exaggerated']],P3.exag)}</div>
+  <div class="field"><label for="p3terr">Surface</label>${o('p3terr',[[0,'Smooth hillside'],[1,'Terraced every 1 m'],[2,'Terraced every 2 m'],[5,'Terraced every 5 m']],P3.terrace)}</div>
+  <div class="row"><label><input type="checkbox" id="p3b" ${P3.bound?'checked':''}> Boundary</label><label><input type="checkbox" id="p3w" ${P3.water?'checked':''}> Creeks & water</label></div>
+  <div class="row"><label><input type="checkbox" id="p3z" ${P3.zones?'checked':''}> Zones</label><label><input type="checkbox" id="p3d" ${P3.design?'checked':''}> Design features</label></div>
+  <div class="row"><label><input type="checkbox" id="p3t" ${P3.trees?'checked':''}> Planned trees & guilds as domes at mature size</label></div>
+  <div class="seg"><button class="btn primary" id="p3mf">Download 3MF (multi-colour)</button><button class="btn" id="p3stl">STL (one colour)</button></div><p class="hint" id="p3status" aria-live="polite"></p>`}
+function wireP3(el){const set=(k,v)=>{P3[k]=v;lsSet('bt.p3',P3)};
+  el.querySelector('#p3area').onchange=e=>set('area',e.target.value);el.querySelector('#p3clip').onchange=e=>set('clip',e.target.checked);el.querySelector('#p3size').onchange=e=>set('size',+e.target.value);
+  el.querySelector('#p3exag').onchange=e=>set('exag',+e.target.value);el.querySelector('#p3terr').onchange=e=>set('terrace',+e.target.value);
+  el.querySelector('#p3b').onchange=e=>set('bound',e.target.checked);el.querySelector('#p3w').onchange=e=>set('water',e.target.checked);el.querySelector('#p3z').onchange=e=>set('zones',e.target.checked);el.querySelector('#p3d').onchange=e=>set('design',e.target.checked);el.querySelector('#p3t').onchange=e=>set('trees',e.target.checked);
+  el.querySelector('#p3mf').onclick=()=>export3D('3mf');el.querySelector('#p3stl').onclick=()=>export3D('stl')}
+
+/* ---------------- panels ---------------- */
+function showTab(t){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));for(const id of ['layers','draw','feat','site'])$('#tab-'+id).hidden=id!==t;$('#panel').classList.remove('min');lsSet('bt.tab',t)}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{if(b.getAttribute('aria-selected')==='true'&&matchMedia('(max-width:760px)').matches){$('#panel').classList.toggle('min');setTimeout(resize,0);return}showTab(b.dataset.tab);setTimeout(resize,0)});
+function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);draw()}
+function renderLayers(){const el=$('#tab-layers');const m=T.meta;
+  const sc=m.slopeClasses.map(([lo,hi,c])=>`<span><i class="swatch" style="background:rgba(${c[0]},${c[1]},${c[2]},.85)"></i>${hi?lo+'–'+hi:'>'+lo}%</span>`).join('');
+  const ac=Object.entries(m.aspectColors).map(([n,c])=>`<span><i class="swatch" style="background:rgb(${c})"></i>${n}</span>`).join('');
+  const ov=[['none','None'],['slope','Slope'],['aspect','Aspect (facing)'],['sun_winter','Winter sun hours'],['sun_equinox','Equinox sun hours'],['sun_summer','Summer sun hours'],['cold','Cold air pooling']];
+  el.innerHTML=`<h2>Base</h2><div class="seg" id="baseSeg">${[['none','None'],['relief','Relief'],['hillshade','Hillshade']].map(([k,l])=>`<button aria-pressed="${layers.base===k}" data-v="${k}">${l}</button>`).join('')}</div>
+  <div class="row"><label for="baseop">Base strength <span id="baseopv" class="pill">${Math.round(layers.baseOp*100)}%</span></label><input type="range" id="baseop" min="0" max="1" step="0.05" value="${layers.baseOp}"></div>
+  <p class="hint" style="margin:0 0 4px">Lower it to see the aerial photo underneath.</p>
+  <h2>Contours</h2><div class="seg" id="conSeg">${[['off','Off'],['on','On']].map(([k,l])=>`<button aria-pressed="${(k==='on')===(layers.c1||layers.c5)}" data-v="${k}">${l}</button>`).join('')}</div>
+  <div id="imgSec">${imageryHTML()}</div>
+  <h2>Terrain analysis</h2><div class="seg" id="ovSeg">${ov.map(([k,l])=>`<button aria-pressed="${layers.overlay===k}" data-v="${k}">${l}</button>`).join('')}</div>
+  <div class="row"><label for="ovop">Overlay strength</label><input type="range" id="ovop" min="0.2" max="1" step="0.05" value="${layers.ovOp}"></div>
+  <div id="ovLegend" class="hint"></div>
+  <h2>Lines and points</h2>
+  ${[['lot','Lot boundary','#c2185b'],['c1','1 m contours (lot area, zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],['design','Design features','#1f6a57'],['labels','Labels','#777']].map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join('')}
+  <p class="hint">Contours, flow lines and sun hours come from the Queensland Government 2022 LiDAR survey (bare earth, 1 m). Sun hours count terrain shading only, not trees.</p>`;
+  const legends={slope:`<div class="legend">${sc}</div>Permaculture reading: under 10% suits tracks and beds; 10–25% contour beds and terraces; 25–50% tree crops on contour with groundcover; over 50% keep in forest.`,aspect:`<div class="legend">${ac}</div>North-facing slopes are the warm, winter-sunny side in the southern hemisphere.`,
+   sun_winter:'Direct sun on 21 June, blocked by terrain only. Dark blue about 0 h, gold 7 h and more. Mean across the lot: '+m.sun_winter_lotmean.toFixed(1)+' h.',sun_equinox:'Direct sun at the equinox. Mean across the lot: '+m.sun_equinox_lotmean.toFixed(1)+' h.',sun_summer:'Direct sun on 21 December. Mean across the lot: '+m.sun_summer_lotmean.toFixed(1)+' h.',cold:'Blue marks valley floors where cold air settles on still winter nights (low ground relative to 60 m around it, on gentler slopes). Frost-tender plants belong upslope on the thermal belt.',none:'',slope_:''};
+  const setLeg=()=>{$('#ovLegend').innerHTML=legends[layers.overlay]||'';mapLegend()};setLeg();
+  el.querySelectorAll('#baseSeg button').forEach(b=>b.onclick=()=>{setLayer('base',b.dataset.v);el.querySelectorAll('#baseSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  el.querySelectorAll('#ovSeg button').forEach(b=>b.onclick=()=>{setLayer('overlay',b.dataset.v);el.querySelectorAll('#ovSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b));setLeg()});
+  $('#ovop').oninput=e=>setLayer('ovOp',+e.target.value);
+  el.querySelectorAll('#conSeg button').forEach(b=>b.onclick=()=>{const on=b.dataset.v==='on';layers.c1=on;layers.c5=on;setLayer('c5',on);renderLayers()});
+  const bo=e=>{setLayer('baseOp',+e.target.value);$('#baseopv').textContent=Math.round(layers.baseOp*100)+'%';render()};$('#baseop').oninput=bo;$('#baseop').onchange=bo;
+
+  el.querySelectorAll('input[data-k]').forEach(c=>c.onchange=()=>setLayer(c.dataset.k,c.checked));
+  wireImagery(el)}
+function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.overlay;if(!m||ov==='none'){el.hidden=true;return}
+  const sunGrad='linear-gradient(90deg,rgb(30,40,110),rgb(90,70,150) 35%,rgb(220,110,70) 60%,rgb(250,200,70) 85%,rgb(255,245,170))';
+  const sw=(c,a=.85)=>`background:rgba(${c[0]},${c[1]},${c[2]},${a})`;let h='';
+  if(ov==='slope')h=`<b>Slope</b><div class="legend">${m.slopeClasses.map(([lo,hi,c])=>`<span><i class="swatch" style="${sw(c)}"></i>${hi?lo+'–'+hi:'>'+lo}%</span>`).join('')}</div>`;
+  else if(ov==='aspect')h=`<b>Slope faces</b><div class="legend">${Object.entries(m.aspectColors).map(([n,c])=>`<span><i class="swatch" style="background:rgb(${c})"></i>${n}</span>`).join('')}</div>`;
+  else if(ov.startsWith('sun_')){const k=ov.slice(4),mx={winter:8,equinox:11,summer:13}[k],t={winter:'Winter sun · 21 Jun',equinox:'Equinox sun',summer:'Summer sun · 21 Dec'}[k];h=`<b>${t}</b><div class="grad" style="background:${sunGrad}"></div><div class="ends"><span>0 h</span><span>${Math.round(mx/2)} h</span><span>${mx}+ h</span></div><div class="ends"><span>direct sun, terrain shade only</span></div>`}
+  else if(ov==='cold')h=`<b>Cold air pooling</b><div class="grad" style="background:linear-gradient(90deg,rgba(70,120,230,0),rgba(70,120,230,.8))"></div><div class="ends"><span>drains away</span><span>pools</span></div>`;
+  el.innerHTML=h;el.hidden=!h}
+function renderDraw(){const el=$('#tab-draw');const groups={};for(const [k,v] of Object.entries(KINDS))(groups[v.g]=groups[v.g]||[]).push([k,v]);
+  el.innerHTML=Object.entries(groups).map(([g,list])=>`<h2>${g}</h2><div class="tools">${list.map(([k,v])=>`<button class="tool" data-k="${k}" aria-pressed="${tool===k}"><i class="swatch" style="background:${v.color}"></i><span>${esc(v.label)}</span></button>`).join('')}</div>`).join('')+
+  `<h2>Tips</h2><p class="hint">Drag to pan, scroll or pinch to zoom. Lines and shapes: click points, then Finish (or double-click). Or pick <b>Sketch & tidy</b> in the drawing bar and draw with your finger: rough boxes become rectangles, loops become circles or ovals, anything else is smoothed. Select a shape, circle or sector and drag its round handle to resize it; shapes show their area in the middle. Swales, diversion drains, tracks and planting rows can <b>follow a grade</b>: tick Follow grade and the line traces the hillside at that grade toward your cursor (0% for a swale on contour, 1% for a diversion drain, up to 10% for a track). Tracks turn red where they run steeper than 10%.</p>
+  <p class="hint">Sun sectors draw automatically for 26.7°S: click the house or garden and the winter or summer sun arc appears.</p>`;
+  el.querySelectorAll('.tool').forEach(b=>b.onclick=()=>{if(tool===b.dataset.k){cancelDraft();return}startTool(b.dataset.k);if(matchMedia('(max-width:760px)').matches)$('#panel').classList.add('min');setTimeout(resize,0)})}
+function measure(f){const g=f.geom,out=[];
+  if(g.g==='point'){const z=zAt(...g.pts[0]),s=slopeAt(...g.pts[0]);out.push(['Elevation',z.toFixed(1)+' m'],['Slope',`${s.pct.toFixed(0)}% (${s.deg.toFixed(0)}°), faces ${dirName(s.asp)}`],['Direct sun',`${sunAt('winter',...g.pts[0]).toFixed(1)} h winter · ${sunAt('summer',...g.pts[0]).toFixed(1)} h summer`]);if(g.r)out.push(['Radius',g.r+' m'])}
+  if(g.g==='polygon'){const a=polyArea(g.pts);out.push(['Area',fmtArea(a)+(a>=2000?` · ${(a/1e4).toFixed(2)} ha · ${Math.round(a).toLocaleString()} m²`:'')],['Perimeter',Math.round(lineLen(g.pts.concat([g.pts[0]])))+' m']);
+    const xs=g.pts.map(q=>q[0]),ys=g.pts.map(q=>q[1]);let zs=[],ss=[],sw=[];const st=Math.max(2,Math.sqrt(a)/25);
+    for(let x=Math.min(...xs);x<=Math.max(...xs);x+=st)for(let y=Math.min(...ys);y<=Math.max(...ys);y+=st)if(inPoly([x,y],g.pts)){zs.push(zAt(x,y));ss.push(slopeAt(x,y).pct);sw.push(sunAt('winter',x,y))}
+    if(zs.length){const avg=a=>a.reduce((s,v)=>s+v,0)/a.length;out.push(['Elevation',`${Math.min(...zs).toFixed(0)}–${Math.max(...zs).toFixed(0)} m`],['Average slope',avg(ss).toFixed(0)+'%'],['Winter sun',avg(sw).toFixed(1)+' h average'])}}
+  if(g.g==='line'){const d=densify(g.pts,2);const L=d[d.length-1].d;let maxg=0,steep=0;const k=KINDS[f.kind]||{};const lim=k.checkGrade||10;
+    for(let i=3;i<d.length;i+=3){const gr=Math.abs(d[i].z-d[i-3].z)/(d[i].d-d[i-3].d)*100;maxg=Math.max(maxg,gr);if(gr>lim)steep+=d[i].d-d[i-3].d}
+    const zs=d.map(q=>q.z);out.push(['Length',Math.round(L)+' m'],['Start → end',`${d[0].z.toFixed(1)} → ${d[d.length-1].z.toFixed(1)} m`],['Overall grade',(Math.abs(d[d.length-1].z-d[0].z)/L*100).toFixed(1)+'%'],['Steepest stretch',maxg.toFixed(0)+'%']);
+    if(k.checkGrade)out.push([`Over ${lim}%`,Math.round(steep)+' m'+(steep?' (red on map)':'')]);
+    if(f.kind==='swale'||f.kind==='row')out.push(['Off level',`${(Math.max(...zs)-Math.min(...zs)).toFixed(2)} m between high and low point`])}
+  if(g.g==='sector'){out.push(['Bearings',`${g.a0.toFixed(0)}° → ${g.a1.toFixed(0)}° clockwise`],['Radius',Math.round(g.r)+' m'])}
+  if(g.g==='sun'){const b=sunBearings(KINDS[f.kind].decl);out.push(['Sunrise',`${b.rise.toFixed(0)}° (${dirName(b.rise)})`],['Sunset',`${b.set.toFixed(0)}° (${dirName(b.set)})`],['Noon altitude',b.noonAlt.toFixed(0)+'° above the northern horizon'])}
+  const c=centroid(f);if(c){const ll=xy2ll(...c);out.push(['Lat, long',`${ll[1].toFixed(6)}, ${ll[0].toFixed(6)}`])}
+  return out}
+let nameCache={};
+async function names(ids){if(!userCap||!ids.length)return;try{const ps=await userCap.profiles(ids);for(const id of ids)nameCache[id]=(ps[id]&&ps[id].name)||'Someone';}catch(e){}}
+function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // don't clobber typing
+  const f=selected&&features.get(selected);
+  if(f){const k=KINDS[f.kind]||KINDS.note;const m=measure(f);const by=f.createdBy?(nameCache[f.createdBy]||'…'):(f.source==='claude'?'Claude':'Unknown');if(f.createdBy&&!nameCache[f.createdBy])names([f.createdBy]).then(()=>renderFeatures());
+    el.innerHTML=`<button class="btn" id="back">← All features</button>
+    <h2>${esc(k.label)}</h2>
+    <div class="field"><label for="fname">Name</label><input id="fname" value="${esc(f.name)}"></div>
+    <div class="field"><label for="fkind">Type</label><select id="fkind">${Object.entries(KINDS).filter(([kk,v])=>v.geom===k.geom).map(([kk,v])=>`<option value="${kk}" ${kk===f.kind?'selected':''}>${esc(v.g)} · ${esc(v.label)}</option>`).join('')}</select></div>
+    <div class="field"><label>Status</label><div class="seg" id="fstat">${STATUS.map(s=>`<button aria-pressed="${f.status===s}" data-v="${s}">${s}</button>`).join('')}</div></div>
+    <div class="field"><label for="fnotes">Notes and reasons</label><textarea id="fnotes" placeholder="Why here? Species, sizes, who decided, what to check on site.">${esc(f.notes)}</textarea></div>
+    ${(f.kind==='tree'||f.kind==='guild')?`<div class="row"><div class="field" style="flex:1"><label for="fh">Mature height (m)</label><input id="fh" type="number" min="0.5" max="60" step="0.5" value="${f.height||(f.kind==='tree'?8:3)}"></div><div class="field" style="flex:1"><label for="fw">Canopy width (m)</label><input id="fw" type="number" min="0.5" max="40" step="0.5" value="${(f.geom.r||3)*2}"></div></div>`:''}
+    <h2>Measured from LiDAR</h2><dl class="facts">${m.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>
+    ${f.geom.g==='line'?'<h2>Profile</h2><canvas id="profile"></canvas>':''}
+    <p class="hint">Added by ${esc(by)} · ${new Date(f.createdAt).toLocaleDateString()}. Drag the white handles on the map to reshape.</p>
+    <div class="seg" style="margin-top:8px"><button class="btn" id="fzoom">Zoom to</button><button class="btn danger" id="fdel">Delete</button></div><div id="delc"></div>`;
+    $('#back').onclick=()=>{selected=null;renderFeatures();draw()};
+    let t;$('#fname').oninput=e=>{f.name=e.target.value;draw();clearTimeout(t);t=setTimeout(()=>saveFields(selected,{name:f.name}),600)};
+    $('#fnotes').oninput=e=>{f.notes=e.target.value;clearTimeout(t);t=setTimeout(()=>saveFields(selected,{notes:f.notes}),800)};
+    if($('#fh')){$('#fh').onchange=e=>saveFields(selected,{height:Math.max(.5,+e.target.value||3)});
+      $('#fw').onchange=e=>{const g=structuredClone(f.geom);g.r=Math.max(.25,(+e.target.value||2)/2);f.geom=g;saveGeom(selected,g);draw()}}
+    $('#fkind').onchange=e=>{saveFields(selected,{kind:e.target.value});renderFeatures()};
+    el.querySelectorAll('#fstat button').forEach(b=>b.onclick=()=>{saveFields(selected,{status:b.dataset.v});renderFeatures()});
+    $('#fzoom').onclick=()=>zoomTo(f);
+    $('#fdel').onclick=()=>{$('#delc').innerHTML=`<p class="hint">Delete “${esc(f.name)}” for everyone?</p><div class="seg"><button class="btn danger" id="dyes">Delete</button><button class="btn" id="dno">Keep</button></div>`;$('#dyes').onclick=()=>removeFeature(selected);$('#dno').onclick=()=>$('#delc').innerHTML=''};
+    if(f.geom.g==='line')drawProfile(f);return}
+  const arr=[...features.entries()];
+  if(!arr.length){el.innerHTML=`<div class="empty"><b>No design features yet.</b> Start by marking what already exists, so zones and sectors can be placed around it:<ol><li>House, sauna, tanks (20,000 L and 35,000 L), treatment plant and reed beds: use <i>Structure / asset</i> or <i>Tank</i>.</li><li>Driveway and digger trails: <i>Track</i>.</li><li>Culvert and road runoff paths: <i>Water flow</i>.</li></ol>Then add the winter sun sector from the house. Everything you draw saves for the whole team, and Claude can read it to suggest placements.</div><p style="margin-top:12px"><button class="btn primary" id="go">Open the drawing tools</button></p>`;$('#go').onclick=()=>showTab('draw');return}
+  const groups={};for(const [id,f] of arr){const g=(KINDS[f.kind]||KINDS.note).g;(groups[g]=groups[g]||[]).push([id,f])}
+  el.innerHTML=`<div class="seg"><button class="btn" id="exGeo">Export GeoJSON</button><button class="btn" id="exKml">Export KML</button></div><p class="hint">KML opens in Google Earth, Avenza and Queensland Globe.</p>`+
+   Object.keys(ORDER).filter(g=>groups[g]).map(g=>`<h2>${g} · ${groups[g].length}</h2><div class="flist">${groups[g].sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,f])=>`<button data-id="${id}"><i class="swatch" style="background:${(KINDS[f.kind]||KINDS.note).color}"></i><span>${esc(f.name)}</span><span class="meta"><span class="pill ${f.status}">${f.status}</span></span></button>`).join('')}</div>`).join('');
+  el.querySelectorAll('.flist button').forEach(b=>b.onclick=()=>{selected=b.dataset.id;zoomTo(features.get(selected));renderFeatures();draw()});
+  $('#exGeo').onclick=()=>exportFile('geojson');$('#exKml').onclick=()=>exportFile('kml')}
+function zoomTo(f){const g=f.geom;let pts=g.pts||[[g.cx-g.r,g.cy-g.r],[g.cx+g.r,g.cy+g.r]];if(pts.length===1)pts=[[pts[0][0]-40,pts[0][1]-40],[pts[0][0]+40,pts[0][1]+40]];const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);fitBox(Math.min(...xs)-15,Math.min(...ys)-15,Math.max(...xs)+15,Math.max(...ys)+15,60);view.s=Math.min(view.s,6);draw()}
+function drawProfile(f){const c=$('#profile');const r=c.getBoundingClientRect();const dpr=window.devicePixelRatio||1;c.width=r.width*dpr;c.height=r.height*dpr;const g=c.getContext('2d');g.scale(dpr,dpr);
+  const d=densify(f.geom.pts,2);const zs=d.map(q=>q.z);const z0=Math.min(...zs),z1=Math.max(...zs)+.01,L=d[d.length-1].d||1;const pad=26,w=r.width-pad-6,h=r.height-22;
+  const X=v=>pad+v/L*w,Y=v=>6+(1-(v-z0)/(z1-z0))*h;g.strokeStyle=css('--line');g.lineWidth=1;g.beginPath();g.moveTo(pad,6);g.lineTo(pad,6+h);g.lineTo(pad+w,6+h);g.stroke();
+  g.fillStyle=css('--muted');g.font='10px "IBM Plex Mono",monospace';g.textAlign='right';g.fillText(z1.toFixed(0),pad-3,12);g.fillText(z0.toFixed(0),pad-3,6+h);g.textAlign='center';g.fillText(Math.round(L)+' m',pad+w-14,r.height-4);
+  g.beginPath();d.forEach((q,i)=>i?g.lineTo(X(q.d),Y(q.z)):g.moveTo(X(q.d),Y(q.z)));g.lineTo(X(L),6+h);g.lineTo(X(0),6+h);g.closePath();g.fillStyle=hexA((KINDS[f.kind]||KINDS.note).color,.2);g.fill();
+  g.beginPath();d.forEach((q,i)=>i?g.lineTo(X(q.d),Y(q.z)):g.moveTo(X(q.d),Y(q.z)));g.strokeStyle=(KINDS[f.kind]||KINDS.note).color;g.lineWidth=1.8;g.stroke()}
+function geoOf(f){const g=f.geom,ll=q=>xy2ll(q[0],q[1]).map(v=>+v.toFixed(7));
+  if(g.g==='point')return {type:'Point',coordinates:ll(g.pts[0])};if(g.g==='line')return {type:'LineString',coordinates:g.pts.map(ll)};if(g.g==='polygon')return {type:'Polygon',coordinates:[g.pts.concat([g.pts[0]]).map(ll)]};
+  let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(KINDS[f.kind].decl);a0=b.set;a1=b.rise}if(a1<=a0)a1+=360;const ring=[[g.cx,g.cy]];for(let a=a0;a<=a1+.01;a+=5){const r=a*Math.PI/180;ring.push([g.cx+Math.sin(r)*g.r,g.cy-Math.cos(r)*g.r])}ring.push([g.cx,g.cy]);return {type:'Polygon',coordinates:[ring.map(ll)]}}
+async function exportFile(fmt){const feats=[...features.values()].map(f=>({type:'Feature',properties:{name:f.name,type:(KINDS[f.kind]||{}).label,status:f.status,notes:f.notes},geometry:geoOf(f)}));
+  let data,name;if(fmt==='geojson'){data=JSON.stringify({type:'FeatureCollection',features:feats},null,1);name='bright-tree-design.geojson'}
+  else{const coords=c=>c.map(p=>p.join(',')+',0').join(' ');const pm=f=>{const g=f.geometry;let geo=g.type==='Point'?`<Point><coordinates>${g.coordinates.join(',')},0</coordinates></Point>`:g.type==='LineString'?`<LineString><tessellate>1</tessellate><coordinates>${coords(g.coordinates)}</coordinates></LineString>`:`<Polygon><outerBoundaryIs><LinearRing><coordinates>${coords(g.coordinates[0])}</coordinates></LinearRing></outerBoundaryIs></Polygon>`;return `<Placemark><name>${esc(f.properties.name)}</name><description>${esc((f.properties.type||'')+' · '+f.properties.status+(f.properties.notes?' · '+f.properties.notes:''))}</description>${geo}</Placemark>`};
+    data=`<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Bright Tree design</name>${feats.map(pm).join('')}</Document></kml>`;name='bright-tree-design.kml'}
+  if(downloads){try{await downloads.save({filename:name,data});toast('Saved '+name);return}catch(e){if(e&&e.code==='declined')return}}
+  try{await navigator.clipboard.writeText(data);toast('Copied to the clipboard (download not available here)')}catch(e){toast('Export is not available in this view')}}
+function renderSite(){const el=$('#tab-site');const m=T.meta;const lot=T.catch[0];const inf=T.catch.slice(1);
+  const lc=flat(T.lot);const cx=lc.reduce((s,q)=>s+q[0],0)/lc.length,cy=lc.reduce((s,q)=>s+q[1],0)/lc.length;
+  const sl=m.lotSlopeShare;const bar=sl.map(([lo,hi,sh],i)=>{const c=m.slopeClasses[i][2];return `<span style="width:${sh*100}%;background:rgb(${c[0]},${c[1]},${c[2]})" title="${hi?lo+'–'+hi:'>'+lo}%: ${(sh*100).toFixed(0)}%"></span>`}).join('');
+  const lotZ=flat(T.lot).map(q=>zAt(...q));
+  el.innerHTML=`<h2>Water</h2><dl class="facts"><dt>Whole catchment</dt><dd>${lot.ha} ha drains through the lot</dd><dt>From upstream</dt><dd>${(lot.ha-10).toFixed(1)} ha of neighbours’ land</dd>
+   ${inf.map(c=>`<dt>Inflow from ${dirName(bear([cx,cy],c.at))}</dt><dd>${c.ha} ha · enters at ${zAt(...c.at).toFixed(0)} m</dd>`).join('')}
+   <dt>Leaves the lot</dt><dd>${m.outlet.ha} ha, north boundary at ${zAt(...m.outlet.at).toFixed(0)} m</dd></dl>
+   <p class="hint">At about 1,700 mm a year, every hectare of catchment receives about 17 million litres. The biggest single inflow is the eastern gully.</p>
+   <h2>Slope across the lot</h2><div class="bar">${bar}</div><p class="hint">${(sl.slice(0,3).reduce((s,v)=>s+v[2],0)*100).toFixed(0)}% of the lot is under 25%; ${(sl[5][2]*100).toFixed(0)}% is steeper than 50% (27°). Productive ground will be pockets and benches, so the slope layer is the first filter for every placement.</p>
+   <h2>Keypoint candidates</h2><p class="hint">Where a gully’s fall flattens sharply, the classic spot to slow and store water. Computed from the LiDAR; check each on the ground.</p>
+   <div class="kpl">${T.kp.map((k,i)=>`<button data-i="${i}">KP ${i+1} · ${k.z} m · ${k.ha} ha above<br><small>gully falls ${k.above}% above, ${k.below}% below · ${k.inLot?'inside the lot':'upstream, outside the lot'}</small></button>`).join('')}</div>
+   <h2>Sun (terrain only)</h2><dl class="facts"><dt>Winter, 21 Jun</dt><dd>${m.sun_winter_lotmean.toFixed(1)} h average</dd><dt>Equinox</dt><dd>${m.sun_equinox_lotmean.toFixed(1)} h</dd><dt>Summer, 21 Dec</dt><dd>${m.sun_summer_lotmean.toFixed(1)} h</dd></dl>
+   <h2>Sources and accuracy</h2><p class="hint">Elevation: Sunshine Coast 2022 LiDAR, 1 m bare-earth DEM (ELVIS), GDA2020 / MGA zone 56. Lot boundary traced from the Department of Resources vegetation report map (10.0 ha title area) and accurate to about 5 m; the surveyed cadastre would tighten it. Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.</p>`;
+  el.insertAdjacentHTML('beforeend',p3HTML());wireP3(el);
+  el.querySelectorAll('.kpl button').forEach(b=>b.onclick=()=>{const k=T.kp[+b.dataset.i];view.cx=k.x;view.cy=k.y;view.s=Math.max(view.s,2.5);layers.kp=true;draw()})}
+showTab(lsGet('bt.tab','layers')==='feat'?'layers':lsGet('bt.tab','layers'));
+if(matchMedia('(max-width:760px)').matches)$('#panel').classList.add('min');
+boot();
+</script>

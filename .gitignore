@@ -1,0 +1,4 @@
+_test.html
+tmp_*
+__pycache__/
+*.pyc
