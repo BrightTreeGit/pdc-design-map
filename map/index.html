@@ -23,6 +23,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 header.brand{padding:14px 16px 10px;border-bottom:1px solid var(--line)}
 .brand h1{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.02em;margin:0;line-height:1}
 .brand .sub{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-top:4px}
+.sitesel{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted)}.sitesel select{flex:1;min-width:0;font:inherit;font-size:13px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .hdrrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px}
 .hdrrow .sync{margin-top:0}
 .btn.fb{font-size:12.5px;padding:4px 10px;border-color:var(--accent);color:var(--accent);background:transparent}
@@ -54,6 +55,17 @@ h2:first-child{margin-top:4px}
 .hint{font-size:12.5px;color:var(--muted);line-height:1.45}
 .setup{margin:6px 0 0;padding-left:20px;font-size:13px}.setup li{margin:0 0 10px}.setup li b{display:block;font-weight:600}.setup li.done b{color:var(--muted);font-weight:500}.setup li .hint{display:block;margin:1px 0 4px}.setup .btn{font-size:12px;padding:3px 9px}
 .prow .field{flex:1;margin:4px 0}.ptab{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}.ptab th{text-align:left;font-weight:600;font-size:11.5px;color:var(--muted);padding:4px 4px;border-bottom:1px solid var(--line)}.ptab td{padding:5px 4px;border-bottom:1px solid var(--line);vertical-align:top}.ptab small{color:var(--muted)}h3.sub{font-size:13px;margin:12px 0 4px;font-weight:600}
+#v3d{position:absolute;inset:0;z-index:6;background:#dbe5ec}#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.v3bar.min>*:not(#v3drag):not(#v3min):not(#v3plus){display:none!important}.v3bar.min{resize:none;padding:4px 6px}
+.v3bar.compact{font-size:11.5px;gap:4px;padding:4px 6px;max-width:min(330px,calc(100% - 20px))}.v3bar.compact .v3sun{justify-content:flex-start;gap:4px}.v3bar.compact .btn{padding:2px 6px;font-size:11.5px}.v3bar.compact #v3n,.v3bar.compact #v3reset,.v3bar.compact #v3refresh,.v3bar.compact .v3exl,.v3bar.compact #v3info,.v3bar.compact .v3ticks,.v3bar.compact .v3sun>label{display:none!important}.v3bar.compact .v3sun{padding-top:3px}.v3bar.compact .v3tw{width:150px}
+.v3bar{resize:horizontal;overflow:auto;min-width:120px}#v3min,#v3plus{min-width:26px;padding:3px 6px}#v3drag{cursor:move;user-select:none;touch-action:none}
+.v3bar{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:calc(10px + env(safe-area-inset-left,0px));display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-start;width:max-content;max-width:min(520px,calc(100% - 20px));background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;box-shadow:0 4px 18px rgba(0,0,0,.15);font-size:13px}
+.v3bar b{font-family:var(--f-display);font-size:15px;letter-spacing:.03em;padding:0 4px}.v3bar select{font:inherit;padding:3px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)}.v3bar .btn{padding:4px 9px}
+.v3sun{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;width:100%;border-top:1px solid var(--line);padding-top:6px;margin-top:2px}.v3tw{display:inline-flex;flex-direction:column;width:min(320px,40vw)}.v3sun input[type=range]{width:100%;margin:0}.v3grad{height:7px;border-radius:4px;margin:1px 8px 0;border:1px solid rgba(0,0,0,.12)}.v3ticks{position:relative;height:14px;margin:0 8px;font:10.5px/1.3 var(--f-mono);color:var(--muted)}.v3ticks span{position:absolute;top:1px;transform:translateX(-50%);white-space:nowrap}.v3sun.off .v3grad,.v3sun.off .v3ticks{opacity:.45}.v3sun.off input,.v3sun.off .v3clock{opacity:.45}.v3clock{font-family:var(--f-mono);font-size:13px;min-width:44px}
+.v3info{width:100%;text-align:center;font-family:var(--f-mono);font-size:12px;color:var(--muted);min-height:0}.v3info:empty{display:none}
+.v3hint{position:absolute;left:10px;bottom:10px;background:color-mix(in srgb,var(--panel) 90%,transparent);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:11.5px;color:var(--muted);max-width:calc(100% - 90px)}
+.v3msg{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;color:var(--muted);pointer-events:none}
+.v3n{position:absolute;right:16px;bottom:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.85);display:grid;place-items:center;font:600 10px/1 var(--f-body);color:#222}.v3n div{text-align:center;transition:transform .05s}
 .facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
 .facts dt{color:var(--muted)} .facts dd{margin:0;font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
 .bar{height:8px;border-radius:2px;display:flex;overflow:hidden;margin:6px 0}
@@ -137,6 +149,7 @@ details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset
     <header class="brand">
       <h1 id="siteName">Design Map</h1>
       <div class="sub" id="siteSub">Loading…</div>
+      <div class="sitesel"><label for="siteSel">Site</label><select id="siteSel"></select></div>
       <div class="hdrrow"><div class="sync" id="sync"><i></i><span>Connecting…</span></div><button class="btn fb" id="fbBtn" hidden title="Comment on the map for the map owner">Send feedback</button></div>
     </header>
     <nav class="tabs" role="tablist">
@@ -161,11 +174,22 @@ details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset
       <button id="zin" aria-label="Zoom in">+</button>
       <button id="zout" aria-label="Zoom out">−</button>
       <button id="zfit" aria-label="Zoom to the lot" title="Zoom to the lot">⌂</button>
+      <button id="z3d" aria-label="3D view" title="Tilt and rotate in 3D" style="font-size:13px;font-weight:600">3D</button>
+      <button id="zLot" aria-label="Show or hide boundary" title="Show or hide the property boundary" style="font-size:11px;font-weight:600;color:#14898f">▢</button>
     </div>
     <div class="drawbar" id="drawbar" hidden></div>
     <div class="maplegend" id="mapLegend" hidden></div>
     <div class="hud" id="hud">Move over the map for elevation, slope and sun</div>
     <div class="toast" id="toast"></div>
+    <div id="v3d" hidden><canvas id="gl" aria-label="3D view of the terrain"></canvas>
+      <div class="v3bar" id="v3bar"><b id="v3drag" title="Drag to move this panel">⠿ 3D view</b><button class="btn" id="v3min" title="Make smaller" aria-label="Make the panel smaller">–</button><button class="btn" id="v3plus" title="Make bigger" aria-label="Make the panel bigger">+</button><label class="v3exl">Height <select id="v3ex"><option value="1">1×</option><option value="1.5">1.5×</option><option value="2">2×</option><option value="3">3×</option></select></label><button class="btn" id="v3n" title="Turn to face north">Face N</button><button class="btn" id="v3reset">Reset</button><button class="btn" id="v3refresh" title="Redraw with the current layers and drawings">Refresh</button><button class="btn" id="v3suntog" aria-expanded="false" title="Show the sun simulation controls">☀ Sun</button><button class="btn primary" id="v3close">Back to map</button>
+        <div class="v3sun off" id="v3sunrow" hidden><label>Sun <select id="v3season"><option value="off">Off</option><option value="172">Winter solstice · 21 Jun</option><option value="80">Equinox · 21 Mar / 23 Sep</option><option value="355">Summer solstice · 21 Dec</option></select></label>
+          <button class="btn" id="v3play" title="Play the day from sunrise to sunset in 5 seconds">▶ Play day</button>
+          <span class="v3tw"><input type="range" id="v3time" min="4.5" max="19.5" step="0.0833" value="9" aria-label="Time of day"><span class="v3grad" id="v3grad"></span><span class="v3ticks" id="v3ticks"></span></span><span id="v3clock" class="v3clock">9:00</span></div>
+        <div class="v3info" id="v3info" hidden></div></div>
+      <div class="v3hint">Drag to orbit and tilt · right-drag or Shift-drag to pan · scroll or pinch to zoom · shows the area you were viewing</div>
+      <div class="v3msg" id="v3msg"></div>
+      <div class="v3n" aria-hidden="true"><div id="v3north">▲<br>N</div></div></div>
   </main>
 </div>
 
@@ -186,6 +210,7 @@ const KINDS={
   zone3:{g:'Zones',label:'Zone 3 · Broadacre',geom:'polygon',color:'#d9b81f'},
   zone4:{g:'Zones',label:'Zone 4 · Managed bush',geom:'polygon',color:'#7cab3a'},
   zone5:{g:'Zones',label:'Zone 5 · Wild',geom:'polygon',color:'#2f7a46'},
+  goatzone:{g:'Zones',label:'Goat zone (browse & paddock)',geom:'polygon',color:'#a0522d',dash:[8,3]},
   sunW:{g:'Sectors',label:'Winter sun',geom:'sun',decl:23.44,color:'#e0a400'},
   sunS:{g:'Sectors',label:'Summer sun',geom:'sun',decl:-23.44,color:'#e2572b'},
   fire:{g:'Sectors',label:'Fire sector',geom:'sector',color:'#c0311f'},
@@ -248,8 +273,22 @@ const STATUS=['idea','proposed','agreed','built'];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600)}
-function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
-function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+/* ---------------- PDC sites: one map page, one data space per site ---------------- */
+const SITES=[
+ {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true},
+ {id:'bright-tree-gemini',name:'Bright Tree (Gemini data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, Gemini boundary and rainfall',ready:true},
+ {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true},
+ {id:'nimbin',name:'Nimbin site',group:'Group 1',area:'Nimbin, NSW',status:'Paused: NSW download services failing; 5 m elevation as a fallback'},
+ {id:'willow-vale',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW',status:'Paused: NSW download services failing; 5 m elevation as a fallback'},
+ {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'Trial',area:'Kin Kin, Qld',ready:true},
+ {id:'regenify',name:'Regenify',group:'Trial',area:'Location to come',status:'Location to come'}];
+const SITEID=(()=>{let h='';try{h=(location.hash.match(/site=([\w-]+)/)||[])[1]||''}catch(e){}const s=SITES.find(x=>x.id===h&&x.ready);return s?s.id:'bright-tree'})();
+const SITEDEF=SITES.find(x=>x.id===SITEID);const SB=SITEDEF.base??('sites/'+SITEID+'/');
+const C=n=>SITEID==='bright-tree'?n:SITEID+'_'+n; // shared-data names: Bright Tree keeps its original ones
+const LSK=k=>SITEID==='bright-tree'?k:k.replace(/^bt\./,'bt.'+SITEID+'.');
+function switchSite(id){try{location.hash=id==='bright-tree'?'':'site='+id}catch(e){}location.reload()}
+function lsGet(k,d){try{const v=localStorage.getItem(LSK(k));return v==null?d:JSON.parse(v)}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(LSK(k),JSON.stringify(v))}catch(e){}}
 
 /* ---------------- projection (Krüger, GRS80, MGA56) ---------------- */
 const PJ=(()=>{const a=6378137,f=1/298.257222101,k0=.9996,FE=5e5,FN=1e7;
@@ -290,19 +329,22 @@ function applySite(){const ms=T&&T.meta&&T.meta.site;
   for(const k in WEEDS){let t=WEEDS[k][1].replace(R3,R3n).replace(LOC,LOCn);if(!SITE.lfw){t=t.replace(' '+LFW,'').replace(LFW+' ','').replace(LFW,'').replace(/^Land for Wildlife[^:]*: ?/,'Common advice: ').replace('Land for Wildlife medium priority.','Environmental weed; remove seedlings.')}WEEDS[k][1]=t||'Environmental weed.'}
   const ch=OVERLAYS[1].items;for(let i=ch.length-1;i>=0;i--)if(ch[i][0].startsWith('change_'))ch.splice(i,1);
   for(const y of (SITE.changeYears||[]).slice().sort()){ch.push(['change_'+y,'Ground change since '+y]);OVNAME['change_'+y]='Ground change since '+y}}
-async function boot(){
+function siteBanner(){if(SITEID==='bright-tree')return;const d=document.createElement('div');d.className='warn';d.style.margin='8px 0 0';d.innerHTML=`You're viewing <b>${esc(SITEDEF.name)}</b>, which has its own drawings. <button class="linkish" id="backBT">Back to Bright Tree (manual)</button>`;$('header.brand').appendChild(d);$('#backBT').onclick=()=>switchSite('bright-tree')}
+function renderSiteSel(){siteBanner();const el=$('#siteSel');if(!el)return;el.innerHTML=SITES.map(x=>`<option value="${x.id}" ${x.id===SITEID?'selected':''} ${x.ready?'':'disabled'}>${esc(x.name)} · ${esc(x.group)}${x.ready?'':' (coming soon)'}</option>`).join('');el.onchange=()=>{const id=el.value;if(id!==SITEID)switchSite(id)}}
+async function boot(){renderSiteSel();
   resize(); fitLot(); draw();
-  const imgs=['relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png'];
-  try{T=await (await fetch('terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
+  const imgs=['aerial.jpg','relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png'];
+  try{T=await (await fetch(SB+'terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
-  const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],f)));
+  const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],SB+f)));
   applySite(); buildPaths(); fitLot();
   dem2=new Int16Array(await inflate(T.meta.dem.b64));
   const d1=T.meta.dem1; dem1={x0:d1.x0,y0:d1.y0,w:d1.w,h:d1.h,a:new Int16Array(await inflate(d1.b64))};
   for(const k of ['winter','equinox','summer']) sunGrid[k]=new Uint8Array(await inflate(T.meta['sunh_'+k]));
-  try{const ex=await (await fetch('extra.json')).json();EXTRA={change:ex.change,d8:new Uint8Array(await inflate(ex.d8)),coldGrid:new Uint8Array(await inflate(ex.cold))}}catch(e){EXTRA=null}
-  await pImgs; $('#loading').hidden=true;if(layers.overlay==='shadow')computeShadow();
+  try{const ex=await (await fetch(SB+'extra.json')).json();EXTRA={change:ex.change,d8:new Uint8Array(await inflate(ex.d8)),coldGrid:new Uint8Array(await inflate(ex.cold))}}catch(e){EXTRA=null}
+  await pImgs; $('#loading').hidden=true;if(IMG.aerial&&!lsGet('bt.aerialAuto',false)){layers.base='aerial';lsSet('bt.layers',layers);lsSet('bt.aerialAuto',true)}if(layers.overlay==='shadow')computeShadow();
   renderLayers(); renderDraw(); renderFeatures(); renderPlan(); renderTools(); renderSite(); draw();
+  wire3D();$('#z3d').onclick=open3D;{const zb=$('#zLot'),sync=()=>{zb.style.opacity=layers.lot?1:.45};sync();zb.onclick=()=>{setLayer('lot',!layers.lot);sync();if($('#tab-layers')&&!$('#tab-layers').hidden)renderLayers()}}
   connect();
 }
 
@@ -373,7 +415,7 @@ function render(){
   if(layers.c5){ctx.save();if(showC1)ctx.clip(P.notBox,'evenodd');ctx.strokeStyle='rgba(80,55,30,.55)';ctx.lineWidth=.8*px;ctx.stroke(P.c5);ctx.lineWidth=1.5*px;ctx.strokeStyle='rgba(80,55,30,.75)';ctx.stroke(P.c5i);ctx.restore()}
   if(showC1){ctx.strokeStyle='rgba(80,55,30,.32)';ctx.lineWidth=.6*px;ctx.stroke(P.c1);ctx.strokeStyle='rgba(80,55,30,.6)';ctx.lineWidth=1*px;ctx.stroke(P.c1f);ctx.strokeStyle='rgba(80,55,30,.8)';ctx.lineWidth=1.6*px;ctx.stroke(P.c1i)}
   if(layers.streams){const wd=[.8,1.3,2.2,3.4],al=[.45,.65,.85,.95];for(let k=0;k<4;k++){ctx.strokeStyle=`rgba(25,105,200,${al[k]})`;ctx.lineWidth=wd[k]*px;ctx.lineCap='round';ctx.stroke(P.st[k])}}
-  if(layers.lot){ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke(P.lot);ctx.lineWidth=1.6*px;ctx.strokeStyle='#c2185b';ctx.setLineDash([10*px,4*px]);ctx.stroke(P.lot);ctx.setLineDash([])}
+  if(layers.lot){ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke(P.lot);ctx.lineWidth=1.6*px;ctx.strokeStyle='#14898f';ctx.setLineDash([10*px,4*px]);ctx.stroke(P.lot);ctx.setLineDash([])}
   if(layers.design)drawFeatures(px);
   if(draft)drawDraft(px);
   if(mt)drawMT(px);
@@ -381,7 +423,7 @@ function render(){
   // screen-space overlays
   ctx.setTransform(DPR,0,0,DPR,0,0);
   if(layers.labels)drawLabels();
-  drawScale();
+  if(!(typeof V3!=='undefined'&&V3.tex2d))drawScale();
 }
 function haloText(t,x,y,size=11,color='#3a2a14',font='IBM Plex Mono'){ctx.font=`500 ${size}px "${font}",monospace`;ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.strokeText(t,x,y);ctx.fillStyle=color;ctx.fillText(t,x,y)}
 function drawLabels(){
@@ -578,17 +620,17 @@ function updateDrawbar(){const b=$('#drawbar');if(!draft){b.hidden=true;return}c
   if(pen){b.querySelector('#penon').onchange=e=>{gradePen.on=e.target.checked;draft.pen=gradePen.on;draft.preview=[];lsSet('bt.gradePen',gradePen);updateDrawbar();draw()};
     b.querySelector('#pengr').onchange=e=>{gradePen.grade=Math.max(0,Math.min(20,+e.target.value||0));lsSet('bt.gradePen',gradePen)};
     b.querySelector('#pendir').onclick=()=>{gradePen.dir=gradePen.dir==='down'?'up':'down';lsSet('bt.gradePen',gradePen);updateDrawbar()}}}
-function nextName(kind){const k=KINDS[kind];let n=1;for(const f of features.values())if(f.kind===kind)n++;return k.g==='Zones'||k.geom==='sun'?k.label:`${k.label} ${n}`}
+function nextName(kind){const k=KINDS[kind];let n=1;for(const f of features.values())if(f.kind===kind)n++;return (k.g==='Zones'&&kind!=='goatzone')||k.geom==='sun'?k.label:`${k.label} ${n}`}
 async function commit(geom){const kind=draft.kind;const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const doc={kind,name:nextName(kind),status:'idea',notes:'',stage:defStage(kind),geom,createdBy:myId||null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'map'};
   features.set(id,doc);selected=id;draft=null;tool=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;showTab('feat');renderDraw();renderFeatures();draw();
   await persist(id,doc)}
 
 /* ---------------- persistence ---------------- */
-async function persist(id,doc){if(live){try{await db.collection('features').doc(id).set(doc)}catch(e){toast(e&&e.code==='invalid_argument'?'You can view this map but not change it.':'That change did not save. Try again in a moment.')}}else{saveLocal()}}
-async function saveGeom(id,geom){const f=features.get(id);if(!f)return;f.updatedAt=new Date().toISOString();if(live){try{await db.collection('features').doc(id).update({geom,updatedAt:f.updatedAt})}catch(e){toast('That change did not save.')}}else saveLocal()}
-async function saveFields(id,fields){const f=features.get(id);if(!f)return;Object.assign(f,fields,{updatedAt:new Date().toISOString()});if(!live&&T)setTimeout(renderSite,0);if(live){try{await db.collection('features').doc(id).update({...fields,updatedAt:f.updatedAt})}catch(e){toast('That change did not save.')}}else saveLocal();draw()}
-async function removeFeature(id){features.delete(id);selected=null;renderFeatures();draw();if(live){try{await db.collection('features').doc(id).delete()}catch(e){toast('Delete did not save.')}}else saveLocal()}
+async function persist(id,doc){if(live){try{await db.collection(C('features')).doc(id).set(doc)}catch(e){toast(e&&e.code==='invalid_argument'?'You can view this map but not change it.':'That change did not save. Try again in a moment.')}}else{saveLocal()}}
+async function saveGeom(id,geom){const f=features.get(id);if(!f)return;f.updatedAt=new Date().toISOString();if(live){try{await db.collection(C('features')).doc(id).update({geom,updatedAt:f.updatedAt})}catch(e){toast('That change did not save.')}}else saveLocal()}
+async function saveFields(id,fields){const f=features.get(id);if(!f)return;Object.assign(f,fields,{updatedAt:new Date().toISOString()});if(!live&&T)setTimeout(renderSite,0);if(live){try{await db.collection(C('features')).doc(id).update({...fields,updatedAt:f.updatedAt})}catch(e){toast('That change did not save.')}}else saveLocal();draw()}
+async function removeFeature(id){features.delete(id);selected=null;renderFeatures();draw();if(live){try{await db.collection(C('features')).doc(id).delete()}catch(e){toast('Delete did not save.')}}else saveLocal()}
 function saveLocal(){lsSet('bt.features',Object.fromEntries(features))}
 async function connect(){
   const sync=$('#sync');
@@ -598,15 +640,15 @@ async function connect(){
   try{assets=window.claude?await window.claude.use('assets'):null}catch(e){}
   try{const cm=window.claude?await window.claude.use('comments'):null;if(cm){const b=$('#fbBtn');b.hidden=false;b.onclick=async()=>{try{const r=await cm.openComposer({element:$('#mapwrap')});if(!r||!r.opened)toast('Click anywhere on the map, then press Send feedback again.');else toast('Tip: for a spot on the land, add a Note on the map instead.')}catch(e){b.hidden=true;toast('Feedback comments are not available in this view.')}}}}catch(e){}
   if(T)renderLayers();
-  if(db)db.collection('tasks').onSnapshot(sn=>{tasks.clear();for(const d of sn.docs){const v=d.data();if(v)tasks.set(d.id,v)}renderPlan();if(selected)renderFeatures(true);if(T)renderSite()},()=>{});
-  if(db)db.doc('meta/lot').onSnapshot(sn=>{if(sn.exists){lotDoc=sn.data();if(lotDoc&&Array.isArray(lotDoc.pts)&&lotDoc.pts.length>=6)applyLot(lotDoc.pts)}},()=>{});
-  if(db)db.doc('settings/water').onSnapshot(sn=>{if(sn.exists){WB=Object.assign(WB,sn.data());if(!$('#tab-tools').contains(document.activeElement))renderTools()}},()=>{});
-  if(db)db.collection('imagery').onSnapshot(snap=>{const keepLocal=[...imagery.entries()].filter(([k,v])=>v.local);imagery.clear();for(const [k,v] of keepLocal)imagery.set(k,v);
+  if(db)db.collection(C('tasks')).onSnapshot(sn=>{tasks.clear();for(const d of sn.docs){const v=d.data();if(v)tasks.set(d.id,v)}renderPlan();if(selected)renderFeatures(true);if(T)renderSite()},()=>{});
+  if(db)db.doc(C('meta')+'/lot').onSnapshot(sn=>{if(sn.exists){lotDoc=sn.data();if(lotDoc&&Array.isArray(lotDoc.pts)&&lotDoc.pts.length>=6)applyLot(lotDoc.pts)}},()=>{});
+  if(db)db.doc(C('settings')+'/water').onSnapshot(sn=>{if(sn.exists){WB=Object.assign(WB,sn.data());if(!$('#tab-tools').contains(document.activeElement))renderTools()}},()=>{});
+  if(db)db.collection(C('imagery')).onSnapshot(snap=>{const keepLocal=[...imagery.entries()].filter(([k,v])=>v.local);imagery.clear();for(const [k,v] of keepLocal)imagery.set(k,v);
     for(const d of snap.docs){const v=d.data();if(!v||!v.assetId)continue;const cur={...v,src:'/_blob/'+v.assetId};if(align&&align.id===d.id){const mine=imagery.get(d.id);if(mine)continue}imagery.set(d.id,cur);loadImageryEl(d.id,cur)}
     if(!(document.activeElement&&document.activeElement.matches('#tab-layers input[type=range]')))renderLayers();draw()},()=>{});
   if(!db){const loc=lsGet('bt.features',{});for(const [k,v] of Object.entries(loc))features.set(k,v);const lt=lsGet('bt.tasks',{});const ll=lsGet('bt.lot',null);if(ll&&ll.pts){lotDoc=ll;applyLot(ll.pts)}for(const [k,v] of Object.entries(lt))tasks.set(k,v);renderPlan();sync.className='sync off';sync.querySelector('span').textContent='Not shared: changes stay in this browser';renderFeatures();draw();return}
   live=true;sync.className='sync on';sync.querySelector('span').textContent='Shared with the team · saves automatically';
-  db.collection('features').onSnapshot(snap=>{features.clear();for(const d of snap.docs){const v=d.data();if(v&&v.geom)features.set(d.id,structuredClone(v))}if(selected&&!features.has(selected))selected=null;renderFeatures(true);if(!$('#tab-tools').contains(document.activeElement))renderTools();if(T)renderSite();draw()},
+  db.collection(C('features')).onSnapshot(snap=>{features.clear();for(const d of snap.docs){const v=d.data();if(v&&v.geom)features.set(d.id,structuredClone(v))}if(selected&&!features.has(selected))selected=null;renderFeatures(true);if(!$('#tab-tools').contains(document.activeElement))renderTools();if(T)renderSite();draw()},
     err=>{sync.className='sync off';sync.querySelector('span').textContent='Sync stopped. Reload to reconnect.'});
 }
 
@@ -619,7 +661,7 @@ function imgSrc(im){return im.assetId?'/_blob/'+im.assetId:im.local||''}
 let imgSaveT={};
 function saveImageryLater(id){clearTimeout(imgSaveT[id]);imgSaveT[id]=setTimeout(()=>saveImagery(id),500)}
 async function saveImagery(id){const im=imagery.get(id);if(!im)return;const body={name:im.name,assetId:im.assetId||null,w:im.w,h:im.h,a:im.a,b:im.b,c:im.c,d:im.d,op:im.op,on:im.on,aligned:!!im.aligned,createdBy:im.createdBy||null,createdAt:im.createdAt,updatedAt:new Date().toISOString()};
-  if(live&&im.assetId){try{await db.collection('imagery').doc(id).set(body)}catch(e){toast('Image position did not save.')}}}
+  if(live&&im.assetId){try{await db.collection(C('imagery')).doc(id).set(body)}catch(e){toast('Image position did not save.')}}}
 async function addImage(file){
   if(!file)return;if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Use a PNG, JPEG or WebP image');return}
   const id='img'+Date.now().toString(36);let assetId=null,local=null;
@@ -649,11 +691,11 @@ function renderAlignBar(){const b=$('#drawbar');const im=imagery.get(align.id);i
    <button class="btn primary" id="aDone">Done</button>`;
   $('#amPts').onclick=()=>{align.mode='pts';align.step=0;renderAlignBar()};$('#amMove').onclick=()=>{align.mode='move';renderAlignBar()};
   $('#aSm').onclick=()=>nudge(1/1.02,0);$('#aSp').onclick=()=>nudge(1.02,0);$('#aRl').onclick=()=>nudge(1,-0.5);$('#aRr').onclick=()=>nudge(1,0.5);$('#aDone').onclick=endAlign}
-async function deleteImage(id){const im=imagery.get(id);imagery.delete(id);delete IMGX[id];renderLayers();draw();if(live){try{await db.collection('imagery').doc(id).delete()}catch(e){}if(im&&im.assetId&&assets){try{await assets.delete(im.assetId)}catch(e){}}}}
-function imageryHTML(){const rows=[...imagery.entries()].map(([id,im])=>`<div class="row"><label><input type="checkbox" data-img="${id}" ${im.on?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#6b8f4e,#a7926a)"></i>${esc(im.name)}${im.local?' <span class="pill">this browser</span>':''}</label><input type="range" min="0.2" max="1" step="0.05" value="${im.op}" data-imgop="${id}" aria-label="Opacity of ${esc(im.name)}"></div>
+async function deleteImage(id){const im=imagery.get(id);imagery.delete(id);delete IMGX[id];renderLayers();draw();if(live){try{await db.collection(C('imagery')).doc(id).delete()}catch(e){}if(im&&im.assetId&&assets){try{await assets.delete(im.assetId)}catch(e){}}}}
+function imageryHTML(){const gov=IMG.aerial?`<div class="row"><label><input type="checkbox" id="govAer" ${layers.base==='aerial'?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#3f6b3a,#b9a77a)"></i>Government aerial photo <span class="pill">auto</span></label></div><p class="hint" style="padding-left:22px;margin-top:-2px">Loads with the map and lines up by itself. It shows as the Aerial base map; the Strength slider fades it.</p>`:'';const rows=gov+[...imagery.entries()].map(([id,im])=>`<div class="row"><label><input type="checkbox" data-img="${id}" ${im.on?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#6b8f4e,#a7926a)"></i>${esc(im.name)}${im.local?' <span class="pill">this browser</span>':''}</label><input type="range" min="0.2" max="1" step="0.05" value="${im.op}" data-imgop="${id}" aria-label="Opacity of ${esc(im.name)}"></div>
    <div class="seg" style="padding-left:22px"><button class="btn" data-imgalign="${id}">Align</button><button class="btn" data-imgdel="${id}">Remove</button></div><div data-imgconf="${id}"></div>`).join('');
   return `${rows}<input type="file" id="imgfile" accept="image/png,image/jpeg,image/webp" hidden><button class="btn" id="imgadd">Add aerial image…</button>
-   <p class="hint">${imagery.size?'':'Satellite tiles can’t stream into this page, so bring your own: '}In ${SITE.state==='NSW'?'the NSW Spatial Viewer':'Queensland Globe'} switch to <b>2D</b>, north up, imagery on, zoom so the lot fills the screen, and take a screenshot (a drone orthomosaic or Google Earth “Save image” also works). Upload it, then click two matching points, such as lot corners, on the image and then on the pink boundary.${assets?'':' <b>Not shared:</b> uploads stay in this browser until the page can store files.'}</p>`}
+   <p class="hint">${IMG.aerial?'To add your own photo, such as a newer drone image: ':imagery.size?'':'Satellite tiles can’t stream into this page, so bring your own: '}In ${SITE.state==='NSW'?'the NSW Spatial Viewer':'Queensland Globe'} switch to <b>2D</b>, north up, imagery on, zoom so the lot fills the screen, and take a screenshot (a drone orthomosaic or Google Earth “Save image” also works). Upload it, then click two matching points, such as lot corners, on the image and then on the teal boundary.${assets?'':' <b>Not shared:</b> uploads stay in this browser until the page can store files.'}</p>`}
 function wireImagery(el){el.querySelector('#imgadd').onclick=()=>el.querySelector('#imgfile').click();el.querySelector('#imgfile').onchange=e=>{addImage(e.target.files[0]);e.target.value=''};
   el.querySelectorAll('[data-img]').forEach(c=>c.onchange=()=>{const im=imagery.get(c.dataset.img);im.on=c.checked;draw();saveImageryLater(c.dataset.img)});
   el.querySelectorAll('[data-imgop]').forEach(r=>r.oninput=()=>{const im=imagery.get(r.dataset.imgop);im.op=+r.value;draw();saveImageryLater(r.dataset.imgop)});
@@ -784,7 +826,7 @@ const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','De
 const ROOF_KINDS=['building','shed','greenhouse','carport','futurebuilding','nursery'];
 let WB=Object.assign({people:6,lpp:120,garden:0,gardenMonths:[8,9,10,11],extraRoof:150,extraTank:55000,eff:0.8,scen:'median',dryPct:70},lsGet('bt.wb',{}));
 let wbDoc=null;
-async function saveWB(){lsSet('bt.wb',WB);if(live){try{await db.doc('settings/water').set(WB)}catch(e){}}}
+async function saveWB(){lsSet('bt.wb',WB);if(live){try{await db.doc(C('settings')+'/water').set(WB)}catch(e){}}}
 function pressureMeaning(kpa){
   if(kpa<15)return 'A trickle: fine for filling buckets, a watering can or a gravity drip line with large holes, but too low for sprinklers, taps that need pressure or a shower.';
   if(kpa<50)return 'Gentle flow, like a tap barely open: good for low-pressure (gravity) drip kits and soaker hoses. Too low for sprinklers, most standard drip emitters or a decent shower.';
@@ -976,7 +1018,7 @@ let GZ=Object.assign({animal:'goats',n:6,season:'summer'},lsGet('bt.gz',{}));
 function paddockCalc(f){const a=polyArea(f.geom.pts)/1e4,q=PQ[f.pq||'fair'],an=ANIMALS[GZ.animal];const need=Math.max(.1,(+GZ.n||0)*an[1]);
   const days=a*q[1]/need,grow=GZ.season==='summer'?q[2]:q[3],rest=q[1]/grow;return {ha:a,days,rest,slope:avgSlope(f.geom.pts)}}
 function avgSlope(poly){const xs=poly.map(q=>q[0]),ys=poly.map(q=>q[1]);let s=0,n=0;const st=Math.max(2,Math.sqrt(polyArea(poly))/15);for(let x=Math.min(...xs);x<=Math.max(...xs);x+=st)for(let y=Math.min(...ys);y<=Math.max(...ys);y+=st)if(inPoly([x,y],poly)){s+=slopeAt(x,y).pct;n++}return n?s/n:0}
-function grazeHTML(){const pads=[...features.values()].filter(f=>f.kind==='paddock'&&f.geom.g==='polygon');
+function grazeHTML(){const pads=[...features.values()].filter(f=>(f.kind==='paddock'||f.kind==='goatzone')&&f.geom.g==='polygon');
   const rows=pads.map(f=>[f,paddockCalc(f)]);const cycle=rows.reduce((s,[f,r])=>s+r.days,0);const restNeed=rows.length?Math.max(...rows.map(([f,r])=>r.rest)):0;
   return `<p class="hint">Draw paddocks with the <i>Paddock / grazing cell</i> tool and set each one's pasture quality. The planner works out how long your herd can graze each paddock and whether the others rest long enough to regrow. Rules of thumb only; watch the pasture and adjust.</p>
    <div class="row"><div class="field" style="flex:1"><label for="gzA">Animals</label><select id="gzA">${Object.entries(ANIMALS).map(([k,v])=>`<option value="${k}" ${GZ.animal===k?'selected':''}>${v[0]}</option>`).join('')}</select></div><div class="field" style="flex:1"><label for="gzN">How many</label><input id="gzN" type="number" min="0" max="500" value="${GZ.n}"></div></div>
@@ -989,8 +1031,8 @@ function wireGraze(el){const a=el.querySelector('#gzA'),n=el.querySelector('#gzN
 
 /* ---------------- tasks linked to design features ---------------- */
 const tasks=new Map();let planFilter=lsGet('bt.planF','open'),planFeat=null;
-async function saveTask(id,doc){tasks.set(id,doc);if(live){try{await db.collection('tasks').doc(id).set(doc)}catch(e){toast('That task did not save.')}}else lsSet('bt.tasks',Object.fromEntries(tasks));renderPlan()}
-async function delTask(id){tasks.delete(id);if(live){try{await db.collection('tasks').doc(id).delete()}catch(e){}}else lsSet('bt.tasks',Object.fromEntries(tasks));renderPlan()}
+async function saveTask(id,doc){tasks.set(id,doc);if(live){try{await db.collection(C('tasks')).doc(id).set(doc)}catch(e){toast('That task did not save.')}}else lsSet('bt.tasks',Object.fromEntries(tasks));renderPlan()}
+async function delTask(id){tasks.delete(id);if(live){try{await db.collection(C('tasks')).doc(id).delete()}catch(e){}}else lsSet('bt.tasks',Object.fromEntries(tasks));renderPlan()}
 function renderPlan(){const el=$('#tab-plan');if(!el)return;if(el.contains(document.activeElement)&&document.activeElement.matches('input:not([type=checkbox]),textarea,select'))return;
   const today=new Date().toISOString().slice(0,10);const all=[...tasks.entries()];
   const open=all.filter(([i,t])=>t.status!=='done'),over=open.filter(([i,t])=>t.due&&t.due<today);
@@ -1154,7 +1196,7 @@ async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textCo
     if(layers.overlay!=='none'){wrap('Analysis shown: '+OVNAME[layers.overlay],'400 30px "IBM Plex Sans",sans-serif',SW-X-60,40)}
     y+=24;g.fillStyle='#1d2621';g.font='600 34px "Barlow Condensed","Arial Narrow",sans-serif';g.fillText('LEGEND',X,y);y+=40;
     const vf=visList();const used={};vf.forEach(f=>{const k=f.kind;used[k]=used[k]||{n:0,a:0};used[k].n++;if(f.geom.g==='polygon')used[k].a+=polyArea(f.geom.pts)});
-    const lg=[['#c2185b','Lot boundary',''],['#1969c8','Flow lines',''],['#8a6a45','Contours (1 m and 5 m)','']];
+    const lg=[['#14898f','Property boundary',''],['#1969c8','Flow lines',''],['#8a6a45','Contours (1 m and 5 m)','']];
     Object.keys(KINDS).filter(k=>used[k]).forEach(k=>lg.push([KINDS[k].color,KINDS[k].label,used[k].a?fmtArea(used[k].a):(used[k].n>1?'× '+used[k].n:'')]));
     g.font='400 28px "IBM Plex Sans",sans-serif';for(const [c,l,v] of lg){if(y>SH-200)break;g.fillStyle=c;g.fillRect(X,y-22,30,26);g.fillStyle='#1d2621';g.fillText(l,X+46,y);if(v){g.fillStyle='#5d6a62';g.textAlign='right';g.fillText(v,SW-60,y);g.textAlign='left'}y+=42}
     y=SH-120;g.fillStyle='#5d6a62';g.font='400 22px "IBM Plex Sans",sans-serif';g.fillText(`Terrain: ${SITE.source||('LiDAR '+SITE.main+', '+SITE.res)}.`,X,y);g.fillText('Boundary approximate (±5 m). Concept design only.',X,y+30);
@@ -1168,13 +1210,14 @@ async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textCo
 let lotDoc=null;
 function setupItems(){const fs=[...features.values()];const g=f=>(KINDS[f.kind]||{}).g;
   return [
-   {k:'bound',t:'Check the boundary',d:'Compare the pink line with your title plan or council map; drag corners to fix it, or confirm it.',ok:!!(lotDoc&&lotDoc.ok),btn:'Check boundary',go:()=>startBound()},
+   {k:'bound',t:'Check the boundary',d:'Compare the teal line with your title plan or council map; drag corners to fix it, or confirm it.',ok:!!(lotDoc&&lotDoc.ok),btn:'Check boundary',go:()=>startBound()},
    {k:'aerial',t:'Add an aerial photo',d:'Upload a screenshot or drone image and line it up with the terrain (Layers tab).',ok:[...imagery.values()].some(i=>i.aligned),btn:'Open Layers',go:()=>{showTab('layers');const d=document.querySelector('details[data-sec="photo"]');if(d){d.open=true;d.scrollIntoView({block:'start'})}}},
    {k:'existing',t:'Mark what is already there',d:'House, sheds, tanks, tracks, dams, big trees: draw them with stage “Existing”.',ok:fs.some(f=>(f.stage||defStage(f.kind))==='existing'&&g(f)!=='Sectors'),btn:'Open Draw',go:()=>showTab('draw')},
    {k:'sectors',t:'Add sun, wind and fire sectors',d:'The energies coming onto the site (Draw → Sectors).',ok:fs.some(f=>g(f)==='Sectors'),btn:'Open Draw',go:()=>showTab('draw')},
    {k:'water',t:'Set up water',d:'Mark which buildings have gutters, enter tank sizes, and set household use (Tools → Water balance).',ok:fs.some(f=>f.roof||+f.litres>0),btn:'Open Tools',go:()=>showTab('tools')},
-   {k:'zones',t:'Sketch zones 0–5',d:'Start with Zone 0 (home) and Zone 1 (daily visits).',ok:fs.some(f=>g(f)==='Zones'),btn:'Open Draw',go:()=>showTab('draw')},
+   {k:'zones',t:'Sketch zones 0–5',d:'Start with Zone 0 (home) and Zone 1 (daily visits).',ok:fs.some(f=>g(f)==='Zones'&&f.kind!=='goatzone'),btn:'Open Draw',go:()=>showTab('draw')},
    {k:'plan',t:'List the first jobs',d:'Add tasks with owners and stages in the Plan tab.',ok:tasks.size>0,btn:'Open Plan',go:()=>showTab('plan')}]}
+function sitesHTML(){return sec('sites','PDC sites',`<p class="hint">Each site has its own map and its own shared drawings. Pick a site from the list under the title.</p><dl class="facts">${SITES.map(x=>`<dt>${esc(x.name)}<br><small>${esc(x.group)} · ${esc(x.area)}</small></dt><dd>${x.ready?(x.id===SITEID?'<b>Open now</b>':'Ready'):esc(x.status)}</dd>`).join('')}</dl>`,false)}
 function setupHTML(){const it=setupItems();const n=it.filter(i=>i.ok).length;const st=lsGet('bt.sec',{});const open=st.setup??(n<it.length);
   return `<details class="sec" data-sec="setup" ${open?'open':''}><summary>Set-up checklist · ${n} of ${it.length}</summary><div class="secbody"><p class="hint">The terrain is ready. These steps turn it into a base map for designing${RAIN.placeholder?'. Rainfall is still a placeholder: send the map owner the nearest Bureau of Meteorology station.':'.'}</p>
    <ol class="setup">${it.map(i=>`<li class="${i.ok?'done':''}"><b>${i.ok?'✓ ':''}${i.t}</b><span class="hint">${i.d}</span>${i.ok&&i.k!=='bound'?'':`<button class="btn" data-go="${i.k}">${i.btn}</button>`}</li>`).join('')}</ol></div></details>`}
@@ -1194,7 +1237,7 @@ function boundBar(b){const a=polyArea(mt.pts);
   $('#bSave').onclick=()=>saveLot(mt.pts);$('#mtClose').onclick=()=>{endMT()};
   if($('#bReset'))$('#bReset').onclick=()=>{mt.pts=flat(T.lot0).map(r1);mt.dirty=true;renderMTBar();draw()}}
 async function saveLot(pts){const body={pts:pts.flat().map(v=>+(+v).toFixed(1)),ok:true,by:myId||null,at:new Date().toISOString(),area:Math.round(polyArea(pts))};endMT();
-  if(live){try{await db.doc('meta/lot').set(body);toast('Boundary saved for everyone')}catch(e){toast('Boundary did not save.');return}}else{lsSet('bt.lot',body);toast('Boundary saved in this browser')}
+  if(live){try{await db.doc(C('meta')+'/lot').set(body);toast('Boundary saved for everyone')}catch(e){toast('Boundary did not save.');return}}else{lsSet('bt.lot',body);toast('Boundary saved in this browser')}
   lotDoc=body;applyLot(body.pts)}
 function applyLot(arr){if(!T)return;if(!T.lot0)T.lot0=T.lot.slice();const same=arr.length===T.lot.length&&arr.every((v,i)=>Math.abs(v-T.lot[i])<.05);T.lot=arr.slice();
   if(!same){buildPaths();recomputeLot()}renderSite();draw()}
@@ -1221,10 +1264,123 @@ function recomputeLot(){if(!EXTRA||!EXTRA.d8||!dem2)return;const N=1000,d8=EXTRA
   for(const k of T.kp)k.inLot=inPoly([k.x,k.y],lp);
   buildPaths()}
 
+
+/* ---------------- 3D view: tilt and orbit the terrain with the current map draped on it (plain WebGL) ---------------- */
+const V3={sun:null,sunT:9,sunDoy:172,play:null,shCache:new Map(),on:false,gl:null,prog:null,buf:null,n:0,tex:null,yaw:0,pitch:.62,dist:1,tgt:[0,0,0],ex:+lsGet('bt.v3ex',1),L:1000,zmid:0,drag:null,pts:new Map()};
+function v3Box(){const L=Math.max(200,Math.min(2000,Math.max(W,H)/view.s));let cx=view.cx,cy=view.cy;cx=Math.max(L/2,Math.min(2000-L/2,cx));cy=Math.max(L/2,Math.min(2000-L/2,cy));return {L,x0:cx-L/2,y0:cy-L/2,cx,cy}}
+function v3Texture(b){const S=2048;const sv={W,H,DPR,cx:view.cx,cy:view.cy,s:view.s,w:cv.width,h:cv.height};
+  let out=null;try{V3.tex2d=true;W=S;H=S;DPR=1;cv.width=S;cv.height=S;view.cx=b.x0+b.L/2;view.cy=b.y0+b.L/2;view.s=S/b.L;render();out=document.createElement('canvas');out.width=S;out.height=S;out.getContext('2d').drawImage(cv,0,0)}
+  finally{V3.tex2d=false;W=sv.W;H=sv.H;DPR=sv.DPR;cv.width=sv.w;cv.height=sv.h;view.cx=sv.cx;view.cy=sv.cy;view.s=sv.s;render()}return out}
+function v3Shader(gl,type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s}
+function v3Init(){const c=$('#gl');const gl=c.getContext('webgl',{antialias:true,preserveDrawingBuffer:true});if(!gl)return false;V3.gl=gl;
+  const vs=`attribute vec3 p;attribute vec2 t;attribute vec3 nm;attribute float so;uniform mat4 M;uniform float ex,zm,sunOn,amb;uniform vec3 S;varying vec2 vt;varying float sh;
+    void main(){vec3 q=vec3(p.x,(p.y-zm)*ex,p.z);vec3 n=normalize(vec3(nm.x*ex,nm.y,nm.z*ex));
+      if(sunOn>.5){float d=max(dot(normalize(vec3(nm.x,nm.y,nm.z)),S),0.)*so;sh=amb+(1.15-amb)*d;}else{vec3 L=normalize(vec3(-.6,1.1,-.5));sh=.62+.48*max(dot(n,L),0.);}
+      vt=t;gl_Position=M*vec4(q,1.);}`;
+  const fs=`precision mediump float;varying vec2 vt;varying float sh;uniform sampler2D tx;uniform vec3 tint;void main(){vec4 c=texture2D(tx,vt);gl_FragColor=vec4(min(c.rgb*sh*tint,1.),1.);}`;
+  const pr=gl.createProgram();gl.attachShader(pr,v3Shader(gl,gl.VERTEX_SHADER,vs));gl.attachShader(pr,v3Shader(gl,gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);V3.prog=pr;return true}
+function v3Build(){const gl=V3.gl,b=v3Box(),N=256,L=b.L;V3.L=L;V3.box=b;
+  const z=new Float32Array(N*N);let zmin=1e9,zmax=-1e9;
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const x=b.x0+i/(N-1)*L,y=b.y0+j/(N-1)*L;let h=zAt(Math.min(1999,Math.max(1,x)),Math.min(1999,Math.max(1,y)));if(!isFinite(h))h=0;z[j*N+i]=h;if(h<zmin)zmin=h;if(h>zmax)zmax=h}
+  V3.zmid=(zmin+zmax)/2;V3.zr=zmax-zmin;const d=L/(N-1);V3.N=N;V3.zg=z;V3.shCache.clear();
+  const lp=T?flat(T.lot):[];V3.inLot=new Uint8Array(N*N);for(let j=0;j<N;j++)for(let i=0;i<N;i++){V3.inLot[j*N+i]=lp.length&&inPoly([b.x0+i/(N-1)*L,b.y0+j/(N-1)*L],lp)?1:0}
+  const pos=new Float32Array(N*N*3),uv=new Float32Array(N*N*2),nm=new Float32Array(N*N*3);
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const k=j*N+i;pos[3*k]=i*d-L/2;pos[3*k+1]=z[k];pos[3*k+2]=j*d-L/2;uv[2*k]=i/(N-1);uv[2*k+1]=1-j/(N-1);
+    const zl=z[j*N+Math.max(0,i-1)],zr=z[j*N+Math.min(N-1,i+1)],zu=z[Math.max(0,j-1)*N+i],zd=z[Math.min(N-1,j+1)*N+i];const nx=-(zr-zl)/(2*d),nz=-(zd-zu)/(2*d),ln=Math.hypot(nx,1,nz);nm[3*k]=nx/ln;nm[3*k+1]=1/ln;nm[3*k+2]=nz/ln}
+  const idx=new Uint16Array((N-1)*(N-1)*6);let q=0;for(let j=0;j<N-1;j++)for(let i=0;i<N-1;i++){const a=j*N+i,b2=a+1,c=a+N,e=c+1;idx[q++]=a;idx[q++]=c;idx[q++]=b2;idx[q++]=b2;idx[q++]=c;idx[q++]=e}
+  const mk=(data,tgt=gl.ARRAY_BUFFER)=>{const bf=gl.createBuffer();gl.bindBuffer(tgt,bf);gl.bufferData(tgt,data,gl.STATIC_DRAW);return bf};
+  V3.buf={p:mk(pos),t:mk(uv),n:mk(nm),i:mk(idx,gl.ELEMENT_ARRAY_BUFFER),so:mk(new Float32Array(N*N).fill(1))};V3.n=idx.length;
+  const img=v3Texture(b);const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
+  gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  const af=gl.getExtension('EXT_texture_filter_anisotropic');if(af)gl.texParameterf(gl.TEXTURE_2D,af.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(8,gl.getParameter(af.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+  V3.tex=tx;v3Reset();if(V3.sun)sunSet(V3.sunT)}
+function v3Reset(){V3.yaw=0;V3.pitch=.62;V3.dist=V3.L*1.15;V3.tgt=[0,0,0];v3Draw()}
+function mat4Mul(a,b){const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s}return o}
+function v3Draw(){const gl=V3.gl;if(!gl||!V3.buf)return;const c=$('#gl');const r=c.getBoundingClientRect(),dp=Math.min(2,window.devicePixelRatio||1);const w=Math.max(1,Math.round(r.width*dp)),h=Math.max(1,Math.round(r.height*dp));if(c.width!==w||c.height!==h){c.width=w;c.height=h}
+  gl.viewport(0,0,w,h);{const sn=V3.sun&&V3.sunNow;const day=sn?Math.max(0,Math.min(1,(sn.alt+4)/14)):1;gl.clearColor(.16+.7*day,.2+.7*day,.32+.61*day,1)}gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
+  const f=1/Math.tan(22*Math.PI/180),asp=w/h,near=V3.dist/50,far=V3.dist*6+V3.L*4;
+  const P=new Float32Array([f/asp,0,0,0,0,f,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]);
+  const cp=Math.cos(V3.pitch),eye=[V3.tgt[0]+V3.dist*cp*Math.sin(V3.yaw),V3.tgt[1]+V3.dist*Math.sin(V3.pitch),V3.tgt[2]+V3.dist*cp*Math.cos(V3.yaw)];
+  const zf=[eye[0]-V3.tgt[0],eye[1]-V3.tgt[1],eye[2]-V3.tgt[2]],zl=Math.hypot(...zf),Z=zf.map(v=>v/zl);let X=[Z[2],0,-Z[0]];const xl=Math.hypot(...X)||1;X=X.map(v=>v/xl);const Y=[Z[1]*X[2]-Z[2]*X[1],Z[2]*X[0]-Z[0]*X[2],Z[0]*X[1]-Z[1]*X[0]];
+  const Vw=new Float32Array([X[0],Y[0],Z[0],0,X[1],Y[1],Z[1],0,X[2],Y[2],Z[2],0,-(X[0]*eye[0]+X[1]*eye[1]+X[2]*eye[2]),-(Y[0]*eye[0]+Y[1]*eye[1]+Y[2]*eye[2]),-(Z[0]*eye[0]+Z[1]*eye[1]+Z[2]*eye[2]),1]);
+  const M=mat4Mul(P,Vw);const pr=V3.prog;gl.useProgram(pr);
+  const at=(nm,bf,sz)=>{const l=gl.getAttribLocation(pr,nm);gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,sz,gl.FLOAT,false,0,0)};
+  at('p',V3.buf.p,3);at('t',V3.buf.t,2);at('nm',V3.buf.n,3);at('so',V3.buf.so,1);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,V3.buf.i);
+  const sn=V3.sunNow,u=k=>gl.getUniformLocation(pr,k);
+  if(V3.sun&&sn){const a=sn.alt*Math.PI/180,z=sn.az*Math.PI/180;gl.uniform1f(u('sunOn'),1);gl.uniform3f(u('S'),Math.sin(z)*Math.cos(a),Math.sin(a),-Math.cos(z)*Math.cos(a));
+    const day=Math.max(0,Math.min(1,(sn.alt+4)/14));gl.uniform1f(u('amb'),.18+.27*day);const warm=Math.max(0,1-Math.abs(sn.alt-3)/12);gl.uniform3f(u('tint'),1+.12*warm,1-.03*warm,1-.16*warm+(.08*(1-day)))}
+  else{gl.uniform1f(u('sunOn'),0);gl.uniform3f(u('tint'),1,1,1)}
+  gl.uniformMatrix4fv(gl.getUniformLocation(pr,'M'),false,M);gl.uniform1f(gl.getUniformLocation(pr,'ex'),V3.ex);gl.uniform1f(gl.getUniformLocation(pr,'zm'),V3.zmid);
+  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,V3.tex);gl.uniform1i(gl.getUniformLocation(pr,'tx'),0);gl.drawElements(gl.TRIANGLES,V3.n,gl.UNSIGNED_SHORT,0);
+  const nd=$('#v3north');if(nd)nd.style.transform=`rotate(${V3.yaw*180/Math.PI}deg)`}
+async function open3D(){if(!dem2){toast('Terrain still loading');return}const o=$('#v3d');o.hidden=false;V3.on=true;if(V3.placeBar)V3.placeBar();
+  if(!V3.gl&&!v3Init()){o.hidden=true;V3.on=false;toast('3D needs WebGL, which this browser has turned off.');return}
+  $('#v3msg').textContent='Building 3D view…';await new Promise(r=>setTimeout(r,30));try{v3Build();$('#v3msg').textContent=''}catch(e){$('#v3msg').textContent='3D view failed: '+e.message}}
+function close3D(){sunStop();$('#v3d').hidden=true;V3.on=false}
+/* sun simulation in 3D: terrain shadows marched over the 2 m DEM (whole 2 km window, so outside hills cast shade too) */
+function v3Shadow(alt,az){const key=V3.sunDoy+'|'+Math.round(alt*10)+'|'+Math.round(az*10);if(V3.shCache.has(key))return V3.shCache.get(key);
+  const N=V3.N,b=V3.box,L=V3.L,z=V3.zg,out=new Float32Array(N*N);
+  if(alt<=0){V3.shCache.set(key,out);return out}
+  const a=alt*Math.PI/180,r=az*Math.PI/180,sx=Math.sin(r),sy=-Math.cos(r),ta=Math.tan(a);
+  const h2=(x,y)=>{const i=x>>1,j=y>>1;return (i<0||j<0||i>999||j>999)?-1e9:dem2[j*1000+i]/10};
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const k=j*N+i,x0=b.x0+i/(N-1)*L,y0=b.y0+j/(N-1)*L,z0=z[k]+1.2;let t=3,lit=1;
+    const d=L/(N-1),zl=z[j*N+Math.max(0,i-1)],zr=z[j*N+Math.min(N-1,i+1)],zu=z[Math.max(0,j-1)*N+i],zd=z[Math.min(N-1,j+1)*N+i];
+    const nx=-(zr-zl)/(2*d),nz=-(zd-zu)/(2*d);if(nx*sx*Math.cos(a)+nz*sy*Math.cos(a)+Math.sin(a)<=0)lit=0;   // slope turned away from the sun
+    while(lit&&t<2600){const x=x0+sx*t,y=y0+sy*t;if(x<0||y<0||x>=2000||y>=2000)break;if(h2(x,y)>z0+t*ta){lit=0;break}t*=1.07}
+    out[k]=lit}
+  if(V3.shCache.size>400)V3.shCache.clear();V3.shCache.set(key,out);return out}
+function sunTimes(doy){let rise=null,set=null;for(let t=3;t<=21;t+=1/60){const s=sunAtTime(doy,t);if(s.alt>0&&rise===null)rise=t;if(s.alt>0)set=t}return {rise,set}}
+const fmtClock=t=>{const h=Math.floor(t+1e-6),m=Math.round((t-h)*60);return `${h}:${String(m===60?0:m).padStart(2,'0')}`.replace(/^(\d+):60/,(x,hh)=>(+hh+1)+':00')};
+function sunSet(t){V3.sunT=t;$('#v3time').value=t;$('#v3clock').textContent=fmtClock(t);if(!V3.sun){v3Draw();return}
+  const sn=sunAtTime(V3.sunDoy,t);V3.sunNow=sn;const sh=v3Shadow(sn.alt,sn.az);const gl=V3.gl;gl.bindBuffer(gl.ARRAY_BUFFER,V3.buf.so);gl.bufferData(gl.ARRAY_BUFFER,sh,gl.DYNAMIC_DRAW);
+  let lit=0,n=0;for(let k=0;k<sh.length;k++)if(V3.inLot[k]){n++;lit+=sh[k]}V3.lotSun=n?lit/n:null;v3Draw();sunInfo()}
+function sunInfo(){const el=$('#v3info');if(!V3.sun){el.textContent='';return}const sn=V3.sunNow,st=sunTimes(V3.sunDoy);
+  const len=st.rise!==null?(st.set-st.rise):0;
+  el.textContent=sn.alt>0?`Sun ${sn.alt.toFixed(0)}° high, from the ${DL3[dirName(sn.az)]} (${sn.az.toFixed(0)}°) · ${V3.lotSun!=null?Math.round(V3.lotSun*100)+'% of the lot in direct sun · ':''}sunrise ${fmtClock(st.rise)}, sunset ${fmtClock(st.set)} (${len.toFixed(1)} h, flat horizon) · clock times AEST, terrain shade only`
+    :`Sun below the horizon · sunrise ${fmtClock(st.rise)}, sunset ${fmtClock(st.set)}`}
+const DL3={N:'north',NE:'north-east',E:'east',SE:'south-east',S:'south',SW:'south-west',W:'west',NW:'north-west'};
+function sunTrack(){const st=sunTimes(V3.sunDoy);if(st.rise===null)return;const p=t=>Math.max(0,Math.min(100,(t-4.5)/15*100)).toFixed(1)+'%',r=st.rise,s=st.set,n=(r+s)/2;
+  $('#v3grad').style.background=`linear-gradient(90deg,#1b2a4a 0%,#1b2a4a ${p(r-.7)},#c4527a ${p(r-.25)},#ee8a3a ${p(r)},#f7c75e ${p(r+.8)},#fff0b3 ${p(n)},#f7c75e ${p(s-.8)},#ee8a3a ${p(s)},#c4527a ${p(s+.25)},#1b2a4a ${p(s+.7)},#1b2a4a 100%)`;
+  $('#v3ticks').innerHTML=`<span style="left:${p(r)}">↑ ${fmtClock(r)}</span><span style="left:${p(n)}">noon ${fmtClock(n)}</span><span style="left:${p(s)}">↓ ${fmtClock(s)}</span>`}
+function sunPlay(){const st=sunTimes(V3.sunDoy);const t0=st.rise-.25,t1=st.set+.25,dur=5000;$('#v3play').textContent='❚❚ Pause';
+  const start=performance.now()-((Math.min(Math.max(V3.sunT,t0),t1)-t0)/(t1-t0)>=.98?0:((Math.max(V3.sunT,t0)-t0)/(t1-t0))*dur);
+  const step=now=>{if(!V3.play)return;const f=Math.min(1,(now-start)/dur);sunSet(t0+(t1-t0)*f);if(f<1)V3.play=requestAnimationFrame(step);else sunStop()};V3.play=requestAnimationFrame(step)}
+function sunStop(){if(V3.play){cancelAnimationFrame(V3.play);V3.play=null}const b=$('#v3play');if(b)b.textContent='▶ Play day'}
+function wire3D(){const c=$('#gl');
+  c.addEventListener('pointerdown',e=>{c.setPointerCapture(e.pointerId);V3.pts.set(e.pointerId,[e.clientX,e.clientY]);V3.drag={btn:e.button,shift:e.shiftKey}});
+  c.addEventListener('pointermove',e=>{if(!V3.pts.has(e.pointerId))return;const prev=V3.pts.get(e.pointerId);const dx=e.clientX-prev[0],dy=e.clientY-prev[1];
+    if(V3.pts.size===2){const ps=[...V3.pts.values()];const d0=Math.hypot(ps[0][0]-ps[1][0],ps[0][1]-ps[1][1]);V3.pts.set(e.pointerId,[e.clientX,e.clientY]);const qs=[...V3.pts.values()];const d1=Math.hypot(qs[0][0]-qs[1][0],qs[0][1]-qs[1][1]);
+      if(d0>0)V3.dist=Math.max(V3.L*.08,Math.min(V3.L*4,V3.dist*d0/d1));V3.pitch=Math.max(.08,Math.min(1.5,V3.pitch+dy*.0025));v3Draw();return}
+    V3.pts.set(e.pointerId,[e.clientX,e.clientY]);
+    if(V3.drag&&(V3.drag.btn===2||V3.drag.shift)){const k=V3.dist/600,cy=Math.cos(V3.yaw),sy=Math.sin(V3.yaw);V3.tgt[0]+=(-cy*dx-sy*dy)*k;V3.tgt[2]+=(sy*dx-cy*dy)*k;V3.tgt[2]=Math.max(-V3.L/2,Math.min(V3.L/2,V3.tgt[2]));V3.tgt[0]=Math.max(-V3.L/2,Math.min(V3.L/2,V3.tgt[0]))}
+    else{V3.yaw-=dx*.006;V3.pitch=Math.max(.08,Math.min(1.5,V3.pitch+dy*.004))}v3Draw()});
+  const up=e=>{V3.pts.delete(e.pointerId);if(!V3.pts.size)V3.drag=null};c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
+  c.addEventListener('contextmenu',e=>e.preventDefault());
+  c.addEventListener('wheel',e=>{e.preventDefault();V3.dist=Math.max(V3.L*.08,Math.min(V3.L*4,V3.dist*Math.exp(e.deltaY*.0012)));v3Draw()},{passive:false});
+  $('#v3close').onclick=close3D;$('#v3reset').onclick=v3Reset;$('#v3refresh').onclick=()=>{if(V3.gl){v3Build()}};
+  const ex=$('#v3ex');ex.value=String(V3.ex);ex.onchange=()=>{V3.ex=+ex.value;lsSet('bt.v3ex',V3.ex);v3Draw()};
+  $('#v3n').onclick=()=>{V3.yaw=0;v3Draw()};
+  {const bar=$('#v3bar'),hd=$('#v3drag'),mn=$('#v3min'),st=lsGet('bt.v3bar',{x:null,y:null,min:false});
+   const place=(x,y)=>{const box=$('#v3d').getBoundingClientRect(),w=bar.offsetWidth,h=bar.offsetHeight;x=Math.max(4,Math.min(box.width-w-4,x));y=Math.max(4,Math.min(box.height-h-4,y));bar.style.left=x+'px';bar.style.top=y+'px';return [x,y]};
+   const pl=$('#v3plus');if(st.size==null)st.size=st.min?2:0;
+   const setMin=sz=>{sz=Math.max(0,Math.min(2,sz));st.size=sz;bar.classList.toggle('compact',sz===1);bar.classList.toggle('min',sz===2);mn.hidden=sz===2;pl.hidden=sz===0;if(sz===2)bar.style.width='';lsSet('bt.v3bar',st)};setMin(st.size);
+   pl.onclick=()=>setMin(st.size-1);
+   mn.onclick=()=>setMin(st.size+1);
+   let dg=null;hd.addEventListener('pointerdown',e=>{hd.setPointerCapture(e.pointerId);const r=bar.getBoundingClientRect(),box=$('#v3d').getBoundingClientRect();dg={dx:e.clientX-r.left,dy:e.clientY-r.top,bx:box.left,by:box.top}});
+   hd.addEventListener('pointermove',e=>{if(!dg)return;const [x,y]=place(e.clientX-dg.bx-dg.dx,e.clientY-dg.by-dg.dy);st.x=x;st.y=y});
+   hd.addEventListener('pointerup',()=>{if(dg){dg=null;lsSet('bt.v3bar',st)}});
+   V3.placeBar=()=>{if(st.x!=null)place(st.x,st.y)}}
+  $('#v3suntog').onclick=()=>{const b=$('#v3suntog'),open=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',open);b.classList.toggle('primary',open);$('#v3sunrow').hidden=!open;$('#v3info').hidden=!open;if(open)sunTrack();if(!open&&V3.play)sunStop()};
+  $('#v3season').onchange=e=>{const v=e.target.value;if(v==='off'){V3.sun=null;sunStop();$('#v3sunrow').classList.add('off');v3Draw();sunInfo();return}V3.sun=v;V3.sunDoy=+v;$('#v3sunrow').classList.remove('off');sunTrack();sunSet(V3.sunT)};
+  $('#v3time').oninput=e=>{sunStop();sunSet(+e.target.value)};
+  $('#v3play').onclick=()=>{if(V3.play){sunStop();return}if(!V3.sun){$('#v3season').value='172';V3.sun='172';V3.sunDoy=172;$('#v3sunrow').classList.remove('off');sunTrack()}sunPlay()};
+  window.addEventListener('resize',()=>{if(V3.on)v3Draw()});
+  document.addEventListener('keydown',e=>{if(V3.on&&e.key==='Escape')close3D()})}
+
 /* ---------------- panels ---------------- */
 function showTab(t){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));for(const id of ['layers','draw','feat','plan','tools','site'])$('#tab-'+id).hidden=id!==t;$('#panel').classList.remove('min');lsSet('bt.tab',t)}
 document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{if(b.getAttribute('aria-selected')==='true'&&matchMedia('(max-width:760px)').matches){$('#panel').classList.toggle('min');setTimeout(resize,0);return}showTab(b.dataset.tab);setTimeout(resize,0)});
-function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);draw()}
+function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);if(k==='lot'&&$('#zLot'))$('#zLot').style.opacity=v?1:.45;draw()}
 const OVERLAYS=[
  {grp:'Light & climate',items:[['shadow','Shade at a time'],['aspect','Aspect'],['sun_winter','Winter sun'],['sun_equinox','Equinox sun'],['sun_summer','Summer sun'],['cold','Cold air / frost']]},
  {grp:'Land & risk',items:[['slope','Slope'],['fire','Fire run'],['change_2008','Ground change since 2008'],['change_2014','Ground change since 2014']]}];
@@ -1235,9 +1391,9 @@ function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="$
 function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   const sc=m.slopeClasses.map(([lo,hi,c])=>`<span><i class="swatch" style="background:rgba(${c[0]},${c[1]},${c[2]},.85)"></i>${hi?lo+'–'+hi:'>'+lo}%</span>`).join('');
   const ac=Object.entries(m.aspectColors).map(([n,c])=>`<span><i class="swatch" style="background:rgb(${c})"></i>${n}</span>`).join('');
-  const lines=[['lot','Lot boundary','#c2185b'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['labels','Labels','#777']];
+  const lines=[['lot','Property boundary','#14898f'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['labels','Labels','#777']];
   el.innerHTML=
-   sec('base','Base map',`${segHTML('baseSeg',[['none','None'],['relief','Relief'],['hillshade','Hillshade']],layers.base)}
+   sec('base','Base map',`${segHTML('baseSeg',[['none','None'],['relief','Relief'],['hillshade','Hillshade']].concat(IMG.aerial?[['aerial','Aerial']]:[]),layers.base)}
     <div class="row"><label for="baseop">Strength <span id="baseopv" class="pill">${Math.round(layers.baseOp*100)}%</span></label><input type="range" id="baseop" min="0" max="1" step="0.05" value="${layers.baseOp}"></div>
     <div class="row"><span class="lbl">Contours</span>${segHTML('conSeg',[['off','Off'],['on','On']],(layers.c1||layers.c5)?'on':'off')}</div>`)+
    sec('photo','Aerial photos',`<div id="imgSec">${imageryHTML()}</div>`)+
@@ -1277,7 +1433,7 @@ function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.
   else if(ov==='fire')h=`<b>Fire run potential</b><div class="legend"><span><i class="swatch" style="background:rgb(245,160,60)"></i>Moderate</span><span><i class="swatch" style="background:rgb(225,90,40)"></i>High</span><span><i class="swatch" style="background:rgb(150,30,30)"></i>Very high</span></div><div class="ends"><span>terrain and NW–W winds only</span></div>`;
   else if(ov.startsWith('change_'))h=`<b>Ground change since ${ov.slice(7)}</b><div class="legend"><span><i class="swatch" style="background:rgb(215,60,40)"></i>Lower now</span><span><i class="swatch" style="background:rgb(40,110,220)"></i>Higher now</span></div><div class="ends"><span>over about 1.2 m; check on site</span></div>`;
   el.innerHTML=h;el.hidden=!h}
-const GROUP_HINT={Observe:'Record what is there first: notes, photos, soil tests, frost and wildlife.',Zones:'Zones 0–5 by how often you visit.',Sectors:'Energies coming onto the site: sun, fire, wind, cold air, views.',Water:'Catch, slow, store and move water.',Access:'Tracks and paths, checked against safe grades.',Built:'Existing and future buildings and assets.',Landscape:'Spaces for people, animals and shelter.',Plants:'Trees, guilds, beds and rows.'};
+const GROUP_HINT={Observe:'Record what is there first: notes, photos, soil tests, frost and wildlife.',Zones:'Zones 0–5 by how often you visit, plus goat zones for browsing animals.',Sectors:'Energies coming onto the site: sun, fire, wind, cold air, views.',Water:'Catch, slow, store and move water.',Access:'Tracks and paths, checked against safe grades.',Built:'Existing and future buildings and assets.',Landscape:'Spaces for people, animals and shelter.',Plants:'Trees, guilds, beds and rows.'};
 function renderDraw(){const el=$('#tab-draw');const groups={};for(const [k,v] of Object.entries(KINDS))(groups[v.g]=groups[v.g]||[]).push([k,v]);
   el.innerHTML=DRAW_ORDER.filter(g=>groups[g]).map(g=>`<h2>${g}</h2><p class="hint gh">${GROUP_HINT[g]||''}</p><div class="tools">${groups[g].map(([k,v])=>`<button class="tool" data-k="${k}" aria-pressed="${tool===k}"><i class="swatch" style="background:${v.color}"></i><span>${esc(v.label)}</span></button>`).join('')}</div>${g==='Sectors'?'<button class="btn" id="addWinds" style="margin-top:6px">Add typical SE Queensland wind sectors</button>':''}`).join('')+
   sec('tips','How drawing works',`<p class="hint">Drag to pan, scroll or pinch to zoom. Lines and shapes: click points, then Finish (or double-click). Or pick <b>Sketch & tidy</b> in the drawing bar and draw with your finger: rough boxes become rectangles, loops become circles or ovals, anything else is smoothed.</p>
@@ -1372,7 +1528,7 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
       ${obsExtraHTML(f)}
       ${f.photo?`<img class="obsimg" src="/_blob/${esc(f.photo)}" alt="Photo for ${esc(f.name)}">`:''}
       ${assets?`<input type="file" id="fphoto" accept="image/png,image/jpeg,image/webp" hidden><button class="btn" id="fphotob">${f.photo?'Replace photo':'Add a photo'}</button>`:'<p class="hint">Photos can be added by map editors.</p>'}`:''}
-    ${f.kind==='paddock'?`<div class="field"><label for="fpq">Pasture quality</label><select id="fpq">${Object.entries(PQ).map(([k,v])=>`<option value="${k}" ${(f.pq||'fair')===k?'selected':''}>${v[0]}</option>`).join('')}</select></div><p class="hint">${(()=>{const r=paddockCalc(f);return `${GZ.n} ${ANIMALS[GZ.animal][0].toLowerCase()} can graze it for about ${r.days<1?'under a day':Math.round(r.days)+' days'}, then it needs about ${Math.round(r.rest)} days to regrow (${GZ.season==='summer'?'growing season':'winter'}).`})()}</p>`:''}
+    ${f.kind==='paddock'||f.kind==='goatzone'?`${f.kind==='goatzone'?'<p class="hint">Goats browse shrubs and weeds more than grass. Fence with mesh or 5-strand electric, give a dry shelter, keep them out of creek lines, the vine-forest gullies and young plantings, and rotate before they strip the bark off trees.</p>':''}<div class="field"><label for="fpq">Pasture quality</label><select id="fpq">${Object.entries(PQ).map(([k,v])=>`<option value="${k}" ${(f.pq||'fair')===k?'selected':''}>${v[0]}</option>`).join('')}</select></div><p class="hint">${(()=>{const r=paddockCalc(f);return `${GZ.n} ${ANIMALS[GZ.animal][0].toLowerCase()} can graze it for about ${r.days<1?'under a day':Math.round(r.days)+' days'}, then it needs about ${Math.round(r.rest)} days to regrow (${GZ.season==='summer'?'growing season':'winter'}).`})()}</p>`:''}
     ${f.kind==='tank'?`<div class="field"><label for="flit">Tank size (litres)</label><input id="flit" type="number" min="0" max="1000000" step="500" value="${+f.litres||''}" placeholder="e.g. 20000"></div>`:''}
     ${ROOF_KINDS.includes(f.kind)?`<div class="row"><label><input type="checkbox" id="froof" ${f.roof?'checked':''}> Roof collects to tanks (${fmtArea(polyArea(f.geom.pts))})</label></div>`:''}
     <div class="row"><div class="field" style="flex:1"><label for="fkind">Type</label><select id="fkind">${Object.entries(KINDS).filter(([kk,v])=>v.geom===k.geom).map(([kk,v])=>`<option value="${kk}" ${kk===f.kind?'selected':''}>${esc(v.g)} · ${esc(v.label)}</option>`).join('')}</select></div>
@@ -1438,7 +1594,7 @@ function renderSite(){const el=$('#tab-site');const m=T.meta;const lot=T.catch[0
   const sl=m.lotSlopeShare;const bar=sl.map(([lo,hi,sh],i)=>{const c=m.slopeClasses[i][2];return `<span style="width:${sh*100}%;background:rgb(${c[0]},${c[1]},${c[2]})" title="${hi?lo+'–'+hi:'>'+lo}%: ${(sh*100).toFixed(0)}%"></span>`}).join('');
   const DL={N:'north',NE:'north-east',E:'east',SE:'south-east',S:'south',SW:'south-west',W:'west',NW:'north-west'};const lotZ=flat(T.lot).map(q=>zAt(...q));const lotHa=polyArea(lc)/1e4;const annual=RAIN.mean.reduce((a,b)=>a+b,0);
   const big=inf.slice().sort((a,b)=>b.ha-a.ha)[0];const wet=RAIN.mean.indexOf(Math.max(...RAIN.mean)),dry=RAIN.mean.indexOf(Math.min(...RAIN.mean)),coldM=Math.min(...RAIN.tmin);
-  el.innerHTML=setupHTML()+`<h2>Water</h2><dl class="facts"><dt>Whole catchment</dt><dd>${lot.ha} ha drains through the lot</dd><dt>From upstream</dt><dd>${Math.max(0,lot.ha-lotHa).toFixed(1)} ha of neighbours’ land</dd>
+  el.innerHTML=setupHTML()+sitesHTML()+`<h2>Water</h2><dl class="facts"><dt>Whole catchment</dt><dd>${m.catchEdge?'at least ':''}${lot.ha} ha drains through the lot${m.catchEdge?' (it runs past the edge of the map, so the true figure is larger)':''}</dd><dt>From upstream</dt><dd>${Math.max(0,lot.ha-lotHa).toFixed(1)} ha of neighbours’ land</dd>
    ${inf.map(c=>`<dt>Inflow from ${dirName(bear([cx,cy],c.at))}</dt><dd>${c.ha} ha · enters at ${zAt(...c.at).toFixed(0)} m</dd>`).join('')}
    ${m.outlet?`<dt>Leaves the lot</dt><dd>${m.outlet.ha} ha, ${dirName(bear([cx,cy],m.outlet.at))} boundary at ${zAt(...m.outlet.at).toFixed(0)} m</dd>`:''}</dl>
    <p class="hint">At about ${(Math.round(annual/50)*50).toLocaleString()} mm a year, every hectare of catchment receives about ${(annual/100).toFixed(0)} million litres.${big?` The biggest single inflow comes from the ${DL[dirName(bear([cx,cy],big.at))]} (${big.ha} ha).`:''}</p>
@@ -1448,9 +1604,10 @@ function renderSite(){const el=$('#tab-site');const m=T.meta;const lot=T.catch[0
    <h2>Sun (terrain only)</h2><dl class="facts"><dt>Winter, 21 Jun</dt><dd>${m.sun_winter_lotmean.toFixed(1)} h average</dd><dt>Equinox</dt><dd>${m.sun_equinox_lotmean.toFixed(1)} h</dd><dt>Summer, 21 Dec</dt><dd>${m.sun_summer_lotmean.toFixed(1)} h</dd></dl>
    ${soilSiteHTML()}
    <h2>Climate</h2>${climateSVG()}<p class="hint">${RAIN.station}, ${RAIN.period}. Bars are average monthly rain (darker: the typical, median month). ${MON[wet]} is the wettest month and ${MON[dry]} the driest. The coldest month's mean minimum is ${coldM} °C at the station, and cold air pools in valley floors, so frost comes earlier and harder there on still, clear nights.</p>
-   <h2>Sources and accuracy</h2><p class="hint">Elevation: ${esc(SITE.source||('LiDAR '+SITE.main+', '+SITE.res+' bare-earth DEM (ELVIS)'))}, GDA2020 / MGA zone ${ZONE}. ${esc(SITE.boundaryNote||'Lot boundary is approximate: check it against the title plan and fix it under Set-up above.')} Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.</p>`;
+   <h2>Sources and accuracy</h2><p class="hint">${IMG.aerial?`Aerial base: ${SITE.state==='NSW'?'NSW Spatial Services imagery':'Queensland Government “Latest State Program” imagery'} (CC BY 4.0), fetched for the map’s 2 km square so it lines up without alignment. `:''}Elevation: ${esc(SITE.source||('LiDAR '+SITE.main+', '+SITE.res+' bare-earth DEM (ELVIS)'))}, GDA2020 / MGA zone ${ZONE}. ${esc(SITE.boundaryNote||'Lot boundary is approximate: check it against the title plan and fix it under Set-up above.')} Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.</p>`;
   wireSetup(el);wireSecs(el);
   el.querySelectorAll('.kpl button').forEach(b=>b.onclick=()=>{const k=T.kp[+b.dataset.i];view.cx=k.x;view.cy=k.y;view.s=Math.max(view.s,2.5);layers.kp=true;draw()})}
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='govAer'){setLayer('base',e.target.checked?'aerial':'relief');renderLayers()}});
 showTab(lsGet('bt.tab','layers')==='feat'?'layers':lsGet('bt.tab','layers'));
 if(matchMedia('(max-width:760px)').matches)$('#panel').classList.add('min');
 boot();
