@@ -276,7 +276,7 @@ function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show'
 /* ---------------- PDC sites: one map page, one data space per site ---------------- */
 const SITES=[
  {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true},
- {id:'bright-tree-gemini',name:'Bright Tree (Gemini data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, Gemini boundary and rainfall',ready:true},
+ {id:'bright-tree-gemini',name:'Bright Tree (auto data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, auto-fetched boundary and rainfall',ready:true},
  {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true},
  {id:'nimbin',name:'Nimbin site',group:'Group 1',area:'Nimbin, NSW',status:'Paused: NSW download services failing; 5 m elevation as a fallback'},
  {id:'willow-vale',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW',status:'Paused: NSW download services failing; 5 m elevation as a fallback'},
@@ -303,10 +303,10 @@ const PJ=(()=>{const a=6378137,f=1/298.257222101,k0=.9996,FE=5e5,FN=1e7;
 const xy2ll=(x,y)=>PJ.toLL(x+E0,N0-y);
 
 /* ---------------- state ---------------- */
-let T=null, EXTRA=null; const IMG={};
+let T=null, EXTRA=null, PROS=null; const IMG={};
 let dem2=null, dem1=null, sunGrid={};
 const view={cx:960,cy:960,s:1};
-const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,design:true,labels:true,stage:'all'},lsGet('bt.layers',{}));
+const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,labels:true,stage:'all'},lsGet('bt.layers',{}));
 const features=new Map(); // id -> data
 let selected=null, tool=null, draft=null, gradePen=lsGet('bt.gradePen',{on:false,grade:0,dir:'down'});
 let db=null, userCap=null, myId=null, downloads=null, live=false, assets=null;
@@ -341,6 +341,7 @@ async function boot(){renderSiteSel();
   dem2=new Int16Array(await inflate(T.meta.dem.b64));
   const d1=T.meta.dem1; dem1={x0:d1.x0,y0:d1.y0,w:d1.w,h:d1.h,a:new Int16Array(await inflate(d1.b64))};
   for(const k of ['winter','equinox','summer']) sunGrid[k]=new Uint8Array(await inflate(T.meta['sunh_'+k]));
+  try{const pr=await fetch(SB+'prospects.json');PROS=pr.ok?await pr.json():null}catch(e){PROS=null}
   try{const ex=await (await fetch(SB+'extra.json')).json();EXTRA={change:ex.change,d8:new Uint8Array(await inflate(ex.d8)),coldGrid:new Uint8Array(await inflate(ex.cold))}}catch(e){EXTRA=null}
   await pImgs; $('#loading').hidden=true;if(IMG.aerial&&!lsGet('bt.aerialAuto',false)){layers.base='aerial';lsSet('bt.layers',layers);lsSet('bt.aerialAuto',true)}if(layers.overlay==='shadow')computeShadow();
   renderLayers(); renderDraw(); renderFeatures(); renderPlan(); renderTools(); renderSite(); draw();
@@ -415,6 +416,7 @@ function render(){
   if(layers.c5){ctx.save();if(showC1)ctx.clip(P.notBox,'evenodd');ctx.strokeStyle='rgba(80,55,30,.55)';ctx.lineWidth=.8*px;ctx.stroke(P.c5);ctx.lineWidth=1.5*px;ctx.strokeStyle='rgba(80,55,30,.75)';ctx.stroke(P.c5i);ctx.restore()}
   if(showC1){ctx.strokeStyle='rgba(80,55,30,.32)';ctx.lineWidth=.6*px;ctx.stroke(P.c1);ctx.strokeStyle='rgba(80,55,30,.6)';ctx.lineWidth=1*px;ctx.stroke(P.c1f);ctx.strokeStyle='rgba(80,55,30,.8)';ctx.lineWidth=1.6*px;ctx.stroke(P.c1i)}
   if(layers.streams){const wd=[.8,1.3,2.2,3.4],al=[.45,.65,.85,.95];for(let k=0;k<4;k++){ctx.strokeStyle=`rgba(25,105,200,${al[k]})`;ctx.lineWidth=wd[k]*px;ctx.lineCap='round';ctx.stroke(P.st[k])}}
+  if(layers.pros&&PROS)drawPros(px);
   if(layers.lot){ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke(P.lot);ctx.lineWidth=1.6*px;ctx.strokeStyle='#14898f';ctx.setLineDash([10*px,4*px]);ctx.stroke(P.lot);ctx.setLineDash([])}
   if(layers.design)drawFeatures(px);
   if(draft)drawDraft(px);
@@ -425,6 +427,23 @@ function render(){
   if(layers.labels)drawLabels();
   if(!(typeof V3!=='undefined'&&V3.tex2d))drawScale();
 }
+const PRC={pond:'#0d5fa8',pad:'#a14e07',tank:'#0d5fa8',flat:'#3f7a1f'};
+function drawPros(px){for(const p of PROS.items){const c=PRC[p.kind];ctx.setLineDash([]);
+  if(p.poly){ctx.beginPath();p.poly.forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q));ctx.closePath();
+    if(p.kind==='pond'){ctx.fillStyle='rgba(45,143,213,.38)';ctx.fill();ctx.lineWidth=1.2*px;ctx.strokeStyle=c;ctx.stroke()}
+    else if(p.kind==='pad'){ctx.fillStyle='rgba(230,140,40,.22)';ctx.fill();ctx.lineWidth=2*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke();ctx.lineWidth=1.4*px;ctx.strokeStyle=c;ctx.setLineDash([4*px,3*px]);ctx.stroke();ctx.setLineDash([])}
+    else{ctx.fillStyle='rgba(90,160,60,.18)';ctx.fill();ctx.lineWidth=1.3*px;ctx.strokeStyle=c;ctx.setLineDash([3*px,3*px]);ctx.stroke();ctx.setLineDash([])}}
+  if(p.wall){ctx.lineCap='round';ctx.lineWidth=5*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.moveTo(...p.wall[0]);ctx.lineTo(...p.wall[1]);ctx.stroke();ctx.lineWidth=3*px;ctx.strokeStyle='#7a4a1c';ctx.stroke()}
+  if(p.kind==='tank'){ctx.beginPath();ctx.arc(p.at[0],p.at[1],5,0,7);ctx.fillStyle='rgba(45,143,213,.6)';ctx.fill();ctx.lineWidth=2*px;ctx.strokeStyle='#fff';ctx.stroke();ctx.lineWidth=1.2*px;ctx.strokeStyle=c;ctx.stroke()}}}
+function prosHTML(){if(!PROS)return'';const g={pond:'Pond and small dam sites',pad:'Building pads',tank:'Header tank',flat:'Gully flats'};
+  return Object.keys(g).filter(k=>PROS.items.some(p=>p.kind===k)).map(k=>`<h3 style="margin:10px 0 4px;font-size:13px">${g[k]}</h3>`+PROS.items.filter(p=>p.kind===k).map(p=>`<div class="pro" style="border-left:3px solid ${PRC[p.kind]};padding:4px 0 6px 8px;margin:4px 0"><b>${esc(p.label)}</b><div class="hint" style="margin:2px 0 4px">${esc(p.note)}</div><button class="btn" data-pz="${p.id}">Zoom</button> <button class="btn" data-pa="${p.id}">Add to my design</button></div>`).join('')).join('')+`<p class="hint">${esc(PROS.note)}</p>`}
+function wirePros(el){el.querySelectorAll('[data-pz]').forEach(b=>b.onclick=()=>{const p=PROS.items.find(q=>q.id===b.dataset.pz);const pts=p.poly||[p.at];const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);fitBox(Math.min(...xs)-40,Math.min(...ys)-40,Math.max(...xs)+40,Math.max(...ys)+40);if(!layers.pros)setLayer('pros',true);draw()});
+  el.querySelectorAll('[data-pa]').forEach(b=>b.onclick=async()=>{const p=PROS.items.find(q=>q.id===b.dataset.pa);const note=p.note+' (Computed prospect: check on site; needs engineering and approvals.)';
+    if(p.kind==='pond'){draft={kind:'pond',pts:[]};await commit({g:'polygon',pts:p.poly});await saveFields(selected,{name:p.label,notes:note,status:'idea'});draft={kind:'damwall',pts:[]};await commit({g:'line',pts:p.wall});await saveFields(selected,{name:p.id+' wall',notes:note})}
+    else if(p.kind==='pad'){draft={kind:'futurebuilding',pts:[]};await commit({g:'polygon',pts:p.poly});await saveFields(selected,{name:p.label,notes:note,status:'idea'})}
+    else if(p.kind==='tank'){draft={kind:'tank',pts:[]};await commit({g:'point',pts:[p.at]});await saveFields(selected,{name:p.label,notes:note,status:'idea'})}
+    else{draft={kind:'nursery',pts:[]};await commit({g:'polygon',pts:p.poly});await saveFields(selected,{name:p.label,notes:note})}
+    draft=null;draw();toast(p.id+' added to your design: edit or move it like any feature')})}
 function haloText(t,x,y,size=11,color='#3a2a14',font='IBM Plex Mono'){ctx.font=`500 ${size}px "${font}",monospace`;ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.strokeText(t,x,y);ctx.fillStyle=color;ctx.fillText(t,x,y)}
 function drawLabels(){
   if(mt&&mt.type==='fire')fireLabels();
@@ -434,6 +453,10 @@ function drawLabels(){
   if(layers.c5&&view.s>0.45)for(const l of T.labels){const [x,y]=w2s(...l.a),[x2,y2]=w2s(...l.b);if(x<-20||y<-20||x>W+20||y>H+20)continue;let a=Math.atan2(y2-y,x2-x);if(a>Math.PI/2)a-=Math.PI;if(a<-Math.PI/2)a+=Math.PI;ctx.save();ctx.translate(x,y);ctx.rotate(a);haloText(l.z+'',0,0,10,'#5a3d1c');ctx.restore()}
   if(layers.catch)for(const c of T.catch){if(!c.at)continue;const [x,y]=w2s(...c.at);haloText(`↓ ${c.ha} ha in`,x,y-12,11,'#0f4f96')}
   if(layers.catch&&T.meta.outlet){const [x,y]=w2s(...T.meta.outlet.at);haloText(`${T.meta.outlet.ha} ha out ↑`,x,y+14,11,'#0f4f96')}
+  if(layers.pros&&PROS&&view.s>0.35)for(const p of PROS.items){let [x,y]=w2s(...p.at);const col=PRC[p.kind];let t=view.s>0.8?p.label:p.id;
+    if(p.kind==='pond'){t=view.s>0.8?`${p.id} ~${p.ml.toFixed(1)} ML`:p.id;ctx.textAlign='left';haloText(t,x+16,y+5,10.5,col,'IBM Plex Sans');ctx.textAlign='center';continue}
+    if(p.kind==='flat'){t=view.s>1.2?p.label:p.id;ctx.textAlign='right';haloText(t,x-14,y+12,10.5,col,'IBM Plex Sans');ctx.textAlign='center';continue}
+    haloText(t,x,y+(p.kind==='tank'?-16:-18),10.5,col,'IBM Plex Sans')}
   if(layers.kp)for(const k of T.kp){const [x,y]=w2s(k.x,k.y);ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/4);ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.strokeRect(-6,-6,12,12);ctx.strokeStyle='#0b5c8f';ctx.lineWidth=1.6;ctx.setLineDash([3,2]);ctx.strokeRect(-6,-6,12,12);ctx.restore();ctx.setLineDash([]);if(view.s>0.6)haloText(`KP? ${k.z.toFixed(0)} m`,x,y-14,10.5,'#0b5c8f')}
   if(layers.design&&view.s>0.5)for(const [id,f] of features){if(!vis(f))continue;let c=centroid(f);if(!c)continue;const gg=f.geom;if(gg.g==='sector'||gg.g==='sun'){let a0=gg.a0,a1=gg.a1;if(gg.g==='sun'){const b=sunBearings(KINDS[f.kind].decl);a0=b.set;a1=b.rise}if(a1<a0)a1+=360;const m=((a0+a1)/2)*Math.PI/180;c=[gg.cx+Math.sin(m)*gg.r*.72,gg.cy-Math.cos(m)*gg.r*.72]}const [x,y]=w2s(...c);const k=KINDS[f.kind]||KINDS.note;
     if(f.geom.g==='polygon'){haloText(f.name||k.label,x,y-8,11.5,'#1d2621','IBM Plex Sans');ctx.font='600 12.5px "IBM Plex Mono",monospace';const t=fmtArea(polyArea(f.geom.pts));ctx.lineWidth=3.5;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.strokeText(t,x,y+8);ctx.fillStyle=k.color;ctx.fillText(t,x,y+8)}
@@ -623,14 +646,14 @@ function updateDrawbar(){const b=$('#drawbar');if(!draft){b.hidden=true;return}c
 function nextName(kind){const k=KINDS[kind];let n=1;for(const f of features.values())if(f.kind===kind)n++;return (k.g==='Zones'&&kind!=='goatzone')||k.geom==='sun'?k.label:`${k.label} ${n}`}
 async function commit(geom){const kind=draft.kind;const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const doc={kind,name:nextName(kind),status:'idea',notes:'',stage:defStage(kind),geom,createdBy:myId||null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'map'};
-  features.set(id,doc);selected=id;draft=null;tool=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;showTab('feat');renderDraw();renderFeatures();draw();
+  features.set(id,doc);selected=id;draft=null;tool=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;showTab('feat');renderDraw();renderFeatures();renderTools();draw();
   await persist(id,doc)}
 
 /* ---------------- persistence ---------------- */
 async function persist(id,doc){if(live){try{await db.collection(C('features')).doc(id).set(doc)}catch(e){toast(e&&e.code==='invalid_argument'?'You can view this map but not change it.':'That change did not save. Try again in a moment.')}}else{saveLocal()}}
 async function saveGeom(id,geom){const f=features.get(id);if(!f)return;f.updatedAt=new Date().toISOString();if(live){try{await db.collection(C('features')).doc(id).update({geom,updatedAt:f.updatedAt})}catch(e){toast('That change did not save.')}}else saveLocal()}
-async function saveFields(id,fields){const f=features.get(id);if(!f)return;Object.assign(f,fields,{updatedAt:new Date().toISOString()});if(!live&&T)setTimeout(renderSite,0);if(live){try{await db.collection(C('features')).doc(id).update({...fields,updatedAt:f.updatedAt})}catch(e){toast('That change did not save.')}}else saveLocal();draw()}
-async function removeFeature(id){features.delete(id);selected=null;renderFeatures();draw();if(live){try{await db.collection(C('features')).doc(id).delete()}catch(e){toast('Delete did not save.')}}else saveLocal()}
+async function saveFields(id,fields){const f=features.get(id);if(!f)return;Object.assign(f,fields,{updatedAt:new Date().toISOString()});setTimeout(renderTools,0);if(!live&&T)setTimeout(renderSite,0);if(live){try{await db.collection(C('features')).doc(id).update({...fields,updatedAt:f.updatedAt})}catch(e){toast('That change did not save.')}}else saveLocal();draw()}
+async function removeFeature(id){features.delete(id);selected=null;renderFeatures();renderTools();draw();if(live){try{await db.collection(C('features')).doc(id).delete()}catch(e){toast('Delete did not save.')}}else saveLocal()}
 function saveLocal(){lsSet('bt.features',Object.fromEntries(features))}
 async function connect(){
   const sync=$('#sync');
@@ -648,8 +671,17 @@ async function connect(){
     if(!(document.activeElement&&document.activeElement.matches('#tab-layers input[type=range]')))renderLayers();draw()},()=>{});
   if(!db){const loc=lsGet('bt.features',{});for(const [k,v] of Object.entries(loc))features.set(k,v);const lt=lsGet('bt.tasks',{});const ll=lsGet('bt.lot',null);if(ll&&ll.pts){lotDoc=ll;applyLot(ll.pts)}for(const [k,v] of Object.entries(lt))tasks.set(k,v);renderPlan();sync.className='sync off';sync.querySelector('span').textContent='Not shared: changes stay in this browser';renderFeatures();draw();return}
   live=true;sync.className='sync on';sync.querySelector('span').textContent='Shared with the team · saves automatically';
-  db.collection(C('features')).onSnapshot(snap=>{features.clear();for(const d of snap.docs){const v=d.data();if(v&&v.geom)features.set(d.id,structuredClone(v))}if(selected&&!features.has(selected))selected=null;renderFeatures(true);if(!$('#tab-tools').contains(document.activeElement))renderTools();if(T)renderSite();draw()},
-    err=>{sync.className='sync off';sync.querySelector('span').textContent='Sync stopped. Reload to reconnect.'});
+  let tries=0,unsub=null;
+  const setSync=(on,t,tip)=>{sync.className='sync '+(on?'on':'off');sync.querySelector('span').textContent=t;sync.title=tip||''};
+  const sub=()=>{try{if(unsub)unsub()}catch(e){}
+    unsub=db.collection(C('features')).onSnapshot(snap=>{if(tries){tries=0;setSync(true,'Shared with the team · saves automatically')}
+      features.clear();for(const d of snap.docs){const v=d.data();if(v&&v.geom)features.set(d.id,structuredClone(v))}if(selected&&!features.has(selected))selected=null;renderFeatures(true);if(!$('#tab-tools').contains(document.activeElement))renderTools();if(T)renderSite();draw()},
+    err=>{tries++;console.warn('features sync error',err);const wait=Math.min(30,2*tries);
+      setSync(false,tries<6?`Connection dropped · reconnecting in ${wait} s…`:'Offline · retrying every 30 s. Your view is safe; new drawings save once reconnected.',String(err&&err.message||err));
+      setTimeout(sub,wait*1000)})};
+  sub();
+  // reconnect straight away when the tab wakes or the network returns
+  const nudge=()=>{if(tries)sub()};window.addEventListener('online',nudge);document.addEventListener('visibilitychange',()=>{if(!document.hidden)nudge()});
 }
 
 /* ---------------- aerial imagery: upload, align (similarity transform), share ---------------- */
@@ -824,7 +856,7 @@ let RAIN={station:'Nambour DAFF – Hillside (040988)',period:'2007–2026',
   tmin:[20.6,20.6,19.9,16.9,13.7,11.6,10.6,10.9,13.4,15.7,17.9,19.5]};
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],MDAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
 const ROOF_KINDS=['building','shed','greenhouse','carport','futurebuilding','nursery'];
-let WB=Object.assign({people:6,lpp:120,garden:0,gardenMonths:[8,9,10,11],extraRoof:150,extraTank:55000,eff:0.8,scen:'median',dryPct:70},lsGet('bt.wb',{}));
+let WB=Object.assign({people:6,lpp:120,garden:0,gardenMonths:[8,9,10,11],extraRoof:SITEID==='bright-tree'?150:0,extraTank:SITEID==='bright-tree'?55000:0,eff:0.8,scen:'median',dryPct:70},lsGet('bt.wb',{}));
 let wbDoc=null;
 async function saveWB(){lsSet('bt.wb',WB);if(live){try{await db.doc(C('settings')+'/water').set(WB)}catch(e){}}}
 function pressureMeaning(kpa){
@@ -835,7 +867,12 @@ function pressureMeaning(kpa){
   if(kpa<350)return 'Feels like town water at the tap: comfortable showers, sprinklers and hoses all work well.';
   if(kpa<500)return 'Strong, like good town water pressure. Pipes and fittings need to be rated for it.';
   return 'Higher than household plumbing allows: Australian plumbing rules cap pressure inside buildings at about 500 kPa, so fit a pressure-limiting valve before the house.'}
-function roofArea(){let a=0;const list=[];for(const [id,f] of features){if(ROOF_KINDS.includes(f.kind)&&f.geom.g==='polygon'&&f.roof){const ar=polyArea(f.geom.pts);a+=ar;list.push([f.name,ar])}}return {a:a+(+WB.extraRoof||0),list}}
+function zone0s(){return [...features.values()].filter(f=>f.kind==='zone0'&&f.geom.g==='polygon'&&f.geom.pts.length>2)}
+function inZone0(f){const c=centroid(f);return !!c&&zone0s().some(z=>inPoly(c,z.geom.pts))}
+function z0HasRoof(z){for(const f of features.values())if(ROOF_KINDS.includes(f.kind)&&f.geom.g==='polygon'){const c=centroid(f);if(c&&inPoly(c,z.geom.pts))return true}return false}
+// a building collects if ticked, or by default when it sits in Zone 0 (the house); a Zone 0 with no building drawn in it counts as the house roof itself
+function roofOn(f){if(f.geom.g!=='polygon')return false;if(ROOF_KINDS.includes(f.kind))return f.roof===true||(f.roof!==false&&inZone0(f));if(f.kind==='zone0')return f.roof!==false&&!z0HasRoof(f);return false}
+function roofArea(){let a=0;const list=[];for(const [id,f] of features){if(roofOn(f)){const ar=polyArea(f.geom.pts);a+=ar;list.push([f.kind==='zone0'?(f.name||'Zone 0')+' (taken as the house roof)':f.name,ar])}}return {a:a+(+WB.extraRoof||0),list}}
 function tankStore(){let l=0;const list=[];for(const f of features.values()){if(f.kind==='tank'&&+f.litres>0){l+=+f.litres;list.push([f.name,+f.litres])}}return {l:l+(+WB.extraTank||0),list}}
 function wbSim(cap,roof,rainArr){rainArr=rainArr||(WB.scen==='dry'?RAIN.median.map(v=>v*(+WB.dryPct||70)/100):WB.scen==='mean'?RAIN.mean:RAIN.median);
   // start full at the end of the wet season (1 May), run two years, report the second
@@ -855,11 +892,11 @@ function wbHTML(){const R=roofArea(),Tk=tankStore();const sim=wbSim(Tk.l,R.a);co
    <div class="row"><div class="field" style="flex:1"><label for="wbRoof">Roof area not drawn (m²)</label><input id="wbRoof" type="number" min="0" max="5000" step="10" value="${WB.extraRoof}"></div><div class="field" style="flex:1"><label for="wbTank">Storage not drawn (L)</label><input id="wbTank" type="number" min="0" max="2000000" step="1000" value="${WB.extraTank}"></div></div>
    <div class="field"><label>Rainfall year</label>${segHTML('wbScen',[['median','Typical (median)'],['mean','Average'],['dry','Dry year']],WB.scen)}</div>
    ${WB.scen==='dry'?`<div class="field"><label for="wbDry">Dry year: <b id="wbDryV">${WB.dryPct}%</b> of a typical year's rain</label><input type="range" id="wbDry" min="40" max="95" step="5" value="${WB.dryPct}"></div>`:''}
-   <dl class="facts"><dt>Roof collecting</dt><dd>${Math.round(R.a)} m²${R.list.length?` (${R.list.length} drawn + ${WB.extraRoof} m²)`:''}</dd><dt>Storage</dt><dd>${Math.round(Tk.l).toLocaleString()} L</dd><dt>Rain caught</dt><dd>${Math.round(ann/1000).toLocaleString()} kL a year</dd><dt>Use</dt><dd>${Math.round(use/1000).toLocaleString()} kL a year</dd></dl>
+   <dl class="facts"><dt>Roof collecting</dt><dd>${Math.round(R.a)} m²${R.list.length?`: ${R.list.map(([n,ar])=>esc(n)+' '+Math.round(ar)+' m²').join(', ')}${+WB.extraRoof?' + '+WB.extraRoof+' m² not drawn':''}`:''}</dd><dt>Storage</dt><dd>${Math.round(Tk.l).toLocaleString()} L</dd><dt>Rain caught</dt><dd>${Math.round(ann/1000).toLocaleString()} kL a year</dd><dt>Use</dt><dd>${Math.round(use/1000).toLocaleString()} kL a year</dd></dl>
    <svg viewBox="0 0 ${W} ${Hc}" width="100%" role="img" aria-label="Water left in the tanks at the end of each month">${bars}</svg>
    <p class="hint" style="margin-top:2px">Water left at the end of each month${sim.short>0?'; orange months run dry':''}.</p>
    ${sim.short>0?`<div class="warn"><p>The tanks run dry, about <b>${Math.round(sim.short/1000)} kL</b> short over the year (${sim.months.filter(x=>x.sh>0).map(x=>MON[x.m]).join(', ')}).</p><p>To close the gap: about <b>${need?Math.round(need/1000).toLocaleString()+' kL':'over 1,000 kL'}</b> of storage with this roof, or about <b>${roofNeed?roofNeed+' m²':'over 3,000 m²'}</b> of roof with this storage, or less use in the dry months.</p></div>`:`<p class="hint ok">Enough water for this year, with ${Math.round(sim.over/1000)} kL overflowing in the wet months: room to catch more or plan a pond.</p>`}
-   <p class="hint">Mark roofs that feed tanks by selecting a building and ticking “Roof collects to tanks”, and give each tank its size. Roof run-off is taken as ${Math.round(WB.eff*100)}% of rain after first-flush and losses.</p>`}
+   <p class="hint">Buildings inside Zone 0 (the house) count as collecting roof automatically; if Zone 0 has no building drawn in it, its own area is taken as the house roof. Tick or untick “Roof collects to tanks” on any building to change this, and give each tank its size. Roof run-off is taken as ${Math.round(WB.eff*100)}% of rain after first-flush and losses.</p>`}
 function wireWB(el){const n=(id,k)=>{const e=el.querySelector('#'+id);if(e)e.onchange=()=>{WB[k]=+e.value;saveWB();renderTools()}};
   n('wbPeople','people');n('wbLpp','lpp');n('wbGarden','garden');n('wbRoof','extraRoof');n('wbTank','extraTank');
   el.querySelectorAll('#wbScen button').forEach(b=>b.onclick=()=>{WB.scen=b.dataset.v;saveWB();renderTools()});
@@ -1378,7 +1415,7 @@ function wire3D(){const c=$('#gl');
   document.addEventListener('keydown',e=>{if(V3.on&&e.key==='Escape')close3D()})}
 
 /* ---------------- panels ---------------- */
-function showTab(t){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));for(const id of ['layers','draw','feat','plan','tools','site'])$('#tab-'+id).hidden=id!==t;$('#panel').classList.remove('min');lsSet('bt.tab',t)}
+function showTab(t){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));for(const id of ['layers','draw','feat','plan','tools','site'])$('#tab-'+id).hidden=id!==t;$('#panel').classList.remove('min');lsSet('bt.tab',t);if(t==='tools')renderTools()}
 document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{if(b.getAttribute('aria-selected')==='true'&&matchMedia('(max-width:760px)').matches){$('#panel').classList.toggle('min');setTimeout(resize,0);return}showTab(b.dataset.tab);setTimeout(resize,0)});
 function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);if(k==='lot'&&$('#zLot'))$('#zLot').style.opacity=v?1:.45;draw()}
 const OVERLAYS=[
@@ -1391,7 +1428,7 @@ function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="$
 function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   const sc=m.slopeClasses.map(([lo,hi,c])=>`<span><i class="swatch" style="background:rgba(${c[0]},${c[1]},${c[2]},.85)"></i>${hi?lo+'–'+hi:'>'+lo}%</span>`).join('');
   const ac=Object.entries(m.aspectColors).map(([n,c])=>`<span><i class="swatch" style="background:rgb(${c})"></i>${n}</span>`).join('');
-  const lines=[['lot','Property boundary','#14898f'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['labels','Labels','#777']];
+  const lines=[['lot','Property boundary','#14898f'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],...(PROS?[['pros','Prospects: ponds, pads, tank (computed)','#a14e07']]:[]),['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['labels','Labels','#777']];
   el.innerHTML=
    sec('base','Base map',`${segHTML('baseSeg',[['none','None'],['relief','Relief'],['hillshade','Hillshade']].concat(IMG.aerial?[['aerial','Aerial']]:[]),layers.base)}
     <div class="row"><label for="baseop">Strength <span id="baseopv" class="pill">${Math.round(layers.baseOp*100)}%</span></label><input type="range" id="baseop" min="0" max="1" step="0.05" value="${layers.baseOp}"></div>
@@ -1404,6 +1441,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
     <div class="row"><label for="ovop">Overlay strength</label><input type="range" id="ovop" min="0.2" max="1" step="0.05" value="${layers.ovOp}"></div>
     <div id="ovLegend" class="hint"></div>`)+
    sec('lines','Water, contours & labels',lines.map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join(''))+
+   (PROS?sec('pros','Prospects (computed sites)',`<p class="hint">Screening sites found by scanning the terrain: where small pond walls store the most water for the least earth, where level building pads need the least cut and fill with good winter sun, the highest tank site, and the few flat spots. A starting point for a site walk, not a design.</p>`+prosHTML()):'')+
    `<p class="hint">Terrain from the ${SITE.main} LiDAR survey (bare earth, ${SITE.res}). Sun hours count terrain shading only, not trees.</p>`;
   const ch=EXTRA&&EXTRA.change;
   const legends={slope:`<div class="legend">${sc}</div>Under 10% suits tracks and beds; 10–25% contour beds and terraces; 25–50% tree crops on contour with groundcover; over 50% keep in forest.`,
@@ -1421,7 +1459,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   el.querySelectorAll('#conSeg button').forEach(b=>b.onclick=()=>{const on=b.dataset.v==='on';layers.c1=on;layers.c5=on;setLayer('c5',on);renderLayers()});
   const bo=e=>{setLayer('baseOp',+e.target.value);$('#baseopv').textContent=Math.round(layers.baseOp*100)+'%';render()};$('#baseop').oninput=bo;$('#baseop').onchange=bo;
   el.querySelectorAll('input[data-k]').forEach(c=>c.onchange=()=>setLayer(c.dataset.k,c.checked));
-  wireImagery(el);wireSecs(el)}
+  wireImagery(el);wirePros(el);wireSecs(el)}
 function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.overlay;if(!m||ov==='none'){el.hidden=true;return}
   const sunGrad='linear-gradient(90deg,rgb(30,40,110),rgb(90,70,150) 35%,rgb(220,110,70) 60%,rgb(250,200,70) 85%,rgb(255,245,170))';
   const sw=(c,a=.85)=>`background:rgba(${c[0]},${c[1]},${c[2]},${a})`;let h='';
@@ -1530,7 +1568,7 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
       ${assets?`<input type="file" id="fphoto" accept="image/png,image/jpeg,image/webp" hidden><button class="btn" id="fphotob">${f.photo?'Replace photo':'Add a photo'}</button>`:'<p class="hint">Photos can be added by map editors.</p>'}`:''}
     ${f.kind==='paddock'||f.kind==='goatzone'?`${f.kind==='goatzone'?'<p class="hint">Goats browse shrubs and weeds more than grass. Fence with mesh or 5-strand electric, give a dry shelter, keep them out of creek lines, the vine-forest gullies and young plantings, and rotate before they strip the bark off trees.</p>':''}<div class="field"><label for="fpq">Pasture quality</label><select id="fpq">${Object.entries(PQ).map(([k,v])=>`<option value="${k}" ${(f.pq||'fair')===k?'selected':''}>${v[0]}</option>`).join('')}</select></div><p class="hint">${(()=>{const r=paddockCalc(f);return `${GZ.n} ${ANIMALS[GZ.animal][0].toLowerCase()} can graze it for about ${r.days<1?'under a day':Math.round(r.days)+' days'}, then it needs about ${Math.round(r.rest)} days to regrow (${GZ.season==='summer'?'growing season':'winter'}).`})()}</p>`:''}
     ${f.kind==='tank'?`<div class="field"><label for="flit">Tank size (litres)</label><input id="flit" type="number" min="0" max="1000000" step="500" value="${+f.litres||''}" placeholder="e.g. 20000"></div>`:''}
-    ${ROOF_KINDS.includes(f.kind)?`<div class="row"><label><input type="checkbox" id="froof" ${f.roof?'checked':''}> Roof collects to tanks (${fmtArea(polyArea(f.geom.pts))})</label></div>`:''}
+    ${ROOF_KINDS.includes(f.kind)||(f.kind==='zone0'&&f.geom.g==='polygon'&&!z0HasRoof(f))?`<div class="row"><label><input type="checkbox" id="froof" ${roofOn(f)?'checked':''}> Roof collects to tanks (${fmtArea(polyArea(f.geom.pts))})${f.kind==='zone0'?' · Zone 0 counts as the house roof until a building is drawn inside it':''}</label></div>`:''}
     <div class="row"><div class="field" style="flex:1"><label for="fkind">Type</label><select id="fkind">${Object.entries(KINDS).filter(([kk,v])=>v.geom===k.geom).map(([kk,v])=>`<option value="${kk}" ${kk===f.kind?'selected':''}>${esc(v.g)} · ${esc(v.label)}</option>`).join('')}</select></div>
       <div class="field" style="flex:1"><label for="fstage">Stage</label><select id="fstage">${STAGES.map(([kk,l])=>`<option value="${kk}" ${(f.stage||defStage(f.kind))===kk?'selected':''}>${l}</option>`).join('')}</select></div></div>
     <div class="field"><label>Status</label><div class="seg" id="fstat">${STATUS.map(s=>`<button aria-pressed="${f.status===s}" data-v="${s}">${s}</button>`).join('')}</div></div>
