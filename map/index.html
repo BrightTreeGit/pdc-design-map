@@ -1267,10 +1267,10 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
   wireSheet(el);
   $('#exGeo').onclick=()=>exportFile('geojson');$('#exKml').onclick=()=>exportFile('kml');wireP3(el);wireSecs(el)}
 /* ---------------- A3 presentation sheet: options, layout engine, panels, PNG or PDF ---------------- */
-const SHEET_DEF={orient:'land',base:'current',theme:'standard',fmt:'pdf',grid:true,north:true,inset:true,contours:true,callouts:false,legend:true,
+const SHEET_DEF={orient:'land',base:'current',bases:['current'],v3:{auto:true,bearing:135,tilt:32,ex:1.6,drape:'relief',zoom:1},theme:'standard',fmt:'pdf',grid:true,north:true,inset:true,contours:true,callouts:false,legend:true,
   profile:true,profileId:'auto',slope:true,water:true,wb:false,climate:true,sun:true,sectors:true,zones:true,schedule:false,stages:false,plants:false,fire:false,change:false,
   designers:'',version:'v1',concept:true};
-let SO=Object.assign({},SHEET_DEF,lsGet('bt.sheet',{}));
+let SO=Object.assign({},SHEET_DEF,lsGet('bt.sheet',{}));if(!Array.isArray(SO.bases)||!SO.bases.length)SO.bases=[SO.base||'current'];SO.v3=Object.assign({},SHEET_DEF.v3,SO.v3||{});
 const saveSO=()=>lsSet('bt.sheet',SO);
 const SHEET_GROUPS=[
  ['Map frame',[['grid','Coordinate grid & edge ticks (MGA)'],['north','North arrow & scale bar'],['inset','Locator inset (whole lot & catchment)'],['contours','Contours with height labels'],['callouts','Numbered callouts + feature key (instead of names)'],['legend','Legend']]],
@@ -1285,14 +1285,38 @@ function sheetHTML(){const lines=[...features.entries()].filter(([i,f])=>f.geom.
   <div class="field"><label for="shTitle">Title</label><input id="shTitle" value="${esc(lsGet('bt.shTitle',(SITE.name||'Site')+' permaculture design'))}"></div>
   <div class="row"><div class="field" style="flex:2"><label for="shDes">Designers (first names)</label><input id="shDes" value="${esc(SO.designers)}" placeholder="e.g. Dave, Sam, Kira"></div><div class="field" style="flex:1"><label for="shVer">Version</label><input id="shVer" value="${esc(SO.version)}"></div></div>
   <div class="field"><label>Page</label>${seg('shOr',[['land','Landscape'],['port','Portrait']],SO.orient)}</div>
-  <div class="field"><label>Base map</label>${seg('shBase',[['current','As on screen'],['aerial','Aerial'],['relief','Relief'],['paper','Clean paper']],SO.base)}</div>
+  <div class="field"><label>Base map · one page each</label><div class="seg" id="shBase">${[['current','As on screen'],['aerial','Aerial'],['relief','Relief'],['paper','Clean paper'],['3d','3D side view']].map(([k,l])=>`<button data-v="${k}" aria-pressed="${SO.bases.includes(k)}">${l}</button>`).join('')}</div>
+   <p class="hint" style="margin:3px 0 0">Hold Ctrl (⌘ on a Mac) or Shift and click to pick several: each becomes its own page in the PDF.</p></div>
+  ${SO.bases.includes('3d')?v3SheetHTML():''}
   <div class="field"><label>Style</label>${seg('shTheme',[['standard','Standard'],['ink','Ink-saving']],SO.theme)}</div>
   <div class="field"><label>File</label>${seg('shFmt',[['pdf','PDF'],['png','PNG image']],SO.fmt)}</div>
   ${SHEET_GROUPS.map(([h,items])=>`<h3 style="margin:10px 0 2px;font-size:13px">${h}</h3>`+items.map(([k,l])=>`<div class="row"><label><input type="checkbox" data-so="${k}" ${SO[k]?'checked':''}> ${l}</label></div>`+(k==='profile'?`<div class="field" style="margin:0 0 4px 22px"><select id="shProf" aria-label="Profile line"><option value="auto" ${SO.profileId==='auto'?'selected':''}>Automatic: longest line across the lot</option>${lines.map(([i,f])=>`<option value="${i}" ${SO.profileId===i?'selected':''}>${esc(f.name||KINDS[f.kind].label)}</option>`).join('')}</select><p class="hint" style="margin:2px 0 0">Draw any line (a path, flow or pipe) to profile along it.</p></div>`:'')).join('')).join('')}
   <div class="row" style="gap:6px;margin-top:8px"><button class="btn" id="shDefaults">Suggested set</button><button class="btn primary" id="tSheet">Download A3 sheet</button></div>`}
+function v3AutoBearing(){const P=flat(T.lot);let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;P.forEach(p=>{x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1])});let sx=0,sy=0;
+  for(let x=x0;x<=x1;x+=8)for(let y=y0;y<=y1;y+=8){if(!inPoly([x,y],P))continue;const s=slopeAt(x,y);if(!s||!isFinite(s.asp))continue;const w=Math.min(s.pct,80);sx+=Math.sin(s.asp*Math.PI/180)*w;sy+=Math.cos(s.asp*Math.PI/180)*w}
+  return sx||sy?((Math.atan2(sx,sy)*180/Math.PI)+360)%360:135}
+const DIR8=['N','NE','E','SE','S','SW','W','NW'];const dirOf=b=>DIR8[Math.round(((b%360)+360)%360/45)%8];
+function v3SheetHTML(){const v=SO.v3;const b=v.auto?Math.round(v3AutoBearing()):v.bearing;const R=54,C=64;
+  const pts=DIR8.map((d,i)=>{const a=i*45*Math.PI/180;return `<g data-b="${i*45}" style="cursor:pointer"><circle cx="${C+Math.sin(a)*R}" cy="${C-Math.cos(a)*R}" r="12" fill="${!v.auto&&Math.round(b/45)%8===i?'#14898f':'#fff'}" stroke="#5d6a62"/><text x="${C+Math.sin(a)*R}" y="${C-Math.cos(a)*R+4}" font-size="10" text-anchor="middle" fill="${!v.auto&&Math.round(b/45)%8===i?'#fff':'#1d2621'}">${d}</text></g>`}).join('');
+  const ar=b*Math.PI/180;
+  return `<div class="field" style="border-left:3px solid #14898f;padding-left:10px"><label>3D side view</label>
+   <div class="row" style="align-items:center;gap:10px"><svg id="v3cmp" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Viewing direction"><circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="#d3d9d0"/><line x1="${C}" y1="${C}" x2="${C+Math.sin(ar)*(R-14)}" y2="${C-Math.cos(ar)*(R-14)}" stroke="#c0392b" stroke-width="3"/><circle cx="${C+Math.sin(ar)*(R-14)}" cy="${C-Math.cos(ar)*(R-14)}" r="5" fill="#c0392b"/>${pts}</svg>
+   <div style="flex:1"><label><input type="checkbox" id="v3auto" ${v.auto?'checked':''}> Auto: look up the main slope</label><p class="hint" style="margin:2px 0 6px">Viewed from the <b>${dirOf(b)}</b> (${b}°): the red pointer is where you stand. Click a compass point or drag the slider.</p>
+   <input type="range" id="v3b" min="0" max="359" step="5" value="${b}" aria-label="Viewing direction"></div></div>
+   <div class="field"><label for="v3t">Camera height: <b id="v3tv">${v.tilt}°</b> above the horizon</label><input type="range" id="v3t" min="15" max="70" step="1" value="${v.tilt}"></div>
+   <div class="field"><label for="v3e">Height exaggeration: <b id="v3ev">${v.ex}×</b></label><input type="range" id="v3e" min="1" max="3" step="0.1" value="${v.ex}"></div>
+   <div class="field"><label for="v3z">Zoom: <b id="v3zv">${v.zoom}×</b></label><input type="range" id="v3z" min="0.6" max="2" step="0.05" value="${v.zoom}"></div>
+   <div class="field"><label>Draped image</label><div class="seg" id="v3d2">${[['relief','Relief'],['aerial','Aerial'],['current','As on screen']].map(([k,l])=>`<button data-v="${k}" aria-pressed="${v.drape===k}">${l}</button>`).join('')}</div></div></div>`}
 function wireSheet(el){const t=el.querySelector('#shTitle');if(!t)return;t.onchange=e=>lsSet('bt.shTitle',e.target.value);
   el.querySelector('#shDes').onchange=e=>{SO.designers=e.target.value;saveSO()};el.querySelector('#shVer').onchange=e=>{SO.version=e.target.value;saveSO()};
-  for(const [id,k] of [['shOr','orient'],['shBase','base'],['shTheme','theme'],['shFmt','fmt']])el.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{SO[k]=b.dataset.v;saveSO();el.querySelectorAll('#'+id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  el.querySelectorAll('#shBase button').forEach(b=>b.onclick=e=>{const k=b.dataset.v;if(e.ctrlKey||e.metaKey||e.shiftKey){SO.bases=SO.bases.includes(k)?SO.bases.filter(x=>x!==k):SO.bases.concat(k);if(!SO.bases.length)SO.bases=[k]}else SO.bases=[k];SO.base=SO.bases[0];saveSO();renderTools()});
+  const v=SO.v3,sv3=()=>{saveSO()};
+  el.querySelectorAll('#v3cmp [data-b]').forEach(n=>n.onclick=()=>{v.auto=false;v.bearing=+n.dataset.b;sv3();renderTools()});
+  const va=el.querySelector('#v3auto');if(va)va.onchange=()=>{v.auto=va.checked;if(!v.auto)v.bearing=Math.round(v3AutoBearing());sv3();renderTools()};
+  const vb=el.querySelector('#v3b');if(vb)vb.onchange=()=>{v.auto=false;v.bearing=+vb.value;sv3();renderTools()};
+  for(const [id,k,lab,suf] of [['v3t','tilt','v3tv','°'],['v3e','ex','v3ev','×'],['v3z','zoom','v3zv','×']]){const r=el.querySelector('#'+id);if(r){r.oninput=()=>{el.querySelector('#'+lab).textContent=r.value+suf};r.onchange=()=>{v[k]=+r.value;sv3()}}}
+  el.querySelectorAll('#v3d2 button').forEach(b=>b.onclick=()=>{v.drape=b.dataset.v;sv3();el.querySelectorAll('#v3d2 button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  for(const [id,k] of [['shOr','orient'],['shTheme','theme'],['shFmt','fmt']])el.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{SO[k]=b.dataset.v;saveSO();el.querySelectorAll('#'+id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
   el.querySelectorAll('[data-so]').forEach(c=>c.onchange=()=>{SO[c.dataset.so]=c.checked;saveSO()});
   const p=el.querySelector('#shProf');if(p)p.onchange=()=>{SO.profileId=p.value;saveSO()};
   el.querySelector('#shDefaults').onclick=()=>{const keep={designers:SO.designers,version:SO.version,profileId:SO.profileId,fmt:SO.fmt};SO=Object.assign({},SHEET_DEF,keep);saveSO();renderTools()};
@@ -1400,6 +1424,10 @@ const PANELS={
 };
 const PANEL_ORDER=['zones','legend','profile','water','slope','climate','sun','sectors','wb','schedule','stages','plants','fire','change'];
 
+function sheet3D(g,map){if(!V3.gl&&!v3Init())return null;V3.printBg=true;v3Build();V3.sheetBuilt=true;
+  const v=SO.v3;const b=v.auto?v3AutoBearing():v.bearing;const P=flat(T.lot);let cx=0,cy=0;P.forEach(p=>{cx+=p[0];cy+=p[1]});cx/=P.length;cy/=P.length;let span=0;P.forEach(p=>span=Math.max(span,dist(p,[cx,cy])));
+  V3.ex=v.ex;V3.yaw=(180-b)*Math.PI/180;V3.pitch=v.tilt*Math.PI/180;V3.dist=span*2.7/(v.zoom||1);const bx=V3.box;V3.tgt=[cx-(bx.x0+bx.L/2),((zAt(cx,cy)||V3.zmid)-V3.zmid)*v.ex,cy-(bx.y0+bx.L/2)];
+  v3Draw([map.w,map.h]);g.fillStyle='#fff';g.fillRect(map.x,map.y,map.w,map.h);g.drawImage($('#gl'),0,0,map.w,map.h,map.x,map.y,map.w,map.h);V3.printBg=false;V3.ex=+lsGet('bt.v3ex',1);return Math.round(b)}
 async function loadJsPDF(){if(window.jspdf)return window.jspdf;await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)});return window.jspdf}
 
 async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textContent='Drawing the sheet…';await new Promise(r=>setTimeout(r,30));
@@ -1407,24 +1435,26 @@ async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textCo
   const map=land?{x:M,y:M,w:1900,h:SH2-2*M}:{x:M,y:M,w:SW-2*M,h:1380};
   const sv={W,H,DPR,cx:view.cx,cy:view.cy,s:view.s,w:cv.width,h:cv.height,sel:selected,layers:JSON.parse(JSON.stringify(layers))};
   const wx0=view.cx-W/2/view.s,wx1=view.cx+W/2/view.s,wy0=view.cy-H/2/view.s,wy1=view.cy+H/2/view.s;
-  const callouts=[];
+  const bases=SO.bases&&SO.bases.length?SO.bases:['current'];const pages=[];const skippedAll=new Set();
   try{selected=null;
-    if(SO.base==='aerial'&&IMG.aerial){layers.base='aerial';layers.baseOp=1}else if(SO.base==='relief'){layers.base='relief';layers.baseOp=1}else if(SO.base==='paper'){layers.base='hillshade';layers.baseOp=.35;layers.overlay='none'}
+   for(const base of bases){Object.assign(layers,JSON.parse(JSON.stringify(sv.layers)));const callouts=[];const is3d=base==='3d';const bb=is3d?SO.v3.drape:base;
+    if(bb==='aerial'&&IMG.aerial){layers.base='aerial';layers.baseOp=1}else if(bb==='relief'){layers.base='relief';layers.baseOp=1}else if(bb==='paper'){layers.base='hillshade';layers.baseOp=.35;layers.overlay='none'}
     if(SO.theme==='ink'&&layers.base==='aerial')layers.baseOp=.6;
-    layers.c5=!!SO.contours;layers.c1=!!SO.contours;if(SO.callouts)layers.flabels=false;
+    layers.c5=!!SO.contours;layers.c1=!!SO.contours;if(SO.callouts&&!is3d)layers.flabels=false;if(is3d){layers.c1=false;layers.kp=false;layers.labels=false}
     window.__SHEETING=true;const DS=1.6;W=map.w/DS;H=map.h/DS;DPR=DS;cv.width=map.w;cv.height=map.h;fitBox(wx0,wy0,wx1,wy1,6);render();
     const sh=document.createElement('canvas');sh.width=SW;sh.height=SH2;const g=sh.getContext('2d');g.fillStyle='#ffffff';g.fillRect(0,0,SW,SH2);g.drawImage(cv,map.x,map.y);
+    let b3=null;if(is3d){b3=sheet3D(g,map);if(b3==null){toast('3D view needs WebGL, which is off in this browser');continue}}
     const toS=w=>[map.x+((w[0]-view.cx)*view.s+W/2)*DPR,map.y+((w[1]-view.cy)*view.s+H/2)*DPR];
     const mpp=1/(view.s*DPR);// metres per sheet pixel
     // ---- numbered callouts
-    if(SO.callouts){let n=0;for(const f of visList()){if((KINDS[f.kind]||{}).g==='Zones')continue;const g2=f.geom;const a=g2.g==='polygon'?interiorPoint(g2).p:centroid(f);if(!a)continue;const [sx,sy]=toS(a);if(sx<map.x+20||sy<map.y+20||sx>map.x+map.w-20||sy>map.y+map.h-20)continue;if(++n>40)break;callouts.push([n,f]);
+    if(SO.callouts&&!is3d){let n=0;for(const f of visList()){if((KINDS[f.kind]||{}).g==='Zones')continue;const g2=f.geom;const a=g2.g==='polygon'?interiorPoint(g2).p:centroid(f);if(!a)continue;const [sx,sy]=toS(a);if(sx<map.x+20||sy<map.y+20||sx>map.x+map.w-20||sy>map.y+map.h-20)continue;if(++n>40)break;callouts.push([n,f]);
       let px=sx,py=sy;const clash=(a,b)=>callouts.some(c=>c.pos&&Math.hypot(c.pos[0]-a,c.pos[1]-b)<34);
       if(clash(px,py)){search:for(const r of [34,52,70,90,112])for(let t=0;t<16;t++){const an=t*Math.PI/8;const qx=sx+Math.cos(an)*r,qy=sy+Math.sin(an)*r;if(!clash(qx,qy)){px=qx;py=qy;break search}}}
       callouts[callouts.length-1].pos=[px,py];
       if(px!==sx||py!==sy){g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=4;g.beginPath();g.moveTo(sx,sy);g.lineTo(px,py);g.stroke();g.strokeStyle=SC.ink;g.lineWidth=1.8;g.beginPath();g.moveTo(sx,sy);g.lineTo(px,py);g.stroke();g.fillStyle=SC.ink;g.beginPath();g.arc(sx,sy,4,0,7);g.fill()}
       g.fillStyle='#fff';g.strokeStyle=SC.ink;g.lineWidth=2.5;g.beginPath();g.arc(px,py,15,0,7);g.fill();g.stroke();shText(g,String(n),px,py+7,n>9?16:18,SC.ink,700,'center')}}
     // ---- grid
-    if(SO.grid){const span=map.w*mpp;const step=[25,50,100,200,500].find(s=>span/s<=12)||1000;const E0=T.E0,N0=T.N0;g.save();g.beginPath();g.rect(map.x,map.y,map.w,map.h);g.clip();
+    if(SO.grid&&!is3d){const span=map.w*mpp;const step=[25,50,100,200,500].find(s=>span/s<=12)||1000;const E0=T.E0,N0=T.N0;g.save();g.beginPath();g.rect(map.x,map.y,map.w,map.h);g.clip();
       const xa=view.cx-W/2/view.s,xb=view.cx+W/2/view.s,ya=view.cy-H/2/view.s,yb=view.cy+H/2/view.s;g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=1.5;
       const ex0=Math.ceil((E0+xa)/step)*step,ny0=Math.ceil((N0-yb)/step)*step;
       for(let E=ex0;E<E0+xb;E+=step){const sx=toS([E-E0,0])[0];g.beginPath();g.moveTo(sx,map.y);g.lineTo(sx,map.y+map.h);g.stroke()}
@@ -1435,7 +1465,9 @@ async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textCo
       g.textAlign='left';g.fillStyle=SC.mute;g.font='400 15px "IBM Plex Sans",sans-serif';g.fillText(`GDA2020 / MGA zone ${ZONE} · grid ${step} m`,map.x,map.y+map.h+(land?0:30)+ (land?-8:20))}
     g.strokeStyle=SC.ink;g.lineWidth=2;g.strokeRect(map.x,map.y,map.w,map.h);
     // ---- north arrow & scale bar
-    if(SO.north){const nx=map.x+map.w-70,ny=map.y+90;g.fillStyle='rgba(255,255,255,.88)';g.beginPath();g.arc(nx,ny,48,0,7);g.fill();g.fillStyle=SC.ink;g.beginPath();g.moveTo(nx,ny-36);g.lineTo(nx+18,ny+22);g.lineTo(nx,ny+10);g.closePath();g.fill();g.fillStyle='#8a948d';g.beginPath();g.moveTo(nx,ny-36);g.lineTo(nx-18,ny+22);g.lineTo(nx,ny+10);g.closePath();g.fill();shText(g,'N',nx,ny+44,22,SC.ink,700,'center');
+    if(is3d){const nx=map.x+map.w-80,ny=map.y+96;g.fillStyle='rgba(255,255,255,.9)';g.beginPath();g.arc(nx,ny,56,0,7);g.fill();g.save();g.translate(nx,ny);g.rotate(-(b3+180)*Math.PI/180);g.fillStyle=SC.ink;g.beginPath();g.moveTo(0,-40);g.lineTo(16,18);g.lineTo(0,8);g.closePath();g.fill();g.fillStyle='#8a948d';g.beginPath();g.moveTo(0,-40);g.lineTo(-16,18);g.lineTo(0,8);g.closePath();g.fill();shText(g,'N',0,-44,20,SC.ink,700,'center');g.restore();
+      const cap=`3D view from the ${dirOf(b3)} (looking ${dirOf(b3+180)}) · camera ${SO.v3.tilt}° above the horizon · heights ×${SO.v3.ex} · perspective, not to scale`;g.font='500 20px "IBM Plex Sans",sans-serif';const tw=g.measureText(cap).width;g.fillStyle='rgba(255,255,255,.9)';g.fillRect(map.x+20,map.y+map.h-58,tw+32,40);shText(g,cap,map.x+36,map.y+map.h-31,20,SC.ink,500)}
+    if(SO.north&&!is3d){const nx=map.x+map.w-70,ny=map.y+90;g.fillStyle='rgba(255,255,255,.88)';g.beginPath();g.arc(nx,ny,48,0,7);g.fill();g.fillStyle=SC.ink;g.beginPath();g.moveTo(nx,ny-36);g.lineTo(nx+18,ny+22);g.lineTo(nx,ny+10);g.closePath();g.fill();g.fillStyle='#8a948d';g.beginPath();g.moveTo(nx,ny-36);g.lineTo(nx-18,ny+22);g.lineTo(nx,ny+10);g.closePath();g.fill();shText(g,'N',nx,ny+44,22,SC.ink,700,'center');
       const target=map.w*mpp*0.22;const nice=[10,20,25,50,100,200,250,500,1000].reduce((b,v)=>v<=target?v:b,10);const bl=nice/mpp;const bx=map.x+40,by=map.y+map.h-60;
       g.font='400 16px "IBM Plex Sans",sans-serif';g.fillStyle='rgba(255,255,255,.88)';g.fillRect(bx-16,by-38,bl+40+g.measureText('1:00,000 at A3').width+30,70);for(let i=0;i<4;i++){g.fillStyle=i%2?'#fff':SC.ink;g.fillRect(bx+i*bl/4,by,bl/4,12)}g.strokeStyle=SC.ink;g.lineWidth=2;g.strokeRect(bx,by,bl,12);
       shText(g,'0',bx,by-10,18,SC.ink,500,'center');shText(g,nice+' m',bx+bl,by-10,18,SC.ink,500,'center');const scale=Math.round(map.w*mpp*1000/(land?(420*map.w/SW):(297*map.w/SW))/10)*10;shText(g,`1:${scale.toLocaleString()} at A3`,bx+bl+16,by+12,16,SC.mute)}
@@ -1445,13 +1477,15 @@ async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textCo
       const k=iw/sz;const toI=p=>[ix+(p[0]-x0)*k,iy+(p[1]-y0)*k];g.save();g.fillStyle='#fff';g.fillRect(ix-6,iy-6,iw+12,ih+12);g.beginPath();g.rect(ix,iy,iw,ih);g.clip();
       const im=IMG.relief||IMG.hillshade;if(im)g.drawImage(im,x0/2*(im.width/1000),y0/2*(im.height/1000),sz/2*(im.width/1000),sz/2*(im.height/1000),ix,iy,iw,ih);
       const poly=(P,stroke,fill,lw,dash)=>{g.beginPath();P.forEach((p,i)=>{const q=toI(p);i?g.lineTo(...q):g.moveTo(...q)});g.closePath();if(fill){g.fillStyle=fill;g.fill()}g.setLineDash(dash||[]);g.strokeStyle=stroke;g.lineWidth=lw;g.stroke();g.setLineDash([])};
-      poly(cp,'#1969c8','rgba(60,140,220,.12)',2.5,[8,5]);poly(lp,SC.teal,null,4);const a=toI([wx0,wy0]),b=toI([wx1,wy1]);g.strokeStyle='#c0392b';g.lineWidth=3;g.strokeRect(a[0],a[1],b[0]-a[0],b[1]-a[1]);g.restore();
-      g.fillStyle='#fff';g.fillRect(ix-6,iy+ih+6,iw+12,34);g.strokeStyle=SC.ink;g.lineWidth=2;g.strokeRect(ix-6,iy-6,iw+12,ih+46);shText(g,'Lot (teal), catchment (blue), this view (red)',ix+4,iy+ih+30,15,SC.ink,500)}
+      poly(cp,'#1969c8','rgba(60,140,220,.12)',2.5,[8,5]);poly(lp,SC.teal,null,4);
+      if(is3d){let lx=0,ly=0;lp.forEach(p=>{lx+=p[0];ly+=p[1]});lx/=lp.length;ly/=lp.length;const c=toI([lx,ly]);const r=b3*Math.PI/180,d=iw*0.42;const e=[c[0]+Math.sin(r)*d,c[1]-Math.cos(r)*d];g.strokeStyle='#c0392b';g.lineWidth=4;g.beginPath();g.moveTo(...e);g.lineTo(c[0]+Math.sin(r)*d*0.25,c[1]-Math.cos(r)*d*0.25);g.stroke();g.fillStyle='#c0392b';g.beginPath();g.arc(e[0],e[1],9,0,7);g.fill()}
+      else{const a=toI([wx0,wy0]),b=toI([wx1,wy1]);g.strokeStyle='#c0392b';g.lineWidth=3;g.strokeRect(a[0],a[1],b[0]-a[0],b[1]-a[1])}g.restore();
+      g.fillStyle='#fff';g.fillRect(ix-6,iy+ih+6,iw+12,34);g.strokeStyle=SC.ink;g.lineWidth=2;g.strokeRect(ix-6,iy-6,iw+12,ih+46);shText(g,is3d?'Lot (teal), catchment (blue), camera (red)':'Lot (teal), catchment (blue), this view (red)',ix+4,iy+ih+30,15,SC.ink,500)}
     // ---- title block
     const P0=land?{x:map.x+map.w+56,y:M,w:SW-(map.x+map.w+56)-M}:{x:M,y:map.y+map.h+60,w:SW-2*M};
     let ty=P0.y;const title=($('#shTitle')&&$('#shTitle').value)||SITE.name;g.fillStyle=SC.ink;g.textAlign='left';
     const tW=land?P0.w:P0.w*0.55;g.font='700 66px "Barlow Condensed","Arial Narrow",sans-serif';{const ws=title.split(' ');let line='';for(const w0 of ws){const tt=line?line+' '+w0:w0;if(g.measureText(tt).width>tW&&line){g.fillText(line,P0.x,ty+60);ty+=66;line=w0}else line=tt}g.fillText(line,P0.x,ty+60);ty+=96}
-    const meta=[SITE.subtitle||'',SITEDEF&&SITEDEF.group?SITEDEF.group:'',`${new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})} · ${SO.version||''}`].filter(Boolean).join(' · ');
+    const LBL={current:'',aerial:'Aerial base',relief:'Relief base',paper:'Clean base','3d':'3D view from the '+(b3!=null?dirOf(b3):'')};const meta=[LBL[base]||'',SITE.subtitle||'',SITEDEF&&SITEDEF.group?SITEDEF.group:'',`${new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})} · ${SO.version||''}`].filter(Boolean).join(' · ');
     ty+=shWrap(g,meta,P0.x,ty+4,tW,22,SC.mute,30);if(SO.designers)ty+=shWrap(g,'Design: '+SO.designers,P0.x,ty+4,tW,22,SC.ink,30);
     if(SO.concept){const sw=310;const sx=land?P0.x:P0.x+P0.w-sw,sy=land?ty+10:P0.y+6;g.strokeStyle='#c0392b';g.lineWidth=3;g.strokeRect(sx,sy,sw,54);shText(g,'CONCEPT DESIGN',sx+sw/2,sy+25,22,'#c0392b',700,'center');shText(g,'not for construction',sx+sw/2,sy+46,16,'#c0392b',400,'center');if(land)ty+=76}
     if(SO.theme!=='ink'){}
@@ -1471,15 +1505,21 @@ async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textCo
     const fy=SH2-M-50;const fx=land?P0.x:M,fw=land?P0.w:SW-2*M;const bnote=/cadastre/i.test(SITE.boundaryNote||'')?'Boundary: Queensland surveyed cadastre (about ±1 m).':'Boundary approximate: check against the title plan.';
     const src=`Terrain: ${SITE.source||('LiDAR '+SITE.main+', '+SITE.res)}. ${bnote} Rain: ${RAIN.station}.${layers.base==='aerial'&&IMG.aerial?' Aerial: '+(SITE.state==='NSW'?'NSW Spatial Services':'State of Queensland')+' (CC BY 4.0).':''} Concept design only: earthworks, dams and buildings need engineering and approvals.`;
     g.strokeStyle=SC.faint;g.lineWidth=2;g.beginPath();g.moveTo(fx,fy-14);g.lineTo(fx+fw,fy-14);g.stroke();shWrap(g,src,fx,fy+8,fw,15,SC.mute,20);
-    if(skipped.length)toast(`No room for: ${skipped.join(', ')}. Untick a few panels or switch orientation.`);
+    skipped.forEach(k=>skippedAll.add(k));pages.push({sh,base,land});
+   }
+    if(skippedAll.size)toast(`No room for: ${[...skippedAll].join(', ')}. Untick a few panels or switch orientation.`);
+    if(!pages.length)return;
     // ---- save
-    const base=slug()+'-design-sheet';
-    if(SO.fmt==='pdf'){try{const {jsPDF}=await loadJsPDF();const pdf=new jsPDF({orientation:land?'landscape':'portrait',unit:'mm',format:'a3',compress:true});const data=sh.toDataURL('image/jpeg',0.92);pdf.addImage(data,'JPEG',0,0,land?420:297,land?297:420);
-        const blob=pdf.output('blob');if(downloads){await downloads.save({filename:base+'.pdf',data:blob});toast('Saved the A3 PDF')}else{window.__sheet=blob;toast('Downloads are not available in this view')}return}
-      catch(e){if(e&&e.code==='declined')return;toast('PDF maker did not load, so saving a PNG instead')}}
-    const blob=await new Promise(r=>sh.toBlob(r,'image/png'));
-    if(downloads){try{await downloads.save({filename:base+'.png',data:blob});toast('Saved the A3 sheet')}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start')}}else{window.__sheet=blob;toast('Downloads are not available in this view')}
-  }finally{window.__SHEETING=false;W=sv.W;H=sv.H;DPR=sv.DPR;view.cx=sv.cx;view.cy=sv.cy;view.s=sv.s;selected=sv.sel;Object.assign(layers,sv.layers);resize();btn.disabled=false;btn.textContent='Download A3 sheet'}}
+    const base0=slug()+'-design-sheet';const W_=land?420:297,H_=land?297:420;
+    if(SO.fmt==='pdf'){try{const {jsPDF}=await loadJsPDF();const pdf=new jsPDF({orientation:land?'landscape':'portrait',unit:'mm',format:'a3',compress:true});
+        pages.forEach((pg,i)=>{if(i)pdf.addPage('a3',land?'landscape':'portrait');pdf.addImage(pg.sh.toDataURL('image/jpeg',0.92),'JPEG',0,0,W_,H_)});
+        const blob=pdf.output('blob');if(downloads){await downloads.save({filename:base0+'.pdf',data:blob});toast(pages.length>1?`Saved a ${pages.length}-page A3 PDF`:'Saved the A3 PDF')}else{window.__sheet=blob;window.__sheets=pages;toast('Downloads are not available in this view')}return}
+      catch(e){if(e&&e.code==='declined')return;toast('PDF maker did not load, so saving PNG images instead')}}
+    window.__sheets=pages;
+    for(const pg of pages){const blob=await new Promise(r=>pg.sh.toBlob(r,'image/png'));window.__sheet=blob;
+      if(downloads){try{await downloads.save({filename:base0+(pages.length>1?'-'+pg.base:'')+'.png',data:blob})}catch(e){if(e&&e.code==='declined')return;toast('Download did not start');return}}}
+    if(downloads)toast(pages.length>1?`Saved ${pages.length} A3 images`:'Saved the A3 sheet');else toast('Downloads are not available in this view')
+  }finally{window.__SHEETING=false;V3.printBg=false;W=sv.W;H=sv.H;DPR=sv.DPR;view.cx=sv.cx;view.cy=sv.cy;view.s=sv.s;selected=sv.sel;Object.assign(layers,sv.layers);resize();if(V3.on&&V3.sheetBuilt){V3.sheetBuilt=false;try{v3Build()}catch(e){}}btn.disabled=false;btn.textContent='Download A3 sheet'}}
 
 
 
@@ -1573,8 +1613,8 @@ function v3Build(){const gl=V3.gl,b=v3Box(),N=256,L=b.L;V3.L=L;V3.box=b;
   V3.tex=tx;v3Reset();if(V3.sun)sunSet(V3.sunT)}
 function v3Reset(){V3.yaw=0;V3.pitch=.62;V3.dist=V3.L*1.15;V3.tgt=[0,0,0];v3Draw()}
 function mat4Mul(a,b){const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s}return o}
-function v3Draw(){const gl=V3.gl;if(!gl||!V3.buf)return;const c=$('#gl');const r=c.getBoundingClientRect(),dp=Math.min(2,window.devicePixelRatio||1);const w=Math.max(1,Math.round(r.width*dp)),h=Math.max(1,Math.round(r.height*dp));if(c.width!==w||c.height!==h){c.width=w;c.height=h}
-  gl.viewport(0,0,w,h);{const sn=V3.sun&&V3.sunNow;const day=sn?Math.max(0,Math.min(1,(sn.alt+4)/14)):1;gl.clearColor(.16+.7*day,.2+.7*day,.32+.61*day,1)}gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
+function v3Draw(sz){const gl=V3.gl;if(!gl||!V3.buf)return;const c=$('#gl');const r=c.getBoundingClientRect(),dp=Math.min(2,window.devicePixelRatio||1);const w=sz?sz[0]:Math.max(1,Math.round(r.width*dp)),h=sz?sz[1]:Math.max(1,Math.round(r.height*dp));if(c.width!==w||c.height!==h){c.width=w;c.height=h}
+  gl.viewport(0,0,w,h);{const sn=V3.sun&&V3.sunNow;const day=sn?Math.max(0,Math.min(1,(sn.alt+4)/14)):1;if(V3.printBg)gl.clearColor(1,1,1,1);else gl.clearColor(.16+.7*day,.2+.7*day,.32+.61*day,1)}gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
   const f=1/Math.tan(22*Math.PI/180),asp=w/h,near=V3.dist/50,far=V3.dist*6+V3.L*4;
   const P=new Float32Array([f/asp,0,0,0,0,f,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]);
   const cp=Math.cos(V3.pitch),eye=[V3.tgt[0]+V3.dist*cp*Math.sin(V3.yaw),V3.tgt[1]+V3.dist*Math.sin(V3.pitch),V3.tgt[2]+V3.dist*cp*Math.cos(V3.yaw)];
