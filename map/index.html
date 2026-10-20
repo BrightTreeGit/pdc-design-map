@@ -268,6 +268,7 @@ const KINDS={
   hugel:{g:'Plants',label:'Hugelkultur / wicking bed',geom:'polygon',color:'#7d6b3a'},
   habitat:{g:'Landscape',label:'Habitat: nest box, log pile',geom:'point',color:'#4a6b3a',sym:'diamond'},
   seating:{g:'Landscape',label:'Seating / meditation spot',geom:'point',color:'#9a6aa0',sym:'circle'},
+  section:{g:'Observe',label:'Cross-section A–B',geom:'line',color:'#c0392b',dash:[10,5]},
   note:{g:'Observe',label:'Note',geom:'point',color:'#b0306a',sym:'pin'},
   obs:{g:'Observe',label:'Observation',geom:'point',color:'#6a3fa0',sym:'pin'},
   damwall:{g:'Water',label:'Dam wall',geom:'line',color:'#0b5c8f',w:4},
@@ -281,8 +282,8 @@ const SITES=[
  {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true},
  {id:'bright-tree-gemini',name:'Bright Tree (auto data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, auto-fetched boundary and rainfall',ready:true},
  {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true},
- {id:'nimbin',name:'Nimbin site',group:'Group 1',area:'Nimbin, NSW',status:'Paused: NSW download services failing; 5 m elevation as a fallback'},
- {id:'willow-vale',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW',status:'Paused: NSW download services failing; 5 m elevation as a fallback'},
+ {id:'nimbin',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW',ready:true},
+ {id:'willow-vale',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW',ready:true},
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'Trial',area:'Kin Kin, Qld',ready:true},
  {id:'regenify',name:'Regenify',group:'Trial',area:'Location to come',status:'Location to come'}];
 const SITEID=(()=>{let h='';try{h=(location.hash.match(/site=([\w-]+)/)||[])[1]||''}catch(e){}const s=SITES.find(x=>x.id===h&&x.ready);return s?s.id:'bright-tree'})();
@@ -456,8 +457,10 @@ function interiorPoint(g){if(POLE.has(g))return POLE.get(g);const P=g.pts;let x0
   scan(x0+cell/2,y0+cell/2,x1,y1,cell);if(best){const b=best;scan(b[0]-cell,b[1]-cell,b[0]+cell,b[1]+cell,cell/5)}
   const r=best?{p:best,r:bd}:{p:centroid({geom:g}),r:0};POLE.set(g,r);return r}
 function darker(hex,k=.62){const n=parseInt(hex.slice(1),16);const c=[(n>>16)&255,(n>>8)&255,n&255].map(v=>Math.round(v*k));return `rgb(${c.join(',')})`}
+function drawSectionEnds(){for(const [id,f] of secOrder()){if(!vis(f)||f.geom.pts.length<2)continue;const [a,b]=secLetters(id);const P=f.geom.pts;
+  [[P[0],a],[P[P.length-1],b]].forEach(([p,t])=>{const [x,y]=w2s(...p);ctx.fillStyle='#fff';ctx.strokeStyle='#c0392b';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,11,0,7);ctx.fill();ctx.stroke();ctx.font='700 12px "IBM Plex Sans",sans-serif';ctx.fillStyle='#c0392b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,x,y+.5)})}}
 function drawFeatureLabels(){const L=[];
-  for(const [id,f] of features){if(!vis(f))continue;const k=KINDS[f.kind]||KINDS.note;const isZ=k.g==='Zones';if(isZ?!layers.zlabels:!layers.flabels)continue;const g=f.geom;
+  for(const [id,f] of features){if(!vis(f))continue;const k=KINDS[f.kind]||KINDS.note;const isZ=k.g==='Zones';if(f.kind==='section')continue;if(isZ?!layers.zlabels:!layers.flabels)continue;const g=f.geom;
     let a,inner=0;if(g.g==='polygon'){const ip=interiorPoint(g);a=ip.p;inner=ip.r*view.s}else{a=centroid(f);if(!a)continue;if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}if(a1<a0)a1+=360;const m=((a0+a1)/2)*Math.PI/180;a=[g.cx+Math.sin(m)*g.r*.72,g.cy-Math.cos(m)*g.r*.72]}}
     const [x,y]=w2s(...a);if(x<-200||y<-60||x>W+200||y>H+60)continue;
     const area=g.g==='polygon'?polyArea(g.pts):0;const name=f.name||k.label;
@@ -496,6 +499,7 @@ function drawLabels(){
     haloText(t,x,y+(p.kind==='tank'?-16:-18),10.5,col,'IBM Plex Sans')}
   if(layers.kp)for(const k of T.kp){const [x,y]=w2s(k.x,k.y);ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/4);ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.strokeRect(-6,-6,12,12);ctx.strokeStyle='#0b5c8f';ctx.lineWidth=1.6;ctx.setLineDash([3,2]);ctx.strokeRect(-6,-6,12,12);ctx.restore();ctx.setLineDash([]);if(view.s>0.6)haloText(`KP? ${k.z.toFixed(0)} m`,x,y-14,10.5,'#0b5c8f')}
   if(layers.design&&view.s>0.5)drawFeatureLabels();
+  if(layers.design)drawSectionEnds();
 }
 function drawScale(){const target=110/view.s;const nice=[1,2,5,10,20,25,50,100,200,250,500,1000];let m=nice[0];for(const n of nice)if(n<=target)m=n;const L=m*view.s;
   const x=W-L-16,y=H-18;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(x-6,y-16,L+12,24);ctx.strokeStyle='#222';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y-4);ctx.lineTo(x,y);ctx.lineTo(x+L,y);ctx.lineTo(x+L,y-4);ctx.stroke();
@@ -665,6 +669,7 @@ function click(w,e){
     if(k.geom==='sun'){commit({g:'sun',cx:+w[0].toFixed(1),cy:+w[1].toFixed(1),r:90});return}
     if(k.geom==='sector'){draft.pts.push(r1(w));if(draft.pts.length===3){const c=draft.pts[0];commit({g:'sector',cx:c[0],cy:c[1],r:+dist(c,draft.pts[1]).toFixed(1),a0:+bear(c,draft.pts[1]).toFixed(1),a1:+bear(c,draft.pts[2]).toFixed(1)})}draw();updateDrawbar();return}
     if(draft.pen&&draft.pts.length&&draft.preview&&draft.preview.length){draft.pts.push(...draft.preview);draft.preview=[]}else draft.pts.push(r1(w));
+    if(draft.kind==='section'&&draft.pts.length===2){commit({g:'line',pts:draft.pts});return}
     draw();updateDrawbar();return}
   const id=hitFeature(w);selected=id||null;if(id)showTab('feat');renderFeatures();draw()}
 const r1=w=>[+w[0].toFixed(1),+w[1].toFixed(1)];
@@ -676,7 +681,7 @@ function undoPoint(){if(!draft)return;draft.pts.pop();draft.preview=[];updateDra
 function finishDraft(){if(!draft)return;const k=KINDS[draft.kind];if(draft.preview&&draft.preview.length&&draft.pen){draft.pts.push(...draft.preview)}
   if(k.geom==='line'&&draft.pts.length>=2)commit({g:'line',pts:draft.pts});else if(k.geom==='polygon'&&draft.pts.length>=3)commit({g:'polygon',pts:draft.pts});else toast(k.geom==='polygon'?'A shape needs at least 3 points':'A line needs at least 2 points')}
 function updateDrawbar(){const b=$('#drawbar');if(!draft){b.hidden=true;return}const k=KINDS[draft.kind];b.hidden=false;
-  const help={point:'Click to place',sun:'Click the centre (e.g. the house)',sector:['Click the centre','Click where the sector starts (sets the radius)','Click where it ends (clockwise)'][Math.min(2,draft.pts.length)],line:draft.pen?'Click to fix each stretch along the grade':'Click to add points',polygon:'Click to add corners'}[k.geom];
+  const help={point:'Click to place',sun:'Click the centre (e.g. the house)',sector:['Click the centre','Click where the sector starts (sets the radius)','Click where it ends (clockwise)'][Math.min(2,draft.pts.length)],line:draft.kind==='section'?(draft.pts.length?'Click point B: the end of the cross-section':'Click point A: the start of the cross-section'):draft.pen?'Click to fix each stretch along the grade':'Click to add points',polygon:'Click to add corners'}[k.geom];
   const pen=k.geom==='line'&&k.grade!==undefined;
   const canFree=(k.geom==='polygon'||k.geom==='line')&&!draft.pen;
   const freeOpts=k.geom==='polygon'?[['off','Click points'],['box','⬚ Drag box'],['snap','✎ Auto'],['rect','▭ Rectangle'],['circle','◯ Circle'],['oval','⬭ Oval'],['tri','△ Triangle'],['smooth','✎ Freeform']]:[['off','Click points'],['smooth','✎ Sketch']];
@@ -690,7 +695,9 @@ function updateDrawbar(){const b=$('#drawbar');if(!draft){b.hidden=true;return}c
   if(pen){b.querySelector('#penon').onchange=e=>{gradePen.on=e.target.checked;draft.pen=gradePen.on;draft.preview=[];lsSet('bt.gradePen',gradePen);updateDrawbar();draw()};
     b.querySelector('#pengr').onchange=e=>{gradePen.grade=Math.max(0,Math.min(20,+e.target.value||0));lsSet('bt.gradePen',gradePen)};
     b.querySelector('#pendir').onclick=()=>{gradePen.dir=gradePen.dir==='down'?'up':'down';lsSet('bt.gradePen',gradePen);updateDrawbar()}}}
-function nextName(kind){const k=KINDS[kind];let n=1;for(const f of features.values())if(f.kind===kind)n++;return (k.g==='Zones'&&kind!=='goatzone')||k.geom==='sun'?k.label:`${k.label} ${n}`}
+function secOrder(){return [...features.entries()].filter(([i,f])=>f.kind==='section').sort((a,b)=>String(a[1].createdAt||'').localeCompare(String(b[1].createdAt||''))||a[0].localeCompare(b[0]))}
+function secLetters(id){const L='ABCDEFGHJKLMNPQRSTUVWXYZ';const k=secOrder().findIndex(([i])=>i===id);const n=k<0?secOrder().length:k;return [L[(2*n)%24],L[(2*n+1)%24]]}
+function nextName(kind){if(kind==='section'){const [a,b]=secLetters('__new__');return `Section ${a}–${b}`}const k=KINDS[kind];let n=1;for(const f of features.values())if(f.kind===kind)n++;return (k.g==='Zones'&&kind!=='goatzone')||k.geom==='sun'?k.label:`${k.label} ${n}`}
 async function commit(geom){const kind=draft.kind;const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const doc={kind,name:nextName(kind),status:'idea',notes:'',stage:defStage(kind),geom,createdBy:myId||null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'map'};
   features.set(id,doc);selected=id;draft=null;tool=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;showTab('feat');renderDraw();renderFeatures();renderTools();draw();
@@ -1251,6 +1258,7 @@ async function saveDam(){const r=mt.res,pts=mt.pts.slice();const H=mt.H;endMT();
 function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&mt.type==='dam'&&mt.res&&!mt.res.err?mt.res:null;
   const rain=dr?dr.catchHa*RAIN.mean.reduce((a,b)=>a+b,0)/100:0;
   el.innerHTML=
+   sec('t-section','Cross-section A–B',`<p class="hint">Click point A, then point B, to cut a side view through the land: ground shape, height, grade and the zones it crosses. Sections stay on the map (marked A–B, C–D…) and can go on the A3 sheet.</p><button class="btn primary" id="tSection">Draw a cross-section</button>${secOrder().map(([i,f])=>{const [a,b]=secLetters(i);const L=lineLen(f.geom.pts);return `<div class="row" style="margin-top:6px"><span style="flex:1"><b style="color:#c0392b">${a}–${b}</b> · ${Math.round(L)} m</span><button class="btn" data-secv="${i}">View profile</button></div>`}).join('')}`)+
    sec('t-ruler','Distance & area',`<p class="hint">Click points to measure a distance, then close it to get an area and perimeter. Shows map distance and the longer distance along the slope. Nothing is saved to the design.</p><button class="btn primary" id="tRuler">Measure distance or area</button>`)+
    sec('t-water','Water balance & tanks',wbHTML())+
    sec('t-head','Height & water pressure',`<p class="hint">Click two points to get the height difference, distance and the static pressure water would have flowing downhill between them. Use it to place tanks above the house and gardens: every 10 m of fall gives about 1 bar.</p><details class="mini"><summary>What pressure feels like</summary><dl class="facts"><dt>Under 15 kPa (1.5 m)</dt><dd>trickle: buckets, watering cans</dd><dt>15–50 kPa (1.5–5 m)</dt><dd>gravity drip kits, soaker hoses</dd><dt>50–100 kPa (5–10 m)</dt><dd>weak hose, microsprays, slow shower</dd><dt>100–200 kPa (10–20 m)</dt><dd>usable hose, most drip, modest shower</dd><dt>200–350 kPa (20–35 m)</dt><dd>like town water: showers, sprinklers</dd><dt>Over 500 kPa (50 m)</dt><dd>fit a pressure-limiting valve before the house</dd></dl><p class="hint">Pressure drops while water flows, more in long or thin pipes, so allow extra fall for long runs.</p></details><button class="btn primary" id="tMeasure">Measure between two points</button><div id="headRes">${pipeHTML(mt&&mt.type==='measure'?mt.res:null)}</div>`)+
@@ -1263,18 +1271,18 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
    sec('t-3d','3D print',p3HTML())+
    sec('t-sheet','Presentation sheet (A3 PDF)',sheetHTML())+
    sec('t-data','Export design data',`<div class="seg"><button class="btn" id="exGeo">GeoJSON</button><button class="btn" id="exKml">KML</button></div><p class="hint">KML opens in Google Earth, Avenza and Queensland Globe.</p>`);
-  wireWB(el);wireFire(el);wireGraze(el);$('#tRoute').onclick=()=>startMT('route');$('#tRuler').onclick=()=>startMT('ruler');$('#tMeasure').onclick=()=>startMT('measure');wirePipe(el);$('#tDam').onclick=()=>startMT('dam');
+  wireWB(el);wireFire(el);wireGraze(el);$('#tRoute').onclick=()=>startMT('route');$('#tRuler').onclick=()=>startMT('ruler');{const b=$('#tSection');if(b)b.onclick=()=>{showTab('draw');startTool('section')};el.querySelectorAll('[data-secv]').forEach(x=>x.onclick=()=>{selected=x.dataset.secv;showTab('feat');renderFeatures();zoomTo(features.get(selected));draw()})}$('#tMeasure').onclick=()=>startMT('measure');wirePipe(el);$('#tDam').onclick=()=>startMT('dam');
   wireSheet(el);
   $('#exGeo').onclick=()=>exportFile('geojson');$('#exKml').onclick=()=>exportFile('kml');wireP3(el);wireSecs(el)}
 /* ---------------- A3 presentation sheet: options, layout engine, panels, PNG or PDF ---------------- */
-const SHEET_DEF={orient:'land',base:'current',bases:['current'],v3:{auto:true,bearing:135,tilt:32,ex:1.6,drape:'relief',zoom:1},theme:'standard',fmt:'pdf',grid:true,north:true,inset:true,contours:true,callouts:false,legend:true,
+const SHEET_DEF={sections:true,orient:'land',base:'current',bases:['current'],v3:{auto:true,bearing:135,tilt:32,ex:1.6,drape:'relief',zoom:1},theme:'standard',fmt:'pdf',grid:true,north:true,inset:true,contours:true,callouts:false,legend:true,
   profile:true,profileId:'auto',slope:true,water:true,wb:false,climate:true,sun:true,sectors:true,zones:true,schedule:false,stages:false,plants:false,fire:false,change:false,
   designers:'',version:'v1',concept:true};
 let SO=Object.assign({},SHEET_DEF,lsGet('bt.sheet',{}));if(!Array.isArray(SO.bases)||!SO.bases.length)SO.bases=[SO.base||'current'];SO.v3=Object.assign({},SHEET_DEF.v3,SO.v3||{});
 const saveSO=()=>lsSet('bt.sheet',SO);
 const SHEET_GROUPS=[
  ['Map frame',[['grid','Coordinate grid & edge ticks (MGA)'],['north','North arrow & scale bar'],['inset','Locator inset (whole lot & catchment)'],['contours','Contours with height labels'],['callouts','Numbered callouts + feature key (instead of names)'],['legend','Legend']]],
- ['Land & water',[['profile','Contour profile (side view)'],['slope','Slope breakdown bar'],['water','Water summary'],['wb','Water balance (tank level by month)']]],
+ ['Land & water',[['sections','Cross-sections A–B you have drawn (up to 3)'],['profile','Contour profile (side view)'],['slope','Slope breakdown bar'],['water','Water summary'],['wb','Water balance (tank level by month)']]],
  ['Climate & energy',[['climate','Climate chart (rain & min temp)'],['sun','Sun summary'],['sectors','Sector wheel (sun arcs & drawn sectors)']]],
  ['Design',[['zones','Zone table'],['schedule','Feature schedule (existing vs proposed)'],['stages','Staging timeline'],['plants','Planting list']]],
  ['Risk & stewardship',[['fire','Fire panel'],['change','Ground change since earlier surveys']]],
@@ -1379,19 +1387,11 @@ const PANELS={
   const cold=visList().filter(f=>f.kind==='coldair');if(cold.length)key.push(['rgba(70,120,230,.6)','Cold air flow drawn ('+cold.length+')']);
   let ky=y+h+10;const kx=cx+R+30;for(const [c,t] of key.slice(0,8)){g.fillStyle=c;g.fillRect(kx,ky,18,18);ky+=shWrap(g,t,kx+26,ky+16,x+w-kx-26,18,SC.mute,22)+6}
   return Math.max(2*R+40,ky-y-h)+h+6},
- profile(g,x,y,w){let line=null;if(SO.profileId&&SO.profileId!=='auto'){const f=features.get(SO.profileId);if(f&&f.geom.g==='line')line={pts:f.geom.pts,name:f.name}}
+ profile(g,x,y,w){let line=null;if(SO.profileId&&SO.profileId!=='auto'){const f=features.get(SO.profileId);if(f&&f.geom.g==='line')line={pts:f.geom.pts,name:f.name,ends:f.kind==='section'?secLetters(SO.profileId):null}}
   if(!line){const P=flat(T.lot);let best=[0,0,0];for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const d=dist(P[i],P[j]);if(d>best[0])best=[d,i,j]}line={pts:[P[best[1]],P[best[2]]],name:'Longest line across the lot'}}
-  const S=densify(line.pts,2).filter(q=>isFinite(q.z)).map(q=>[q.d,q.z,[q.x,q.y]]);const L=S.length?S[S.length-1][0]:0;if(S.length<3)return 0;
-  let h=shHead(g,x,y,w,'Contour profile');const zs=S.map(s=>s[1]);const z0=Math.floor(Math.min(...zs)/5)*5,z1=Math.ceil(Math.max(...zs)/5)*5;const H0=170,px=d=>x+50+d/L*(w-56),py=z=>y+h+H0-(z-z0)/Math.max(1,z1-z0)*H0;
-  g.strokeStyle=SC.faint;g.lineWidth=1;for(let z=z0;z<=z1;z+=Math.max(5,Math.round((z1-z0)/4/5)*5)){g.beginPath();g.moveTo(x+50,py(z));g.lineTo(x+w,py(z));g.stroke();shText(g,z+' m',x+44,py(z)+6,15,SC.mute,400,'right')}
-  g.beginPath();g.moveTo(px(0),y+h+H0);S.forEach(s=>g.lineTo(px(s[0]),py(s[1])));g.lineTo(px(L),y+h+H0);g.closePath();g.fillStyle='rgba(138,106,69,.22)';g.fill();
-  g.beginPath();S.forEach((s,i)=>i?g.lineTo(px(s[0]),py(s[1])):g.moveTo(px(s[0]),py(s[1])));g.strokeStyle='#5a3d1c';g.lineWidth=3;g.stroke();
-  // zone and feature strip under the profile
-  const Z=zoneFeats();const pol=visList().filter(f=>f.geom.g==='polygon'&&(KINDS[f.kind]||{}).g!=='Zones'&&['pond','building','cabin','futurebuilding','foodforest','bed','shed','nursery','rockpool','reedbed'].includes(f.kind));
-  const sy=y+h+H0+6;for(let i=1;i<S.length;i++){const p=S[i][2];const z=Z.find(f=>inPoly(p,f.geom.pts));if(z){g.fillStyle=KINDS[z.kind].color;g.fillRect(px(S[i-1][0]),sy,px(S[i][0])-px(S[i-1][0])+1,12)}
-   const q=pol.find(f=>inPoly(p,f.geom.pts));if(q){g.fillStyle=KINDS[q.kind].color;g.fillRect(px(S[i-1][0]),py(S[i][1])-10,px(S[i][0])-px(S[i-1][0])+1,8)}}
-  const vex=(L/(w-56))/((z1-z0)/H0);h+=H0+26;
-  h+=shWrap(g,`${line.name}: ${Math.round(L)} m long, ${Math.round(Math.max(...zs)-Math.min(...zs))} m from lowest to highest point. Vertical scale exaggerated about ${vex.toFixed(1)}×; the coloured strip shows the zones along the line.`,x,y+h+16,w,17,SC.mute,22);return h+20},
+  return profBlock(g,x,y,w,line,'Contour profile')},
+ sections(g,x,y,w){const S=secOrder().filter(([i,f])=>vis(f)).slice(0,3);if(!S.length)return 0;let h=0;
+  for(const [id,f] of S){const [a,b]=secLetters(id);const hh=profBlock(g,x,y+h,w,{pts:f.geom.pts,name:`Section ${a}–${b}`,ends:[a,b]},`Cross-section ${a}–${b}`);h+=hh+6}return h},
  schedule(g,x,y,w){const F=visList().filter(f=>(KINDS[f.kind]||{}).g!=='Zones');if(!F.length)return 0;let h=shHead(g,x,y,w,'Feature schedule');const by={};
   for(const f of F){const k=f.kind;by[k]=by[k]||{e:0,p:0,a:0};if(f.stage==='existing')by[k].e++;else by[k].p++;if(f.geom.g==='polygon')by[k].a+=polyArea(f.geom.pts)}
   shText(g,'Existing',x+w-170,y+h+18,16,SC.mute,600,'right');shText(g,'Proposed',x+w-80,y+h+18,16,SC.mute,600,'right');h+=24;
@@ -1422,12 +1422,26 @@ const PANELS={
   lg.forEach(([c,l,v],i)=>{const cx=x+Math.floor(i/rows)*(cw+20),cy=y+h+(i%rows)*28;g.fillStyle=c;g.fillRect(cx,cy+4,18,18);g.font='400 18px "IBM Plex Sans",sans-serif';let t=l;while(g.measureText(t).width>cw-(v?110:30)&&t.length>4)t=t.slice(0,-2);if(t!==l)t+='…';shText(g,t,cx+26,cy+19,18,SC.ink);if(v)shText(g,v,cx+cw,cy+19,16,SC.mute,400,'right')});
   return h+rows*28+10}
 };
-const PANEL_ORDER=['zones','legend','profile','water','slope','climate','sun','sectors','wb','schedule','stages','plants','fire','change'];
+const PANEL_ORDER=['zones','legend','sections','profile','water','slope','climate','sun','sectors','wb','schedule','stages','plants','fire','change'];
 
 function sheet3D(g,map){if(!V3.gl&&!v3Init())return null;V3.printBg=true;v3Build();V3.sheetBuilt=true;
   const v=SO.v3;const b=v.auto?v3AutoBearing():v.bearing;const P=flat(T.lot);let cx=0,cy=0;P.forEach(p=>{cx+=p[0];cy+=p[1]});cx/=P.length;cy/=P.length;let span=0;P.forEach(p=>span=Math.max(span,dist(p,[cx,cy])));
   V3.ex=v.ex;V3.yaw=(180-b)*Math.PI/180;V3.pitch=v.tilt*Math.PI/180;V3.dist=span*2.7/(v.zoom||1);const bx=V3.box;V3.tgt=[cx-(bx.x0+bx.L/2),((zAt(cx,cy)||V3.zmid)-V3.zmid)*v.ex,cy-(bx.y0+bx.L/2)];
   v3Draw([map.w,map.h]);g.fillStyle='#fff';g.fillRect(map.x,map.y,map.w,map.h);g.drawImage($('#gl'),0,0,map.w,map.h,map.x,map.y,map.w,map.h);V3.printBg=false;V3.ex=+lsGet('bt.v3ex',1);return Math.round(b)}
+function profBlock(g,x,y,w,line,title){const S=densify(line.pts,2).filter(q=>isFinite(q.z)).map(q=>[q.d,q.z,[q.x,q.y]]);const L=S.length?S[S.length-1][0]:0;if(S.length<3)return 0;
+  let h=shHead(g,x,y,w,title);const zs=S.map(s=>s[1]);const z0=Math.floor(Math.min(...zs)/5)*5,z1=Math.ceil(Math.max(...zs)/5)*5;const H0=170,px=d=>x+50+d/L*(w-56),py=z=>y+h+H0-(z-z0)/Math.max(1,z1-z0)*H0;
+  g.strokeStyle=SC.faint;g.lineWidth=1;for(let z=z0;z<=z1;z+=Math.max(5,Math.round((z1-z0)/4/5)*5)){g.beginPath();g.moveTo(x+50,py(z));g.lineTo(x+w,py(z));g.stroke();shText(g,z+' m',x+44,py(z)+6,15,SC.mute,400,'right')}
+  g.beginPath();g.moveTo(px(0),y+h+H0);S.forEach(s=>g.lineTo(px(s[0]),py(s[1])));g.lineTo(px(L),y+h+H0);g.closePath();g.fillStyle='rgba(138,106,69,.22)';g.fill();
+  g.beginPath();S.forEach((s,i)=>i?g.lineTo(px(s[0]),py(s[1])):g.moveTo(px(s[0]),py(s[1])));g.strokeStyle='#5a3d1c';g.lineWidth=3;g.stroke();
+  const Z=zoneFeats();const pol=visList().filter(f=>f.geom.g==='polygon'&&(KINDS[f.kind]||{}).g!=='Zones'&&['pond','building','cabin','futurebuilding','foodforest','bed','shed','nursery','rockpool','reedbed','amenities'].includes(f.kind));
+  const sy=y+h+H0+6;for(let i=1;i<S.length;i++){const p=S[i][2];const z=Z.find(f=>inPoly(p,f.geom.pts));if(z){g.fillStyle=KINDS[z.kind].color;g.fillRect(px(S[i-1][0]),sy,px(S[i][0])-px(S[i-1][0])+1,12)}
+   const q=pol.find(f=>inPoly(p,f.geom.pts));if(q){g.fillStyle=KINDS[q.kind].color;g.fillRect(px(S[i-1][0]),py(S[i][1])-10,px(S[i][0])-px(S[i-1][0])+1,8)}}
+  // distance ticks
+  const st=[25,50,100,200,250,500].find(v=>L/v<=6)||1000;for(let d=0;d<=L;d+=st){g.fillStyle=SC.mute;g.fillRect(px(d)-1,sy+12,2,6);shText(g,d+' m',px(d),sy+34,14,SC.mute,400,'center')}
+  if(line.ends){const [a,b]=line.ends;for(const [t,d] of [[a,0],[b,L]]){const cx=px(d),cy=py(S[d?S.length-1:0][1])-24;g.fillStyle='#fff';g.strokeStyle='#c0392b';g.lineWidth=3;g.beginPath();g.arc(cx,cy,15,0,7);g.fill();g.stroke();shText(g,t,cx,cy+7,19,'#c0392b',700,'center')}}
+  const fall=Math.max(...zs)-Math.min(...zs);const gr=Math.abs(S[S.length-1][1]-S[0][1])/Math.max(1,L)*100;let mx=0;for(let i=5;i<S.length;i+=1){const k=Math.max(0,i-5);mx=Math.max(mx,Math.abs(S[i][1]-S[k][1])/Math.max(1,S[i][0]-S[k][0])*100)}
+  const vex=(L/(w-56))/((z1-z0)/H0);h+=H0+44;
+  h+=shWrap(g,`${line.name}: ${Math.round(L)} m long, ${Math.round(fall)} m between lowest and highest point, end-to-end grade ${gr.toFixed(0)}%, steepest stretch about ${Math.round(mx)}%. Vertical scale exaggerated about ${vex.toFixed(1)}×; the strip shows zones along the line.`,x,y+h+16,w,17,SC.mute,22);return h+20}
 async function loadJsPDF(){if(window.jspdf)return window.jspdf;await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)});return window.jspdf}
 
 async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textContent='Drawing the sheet…';await new Promise(r=>setTimeout(r,30));
@@ -1835,7 +1849,7 @@ const OBS_CATS=['Soil test','Water / drainage','Frost / climate','Wildlife','Wee
 function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))return; // don't clobber typing
   const f=selected&&features.get(selected);
   if(f){const k=KINDS[f.kind]||KINDS.note;const m=measure(f);const by=f.createdBy?(nameCache[f.createdBy]||'…'):(f.source==='claude'?'Claude':'Unknown');if(f.createdBy&&!nameCache[f.createdBy])names([f.createdBy]).then(()=>renderFeatures());
-    const isPlant=f.kind==='tree'||f.kind==='guild',isObs=k.g==='Observe';const warns=isPlant?plantWarnings(f):[];
+    const isPlant=f.kind==='tree'||f.kind==='guild',isObs=k.g==='Observe'&&f.kind!=='section';const warns=isPlant?plantWarnings(f):[];
     el.innerHTML=`<button class="btn" id="back">← All features</button>
     <h2>${esc(k.label)}</h2>
     <div class="field"><label for="fname">Name</label><input id="fname" value="${esc(f.name)}"></div>
@@ -1897,7 +1911,9 @@ function drawProfile(f){const c=$('#profile');const r=c.getBoundingClientRect();
   const X=v=>pad+v/L*w,Y=v=>6+(1-(v-z0)/(z1-z0))*h;g.strokeStyle=css('--line');g.lineWidth=1;g.beginPath();g.moveTo(pad,6);g.lineTo(pad,6+h);g.lineTo(pad+w,6+h);g.stroke();
   g.fillStyle=css('--muted');g.font='10px "IBM Plex Mono",monospace';g.textAlign='right';g.fillText(z1.toFixed(0),pad-3,12);g.fillText(z0.toFixed(0),pad-3,6+h);g.textAlign='center';g.fillText(Math.round(L)+' m',pad+w-14,r.height-4);
   g.beginPath();d.forEach((q,i)=>i?g.lineTo(X(q.d),Y(q.z)):g.moveTo(X(q.d),Y(q.z)));g.lineTo(X(L),6+h);g.lineTo(X(0),6+h);g.closePath();g.fillStyle=hexA((KINDS[f.kind]||KINDS.note).color,.2);g.fill();
-  g.beginPath();d.forEach((q,i)=>i?g.lineTo(X(q.d),Y(q.z)):g.moveTo(X(q.d),Y(q.z)));g.strokeStyle=(KINDS[f.kind]||KINDS.note).color;g.lineWidth=1.8;g.stroke()}
+  g.beginPath();d.forEach((q,i)=>i?g.lineTo(X(q.d),Y(q.z)):g.moveTo(X(q.d),Y(q.z)));g.strokeStyle=(KINDS[f.kind]||KINDS.note).color;g.lineWidth=1.8;g.stroke();
+  const Z=zoneFeats();for(let i=1;i<d.length;i++){const z=Z.find(zf=>inPoly([d[i].x,d[i].y],zf.geom.pts));if(z){g.fillStyle=KINDS[z.kind].color;g.fillRect(X(d[i-1].d),6+h-4,X(d[i].d)-X(d[i-1].d)+.5,4)}}
+  if(f.kind==='section'){const [a,b]=secLetters([...features.entries()].find(([i,x])=>x===f)?.[0]);g.font='700 12px "IBM Plex Sans",sans-serif';g.fillStyle='#c0392b';g.textAlign='left';g.fillText(a,pad+3,16);g.textAlign='right';g.fillText(b,pad+w-2,16)}}
 function geoOf(f){const g=f.geom,ll=q=>xy2ll(q[0],q[1]).map(v=>+v.toFixed(7));
   if(g.g==='point')return {type:'Point',coordinates:ll(g.pts[0])};if(g.g==='line')return {type:'LineString',coordinates:g.pts.map(ll)};if(g.g==='polygon')return {type:'Polygon',coordinates:[g.pts.concat([g.pts[0]]).map(ll)]};
   let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(KINDS[f.kind].decl);a0=b.set;a1=b.rise}if(a1<=a0)a1+=360;const ring=[[g.cx,g.cy]];for(let a=a0;a<=a1+.01;a+=5){const r=a*Math.PI/180;ring.push([g.cx+Math.sin(r)*g.r,g.cy-Math.cos(r)*g.r])}ring.push([g.cx,g.cy]);return {type:'Polygon',coordinates:[ring.map(ll)]}}
