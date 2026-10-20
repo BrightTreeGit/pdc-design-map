@@ -429,7 +429,7 @@ function render(){
   // screen-space overlays
   ctx.setTransform(DPR,0,0,DPR,0,0);
   if(layers.labels)drawLabels();
-  if(!(typeof V3!=='undefined'&&V3.tex2d))drawScale();
+  if(!(typeof V3!=='undefined'&&V3.tex2d)&&!window.__SHEETING)drawScale();
 }
 const PRC={pond:'#0d5fa8',pad:'#a14e07',tank:'#0d5fa8',flat:'#3f7a1f'};
 function drawPros(px){for(const p of PROS.items){const c=PRC[p.kind];ctx.setLineDash([]);
@@ -1261,33 +1261,226 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
    sec('t-fire','Bushfire site check',fireHTML())+
    sec('t-graze','Grazing & paddocks',grazeHTML(),false)+
    sec('t-3d','3D print',p3HTML())+
-   sec('t-sheet','Presentation sheet',`<p class="hint">An A3 landscape image of the current map view with a title block, legend of your design, zone areas, scale and north arrow. Frame the view first, then download.</p><div class="field"><label for="shTitle">Title</label><input id="shTitle" value="${esc(lsGet('bt.shTitle','Bright Tree permaculture design'))}"></div><button class="btn primary" id="tSheet">Download A3 sheet (PNG)</button>`)+
+   sec('t-sheet','Presentation sheet (A3 PDF)',sheetHTML())+
    sec('t-data','Export design data',`<div class="seg"><button class="btn" id="exGeo">GeoJSON</button><button class="btn" id="exKml">KML</button></div><p class="hint">KML opens in Google Earth, Avenza and Queensland Globe.</p>`);
   wireWB(el);wireFire(el);wireGraze(el);$('#tRoute').onclick=()=>startMT('route');$('#tRuler').onclick=()=>startMT('ruler');$('#tMeasure').onclick=()=>startMT('measure');wirePipe(el);$('#tDam').onclick=()=>startMT('dam');
-  $('#shTitle').onchange=e=>lsSet('bt.shTitle',e.target.value);$('#tSheet').onclick=()=>exportSheet();
+  wireSheet(el);
   $('#exGeo').onclick=()=>exportFile('geojson');$('#exKml').onclick=()=>exportFile('kml');wireP3(el);wireSecs(el)}
+/* ---------------- A3 presentation sheet: options, layout engine, panels, PNG or PDF ---------------- */
+const SHEET_DEF={orient:'land',base:'current',theme:'standard',fmt:'pdf',grid:true,north:true,inset:true,contours:true,callouts:false,legend:true,
+  profile:true,profileId:'auto',slope:true,water:true,wb:false,climate:true,sun:true,sectors:true,zones:true,schedule:false,stages:false,plants:false,fire:false,change:false,
+  designers:'',version:'v1',concept:true};
+let SO=Object.assign({},SHEET_DEF,lsGet('bt.sheet',{}));
+const saveSO=()=>lsSet('bt.sheet',SO);
+const SHEET_GROUPS=[
+ ['Map frame',[['grid','Coordinate grid & edge ticks (MGA)'],['north','North arrow & scale bar'],['inset','Locator inset (whole lot & catchment)'],['contours','Contours with height labels'],['callouts','Numbered callouts + feature key (instead of names)'],['legend','Legend']]],
+ ['Land & water',[['profile','Contour profile (side view)'],['slope','Slope breakdown bar'],['water','Water summary'],['wb','Water balance (tank level by month)']]],
+ ['Climate & energy',[['climate','Climate chart (rain & min temp)'],['sun','Sun summary'],['sectors','Sector wheel (sun arcs & drawn sectors)']]],
+ ['Design',[['zones','Zone table'],['schedule','Feature schedule (existing vs proposed)'],['stages','Staging timeline'],['plants','Planting list']]],
+ ['Risk & stewardship',[['fire','Fire panel'],['change','Ground change since earlier surveys']]],
+ ['Title block',[['concept','“Concept design” stamp']]]];
+function sheetHTML(){const lines=[...features.entries()].filter(([i,f])=>f.geom.g==='line');
+  const seg=(id,opts,v)=>`<div class="seg" id="${id}">${opts.map(([k,l])=>`<button data-v="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}</div>`;
+  return `<p class="hint">An A3 sheet of the current map view with a title block and the panels you tick. Frame the view first, then download.</p>
+  <div class="field"><label for="shTitle">Title</label><input id="shTitle" value="${esc(lsGet('bt.shTitle',(SITE.name||'Site')+' permaculture design'))}"></div>
+  <div class="row"><div class="field" style="flex:2"><label for="shDes">Designers (first names)</label><input id="shDes" value="${esc(SO.designers)}" placeholder="e.g. Dave, Sam, Kira"></div><div class="field" style="flex:1"><label for="shVer">Version</label><input id="shVer" value="${esc(SO.version)}"></div></div>
+  <div class="field"><label>Page</label>${seg('shOr',[['land','Landscape'],['port','Portrait']],SO.orient)}</div>
+  <div class="field"><label>Base map</label>${seg('shBase',[['current','As on screen'],['aerial','Aerial'],['relief','Relief'],['paper','Clean paper']],SO.base)}</div>
+  <div class="field"><label>Style</label>${seg('shTheme',[['standard','Standard'],['ink','Ink-saving']],SO.theme)}</div>
+  <div class="field"><label>File</label>${seg('shFmt',[['pdf','PDF'],['png','PNG image']],SO.fmt)}</div>
+  ${SHEET_GROUPS.map(([h,items])=>`<h3 style="margin:10px 0 2px;font-size:13px">${h}</h3>`+items.map(([k,l])=>`<div class="row"><label><input type="checkbox" data-so="${k}" ${SO[k]?'checked':''}> ${l}</label></div>`+(k==='profile'?`<div class="field" style="margin:0 0 4px 22px"><select id="shProf" aria-label="Profile line"><option value="auto" ${SO.profileId==='auto'?'selected':''}>Automatic: longest line across the lot</option>${lines.map(([i,f])=>`<option value="${i}" ${SO.profileId===i?'selected':''}>${esc(f.name||KINDS[f.kind].label)}</option>`).join('')}</select><p class="hint" style="margin:2px 0 0">Draw any line (a path, flow or pipe) to profile along it.</p></div>`:'')).join('')).join('')}
+  <div class="row" style="gap:6px;margin-top:8px"><button class="btn" id="shDefaults">Suggested set</button><button class="btn primary" id="tSheet">Download A3 sheet</button></div>`}
+function wireSheet(el){const t=el.querySelector('#shTitle');if(!t)return;t.onchange=e=>lsSet('bt.shTitle',e.target.value);
+  el.querySelector('#shDes').onchange=e=>{SO.designers=e.target.value;saveSO()};el.querySelector('#shVer').onchange=e=>{SO.version=e.target.value;saveSO()};
+  for(const [id,k] of [['shOr','orient'],['shBase','base'],['shTheme','theme'],['shFmt','fmt']])el.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{SO[k]=b.dataset.v;saveSO();el.querySelectorAll('#'+id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  el.querySelectorAll('[data-so]').forEach(c=>c.onchange=()=>{SO[c.dataset.so]=c.checked;saveSO()});
+  const p=el.querySelector('#shProf');if(p)p.onchange=()=>{SO.profileId=p.value;saveSO()};
+  el.querySelector('#shDefaults').onclick=()=>{const keep={designers:SO.designers,version:SO.version,profileId:SO.profileId,fmt:SO.fmt};SO=Object.assign({},SHEET_DEF,keep);saveSO();renderTools()};
+  el.querySelector('#tSheet').onclick=()=>exportSheet()}
+
+const SC={ink:'#1d2621',mute:'#5d6a62',faint:'#d3d9d0',teal:'#14898f',blue:'#1969c8',panel:'#f5f6f2'};
+function shHead(g,x,y,w,t){g.fillStyle=SC.ink;g.font='600 30px "Barlow Condensed","Arial Narrow",sans-serif';g.textAlign='left';g.textBaseline='alphabetic';g.fillText(t.toUpperCase(),x,y+28);g.strokeStyle=SC.faint;g.lineWidth=2;g.beginPath();g.moveTo(x,y+40);g.lineTo(x+w,y+40);g.stroke();return 52}
+function shText(g,t,x,y,size=22,col=SC.ink,weight=400,align='left'){g.font=`${weight} ${size}px "IBM Plex Sans",sans-serif`;g.fillStyle=col;g.textAlign=align;g.textBaseline='alphabetic';g.fillText(t,x,y)}
+function shWrap(g,t,x,y,w,size=22,col=SC.mute,lh=28){g.font=`400 ${size}px "IBM Plex Sans",sans-serif`;g.fillStyle=col;g.textAlign='left';const ws=String(t).split(' ');let line='',yy=y;for(const wd of ws){const tt=line?line+' '+wd:wd;if(g.measureText(tt).width>w&&line){g.fillText(line,x,yy);yy+=lh;line=wd}else line=tt}if(line){g.fillText(line,x,yy);yy+=lh}return yy-y}
+const fmtHa=a=>a>=10000?(a/1e4).toFixed(a>=1e5?1:2)+' ha':Math.round(a).toLocaleString()+' m²';
+function lotArea(){return polyArea(flat(T.lot))}
+function zoneFeats(){return visList().filter(f=>(KINDS[f.kind]||{}).g==='Zones'&&f.geom.g==='polygon').sort((a,b)=>a.kind.localeCompare(b.kind))}
+const ZONE_USE={zone0:'Home & daily living',zone1:'Kitchen garden, herbs, nursery',zone2:'Orchard, food forest, small animals',zone3:'Broadacre, water, grazing',zone4:'Managed bush, timber, forage',zone5:'Wild: habitat & observation',goatzone:'Goat browse & paddock'};
+
+/* each panel: (g,x,y,w) -> height used */
+const PANELS={
+ zones(g,x,y,w){const Z=zoneFeats();if(!Z.length)return 0;let h=shHead(g,x,y,w,'Zones');const la=lotArea();
+  for(const f of Z){const a=polyArea(f.geom.pts),k=KINDS[f.kind];g.fillStyle=k.color;g.globalAlpha=.85;g.fillRect(x,y+h+2,26,26);g.globalAlpha=1;
+   shText(g,f.name||k.label,x+38,y+h+22,22,SC.ink,600);shText(g,fmtHa(a),x+w-80,y+h+22,22,SC.ink,400,'right');shText(g,Math.round(a/la*100)+'%',x+w,y+h+22,22,SC.mute,400,'right');
+   if(ZONE_USE[f.kind]){shText(g,ZONE_USE[f.kind],x+38,y+h+48,18,SC.mute);h+=58}else h+=36}
+  return h+10},
+ slope(g,x,y,w){const sh=T.meta.lotSlopeShare,cl=T.meta.slopeClasses;if(!sh)return 0;let h=shHead(g,x,y,w,'Slope across the lot');let cx=x;
+  sh.forEach(([lo,hi,v],i)=>{const ww=v*w;const c=cl[i][2];g.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},.95)`;g.fillRect(cx,y+h,ww,34);if(ww>58)shText(g,Math.round(v*100)+'%',cx+ww/2,y+h+25,20,'#fff',600,'center');cx+=ww});
+  h+=50;const lab=sh.map(([lo,hi],i)=>[hi==null?`over ${lo}%`:`${lo}–${hi}%`,cl[i][2]]);let lx=x,ly=y+h+4;
+  for(const [t,c] of lab){g.font='400 18px "IBM Plex Sans",sans-serif';const tw=g.measureText(t).width+44;if(lx+tw>x+w){lx=x;ly+=28}g.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;g.fillRect(lx,ly,16,16);shText(g,t,lx+22,ly+15,18,SC.mute);lx+=tw}
+  h=ly-y+30;const under25=sh.filter(([lo,hi])=>hi!=null&&hi<=25).reduce((s,q)=>s+q[2],0);h+=shWrap(g,`${Math.round(under25*100)}% is under 25%: the ground for buildings, beds and tracks. Over 50% stays under permanent cover.`,x,y+h+4,w,19,SC.mute,25);return h+8},
+ water(g,x,y,w){let h=shHead(g,x,y,w,'Water');const m=T.meta;const main=T.catch.find(c=>c.main)||T.catch[0];const inf=T.catch.filter(c=>c.at).map(c=>c.ha).sort((a,b)=>b-a);
+  const annual=RAIN.mean.reduce((a,b)=>a+b,0);const la=lotArea();const ponds=visList().filter(f=>(f.kind==='pond'||f.kind==='rockpool')&&f.geom.g==='polygon');const tk=tankStore();
+  const rows=[['Drains through the lot',main?`${main.ha} ha${m.catchEdge?' +':''}`:'–'],['Main inflows',inf.length?inf.slice(0,3).map(v=>v+' ha').join(', '):'none'],['Leaves at the outlet',m.outlet?m.outlet.ha+' ha':'–'],
+   ['Average rain',Math.round(annual).toLocaleString()+' mm a year'],['Rain on the lot',Math.round(annual/1000*la/1000).toLocaleString()+' ML a year'],['Keypoints in the lot',String(T.kp.filter(k=>k.inLot).length)],
+   ['Ponds & dams drawn',ponds.length?`${ponds.length} · ${fmtHa(ponds.reduce((s,f)=>s+polyArea(f.geom.pts),0))}`:'none yet'],['Tank storage',tk.l?Math.round(tk.l/1000).toLocaleString()+' kL':'none yet']];
+  for(const [a,b] of rows){shText(g,a,x,y+h+22,20,SC.mute);shText(g,b,x+w,y+h+22,20,SC.ink,600,'right');h+=31}return h+8},
+ wb(g,x,y,w){const R=roofArea(),Tk=tankStore();if(!Tk.l||!R.a)return 0;let h=shHead(g,x,y,w,'Water balance');const sim=wbSim(Tk.l,R.a);const bw=w/12,H0=120;
+  sim.months.forEach((mm,i)=>{const hh=mm.end/Tk.l*H0;g.fillStyle=mm.sh>0?'#e07b39':'#2d8fd5';g.fillRect(x+i*bw+4,y+h+H0-hh,bw-8,Math.max(hh,2));shText(g,MON[mm.m][0],x+i*bw+bw/2,y+h+H0+24,17,SC.mute,400,'center')});
+  h+=H0+34;h+=shWrap(g,`${Math.round(R.a)} m² of roof into ${Math.round(Tk.l/1000)} kL of tanks, ${WB.people} people at ${WB.lpp} L a day${sim.short>0?`: runs short by about ${Math.round(sim.short/1000)} kL a year`:': enough water in a typical year'}.`,x,y+h+20,w,18,SC.mute,24);return h+8},
+ climate(g,x,y,w){let h=shHead(g,x,y,w,'Climate');const H0=150,bw=w/12,mx=Math.max(...RAIN.mean)*1.1;const tmx=Math.max(...RAIN.tmin)+2;
+  RAIN.mean.forEach((v,i)=>{if(v<70){g.fillStyle='rgba(224,123,57,.12)';g.fillRect(x+i*bw,y+h,bw,H0)}});
+  RAIN.mean.forEach((v,i)=>{const hh=v/mx*H0;g.fillStyle='#4b9ad8';g.fillRect(x+i*bw+5,y+h+H0-hh,bw-10,hh);shText(g,String(Math.round(v)),x+i*bw+bw/2,y+h+H0-hh-6,15,SC.mute,400,'center');shText(g,MON[i][0],x+i*bw+bw/2,y+h+H0+22,17,SC.mute,400,'center')});
+  g.strokeStyle='#c0392b';g.lineWidth=3;g.beginPath();RAIN.tmin.forEach((t,i)=>{const px=x+i*bw+bw/2,py=y+h+H0-t/tmx*H0;i?g.lineTo(px,py):g.moveTo(px,py)});g.stroke();
+  RAIN.tmin.forEach((t,i)=>{const px=x+i*bw+bw/2,py=y+h+H0-t/tmx*H0;g.fillStyle='#c0392b';g.beginPath();g.arc(px,py,4,0,7);g.fill()});
+  h+=H0+34;const ann=RAIN.mean.reduce((a,b)=>a+b,0);const cold=Math.min(...RAIN.tmin);
+  g.fillStyle='#4b9ad8';g.fillRect(x,y+h,16,16);shText(g,`Rain ${Math.round(ann).toLocaleString()} mm/yr`,x+22,y+h+15,18,SC.mute);g.fillStyle='#c0392b';g.fillRect(x+w*0.48,y+h+6,22,4);shText(g,`Min temp (coldest ${cold.toFixed(1)} °C)`,x+w*0.48+28,y+h+15,18,SC.mute);h+=26;
+  g.fillStyle='rgba(224,123,57,.35)';g.fillRect(x,y+h+2,16,16);shText(g,'Dry months (under 70 mm)',x+22,y+h+17,18,SC.mute);h+=26;
+  h+=shWrap(g,`${RAIN.station}, ${RAIN.period}.`,x,y+h+18,w,15,SC.mute,20);return h+20},
+ sun(g,x,y,w){const m=T.meta;let h=shHead(g,x,y,w,'Sun (terrain only)');const rows=[['Winter solstice',m.sun_winter_lotmean,-23.44],['Equinox',m.sun_equinox_lotmean,0],['Summer solstice',m.sun_summer_lotmean,23.44]];const mx=14;
+  for(const [n,v,d] of rows){const b=sunBearings(d);shText(g,n,x,y+h+22,20,SC.mute);const bx=x+w*0.42,bw=w*0.36;g.fillStyle='#eef0ea';g.fillRect(bx,y+h+6,bw,20);g.fillStyle='#e8a628';g.fillRect(bx,y+h+6,bw*v/mx,20);shText(g,v.toFixed(1)+' h',x+w,y+h+22,20,SC.ink,600,'right');
+   shText(g,`rises ${Math.round(b.rise)}°, sets ${Math.round(b.set)}°, noon ${Math.round(b.noonAlt)}° high`,x,y+h+48,16,SC.mute);h+=62}
+  return h+4},
+ sectors(g,x,y,w){let h=shHead(g,x,y,w,'Sectors');const R=Math.min(w*0.32,150),cx=x+R+18,cy=y+h+R+16;
+  g.strokeStyle=SC.faint;g.lineWidth=2;g.beginPath();g.arc(cx,cy,R,0,7);g.stroke();g.beginPath();g.arc(cx,cy,R*0.55,0,7);g.stroke();
+  for(let a=0;a<360;a+=45){const r=a*Math.PI/180;g.beginPath();g.moveTo(cx+Math.sin(r)*R*0.92,cy-Math.cos(r)*R*0.92);g.lineTo(cx+Math.sin(r)*R,cy-Math.cos(r)*R);g.stroke()}
+  shText(g,'N',cx,cy-R-8,22,SC.ink,700,'center');
+  const arc=(a0,a1,r0,r1,col)=>{if(a1<a0)a1+=360;g.fillStyle=col;g.beginPath();for(let a=a0;a<=a1;a+=2){const r=a*Math.PI/180;g.lineTo(cx+Math.sin(r)*r1,cy-Math.cos(r)*r1)}for(let a=a1;a>=a0;a-=2){const r=a*Math.PI/180;g.lineTo(cx+Math.sin(r)*r0,cy-Math.cos(r)*r0)}g.closePath();g.fill()};
+  const sw=sunBearings(-23.44),ss=sunBearings(23.44);
+  // the sun crosses the northern sky: rise -> north -> set (southern hemisphere), drawn set..rise through north
+  arc(ss.set,ss.rise,R*0.86,R*0.98,'rgba(232,134,42,.75)');arc(sw.set,sw.rise,R*0.72,R*0.84,'rgba(232,180,40,.85)');
+  const key=[['rgba(232,134,42,.9)','Summer sun arc'],['rgba(232,180,40,.95)','Winter sun arc']];
+  const secs=visList().filter(f=>f.geom.g==='sector');const sc={fire:'rgba(200,50,40,.45)',wind:'rgba(70,130,200,.4)',view:'rgba(120,120,120,.35)'};
+  for(const f of secs){const c=sc[f.kind]||'rgba(90,90,90,.35)';arc(f.geom.a0,f.geom.a1,R*0.1,R*0.68,c);key.push([c,f.name||KINDS[f.kind].label])}
+  const cold=visList().filter(f=>f.kind==='coldair');if(cold.length)key.push(['rgba(70,120,230,.6)','Cold air flow drawn ('+cold.length+')']);
+  let ky=y+h+10;const kx=cx+R+30;for(const [c,t] of key.slice(0,8)){g.fillStyle=c;g.fillRect(kx,ky,18,18);ky+=shWrap(g,t,kx+26,ky+16,x+w-kx-26,18,SC.mute,22)+6}
+  return Math.max(2*R+40,ky-y-h)+h+6},
+ profile(g,x,y,w){let line=null;if(SO.profileId&&SO.profileId!=='auto'){const f=features.get(SO.profileId);if(f&&f.geom.g==='line')line={pts:f.geom.pts,name:f.name}}
+  if(!line){const P=flat(T.lot);let best=[0,0,0];for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const d=dist(P[i],P[j]);if(d>best[0])best=[d,i,j]}line={pts:[P[best[1]],P[best[2]]],name:'Longest line across the lot'}}
+  const S=densify(line.pts,2).filter(q=>isFinite(q.z)).map(q=>[q.d,q.z,[q.x,q.y]]);const L=S.length?S[S.length-1][0]:0;if(S.length<3)return 0;
+  let h=shHead(g,x,y,w,'Contour profile');const zs=S.map(s=>s[1]);const z0=Math.floor(Math.min(...zs)/5)*5,z1=Math.ceil(Math.max(...zs)/5)*5;const H0=170,px=d=>x+50+d/L*(w-56),py=z=>y+h+H0-(z-z0)/Math.max(1,z1-z0)*H0;
+  g.strokeStyle=SC.faint;g.lineWidth=1;for(let z=z0;z<=z1;z+=Math.max(5,Math.round((z1-z0)/4/5)*5)){g.beginPath();g.moveTo(x+50,py(z));g.lineTo(x+w,py(z));g.stroke();shText(g,z+' m',x+44,py(z)+6,15,SC.mute,400,'right')}
+  g.beginPath();g.moveTo(px(0),y+h+H0);S.forEach(s=>g.lineTo(px(s[0]),py(s[1])));g.lineTo(px(L),y+h+H0);g.closePath();g.fillStyle='rgba(138,106,69,.22)';g.fill();
+  g.beginPath();S.forEach((s,i)=>i?g.lineTo(px(s[0]),py(s[1])):g.moveTo(px(s[0]),py(s[1])));g.strokeStyle='#5a3d1c';g.lineWidth=3;g.stroke();
+  // zone and feature strip under the profile
+  const Z=zoneFeats();const pol=visList().filter(f=>f.geom.g==='polygon'&&(KINDS[f.kind]||{}).g!=='Zones'&&['pond','building','cabin','futurebuilding','foodforest','bed','shed','nursery','rockpool','reedbed'].includes(f.kind));
+  const sy=y+h+H0+6;for(let i=1;i<S.length;i++){const p=S[i][2];const z=Z.find(f=>inPoly(p,f.geom.pts));if(z){g.fillStyle=KINDS[z.kind].color;g.fillRect(px(S[i-1][0]),sy,px(S[i][0])-px(S[i-1][0])+1,12)}
+   const q=pol.find(f=>inPoly(p,f.geom.pts));if(q){g.fillStyle=KINDS[q.kind].color;g.fillRect(px(S[i-1][0]),py(S[i][1])-10,px(S[i][0])-px(S[i-1][0])+1,8)}}
+  const vex=(L/(w-56))/((z1-z0)/H0);h+=H0+26;
+  h+=shWrap(g,`${line.name}: ${Math.round(L)} m long, ${Math.round(Math.max(...zs)-Math.min(...zs))} m from lowest to highest point. Vertical scale exaggerated about ${vex.toFixed(1)}×; the coloured strip shows the zones along the line.`,x,y+h+16,w,17,SC.mute,22);return h+20},
+ schedule(g,x,y,w){const F=visList().filter(f=>(KINDS[f.kind]||{}).g!=='Zones');if(!F.length)return 0;let h=shHead(g,x,y,w,'Feature schedule');const by={};
+  for(const f of F){const k=f.kind;by[k]=by[k]||{e:0,p:0,a:0};if(f.stage==='existing')by[k].e++;else by[k].p++;if(f.geom.g==='polygon')by[k].a+=polyArea(f.geom.pts)}
+  shText(g,'Existing',x+w-170,y+h+18,16,SC.mute,600,'right');shText(g,'Proposed',x+w-80,y+h+18,16,SC.mute,600,'right');h+=24;
+  const ks=Object.keys(by).sort((a,b)=>(by[b].e+by[b].p)-(by[a].e+by[a].p)).slice(0,14);
+  for(const k of ks){const v=by[k];g.fillStyle=KINDS[k].color;g.fillRect(x,y+h+6,16,16);shText(g,KINDS[k].label+(v.a?` · ${fmtHa(v.a)}`:''),x+24,y+h+21,18,SC.ink);shText(g,v.e||'–',x+w-170,y+h+21,18,SC.ink,400,'right');shText(g,v.p||'–',x+w-80,y+h+21,18,SC.ink,400,'right');h+=27}
+  return h+8},
+ stages(g,x,y,w){const F=visList().filter(f=>(KINDS[f.kind]||{}).g!=='Zones');if(!F.length)return 0;let h=shHead(g,x,y,w,'Staging');const st=STAGES;const n=st.length;const step=(w-20)/(n-1);const ly=y+h+22;
+  g.strokeStyle=SC.teal;g.lineWidth=4;g.beginPath();g.moveTo(x+10,ly);g.lineTo(x+10+step*(n-1),ly);g.stroke();
+  st.forEach(([k,l],i)=>{const cx=x+10+step*i;const items=F.filter(f=>(f.stage||'now')===k);g.fillStyle=items.length?SC.teal:'#fff';g.strokeStyle=SC.teal;g.lineWidth=3;g.beginPath();g.arc(cx,ly,10,0,7);g.fill();g.stroke();
+   const lab=l.replace(/ \(.*\)/,'').replace('Years ','');shText(g,lab,cx,ly+36,16,SC.ink,600,'center');shText(g,items.length?items.length+' items':'–',cx,ly+58,15,SC.mute,400,'center');
+   const kinds={};items.forEach(f=>kinds[f.kind]=(kinds[f.kind]||0)+1);const top=Object.entries(kinds).sort((a,b)=>b[1]-a[1]).slice(0,2);top.forEach(([kk,c],j)=>shText(g,(KINDS[kk].label.split(' ')[0])+(c>1?' ×'+c:''),cx,ly+80+j*20,14,SC.mute,400,'center'))});
+  return h+140},
+ plants(g,x,y,w){const F=visList().filter(f=>f.species&&SPECIES[f.species]);if(!F.length)return 0;let h=shHead(g,x,y,w,'Planting list');const by={};F.forEach(f=>by[f.species]=(by[f.species]||0)+1);
+  const ks=Object.keys(by).sort((a,b)=>by[b]-by[a]).slice(0,16);for(const k of ks){const s=SPECIES[k];shText(g,s[0],x,y+h+21,19,SC.ink);shText(g,`${s[1]} · ${s[2]} m`,x+w-60,y+h+21,17,SC.mute,400,'right');shText(g,'×'+by[k],x+w,y+h+21,19,SC.ink,600,'right');h+=27}
+  return h+8},
+ fire(g,x,y,w){let h=shHead(g,x,y,w,'Fire');let share=null;try{if(IMG.fire){const c=document.createElement('canvas');c.width=500;c.height=500;const cg=c.getContext('2d');cg.drawImage(IMG.fire,0,0,500,500);const d=cg.getImageData(0,0,500,500).data;const P=flat(T.lot);let n=0,hot=0;
+   for(let j=0;j<500;j+=2)for(let i=0;i<500;i+=2){const p=[i*4+2,j*4+2];if(!inPoly(p,P))continue;n++;if(d[(j*500+i)*4+3]>110)hot++}share=n?hot/n:null}}catch(e){}
+  const breaks=visList().filter(f=>['firebreak','track','road'].includes(f.kind)&&f.geom.g==='line').reduce((s,f)=>s+lineLen(f.geom.pts),0);const bld=visList().filter(f=>ROOF_KINDS.includes(f.kind)).length;
+  const rows=[['Steep, fire-facing ground',share==null?'–':Math.round(share*100)+'% of the lot'],['Tracks & firebreaks drawn',breaks?Math.round(breaks).toLocaleString()+' m':'none yet'],['Buildings to protect',String(bld)]];
+  for(const [a,b] of rows){shText(g,a,x,y+h+22,20,SC.mute);shText(g,b,x+w,y+h+22,20,SC.ink,600,'right');h+=31}
+  h+=shWrap(g,'Keep low-fuel ground around buildings and on upslope approaches, with turning room for a fire truck. Check the current QFES or RFS guidance for this site.',x,y+h+10,w,17,SC.mute,22);return h+16},
+ change(g,x,y,w){const ch=EXTRA&&EXTRA.change;if(!ch)return 0;const ys=Object.keys(ch).sort();if(!ys.length)return 0;let h=shHead(g,x,y,w,'Ground change');
+  for(const yy of ys){const c=ch[yy];shText(g,`Since ${yy}`,x,y+h+22,20,SC.ink,600);shText(g,`${c.lotLossHa} ha lowered · ${c.lotGainHa} ha raised`,x+w,y+h+22,19,SC.mute,400,'right');h+=31}
+  h+=shWrap(g,'More than 1 m of change, after survey offsets. Mostly gully edges: leads to check on site.',x,y+h+8,w,17,SC.mute,22);return h+14},
+ legend(g,x,y,w,ctx2){const vf=visList();const used={};vf.forEach(f=>{const k=f.kind;if((KINDS[k]||{}).g==='Zones')return;used[k]=used[k]||{n:0,a:0};used[k].n++;if(f.geom.g==='polygon')used[k].a+=polyArea(f.geom.pts)});
+  const lg=[[SC.teal,'Property boundary',''],['#1969c8','Flow lines',''],['#8a6a45','Contours','']];if(layers.pros&&PROS)lg.push(['#a14e07','Prospects (computed)','']);Object.keys(KINDS).filter(k=>used[k]).forEach(k=>lg.push([KINDS[k].color,KINDS[k].label,used[k].a?fmtHa(used[k].a):(used[k].n>1?'× '+used[k].n:'')]));
+  let h=shHead(g,x,y,w,'Legend');const cols=lg.length>10?2:1;const cw=(w-(cols-1)*20)/cols;const rows=Math.ceil(lg.length/cols);
+  lg.forEach(([c,l,v],i)=>{const cx=x+Math.floor(i/rows)*(cw+20),cy=y+h+(i%rows)*28;g.fillStyle=c;g.fillRect(cx,cy+4,18,18);g.font='400 18px "IBM Plex Sans",sans-serif';let t=l;while(g.measureText(t).width>cw-(v?110:30)&&t.length>4)t=t.slice(0,-2);if(t!==l)t+='…';shText(g,t,cx+26,cy+19,18,SC.ink);if(v)shText(g,v,cx+cw,cy+19,16,SC.mute,400,'right')});
+  return h+rows*28+10}
+};
+const PANEL_ORDER=['zones','legend','profile','water','slope','climate','sun','sectors','wb','schedule','stages','plants','fire','change'];
+
+async function loadJsPDF(){if(window.jspdf)return window.jspdf;await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)});return window.jspdf}
+
 async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textContent='Drawing the sheet…';await new Promise(r=>setTimeout(r,30));
-  const SW=3000,SH=2121,MW=2200,DS=1.8;const sv={W,H,DPR,cx:view.cx,cy:view.cy,s:view.s,w:cv.width,h:cv.height,sel:selected};
+  const land=SO.orient!=='port';const SW=land?3000:2121,SH2=land?2121:3000,M=48;
+  const map=land?{x:M,y:M,w:1900,h:SH2-2*M}:{x:M,y:M,w:SW-2*M,h:1380};
+  const sv={W,H,DPR,cx:view.cx,cy:view.cy,s:view.s,w:cv.width,h:cv.height,sel:selected,layers:JSON.parse(JSON.stringify(layers))};
   const wx0=view.cx-W/2/view.s,wx1=view.cx+W/2/view.s,wy0=view.cy-H/2/view.s,wy1=view.cy+H/2/view.s;
-  try{selected=null;W=MW/DS;H=SH/DS;DPR=DS;cv.width=MW;cv.height=SH;fitBox(wx0,wy0,wx1,wy1,10);render();
-    const sh=document.createElement('canvas');sh.width=SW;sh.height=SH;const g=sh.getContext('2d');g.fillStyle='#ffffff';g.fillRect(0,0,SW,SH);g.drawImage(cv,0,0);
-    const mapWm=W/view.s,scale=Math.round(mapWm*1000/(420*MW/SW)/10)*10;
-    let y=90;const X=MW+70;g.fillStyle='#1d2621';g.textAlign='left';g.textBaseline='alphabetic';
-    g.font='700 64px "Barlow Condensed","Arial Narrow",sans-serif';const title=($('#shTitle')&&$('#shTitle').value)||SITE.name;
-    const wrap=(t,f,maxW,lh)=>{g.font=f;const ws=t.split(' ');let line='';for(const w of ws){const tt=line?line+' '+w:w;if(g.measureText(tt).width>maxW&&line){g.fillText(line,X,y);y+=lh;line=w}else line=tt}if(line){g.fillText(line,X,y);y+=lh}};
-    wrap(title,'700 64px "Barlow Condensed","Arial Narrow",sans-serif',SW-X-60,68);
-    g.fillStyle='#5d6a62';wrap(`${new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})} · scale about 1:${scale.toLocaleString()} at A3`,'400 30px "IBM Plex Sans",sans-serif',SW-X-60,40);
-    if(layers.overlay!=='none'){wrap('Analysis shown: '+OVNAME[layers.overlay],'400 30px "IBM Plex Sans",sans-serif',SW-X-60,40)}
-    y+=24;g.fillStyle='#1d2621';g.font='600 34px "Barlow Condensed","Arial Narrow",sans-serif';g.fillText('LEGEND',X,y);y+=40;
-    const vf=visList();const used={};vf.forEach(f=>{const k=f.kind;used[k]=used[k]||{n:0,a:0};used[k].n++;if(f.geom.g==='polygon')used[k].a+=polyArea(f.geom.pts)});
-    const lg=[['#14898f','Property boundary',''],['#1969c8','Flow lines',''],['#8a6a45','Contours (1 m and 5 m)','']];
-    Object.keys(KINDS).filter(k=>used[k]).forEach(k=>lg.push([KINDS[k].color,KINDS[k].label,used[k].a?fmtArea(used[k].a):(used[k].n>1?'× '+used[k].n:'')]));
-    g.font='400 28px "IBM Plex Sans",sans-serif';for(const [c,l,v] of lg){if(y>SH-200)break;g.fillStyle=c;g.fillRect(X,y-22,30,26);g.fillStyle='#1d2621';g.fillText(l,X+46,y);if(v){g.fillStyle='#5d6a62';g.textAlign='right';g.fillText(v,SW-60,y);g.textAlign='left'}y+=42}
-    y=SH-120;g.fillStyle='#5d6a62';g.font='400 22px "IBM Plex Sans",sans-serif';g.fillText(`Terrain: ${SITE.source||('LiDAR '+SITE.main+', '+SITE.res)}.`,X,y);g.fillText('Boundary approximate (±5 m). Concept design only.',X,y+30);
-    g.strokeStyle='#d3d9d0';g.lineWidth=3;g.beginPath();g.moveTo(MW+30,40);g.lineTo(MW+30,SH-40);g.stroke();
+  const callouts=[];
+  try{selected=null;
+    if(SO.base==='aerial'&&IMG.aerial){layers.base='aerial';layers.baseOp=1}else if(SO.base==='relief'){layers.base='relief';layers.baseOp=1}else if(SO.base==='paper'){layers.base='hillshade';layers.baseOp=.35;layers.overlay='none'}
+    if(SO.theme==='ink'&&layers.base==='aerial')layers.baseOp=.6;
+    layers.c5=!!SO.contours;layers.c1=!!SO.contours;if(SO.callouts)layers.flabels=false;
+    window.__SHEETING=true;const DS=1.6;W=map.w/DS;H=map.h/DS;DPR=DS;cv.width=map.w;cv.height=map.h;fitBox(wx0,wy0,wx1,wy1,6);render();
+    const sh=document.createElement('canvas');sh.width=SW;sh.height=SH2;const g=sh.getContext('2d');g.fillStyle='#ffffff';g.fillRect(0,0,SW,SH2);g.drawImage(cv,map.x,map.y);
+    const toS=w=>[map.x+((w[0]-view.cx)*view.s+W/2)*DPR,map.y+((w[1]-view.cy)*view.s+H/2)*DPR];
+    const mpp=1/(view.s*DPR);// metres per sheet pixel
+    // ---- numbered callouts
+    if(SO.callouts){let n=0;for(const f of visList()){if((KINDS[f.kind]||{}).g==='Zones')continue;const g2=f.geom;const a=g2.g==='polygon'?interiorPoint(g2).p:centroid(f);if(!a)continue;const [sx,sy]=toS(a);if(sx<map.x+20||sy<map.y+20||sx>map.x+map.w-20||sy>map.y+map.h-20)continue;if(++n>40)break;callouts.push([n,f]);
+      let px=sx,py=sy;const clash=(a,b)=>callouts.some(c=>c.pos&&Math.hypot(c.pos[0]-a,c.pos[1]-b)<34);
+      if(clash(px,py)){search:for(const r of [34,52,70,90,112])for(let t=0;t<16;t++){const an=t*Math.PI/8;const qx=sx+Math.cos(an)*r,qy=sy+Math.sin(an)*r;if(!clash(qx,qy)){px=qx;py=qy;break search}}}
+      callouts[callouts.length-1].pos=[px,py];
+      if(px!==sx||py!==sy){g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=4;g.beginPath();g.moveTo(sx,sy);g.lineTo(px,py);g.stroke();g.strokeStyle=SC.ink;g.lineWidth=1.8;g.beginPath();g.moveTo(sx,sy);g.lineTo(px,py);g.stroke();g.fillStyle=SC.ink;g.beginPath();g.arc(sx,sy,4,0,7);g.fill()}
+      g.fillStyle='#fff';g.strokeStyle=SC.ink;g.lineWidth=2.5;g.beginPath();g.arc(px,py,15,0,7);g.fill();g.stroke();shText(g,String(n),px,py+7,n>9?16:18,SC.ink,700,'center')}}
+    // ---- grid
+    if(SO.grid){const span=map.w*mpp;const step=[25,50,100,200,500].find(s=>span/s<=12)||1000;const E0=T.E0,N0=T.N0;g.save();g.beginPath();g.rect(map.x,map.y,map.w,map.h);g.clip();
+      const xa=view.cx-W/2/view.s,xb=view.cx+W/2/view.s,ya=view.cy-H/2/view.s,yb=view.cy+H/2/view.s;g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=1.5;
+      const ex0=Math.ceil((E0+xa)/step)*step,ny0=Math.ceil((N0-yb)/step)*step;
+      for(let E=ex0;E<E0+xb;E+=step){const sx=toS([E-E0,0])[0];g.beginPath();g.moveTo(sx,map.y);g.lineTo(sx,map.y+map.h);g.stroke()}
+      for(let N=ny0;N<N0-ya;N+=step){const sy=toS([0,N0-N])[1];g.beginPath();g.moveTo(map.x,sy);g.lineTo(map.x+map.w,sy);g.stroke()}g.restore();
+      g.fillStyle=SC.ink;g.font='500 16px "IBM Plex Mono",monospace';
+      for(let E=ex0;E<E0+xb;E+=step){const sx=toS([E-E0,0])[0];g.fillRect(sx-1,map.y+map.h,2,12);g.textAlign='center';g.fillText(String(E),sx,map.y+map.h+30)}
+      for(let N=ny0;N<N0-ya;N+=step){const sy=toS([0,N0-N])[1];g.fillRect(map.x-12,sy-1,12,2);g.save();g.translate(map.x-18,sy);g.rotate(-Math.PI/2);g.textAlign='center';g.fillText(String(N),0,0);g.restore()}
+      g.textAlign='left';g.fillStyle=SC.mute;g.font='400 15px "IBM Plex Sans",sans-serif';g.fillText(`GDA2020 / MGA zone ${ZONE} · grid ${step} m`,map.x,map.y+map.h+(land?0:30)+ (land?-8:20))}
+    g.strokeStyle=SC.ink;g.lineWidth=2;g.strokeRect(map.x,map.y,map.w,map.h);
+    // ---- north arrow & scale bar
+    if(SO.north){const nx=map.x+map.w-70,ny=map.y+90;g.fillStyle='rgba(255,255,255,.88)';g.beginPath();g.arc(nx,ny,48,0,7);g.fill();g.fillStyle=SC.ink;g.beginPath();g.moveTo(nx,ny-36);g.lineTo(nx+18,ny+22);g.lineTo(nx,ny+10);g.closePath();g.fill();g.fillStyle='#8a948d';g.beginPath();g.moveTo(nx,ny-36);g.lineTo(nx-18,ny+22);g.lineTo(nx,ny+10);g.closePath();g.fill();shText(g,'N',nx,ny+44,22,SC.ink,700,'center');
+      const target=map.w*mpp*0.22;const nice=[10,20,25,50,100,200,250,500,1000].reduce((b,v)=>v<=target?v:b,10);const bl=nice/mpp;const bx=map.x+40,by=map.y+map.h-60;
+      g.font='400 16px "IBM Plex Sans",sans-serif';g.fillStyle='rgba(255,255,255,.88)';g.fillRect(bx-16,by-38,bl+40+g.measureText('1:00,000 at A3').width+30,70);for(let i=0;i<4;i++){g.fillStyle=i%2?'#fff':SC.ink;g.fillRect(bx+i*bl/4,by,bl/4,12)}g.strokeStyle=SC.ink;g.lineWidth=2;g.strokeRect(bx,by,bl,12);
+      shText(g,'0',bx,by-10,18,SC.ink,500,'center');shText(g,nice+' m',bx+bl,by-10,18,SC.ink,500,'center');const scale=Math.round(map.w*mpp*1000/(land?(420*map.w/SW):(297*map.w/SW))/10)*10;shText(g,`1:${scale.toLocaleString()} at A3`,bx+bl+16,by+12,16,SC.mute)}
+    // ---- locator inset
+    if(SO.inset){const iw=land?360:420,ih=iw,ix=map.x+18,iy=map.y+18;const cp=flat((T.catch.find(c=>c.main)||T.catch[0]||{p:T.lot}).p);const lp=flat(T.lot);const all=cp.concat(lp);
+      let x0=Math.min(...all.map(p=>p[0])),x1=Math.max(...all.map(p=>p[0])),y0=Math.min(...all.map(p=>p[1])),y1=Math.max(...all.map(p=>p[1]));const pad=Math.max(x1-x0,y1-y0)*0.08;x0-=pad;y0-=pad;x1+=pad;y1+=pad;const sz=Math.max(x1-x0,y1-y0);const cxm=(x0+x1)/2,cym=(y0+y1)/2;x0=cxm-sz/2;y0=cym-sz/2;
+      const k=iw/sz;const toI=p=>[ix+(p[0]-x0)*k,iy+(p[1]-y0)*k];g.save();g.fillStyle='#fff';g.fillRect(ix-6,iy-6,iw+12,ih+12);g.beginPath();g.rect(ix,iy,iw,ih);g.clip();
+      const im=IMG.relief||IMG.hillshade;if(im)g.drawImage(im,x0/2*(im.width/1000),y0/2*(im.height/1000),sz/2*(im.width/1000),sz/2*(im.height/1000),ix,iy,iw,ih);
+      const poly=(P,stroke,fill,lw,dash)=>{g.beginPath();P.forEach((p,i)=>{const q=toI(p);i?g.lineTo(...q):g.moveTo(...q)});g.closePath();if(fill){g.fillStyle=fill;g.fill()}g.setLineDash(dash||[]);g.strokeStyle=stroke;g.lineWidth=lw;g.stroke();g.setLineDash([])};
+      poly(cp,'#1969c8','rgba(60,140,220,.12)',2.5,[8,5]);poly(lp,SC.teal,null,4);const a=toI([wx0,wy0]),b=toI([wx1,wy1]);g.strokeStyle='#c0392b';g.lineWidth=3;g.strokeRect(a[0],a[1],b[0]-a[0],b[1]-a[1]);g.restore();
+      g.fillStyle='#fff';g.fillRect(ix-6,iy+ih+6,iw+12,34);g.strokeStyle=SC.ink;g.lineWidth=2;g.strokeRect(ix-6,iy-6,iw+12,ih+46);shText(g,'Lot (teal), catchment (blue), this view (red)',ix+4,iy+ih+30,15,SC.ink,500)}
+    // ---- title block
+    const P0=land?{x:map.x+map.w+56,y:M,w:SW-(map.x+map.w+56)-M}:{x:M,y:map.y+map.h+60,w:SW-2*M};
+    let ty=P0.y;const title=($('#shTitle')&&$('#shTitle').value)||SITE.name;g.fillStyle=SC.ink;g.textAlign='left';
+    const tW=land?P0.w:P0.w*0.55;g.font='700 66px "Barlow Condensed","Arial Narrow",sans-serif';{const ws=title.split(' ');let line='';for(const w0 of ws){const tt=line?line+' '+w0:w0;if(g.measureText(tt).width>tW&&line){g.fillText(line,P0.x,ty+60);ty+=66;line=w0}else line=tt}g.fillText(line,P0.x,ty+60);ty+=96}
+    const meta=[SITE.subtitle||'',SITEDEF&&SITEDEF.group?SITEDEF.group:'',`${new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})} · ${SO.version||''}`].filter(Boolean).join(' · ');
+    ty+=shWrap(g,meta,P0.x,ty+4,tW,22,SC.mute,30);if(SO.designers)ty+=shWrap(g,'Design: '+SO.designers,P0.x,ty+4,tW,22,SC.ink,30);
+    if(SO.concept){const sw=310;const sx=land?P0.x:P0.x+P0.w-sw,sy=land?ty+10:P0.y+6;g.strokeStyle='#c0392b';g.lineWidth=3;g.strokeRect(sx,sy,sw,54);shText(g,'CONCEPT DESIGN',sx+sw/2,sy+25,22,'#c0392b',700,'center');shText(g,'not for construction',sx+sw/2,sy+46,16,'#c0392b',400,'center');if(land)ty+=76}
+    if(SO.theme!=='ink'){}
+    // ---- panels: flow into columns
+    const area=land?{x:P0.x,y:ty+24,w:P0.w,h:SH2-M-90-(ty+24)}:{x:P0.x,y:Math.max(ty,P0.y+130)+16,w:P0.w,h:SH2-M-90-(Math.max(ty,P0.y+130)+16)};
+    const ncol=land?2:3,gap=40,cw=(area.w-gap*(ncol-1))/ncol;
+    const order=PANEL_ORDER.filter(k=>SO[k]);if(SO.callouts&&callouts.length)order.splice(1,0,'_callouts');
+    PANELS._callouts=(g2,x,y,w)=>{let h=shHead(g2,x,y,w,'Key');const cols=callouts.length>14?2:1;const cww=(w-(cols-1)*16)/cols;const rows=Math.ceil(callouts.length/cols);
+      callouts.forEach(([n,f],i)=>{const cx=x+Math.floor(i/rows)*(cww+16),cy=y+h+(i%rows)*26;shText(g2,String(n),cx+12,cy+19,17,SC.ink,700,'center');g2.font='400 17px "IBM Plex Sans",sans-serif';let t=f.name||KINDS[f.kind].label;while(g2.measureText(t).width>cww-36&&t.length>4)t=t.slice(0,-2);shText(g2,t,cx+30,cy+19,17,SC.ink)});return h+rows*26+8};
+    const scratch=document.createElement('canvas').getContext('2d');scratch.canvas.width=10;scratch.canvas.height=10;
+    let col=0,cy=area.y;const skipped=[];
+    for(const k of order){const fn=PANELS[k];if(!fn)continue;let hh=0;try{hh=fn(scratch,0,0,cw)}catch(e){console.warn('panel',k,e);continue}if(!hh)continue;
+      if(cy+hh>area.y+area.h){col++;cy=area.y}if(col>=ncol){skipped.push(k);continue}
+      const px=area.x+col*(cw+gap);if(SO.theme!=='ink'){g.fillStyle=SC.panel;g.fillRect(px-14,cy-10,cw+28,hh+8)}
+      fn(g,px,cy,cw);cy+=hh+26}
+    // ---- footer
+    const fy=SH2-M-50;const fx=land?P0.x:M,fw=land?P0.w:SW-2*M;const bnote=/cadastre/i.test(SITE.boundaryNote||'')?'Boundary: Queensland surveyed cadastre (about ±1 m).':'Boundary approximate: check against the title plan.';
+    const src=`Terrain: ${SITE.source||('LiDAR '+SITE.main+', '+SITE.res)}. ${bnote} Rain: ${RAIN.station}.${layers.base==='aerial'&&IMG.aerial?' Aerial: '+(SITE.state==='NSW'?'NSW Spatial Services':'State of Queensland')+' (CC BY 4.0).':''} Concept design only: earthworks, dams and buildings need engineering and approvals.`;
+    g.strokeStyle=SC.faint;g.lineWidth=2;g.beginPath();g.moveTo(fx,fy-14);g.lineTo(fx+fw,fy-14);g.stroke();shWrap(g,src,fx,fy+8,fw,15,SC.mute,20);
+    if(skipped.length)toast(`No room for: ${skipped.join(', ')}. Untick a few panels or switch orientation.`);
+    // ---- save
+    const base=slug()+'-design-sheet';
+    if(SO.fmt==='pdf'){try{const {jsPDF}=await loadJsPDF();const pdf=new jsPDF({orientation:land?'landscape':'portrait',unit:'mm',format:'a3',compress:true});const data=sh.toDataURL('image/jpeg',0.92);pdf.addImage(data,'JPEG',0,0,land?420:297,land?297:420);
+        const blob=pdf.output('blob');if(downloads){await downloads.save({filename:base+'.pdf',data:blob});toast('Saved the A3 PDF')}else{window.__sheet=blob;toast('Downloads are not available in this view')}return}
+      catch(e){if(e&&e.code==='declined')return;toast('PDF maker did not load, so saving a PNG instead')}}
     const blob=await new Promise(r=>sh.toBlob(r,'image/png'));
-    if(downloads){try{await downloads.save({filename:slug()+'-design-sheet.png',data:blob});toast('Saved the A3 sheet')}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start')}}else{window.__sheet=blob;toast('Downloads are not available in this view')}
-  }finally{W=sv.W;H=sv.H;DPR=sv.DPR;view.cx=sv.cx;view.cy=sv.cy;view.s=sv.s;selected=sv.sel;resize();btn.disabled=false;btn.textContent='Download A3 sheet (PNG)'}}
+    if(downloads){try{await downloads.save({filename:base+'.png',data:blob});toast('Saved the A3 sheet')}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start')}}else{window.__sheet=blob;toast('Downloads are not available in this view')}
+  }finally{window.__SHEETING=false;W=sv.W;H=sv.H;DPR=sv.DPR;view.cx=sv.cx;view.cy=sv.cy;view.s=sv.s;selected=sv.sel;Object.assign(layers,sv.layers);resize();btn.disabled=false;btn.textContent='Download A3 sheet'}}
+
 
 
 /* ---------------- set-up checklist and boundary editing (any block) ---------------- */
