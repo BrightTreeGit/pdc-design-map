@@ -524,7 +524,7 @@ function render(){
   if(!(typeof V3!=='undefined'&&V3.tex2d)&&!window.__SHEETING)drawScale();
 }
 const PRC={pond:'#0d5fa8',pad:'#a14e07',tank:'#0d5fa8',flat:'#3f7a1f'};
-function drawPros(px){for(const p of PROS.items){const c=PRC[p.kind];ctx.setLineDash([]);
+function drawPros(px){for(const p of PROS.items){if(isHid('pros:'+p.id))continue;const c=PRC[p.kind];ctx.setLineDash([]);
   if(p.poly){ctx.beginPath();p.poly.forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q));ctx.closePath();
     if(p.kind==='pond'){ctx.fillStyle='rgba(45,143,213,.38)';ctx.fill();ctx.lineWidth=1.2*px;ctx.strokeStyle=c;ctx.stroke()}
     else if(p.kind==='pad'){ctx.fillStyle='rgba(230,140,40,.22)';ctx.fill();ctx.lineWidth=2*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke();ctx.lineWidth=1.4*px;ctx.strokeStyle=c;ctx.setLineDash([4*px,3*px]);ctx.stroke();ctx.setLineDash([])}
@@ -584,7 +584,7 @@ function drawLabels(){
   if(layers.c5&&view.s>0.45)for(const l of T.labels){const [x,y]=w2s(...l.a),[x2,y2]=w2s(...l.b);if(x<-20||y<-20||x>W+20||y>H+20)continue;let a=Math.atan2(y2-y,x2-x);if(a>Math.PI/2)a-=Math.PI;if(a<-Math.PI/2)a+=Math.PI;ctx.save();ctx.translate(x,y);ctx.rotate(a);haloText(l.z+'',0,0,10,'#5a3d1c');ctx.restore()}
   if(layers.catch)for(const c of T.catch){if(!c.at)continue;const [x,y]=w2s(...c.at);haloText(`↓ ${c.ha} ha in`,x,y-12,11,'#0f4f96')}
   if(layers.catch&&T.meta.outlet){const [x,y]=w2s(...T.meta.outlet.at);haloText(`${T.meta.outlet.ha} ha out ↑`,x,y+14,11,'#0f4f96')}
-  if(layers.pros&&PROS&&view.s>0.35)for(const p of PROS.items){let [x,y]=w2s(...p.at);const col=PRC[p.kind];let t=view.s>0.8?p.label:p.id;
+  if(layers.pros&&PROS&&view.s>0.35)for(const p of PROS.items){if(isHid('pros:'+p.id))continue;let [x,y]=w2s(...p.at);const col=PRC[p.kind];let t=view.s>0.8?p.label:p.id;
     if(p.kind==='pond'){t=view.s>0.8?`${p.id} ~${p.ml.toFixed(1)} ML`:p.id;ctx.textAlign='left';haloText(t,x+16,y+5,10.5,col,'IBM Plex Sans');ctx.textAlign='center';continue}
     if(p.kind==='flat'){t=view.s>1.2?p.label:p.id;ctx.textAlign='right';haloText(t,x-14,y+12,10.5,col,'IBM Plex Sans');ctx.textAlign='center';continue}
     haloText(t,x,y+(p.kind==='tank'?-16:-18),10.5,col,'IBM Plex Sans')}
@@ -907,7 +907,7 @@ async function connect(){
   const setSync=(on,t,tip)=>{sync.className='sync '+(on?'on':'off');sync.querySelector('span').textContent=t;sync.title=tip||''};
   const sub=()=>{try{if(unsub)unsub()}catch(e){}
     unsub=db.collection(C('features')).onSnapshot(snap=>{if(tries){tries=0;setSync(true,'Shared with the team · saves automatically')}
-      features.clear();for(const d of snap.docs){const v=d.data();if(v&&v.geom)features.set(d.id,structuredClone(v))}if(selected&&!features.has(selected))selected=null;renderFeatures(true);if(!$('#tab-tools').contains(document.activeElement))renderTools();if(T)renderSite();draw()},
+      features.clear();for(const d of snap.docs){const v=d.data();if(v&&v.geom)features.set(d.id,structuredClone(v))}if(selected&&!features.has(selected))selected=null;renderFeatures(true);{const d=$('#damSec');if(d&&!d.contains(document.activeElement)){d.innerHTML=damsHTML();wireDams($('#tab-layers'))}}if(!$('#tab-tools').contains(document.activeElement))renderTools();if(T)renderSite();draw()},
     err=>{tries++;console.warn('features sync error',err);const wait=Math.min(30,2*tries);
       setSync(false,tries<6?`Connection dropped · reconnecting in ${wait} s…`:'Offline · retrying every 30 s. Your view is safe; new drawings save once reconnected.',String(err&&err.message||err));
       setTimeout(sub,wait*1000)})};
@@ -2071,6 +2071,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    sec('design','Design overlays',`<div id="dsgSec">${designHTML()}</div>`,[...imagery.values()].some(im=>im.design))+
    sec('photo','Aerial photos',`<div id="imgSec">${imageryHTML()}</div>`)+
    (PH.data?sec('phist','Photo history (slider)',`<div id="phSec">${phHTML()}</div>`):'')+
+   sec('dams','Dams and ponds (show / hide each)',`<div id="damSec">${damsHTML()}</div>`)+
    sec('analysis','Terrain analysis',`${segHTML('',[['none','None']],layers.overlay,'ovs')}
     ${OVERLAYS.map(g=>`<div class="sub2">${g.grp}</div>${segHTML('',g.items,layers.overlay,'ovs')}`).join('')}
     <div class="sub2">Forest${CANOPY?' · LiDAR 2008–2022':''}</div>${CANOPY?segHTML('',[['canopy_h','Canopy height & tall trees'],['canopy_change','Canopy growth since 2008'],['productivity','Growing power (growth vs typical)'],['understorey','Dense understorey'],['fuel','Fuel structure'],['light_winter','Light at ground · winter'],['light_equinox','Light at ground · equinox']],layers.overlay,'ovs'):'<div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>'}
@@ -2106,7 +2107,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   el.querySelectorAll('#conSeg button').forEach(b=>b.onclick=()=>{const on=b.dataset.v==='on';layers.c1=on;layers.c5=on;setLayer('c5',on);renderLayers()});
   const bo=e=>{setLayer('baseOp',+e.target.value);$('#baseopv').textContent=Math.round(layers.baseOp*100)+'%';render()};$('#baseop').oninput=bo;$('#baseop').onchange=bo;
   el.querySelectorAll('input[data-k]').forEach(c=>c.onchange=()=>setLayer(c.dataset.k,c.checked));
-  wireImagery(el);wirePH(el);wirePros(el);wireSecs(el)}
+  wireImagery(el);wirePH(el);wireDams(el);wirePros(el);wireSecs(el)}
 function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.overlay;if(!m||ov==='none'){el.hidden=true;return}
   const sunGrad='linear-gradient(90deg,rgb(30,40,110),rgb(90,70,150) 35%,rgb(220,110,70) 60%,rgb(250,200,70) 85%,rgb(255,245,170))';
   const sw=(c,a=.85)=>`background:rgba(${c[0]},${c[1]},${c[2]},${a})`;let h='';
@@ -2163,7 +2164,28 @@ async function names(ids){if(!userCap||!ids.length)return;try{const ps=await use
 const STAGES=[['existing','Existing'],['now','Now (year 0–1)'],['y2','Years 1–2'],['y5','Years 3–5'],['y10','Years 5–10'],['y10p','10+ years']];
 const stageIdx=k=>Math.max(0,STAGES.findIndex(s=>s[0]===k));
 function defStage(kind){const g=(KINDS[kind]||{}).g;return (kind==='structure'||kind==='building'||kind==='tank'||kind==='track'||g==='Observe')?'existing':'now'}
-function vis(f){if(!layers.stage||layers.stage==='all')return true;return stageIdx(f.stage||defStage(f.kind))<=stageIdx(layers.stage)}
+let HIDE=null,FID=new WeakMap();
+function hid(){if(!HIDE)HIDE=new Set(lsGet('hide',[]));return HIDE}
+function fidMap(){FID=new WeakMap();for(const [i,f] of features)FID.set(f,i)}
+function isHid(id){return hid().has(id)}
+function setHid(id,h){const s=hid();h?s.add(id):s.delete(id);lsSet('hide',[...s]);draw()}
+function fHidden(f){if(!hid().size)return false;let id=FID.get(f);if(id===undefined){fidMap();id=FID.get(f)}return id!==undefined&&HIDE.has(id)}
+const WATER_KINDS=['pond','damwall','rockpool'];
+function damsHTML(){const mine=[...features.entries()].filter(([i,f])=>WATER_KINDS.includes(f.kind)).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
+ const pr=PROS?PROS.items.filter(p=>p.kind==='pond'):[];
+ if(!mine.length&&!pr.length)return '<p class="hint">No dams or ponds drawn yet. Draw one with Water → Pond / dam, or switch on the computed prospects.</p>';
+ const row=(key,name,sw,extra)=>`<div class="row"><label><input type="checkbox" data-hid="${key}" ${isHid(key)?'':'checked'}><i class="swatch" style="background:${sw}"></i>${esc(name)}${extra||''}</label><button class="btn" data-hz="${key}" style="padding:2px 8px">Zoom</button></div>`;
+ return (mine.length?'<div class="sub2">Drawn in the design</div>'+mine.map(([i,f])=>row(i,f.name||KINDS[f.kind].label,KINDS[f.kind].color,f.kind==='pond'?` <span class="pill">${fmtArea(polyArea(f.geom.pts))}</span>`:'')).join(''):'')+
+  (pr.length?'<div class="sub2">Computed pond sites (prospects)</div>'+pr.map(p=>row('pros:'+p.id,p.label,'#2d8fd5','')).join('')+(layers.pros?'':'<p class="hint">Prospects are switched off: tick “Prospects” under Water, contours & labels to see them.</p>'):'')+
+  `<div class="seg" style="margin-top:6px"><button class="btn" id="damAll">Show all</button><button class="btn" id="damNone">Hide all</button></div><p class="hint">Untick a dam to hide it and leave it out of the water totals, to compare options. This only changes your own view, not what others see.</p>`}
+function wireDams(el){const box=el.querySelector('#damSec');if(!box)return;
+ box.querySelectorAll('[data-hid]').forEach(c=>c.onchange=()=>{setHid(c.dataset.hid,!c.checked);renderFeatures()});
+ box.querySelectorAll('[data-hz]').forEach(b=>b.onclick=()=>{const k=b.dataset.hz;let pts;if(k.startsWith('pros:')){const p=PROS.items.find(q=>'pros:'+q.id===k);pts=p.poly||[p.at];if(!layers.pros)setLayer('pros',true)}else{const f=features.get(k);if(!f)return;pts=f.geom.pts||[[f.geom.cx,f.geom.cy]]}
+   if(isHid(k)){setHid(k,false);const c=box.querySelector(`[data-hid="${k}"]`);if(c)c.checked=true}
+   const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);fitBox(Math.min(...xs)-40,Math.min(...ys)-40,Math.max(...xs)+40,Math.max(...ys)+40);draw()});
+ const all=h=>{box.querySelectorAll('[data-hid]').forEach(c=>{c.checked=!h;const s=hid();h?s.add(c.dataset.hid):s.delete(c.dataset.hid)});lsSet('hide',[...hid()]);draw();renderFeatures()};
+ box.querySelector('#damAll').onclick=()=>all(false);box.querySelector('#damNone').onclick=()=>all(true)}
+function vis(f){if(fHidden(f))return false;if(!layers.stage||layers.stage==='all')return true;return stageIdx(f.stage||defStage(f.kind))<=stageIdx(layers.stage)}
 const visList=()=>[...features.values()].filter(vis);
 // Plant library: starting values for the Sunshine Coast hinterland; check local references before planting.
 const SPECIES={
@@ -2240,9 +2262,10 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
     <h2>Measured from LiDAR</h2><dl class="facts">${m.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>
     ${f.geom.g==='line'?'<h2>Profile</h2><canvas id="profile"></canvas>':''}
     <p class="hint">Added by ${esc(by)} · ${new Date(f.createdAt).toLocaleDateString()}. Drag a white corner to reshape, drag inside the shape to move it, the round arrow handle to resize and the curved-arrow handle to rotate (hold Shift to snap to 15°).</p>
-    <div class="seg" style="margin-top:8px"><button class="btn" id="fzoom">Zoom to</button><button class="btn" id="fdup" title="Duplicate (Ctrl+D)">Duplicate</button><button class="btn" id="flock" title="Locked items can't be moved, reshaped or deleted">${f.locked?'🔒 Unlock':'Lock'}</button><button class="btn danger" id="fdel" title="Delete (Del key). You can undo straight after." ${f.locked?'disabled':''}>Delete</button></div>
+    <div class="seg" style="margin-top:8px"><button class="btn" id="fzoom">Zoom to</button><button class="btn" id="fhide" title="Hide or show this item on your map only">${isHid(selected)?'Show on map':'Hide on map'}</button><button class="btn" id="fdup" title="Duplicate (Ctrl+D)">Duplicate</button><button class="btn" id="flock" title="Locked items can't be moved, reshaped or deleted">${f.locked?'🔒 Unlock':'Lock'}</button><button class="btn danger" id="fdel" title="Delete (Del key). You can undo straight after." ${f.locked?'disabled':''}>Delete</button></div>
     <p class="hint">${f.locked?'<b>Locked:</b> unlock to move, reshape or delete it. ':''}Shortcuts: <kbd>Delete</kbd> removes, <kbd>Ctrl</kbd>+<kbd>D</kbd> duplicates, <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes. Shift-click, Shift-drag or the ⬚ select tool picks several. Right-click a corner (or Alt-click it) to delete that point; right-click an item for more.</p>`;
     $('#back').onclick=()=>{selected=null;renderFeatures();draw()};
+    $('#fhide').onclick=()=>{const id=selected;setHid(id,!isHid(id));renderFeatures();const d=$('#damSec');if(d){d.innerHTML=damsHTML();wireDams($('#tab-layers'))}};
     let t;$('#fname').oninput=e=>{if(!saveFields._nm||saveFields._nm.id!==selected)saveFields._nm={id:selected,name:f.name};f.name=e.target.value;draw();clearTimeout(t);t=setTimeout(()=>saveFields(selected,{name:f.name}),600)};
     $('#fnotes').oninput=e=>{f.notes=e.target.value;clearTimeout(t);t=setTimeout(()=>saveFields(selected,{notes:f.notes}),800)};
     if($('#fh')){$('#fh').onchange=e=>saveFields(selected,{height:Math.max(.5,+e.target.value||3)});
@@ -2280,7 +2303,7 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
   const zoneRows=arr.filter(([i,f])=>(KINDS[f.kind]||{}).g==='Zones'&&f.geom.g==='polygon');
   const zt={};zoneRows.forEach(([i,f])=>{zt[f.kind]=(zt[f.kind]||0)+polyArea(f.geom.pts)});
   el.innerHTML=stageSel+(Object.keys(zt).length?`<h2>Zone areas</h2><dl class="facts">${Object.keys(zt).sort().map(z=>`<dt><i class="swatch" style="background:${KINDS[z].color};display:inline-block;vertical-align:-2px"></i> ${esc(KINDS[z].label)}</dt><dd>${fmtArea(zt[z])}</dd>`).join('')}</dl>`:'')+
-   DRAW_ORDER.filter(g=>groups[g]).map(g=>`<h2>${g} · ${groups[g].length}</h2><div class="flist">${groups[g].sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,f])=>`<button data-id="${id}" class="${vis(f)?'':'dim'}"><i class="swatch" style="background:${(KINDS[f.kind]||KINDS.note).color}"></i><span>${esc(f.name)}</span><span class="meta">${f.geom.g==='polygon'?fmtArea(polyArea(f.geom.pts))+' · ':''}<span class="pill ${f.status}">${f.status}</span></span></button>`).join('')}</div>`).join('');
+   DRAW_ORDER.filter(g=>groups[g]).map(g=>`<h2>${g} · ${groups[g].length}</h2><div class="flist">${groups[g].sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,f])=>`<button data-id="${id}" class="${vis(f)?'':'dim'}"><i class="swatch" style="background:${(KINDS[f.kind]||KINDS.note).color}"></i><span>${esc(f.name)}${isHid(id)?' <span class="pill">hidden</span>':''}</span><span class="meta">${f.geom.g==='polygon'?fmtArea(polyArea(f.geom.pts))+' · ':''}<span class="pill ${f.status}">${f.status}</span></span></button>`).join('')}</div>`).join('');
   $('#stageF').onchange=e=>{setLayer('stage',e.target.value);renderFeatures()};
   const sf=$('#srcF');if(sf)sf.onchange=e=>{featSrc=e.target.value;renderFeatures()};const ss=$('#srcSel');if(ss)ss.onclick=()=>{multi.clear();arr.forEach(([id])=>multi.add(id));selected=null;renderFeatures();draw()};
   el.querySelectorAll('.flist button').forEach(b=>b.onclick=()=>{selected=b.dataset.id;zoomTo(features.get(selected));renderFeatures();draw()})}

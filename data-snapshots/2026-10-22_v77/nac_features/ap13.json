@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1011.2,
+        997.3
+      ],
+      [
+        1011.9,
+        995
+      ],
+      [
+        1013,
+        995.1
+      ],
+      [
+        1012.2,
+        997.4
+      ]
+    ]
+  },
+  "kind": "raisedbed",
+  "name": "Garden bed 3",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m).",
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

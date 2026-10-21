@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-18T12:17:38.409Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        896,
+        931.4
+      ],
+      [
+        905.4,
+        943.6
+      ],
+      [
+        896,
+        950.9
+      ],
+      [
+        886.6,
+        938.7
+      ]
+    ]
+  },
+  "kind": "zone0",
+  "name": "Zone 0 · Home",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "built",
+  "updatedAt": "2026-10-18T12:17:43.707Z"
+}

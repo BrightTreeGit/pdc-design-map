@@ -1,0 +1,16 @@
+{
+  "about": "ap08",
+  "at": "2026-10-20T05:31:00.000Z",
+  "by": null,
+  "done": true,
+  "replies": [
+    {
+      "at": "2026-10-20T05:40:00.000Z",
+      "text": "Updated: the septic items are now marked as a pump-out system with no absorption area, so there is no planting limit around them. Keep a clear, short run from the driveway for the pump-out truck hose, and keep the lids accessible (no raised beds or paving over them).",
+      "who": "Claude"
+    }
+  ],
+  "tag": "diff",
+  "text": "There is no septic absorption area. It's a pump-out system.",
+  "who": "Ange"
+}

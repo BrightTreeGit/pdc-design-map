@@ -1,0 +1,44 @@
+{
+  "createdAt": "2026-10-20T02:25:29.583Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        883,
+        953
+      ],
+      [
+        885.7,
+        950.2
+      ],
+      [
+        875.6,
+        943.5
+      ],
+      [
+        873.6,
+        947
+      ],
+      [
+        883.4,
+        952.8
+      ],
+      [
+        883.8,
+        952.8
+      ],
+      [
+        883.8,
+        952.8
+      ]
+    ]
+  },
+  "kind": "zone3",
+  "name": "Zone 3 · Broadacre",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T02:25:29.583Z"
+}
