@@ -14,7 +14,7 @@ The live map is a Claude artifact. This repository is the separate, permanent ar
 | `VERSIONING.md` | How saving, comparing and reverting works. |
 
 ## Versions
-Every published map version is a commit tagged `vNN` (for example `v76`), matching the version number on the artifact. On GitHub, open **Tags** or **Commits** to browse them, and click a commit to see exactly what changed.
+Every published map version is one commit on `main` whose message starts with the version number (for example `v76: …`), matching the version number on the artifact. CHANGELOG.md has a version index with a link to each one; on GitHub, **Commits** shows them all, and clicking one shows exactly what changed.
 
 Versions up to v76 were rebuilt from copies of the code saved at the time. Their descriptions come from comparing those copies, so they're accurate, but some entries cover a range of versions (for example v66–v68) because not every version was saved. See CHANGELOG.md.
 

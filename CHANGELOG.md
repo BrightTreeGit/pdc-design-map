@@ -4,6 +4,32 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 
 **How this was made.** From v77 on, entries are written as each change is published. Earlier entries were rebuilt by comparing the saved copies of the map code: tools, layers, panels, buttons and drawing types added or removed between each pair. The code behind each entry is exact. Where no copy was saved for every version, the entry covers a range (for example v66–v68), meaning the change landed somewhere in that range. Small fixes and wording tweaks don't show up in that comparison, so they're only listed where known. Times are Brisbane time.
 
+## Version index
+Each version is one commit on the `main` branch. Click a link to see the code exactly as it was, and what changed.
+
+| Version | Saved | Commit |
+|---|---|---|
+| v77 | 22 Oct 2026 05:45 | [aa9b476](https://github.com/BrightTreeGit/pdc-design-map/commit/aa9b476c9e2b1fc3d5c8d2eb783c391851c92325) |
+| v75–v76 | 21 Oct 2026 22:36 | [97ce1ac](https://github.com/BrightTreeGit/pdc-design-map/commit/97ce1ac25c0d146368745872be00726181241d2f) |
+| v74 | 21 Oct 2026 18:18 | [383f2db](https://github.com/BrightTreeGit/pdc-design-map/commit/383f2dbf3dd5fcedb35606207343f9403a66e0af) |
+| v71–v73 | 21 Oct 2026 17:21 | [e037170](https://github.com/BrightTreeGit/pdc-design-map/commit/e0371701597a1a12d04ac65f6021ff37eb0a5786) |
+| v69–v70 | 21 Oct 2026 16:44 | [2dcc51d](https://github.com/BrightTreeGit/pdc-design-map/commit/2dcc51dc5e7ead1e120fbb8538e2fd077e73cb4e) |
+| v66–v68 | 20 Oct 2026 15:32 | [9d4bc4b](https://github.com/BrightTreeGit/pdc-design-map/commit/9d4bc4b098ad25a9c1369781991ee8e16b6df514) |
+| v65 | 20 Oct 2026 15:15 | [133bad0](https://github.com/BrightTreeGit/pdc-design-map/commit/133bad0e680f398b2b8a1f3b929f24c883d0af3f) |
+| v64 | 20 Oct 2026 15:07 | [e166c43](https://github.com/BrightTreeGit/pdc-design-map/commit/e166c4358e78238aa0a38966955868408692a034) |
+| v60–v63 | 20 Oct 2026 14:32 | [05c7fef](https://github.com/BrightTreeGit/pdc-design-map/commit/05c7fef6b1f3e6d519efc2f4884d51e733138b37) |
+| v59 | 20 Oct 2026 11:38 | [c379fba](https://github.com/BrightTreeGit/pdc-design-map/commit/c379fbaf009a1ab5d45a6458334533a26c32f76c) |
+| v58 | 20 Oct 2026 11:14 | [dad8e5d](https://github.com/BrightTreeGit/pdc-design-map/commit/dad8e5d521a2f0da80fde01278e0285a501391e9) |
+| v54–v57 | 20 Oct 2026 11:06 | [abe484d](https://github.com/BrightTreeGit/pdc-design-map/commit/abe484dd4a65fc4324f493850a64053220ad797a) |
+| v50–v53 | 20 Oct 2026 09:38 | [1f22e98](https://github.com/BrightTreeGit/pdc-design-map/commit/1f22e98f496055618d72520a2ec0ad76e4fe1690) |
+| v28–v49 | 20 Oct 2026 07:15 | [ac5eb51](https://github.com/BrightTreeGit/pdc-design-map/commit/ac5eb513340e435acccaa30af78b465be58231b2) |
+| v27 | 19 Oct 2026 11:57 | [5222062](https://github.com/BrightTreeGit/pdc-design-map/commit/5222062ec5a140528dcedf4b637e58374384bd41) |
+| v26 | 19 Oct 2026 05:27 | [6cc3f73](https://github.com/BrightTreeGit/pdc-design-map/commit/6cc3f739f88974908c77e821eb90235b79ab9643) |
+| v16–v25 | 18 Oct 2026 23:51 | [2431f35](https://github.com/BrightTreeGit/pdc-design-map/commit/2431f351940fe300f6554980c8b0cb983ca98439) |
+| v15 | 18 Oct 2026 22:08 | [bb766f1](https://github.com/BrightTreeGit/pdc-design-map/commit/bb766f13db6928a9c9e3ddf34d0371477f03795b) |
+
+The v77 row is the commit that added this index; later versions are listed in the commit history.
+
 ---
 
 ## v77 (22 Oct 2026, 22:37)
