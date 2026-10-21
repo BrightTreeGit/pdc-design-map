@@ -301,6 +301,7 @@ const KINDS={
   clothesline:{g:'Landscape',label:'Clothesline',geom:'point',color:'#7f7f7f',sym:'square'},
   steps:{g:'Access',label:'Steps / stairs',geom:'line',color:'#8a7a6a',w:4,dash:[2,2]},
   driveway:{g:'Access',label:'Driveway (area)',geom:'polygon',color:'#9c8a74'},
+  lop:{g:'Plants',label:'Lopping / thinning job',geom:'point',color:'#e67e22',sym:'diamond',r:6},
   apz:{g:'Sectors',label:'Bushfire asset protection zone',geom:'polygon',color:'#c0311f',dash:[6,4]},
   customzone:{g:'Zones',label:'Other zone',geom:'polygon',color:'#5a7d9a',dash:[6,3]},
 };
@@ -402,7 +403,7 @@ async function boot(){renderSiteSel();
   const imgs=['aerial.jpg','relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png'];
   try{T=await (await fetch(SB+'terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
-  if(SITEDEF.canopy){imgs.push('canopy_h.png','canopy_change.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
+  if(SITEDEF.canopy){imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
   const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],SB+f)));
   applySite(); buildPaths(); fitLot();
   dem2=new Int16Array(await inflate(T.meta.dem.b64));
@@ -1311,7 +1312,7 @@ function featTasksHTML(id){const list=[...tasks.entries()].filter(([i,t])=>t.fea
 let mt=null; // active measuring tool
 function startMT(type){cancelDraft();if(align)endAlign();selected=null;mt={type,pts:[],H:+lsGet('bt.damH',3)};cv.classList.add('drawing');renderMTBar();renderFeatures();draw();if(matchMedia('(max-width:760px)').matches)$('#panel').classList.add('min')}
 function endMT(){if(!mt)return;mt=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;draw()}
-function mtClick(w){if(mt.type==='bound')return;if(mt.type==='hydro'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===2)mt.res=hydroCalc(mt.pts[0],mt.pts[1]);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='route'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){$('#drawbar .hint')&&($('#drawbar .hint').textContent='Finding a route…');setTimeout(()=>{mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade);renderMTBar();draw()},20)}renderMTBar();draw();return}
+function mtClick(w){if(mt.type==='bound')return;if(mt.type==='lop'){lopClick(w);return}if(mt.type==='hydro'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===2)mt.res=hydroCalc(mt.pts[0],mt.pts[1]);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='route'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){$('#drawbar .hint')&&($('#drawbar .hint').textContent='Finding a route…');setTimeout(()=>{mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade);renderMTBar();draw()},20)}renderMTBar();draw();return}
   if(mt.type==='fire'){let foot=null;for(const f of features.values()){if(['building','shed','greenhouse','futurebuilding','carport'].includes(f.kind)&&f.geom.g==='polygon'&&inPoly(w,f.geom.pts)){foot=f.geom.pts;break}}mt.res=fireCheck(foot?centroid({geom:{g:'polygon',pts:foot}}):r1(w),foot);renderMTBar();renderTools();draw();return}
   if(mt.type==='ruler'){if(mt.closed){mt.pts=[];mt.closed=false}mt.pts.push(r1(w));renderMTBar();draw();return}
   if(mt.type==='measure'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){mt.res=headCalc(mt.pts[0],mt.pts[1]);showTab('tools');renderTools();const d=document.querySelector('details[data-sec="t-head"]');if(d){d.open=true;d.scrollIntoView({block:'start'})}}}
@@ -1369,6 +1370,78 @@ function wireHydro(el){const box=el.querySelector('#hyRes');if(!box)return;const
     draft={kind:'structure',pts:[]};await commit({g:'point',pts:[r.b]});await saveFields(selected,{name:'Hydro turbine house',notes:sum,stage:'y2'});
     endMT();renderTools();toast('Saved the hydro scheme: penstock, intake and turbine house')}}
 
+/* ---------------- light & lopping planner: direct sun at garden height through terrain and tree crowns ---------------- */
+let CG=null;const LOP=Object.assign({doy:172,size:120,r:6,mode:'spot'},lsGet('bt.lop',{}));
+async function loadCG(){if(CG||!SITEDEF.canopy)return CG;try{const im=new Image();im.src=SB+'canopy_grid.png';await im.decode();const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);const d=g.getImageData(0,0,c.width,c.height).data;const n=c.width*c.height;const h=new Float32Array(n),gp=new Float32Array(n);for(let i=0;i<n;i++){h[i]=d[i*4]/3;gp[i]=d[i*4+1]/255}CG={w:c.width,h,gp}}catch(e){CG=null}return CG}
+function cgAt(x,y,edits){const i=Math.floor(x/2),j=Math.floor(y/2);if(!CG||i<0||j<0||i>=CG.w||j>=CG.w)return [0,1];let h=CG.h[j*CG.w+i],gp=CG.gp[j*CG.w+i];
+  for(const e of edits){if((x-e.x)**2+(y-e.y)**2<=e.r*e.r){if(e.mode==='remove'){h=0;gp=1}else gp=Math.min(1,gp+0.35)}}return [h,gp]}
+function lightCalc(cx,cy,size,doy,edits){const res=2,n=Math.round(size/res),x0=cx-size/2,y0=cy-size/2,out=new Float32Array(n*n);const step=0.25;const suns=[];
+  for(let t=5;t<=19;t+=step){const s=sunAtTime(doy,t);if(s.alt>3)suns.push([Math.sin(s.az*Math.PI/180),-Math.cos(s.az*Math.PI/180),Math.tan(s.alt*Math.PI/180)])}
+  for(let j=0;j<n;j++)for(let i=0;i<n;i++){const px=x0+(i+.5)*res,py=y0+(j+.5)*res;const zg=zAt(px,py);if(!isFinite(zg))continue;const z0=zg+1;let hrs=0;
+    for(const [dx,dy,tn] of suns){let T=1;for(let d=1;d<600;d+=2){const qx=px+dx*d,qy=py+dy*d,zr=z0+d*tn;const zt=zAt(qx,qy);if(!isFinite(zt))break;if(zt>zr){T=0;break}const hz=zr-zt;if(hz>70)break;
+        const [h,gp]=cgAt(qx,qy,edits);if(h>2&&hz<h&&hz>h*0.45){T*=Math.pow(Math.max(gp,0.02),0.35);if(T<0.02){T=0;break}}}
+      hrs+=T*step}
+    out[j*n+i]=hrs}
+  return {x0,y0,n,res,h:out}}
+function lopImage(r,base){const c=document.createElement('canvas');c.width=r.n;c.height=r.n;const g=c.getContext('2d');const im=g.createImageData(r.n,r.n);const mx=LOP.doy===172?6:LOP.doy===80?8:10;
+  const ramp=[[0,[25,30,70,190]],[.2,[70,60,140,180]],[.45,[200,100,70,190]],[.7,[250,190,70,200]],[1,[255,245,170,215]]];
+  for(let k=0;k<r.n*r.n;k++){let v,col;if(base){v=r.h[k]-base.h[k];if(v<0.1){im.data[k*4+3]=0;continue}const t=Math.min(1,v/2);col=[40+0*t,170+40*t,90-40*t,90+150*t]}
+    else{const t=Math.min(1,r.h[k]/mx);let a=ramp[0],b=ramp[ramp.length-1];for(let q=1;q<ramp.length;q++)if(t<=ramp[q][0]){a=ramp[q-1];b=ramp[q];break}const f=(t-a[0])/Math.max(1e-6,b[0]-a[0]);col=a[1].map((v0,ii)=>v0+(b[1][ii]-v0)*f)}
+    im.data.set(col.map(Math.round),k*4)}g.putImageData(im,0,0);return c}
+function lopStats(r){let s=0,a2=0,a4=0,n=0;for(const v of r.h){s+=v;n++;if(v>=2)a2++;if(v>=4)a4++}const cell=r.res*r.res;return {mean:s/Math.max(1,n),a2:a2*cell,a4:a4*cell}}
+async function lopRun(){if(!mt||mt.type!=='lop'||!mt.c)return;if(!await loadCG()){toast('Canopy data is not available for this site');return}
+  $('#drawbar .hint')&&($('#drawbar .hint').textContent='Working out the sun through the trees…');await new Promise(r=>setTimeout(r,30));
+  const [cx,cy]=mt.c;if(!mt.base||mt.baseKey!==cx+','+cy+','+LOP.size+','+LOP.doy){mt.base=lightCalc(cx,cy,LOP.size,LOP.doy,[]);mt.baseKey=cx+','+cy+','+LOP.size+','+LOP.doy;mt.baseImg=lopImage(mt.base)}
+  if(mt.edits.length){mt.after=lightCalc(cx,cy,LOP.size,LOP.doy,mt.edits);mt.afterImg=lopImage(mt.after);mt.gainImg=lopImage(mt.after,mt.base)}else{mt.after=null;mt.afterImg=null;mt.gainImg=null}
+  renderMTBar();renderTools();draw()}
+function lopClick(w){if(LOP.mode==='spot'||!mt.c){mt.c=r1(w);mt.edits=[];mt.base=null;mt.sugg=[];LOP.mode=LOP.mode==='spot'?'spot':LOP.mode;lopRun();return}
+  const big=CANOPY?CANOPY.trees.find(t=>t[2]>=40&&Math.hypot(t[0]-w[0],t[1]-w[1])<=LOP.r+2):null;
+  if(big&&LOP.mode==='remove'){toast(`That includes an emergent tree about ${Math.round(big[2])} m tall: a likely habitat tree. Try thinning or lopping a limb instead.`)}
+  mt.edits.push({x:+w[0].toFixed(1),y:+w[1].toFixed(1),r:LOP.r,mode:LOP.mode,big:big?Math.round(big[2]):0});lopRun()}
+async function lopSuggest(){if(!mt||!mt.c||!await loadCG())return;const [cx,cy]=mt.c;toast('Testing the trees between the spot and the sun…');await new Promise(r=>setTimeout(r,30));
+  const tgt=30,base=lightCalc(cx,cy,tgt,LOP.doy,mt.edits),bm=lopStats(base).mean;const cands=[];
+  const noonAz=LOP.doy===355?(LAT<-23.4?0:180):0;
+  for(let d=8;d<=48;d+=8)for(let a=-60;a<=60;a+=20){const az=(noonAz+a)*Math.PI/180;const x=cx+Math.sin(az)*d,y=cy-Math.cos(az)*d;const [h]=cgAt(x,y,mt.edits);if(h<8)continue;cands.push([x,y,h])}
+  const res=[];for(const [x,y,h] of cands){const e={x:+x.toFixed(1),y:+y.toFixed(1),r:LOP.r,mode:'remove'};const r=lightCalc(cx,cy,tgt,LOP.doy,mt.edits.concat([e]));const g=lopStats(r).mean-bm;
+    const big=CANOPY?CANOPY.trees.find(t=>t[2]>=40&&Math.hypot(t[0]-x,t[1]-y)<=LOP.r+2):null;res.push({...e,gain:g,h:Math.round(h),big:big?Math.round(big[2]):0})}
+  res.sort((a,b)=>b.gain-a.gain);mt.sugg=res.filter(r=>r.gain>0.05).slice(0,5);renderTools();draw();
+  toast(mt.sugg.length?`Top ${mt.sugg.length} trees to lop for this spot are numbered on the map`:'No single tree makes a real difference here: the shade comes from many crowns or the hill')}
+function lopBar(b){const S=mt.base?lopStats(mt.base):null,A=mt.after?lopStats(mt.after):null;const season={172:'21 Jun',80:'equinox',355:'21 Dec'}[LOP.doy];
+  b.innerHTML=`<span class="what">Light & lopping · ${season}</span><span class="hint">${!mt.c?'Click the garden spot to test':LOP.mode==='spot'?'Click another garden spot, or choose Remove or Thin and click trees':LOP.mode==='remove'?'Click a tree to remove it (whole crown within the radius)':'Click a crown to thin or lop it (lets about a third more light through)'}${S?` · now <b>${S.mean.toFixed(1)} h</b> average${A?` → <b>${A.mean.toFixed(1)} h</b>`:''}`:''}</span>
+   <div class="seg" id="lopMode">${[['spot','◎ Garden spot'],['thin','✂ Thin crown'],['remove','✕ Remove tree']].map(([k,l])=>`<button data-v="${k}" aria-pressed="${LOP.mode===k}">${l}</button>`).join('')}</div>
+   <label class="gp">Radius <input id="lopR" type="number" min="2" max="15" step="1" value="${LOP.r}" aria-label="Crown radius in metres"> m</label>
+   ${mt.edits&&mt.edits.length?'<button class="btn" id="lopUndo">Undo last</button>':''}<button class="btn" id="lopDone">Done</button>`;
+  b.querySelectorAll('#lopMode button').forEach(x=>x.onclick=()=>{LOP.mode=x.dataset.v;lsSet('bt.lop',LOP);renderMTBar()});
+  b.querySelector('#lopR').onchange=e=>{LOP.r=Math.max(2,Math.min(15,+e.target.value||6));lsSet('bt.lop',LOP)};
+  const u=b.querySelector('#lopUndo');if(u)u.onclick=()=>{mt.edits.pop();lopRun()};b.querySelector('#lopDone').onclick=()=>{endMT();renderTools()}}
+function drawLop(px){if(!mt.c)return;const r=mt.base;if(r){ctx.save();ctx.imageSmoothingEnabled=true;ctx.globalAlpha=.85;ctx.drawImage(mt.showGain&&mt.gainImg?mt.gainImg:(mt.afterImg||mt.baseImg),r.x0,r.y0,r.n*r.res,r.n*r.res);ctx.globalAlpha=1;
+  ctx.strokeStyle='#fff';ctx.lineWidth=2*px;ctx.setLineDash([6*px,4*px]);ctx.strokeRect(r.x0,r.y0,r.n*r.res,r.n*r.res);ctx.setLineDash([]);ctx.restore()}
+  (mt.sugg||[]).forEach((e,i)=>{ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.lineWidth=2*px;ctx.strokeStyle='#f1c40f';ctx.setLineDash([2*px,3*px]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#f1c40f';ctx.beginPath();ctx.arc(e.x,e.y,9*px,0,7);ctx.fill();ctx.fillStyle='#111';ctx.font=`700 ${11*px}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),e.x,e.y+0.5*px)});
+  for(const e of mt.edits||[]){ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.lineWidth=2.5*px;ctx.strokeStyle=e.mode==='remove'?'#c0392b':'#e67e22';ctx.setLineDash(e.mode==='remove'?[]:[5*px,3*px]);ctx.stroke();ctx.setLineDash([])}
+  ctx.beginPath();ctx.arc(mt.c[0],mt.c[1],5*px,0,7);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=2*px;ctx.strokeStyle='#111';ctx.stroke()}
+function lopHTML(){if(!SITEDEF.canopy)return '<p class="hint">Needs the LiDAR canopy layers for this site (run make_canopy for its point clouds).</p>';
+  const S=mt&&mt.type==='lop'&&mt.base?lopStats(mt.base):null,A=mt&&mt.type==='lop'&&mt.after?lopStats(mt.after):null;
+  return `<p class="hint">Test where food plants will get enough sun under the forest, and how much lopping or thinning particular trees would help. It traces the sun every 15 minutes through the hills and the tree crowns measured by the 2022 LiDAR, for a square around the spot you click.</p>
+   <div class="row"><div class="field" style="flex:1"><label>Season</label>${segHTML('lopDoy',[['172','Winter'],['80','Equinox'],['355','Summer']],String(LOP.doy))}</div><div class="field" style="flex:1"><label for="lopSize">Area tested</label><select id="lopSize">${[60,90,120,160].map(v=>`<option value="${v}" ${LOP.size===v?'selected':''}>${v} × ${v} m</option>`).join('')}</select></div></div>
+   <button class="btn primary" id="tLop">${mt&&mt.type==='lop'?'Click the map to test a spot':'Pick a garden spot'}</button>
+   ${S?`<dl class="facts"><dt>Direct sun at garden height</dt><dd><b>${S.mean.toFixed(1)} h</b> average${A?` → <b>${A.mean.toFixed(1)} h</b> after the lopping`:''}</dd>
+   <dt>Area with 2 h or more</dt><dd>${Math.round(S.a2).toLocaleString()} m²${A?` → <b>${Math.round(A.a2).toLocaleString()} m²</b>`:''}</dd>
+   <dt>Area with 4 h or more</dt><dd>${Math.round(S.a4).toLocaleString()} m²${A?` → <b>${Math.round(A.a4).toLocaleString()} m²</b>`:''}</dd></dl>
+   <button class="btn" id="lopSug">Suggest the trees to lop for this spot</button>
+   ${mt.sugg&&mt.sugg.length?`<div class="tlist">${mt.sugg.map((e,i)=>`<div class="row"><b>${i+1}.</b>&nbsp;Crown about ${e.h} m tall: +${e.gain.toFixed(1)} h at the spot${e.big?` <span class="pill">habitat tree ~${e.big} m: thin, don't remove</span>`:''}<button class="btn" data-sug="${i}" style="margin-left:auto">${e.big?'Thin':'Remove'}</button></div>`).join('')}</div>`:''}
+   ${A?`<label class="row"><input type="checkbox" id="lopGain" ${mt.showGain?'checked':''}> Show only the hours gained (green)</label>`:''}
+   ${mt.edits.length?`<p class="hint">${mt.edits.length} change${mt.edits.length>1?'s':''}: ${mt.edits.map((e,i)=>`${i+1}. ${e.mode==='remove'?'remove':'thin'} ${e.r} m${e.big?` (habitat tree ~${e.big} m)`:''}`).join(' · ')}</p><button class="btn" id="lopSave">Save these as lopping jobs</button>`:''}`:''}
+   <p class="hint">Plan for 6 h or more for fruit trees and veg, 3–4 h for leafy greens, herbs, coffee and cacao, under 2 h for ferns, ginger, turmeric and mushrooms. Estimates: crowns are treated as partly see-through, and real light also comes from the open sky (diffuse light), so beds under thinned canopy do better than direct sun alone suggests. Keep habitat trees; thinning and lopping limbs is usually enough.</p>`}
+function wireLop(el){const b=el.querySelector('#tLop');if(!b)return;b.onclick=()=>{if(!(mt&&mt.type==='lop')){startMT('lop');mt.edits=[];mt.c=null;LOP.mode='spot';renderMTBar();renderTools()}};
+  el.querySelectorAll('#lopDoy button').forEach(x=>x.onclick=()=>{LOP.doy=+x.dataset.v;lsSet('bt.lop',LOP);if(mt&&mt.type==='lop'&&mt.c){mt.base=null;lopRun()}else renderTools()});
+  const sz=el.querySelector('#lopSize');if(sz)sz.onchange=()=>{LOP.size=+sz.value;lsSet('bt.lop',LOP);if(mt&&mt.type==='lop'&&mt.c){mt.base=null;lopRun()}};
+  const sg=el.querySelector('#lopSug');if(sg)sg.onclick=lopSuggest;
+  el.querySelectorAll('[data-sug]').forEach(x=>x.onclick=()=>{const e=mt.sugg[+x.dataset.sug];mt.edits.push({x:e.x,y:e.y,r:e.r,mode:e.big?'thin':'remove',big:e.big});mt.sugg.splice(+x.dataset.sug,1);lopRun()});
+  const g=el.querySelector('#lopGain');if(g)g.onchange=()=>{mt.showGain=g.checked;draw()};
+  const sv=el.querySelector('#lopSave');if(sv)sv.onclick=async()=>{const S=lopStats(mt.base),A=lopStats(mt.after);const season={172:'winter',80:'equinox',355:'summer'}[LOP.doy];
+    for(const e of mt.edits){draft={kind:'lop',pts:[]};await commit({g:'point',pts:[[e.x,e.y]],r:e.r},{name:(e.mode==='remove'?'Remove tree':'Thin crown')+(e.big?` (habitat tree ~${e.big} m: check first)`:''),stage:'now',notes:`From the light planner (${season}): this set of ${mt.edits.length} change(s) lifts direct sun in the ${LOP.size} m test area from ${S.mean.toFixed(1)} h to ${A.mean.toFixed(1)} h on average, and the area with 2 h+ from ${Math.round(S.a2)} to ${Math.round(A.a2)} m². ${e.mode==='remove'?'Remove the crown within '+e.r+' m.':'Thin or lop limbs within '+e.r+' m (about a third more light).'} Check for hollows and nesting before any work; an arborist for big trees.`})}
+    toast('Saved '+mt.edits.length+' lopping job(s) to the design');renderFeatures()}}
+
 /* ---------------- pipe friction: gravity feed through HDPE pipe and fittings ---------------- */
 // PE100 PN12.5 (SDR 13.6) inside diameters; Hazen-Williams C = 150 for new polyethylene
 const PIPES={'63':{label:'2-inch (63 mm)',id:53.6},'50':{label:'1½-inch (50 mm)',id:42.6},'40':{label:'1¼-inch (40 mm)',id:34.0},'32':{label:'1-inch (32 mm)',id:27.2}};
@@ -1405,6 +1478,7 @@ const fmtLen=m=>m<1000?m.toFixed(m<100?1:0)+' m':(m/1000).toFixed(2)+' km';
 function rulerStats(){const p=mt.pts;if(p.length<2)return null;const ring=mt.closed?p.concat([p[0]]):p;const L=lineLen(ring);const d=densify(ring,1);let S=0;for(let i=1;i<d.length;i++)S+=Math.hypot(d[i].d-d[i-1].d,(d[i].z-d[i-1].z)||0);return {L,S,A:mt.closed&&p.length>=3?polyArea(p):0}}
 function renderMTBar(){const b=$('#drawbar');if(!mt){b.hidden=true;return}b.hidden=false;
   if(mt.type==='bound'){boundBar(b);return}
+  if(mt.type==='lop'){lopBar(b);return}
   if(mt.type==='route'){routeBar(b);return}
   if(mt.type==='fire'){const r=mt.res;b.innerHTML=`<span class="what">Bushfire site check</span><span class="hint">${r?(r.closest?`Vegetation ${Math.round(r.closest.dv)} m away at the closest (${dirName(r.closest.az)}); land falls away up to ${r.steep.deg.toFixed(0)}° (${dirName(r.steep.az)}).${r.over20?' Over 20° in '+r.over20+' directions: detailed assessment needed.':''} Click another building to compare.`:'No unmanaged vegetation within 100 m.'):'Click a building (or any point)'}</span><button class="btn" id="mtClose">Close</button>`;
     $('#mtClose').onclick=()=>{endMT();renderTools()};return}
@@ -1429,6 +1503,7 @@ function renderMTBar(){const b=$('#drawbar');if(!mt){b.hidden=true;return}b.hidd
   $('#mtClose').onclick=()=>{endMT();renderTools()}}
 function drawMT(px){if(!mt)return;ctx.setLineDash([]);
   if(mt.type==='bound'){drawBound(px);return}
+  if(mt.type==='lop'){drawLop(px);return}
   if(mt.type==='fire'){drawFire(px);return}
   if(mt.type==='route'){drawRoute(px);return}
   if(mt.type==='ruler'){const p=mt.pts;if(!p.length)return;const path=new Path2D();p.forEach((q,i)=>i?path.lineTo(...q):path.moveTo(...q));if(mt.closed)path.closePath();else if(mt.hover)path.lineTo(...mt.hover);
@@ -1475,6 +1550,7 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
    sec('t-section','Cross-section A–B',`<p class="hint">Click point A, then point B, to cut a side view through the land: ground shape, height, grade and the zones it crosses. Sections stay on the map (marked A–B, C–D…) and can go on the A3 sheet.</p><button class="btn primary" id="tSection">Draw a cross-section</button>${secOrder().map(([i,f])=>{const [a,b]=secLetters(i);const L=lineLen(f.geom.pts);return `<div class="row" style="margin-top:6px"><span style="flex:1"><b style="color:#c0392b">${a}–${b}</b> · ${Math.round(L)} m</span><button class="btn" data-secv="${i}">View profile</button></div>`}).join('')}`)+
    sec('t-ruler','Distance & area',`<p class="hint">Click points to measure a distance, then close it to get an area and perimeter. Shows map distance and the longer distance along the slope. Nothing is saved to the design.</p><button class="btn primary" id="tRuler">Measure distance or area</button>`)+
    sec('t-water','Water balance & tanks',wbHTML())+
+   (SITEDEF.canopy?sec('t-lop','Light & lopping planner',`<div id="lopRes">${lopHTML()}</div>`):'')+
    sec('t-hydro','Micro-hydro power',`<button class="btn primary" id="tHydro">Pick intake and turbine site</button><div id="hyRes">${hydroHTML(mt&&mt.type==='hydro'?mt.res:null)}</div>`)+
    sec('t-head','Height & water pressure',`<p class="hint">Click two points to get the height difference, distance and the static pressure water would have flowing downhill between them. Use it to place tanks above the house and gardens: every 10 m of fall gives about 1 bar.</p><details class="mini"><summary>What pressure feels like</summary><dl class="facts"><dt>Under 15 kPa (1.5 m)</dt><dd>trickle: buckets, watering cans</dd><dt>15–50 kPa (1.5–5 m)</dt><dd>gravity drip kits, soaker hoses</dd><dt>50–100 kPa (5–10 m)</dt><dd>weak hose, microsprays, slow shower</dd><dt>100–200 kPa (10–20 m)</dt><dd>usable hose, most drip, modest shower</dd><dt>200–350 kPa (20–35 m)</dt><dd>like town water: showers, sprinklers</dd><dt>Over 500 kPa (50 m)</dt><dd>fit a pressure-limiting valve before the house</dd></dl><p class="hint">Pressure drops while water flows, more in long or thin pipes, so allow extra fall for long runs.</p></details><button class="btn primary" id="tMeasure">Measure between two points</button><div id="headRes">${pipeHTML(mt&&mt.type==='measure'?mt.res:null)}</div>`)+
    sec('t-dam','Dam & pond calculator',`<p class="hint">Draw a wall line across a gully, set its height, and the LiDAR gives the storage, the flooded area and the catchment that feeds it. Try it at the keypoint candidates and the planned rock pool.</p><button class="btn primary" id="tDam">Draw a dam wall</button>
@@ -1487,7 +1563,7 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
    sec('t-sheet','Presentation sheet (A3 PDF)',sheetHTML())+
    sec('t-data','Export design data',`<div class="seg"><button class="btn" id="exGeo">GeoJSON</button><button class="btn" id="exKml">KML</button></div><p class="hint">KML opens in Google Earth, Avenza and Queensland Globe.</p>`);
   wireWB(el);wireFire(el);wireGraze(el);$('#tRoute').onclick=()=>startMT('route');$('#tRuler').onclick=()=>startMT('ruler');{const h=$('#tHydro');if(h)h.onclick=()=>startMT('hydro');wireHydro(el)}{const b=$('#tSection');if(b)b.onclick=()=>{showTab('draw');startTool('section')};el.querySelectorAll('[data-secv]').forEach(x=>x.onclick=()=>{selected=x.dataset.secv;showTab('feat');renderFeatures();zoomTo(features.get(selected));draw()})}$('#tMeasure').onclick=()=>startMT('measure');wirePipe(el);$('#tDam').onclick=()=>startMT('dam');
-  wireSheet(el);
+  wireSheet(el);wireLop(el);
   $('#exGeo').onclick=()=>exportFile('geojson');$('#exKml').onclick=()=>exportFile('kml');wireP3(el);wireSecs(el)}
 /* ---------------- A3 presentation sheet: options, layout engine, panels, PNG or PDF ---------------- */
 const SHEET_DEF={sections:true,orient:'land',base:'current',bases:['current'],v3:{auto:true,bearing:135,tilt:32,ex:1.6,drape:'relief',zoom:1},theme:'standard',fmt:'pdf',grid:true,north:true,inset:true,contours:true,callouts:false,legend:true,
@@ -1958,7 +2034,7 @@ function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);if(k==='lot'&&$('#z
 const OVERLAYS=[
  {grp:'Light & climate',items:[['shadow','Shade at a time'],['aspect','Aspect'],['sun_winter','Winter sun'],['sun_equinox','Equinox sun'],['sun_summer','Summer sun'],['cold','Cold air / frost']]},
  {grp:'Land & risk',items:[['slope','Slope'],['fire','Fire run'],['change_2008','Ground change since 2008'],['change_2014','Ground change since 2014']]}];
-const OVNAME={light_winter:'Light reaching the ground · winter',light_equinox:'Light reaching the ground · equinox',canopy_h:'Canopy height (2022)',canopy_change:'Canopy growth 2008–2022',understorey:'Dense understorey (2022)',fuel:'Fuel structure (relative, 2022)',shadow:'Shade at a chosen time',none:'None',aspect:'Aspect',sun_winter:'Winter sun hours',sun_equinox:'Equinox sun hours',sun_summer:'Summer sun hours',cold:'Cold air pooling',slope:'Slope',fire:'Fire run potential',change_2008:'Ground change since 2008',change_2014:'Ground change since 2014'};
+const OVNAME={productivity:'Growing power: tree growth vs typical, 2008–2022',light_winter:'Light reaching the ground · winter',light_equinox:'Light reaching the ground · equinox',canopy_h:'Canopy height (2022)',canopy_change:'Canopy growth 2008–2022',understorey:'Dense understorey (2022)',fuel:'Fuel structure (relative, 2022)',shadow:'Shade at a chosen time',none:'None',aspect:'Aspect',sun_winter:'Winter sun hours',sun_equinox:'Equinox sun hours',sun_summer:'Summer sun hours',cold:'Cold air pooling',slope:'Slope',fire:'Fire run potential',change_2008:'Ground change since 2008',change_2014:'Ground change since 2014'};
 function sec(id,title,body,open=true){let st={};try{st=lsGet('bt.sec',{})}catch(e){}const o=st[id]??open;return `<details class="sec" data-sec="${id}" ${o?'open':''}><summary>${title}</summary><div class="secbody">${body}</div></details>`}
 function wireSecs(el){el.querySelectorAll('details.sec').forEach(d=>d.addEventListener('toggle',()=>{const st=lsGet('bt.sec',{});st[d.dataset.sec]=d.open;lsSet('bt.sec',st)}))}
 function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="${id}"`:''}>${opts.map(([k,l])=>`<button aria-pressed="${cur===k}" data-v="${k}">${l}</button>`).join('')}</div>`}
@@ -1974,7 +2050,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    sec('photo','Aerial photos',`<div id="imgSec">${imageryHTML()}</div>`)+
    sec('analysis','Terrain analysis',`${segHTML('',[['none','None']],layers.overlay,'ovs')}
     ${OVERLAYS.map(g=>`<div class="sub2">${g.grp}</div>${segHTML('',g.items,layers.overlay,'ovs')}`).join('')}
-    <div class="sub2">Forest${CANOPY?' · LiDAR 2008–2022':''}</div>${CANOPY?segHTML('',[['canopy_h','Canopy height & tall trees'],['canopy_change','Canopy growth since 2008'],['understorey','Dense understorey'],['fuel','Fuel structure'],['light_winter','Light at ground · winter'],['light_equinox','Light at ground · equinox']],layers.overlay,'ovs'):'<div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>'}
+    <div class="sub2">Forest${CANOPY?' · LiDAR 2008–2022':''}</div>${CANOPY?segHTML('',[['canopy_h','Canopy height & tall trees'],['canopy_change','Canopy growth since 2008'],['productivity','Growing power (growth vs typical)'],['understorey','Dense understorey'],['fuel','Fuel structure'],['light_winter','Light at ground · winter'],['light_equinox','Light at ground · equinox']],layers.overlay,'ovs'):'<div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>'}
     <div id="shWrap">${layers.overlay==='shadow'?shadowCtl():''}</div>
     <div class="row"><label for="ovop">Overlay strength</label><input type="range" id="ovop" min="0.2" max="1" step="0.05" value="${layers.ovOp}"></div>
     <div id="ovLegend" class="hint"></div>`)+
@@ -1997,6 +2073,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    if(C0.light){const Lw=C0.light.winter,Le=C0.light.equinox;
     legends.light_winter=`Estimated direct sun reaching the ground on 21 June: the hills' shade combined with how open the canopy is overhead (from the share of 2022 LiDAR pulses that got through the crowns). Bright patches are where food plants can grow. Inside the lot only about ${Lw.ha2h} ha gets 2 hours or more of winter sun at ground level, and ${Lw.ha4h} ha gets 4 hours or more: mostly the house clearing and small gaps. An estimate: eucalypt crowns let dappled light through, so treat it as a ranking.`;
     legends.light_equinox=`The same estimate for the equinox (March and September), when the sun is higher. About ${Le.ha2h} ha of the lot gets 2 hours or more of sun at ground level, and ${Le.ha4h} ha 4 hours or more. Compare with the winter layer to find spots that stay sunny all year.`}
+   if(C0.productivity){const P=C0.productivity;legends.productivity=`Where trees grew faster or slower than is typical for their size between 2008 and 2022 (each tree compared with others that started at the same height). Green: faster than typical, the sign of better soil moisture, depth and nutrients: the places to give fruit trees, the food forest and nursery plantings. Orange: slower (dry ridges, shallow sandy soil, exposure) or lost height (tree fall). Inside the lot about ${P.aboveHa} ha grows clearly faster than typical and ${P.belowHa} ha clearly slower. Typical growth was about 2 m in 14 years. Match with the soil tests before committing.`}
    legends.fuel=`An indicative, relative fuel-structure rating from the 2022 LiDAR: dense near-ground growth, ladder fuels from 2 to 10 m that let fire climb, and canopy cover. Ranked against the whole map window. Inside the lot: ${C0.fuel.vhighHa} ha very high, ${C0.fuel.highHa} ha high, ${C0.fuel.modHa} ha moderate. Not an official fuel hazard assessment; read it with the Fire run layer and your fire plan.`}
   for(const y of SITE.changeYears||[])legends['change_'+y]=`Ground that has moved since the ${y} survey, after removing survey-wide offsets: red is lower now (cut, erosion, slips, gully incision), blue is higher (fill, deposition, new pads). Faint scatter under forest is survey noise; treat patches as leads to check on the ground.`+(ch&&ch[y]?` Inside the lot: ${ch[y].lotLossHa} ha lowered and ${ch[y].lotGainHa} ha raised by more than 1 m.`:'');
   const setLeg=()=>{$('#ovLegend').innerHTML=legends[layers.overlay]||'';const sw=$('#shWrap');if(layers.overlay==='shadow'){if(!sw.innerHTML){sw.innerHTML=shadowCtl();wireShadow(el)}computeShadow()}else sw.innerHTML='';mapLegend()};setLeg();if(layers.overlay==='shadow')wireShadow(el);
@@ -2018,6 +2095,7 @@ function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.
   else if(ov==='fire')h=`<b>Fire run potential</b><div class="legend"><span><i class="swatch" style="background:rgb(245,160,60)"></i>Moderate</span><span><i class="swatch" style="background:rgb(225,90,40)"></i>High</span><span><i class="swatch" style="background:rgb(150,30,30)"></i>Very high</span></div><div class="ends"><span>terrain and NW–W winds only</span></div>`;
   else if(ov==='canopy_h')h=`<b>Canopy height · 2022</b><div class="grad" style="background:linear-gradient(90deg,rgb(220,215,150),rgb(180,200,90),rgb(110,170,60),rgb(40,130,60),rgb(20,90,60),rgb(60,40,110))"></div><div class="ends"><span>0 m</span><span>10</span><span>20</span><span>30</span><span>40+ m</span></div><div class="legend"><span><i class="swatch" style="background:rgb(150,40,140);border-radius:50%"></i>Emergent tree ≥40 m</span><span><i class="swatch" style="background:#c0392b;border-radius:50%;outline:2px solid #ffd23f"></i>Within falling distance of a building or tank</span></div>`;
   else if(ov==='light_winter'||ov==='light_equinox')h=`<b>Light at ground · ${ov==='light_winter'?'21 Jun':'equinox'}</b><div class="grad" style="background:linear-gradient(90deg,rgb(25,30,70),rgb(70,60,140),rgb(200,100,70),rgb(250,190,70),rgb(255,245,170))"></div><div class="ends"><span>0 h</span><span>${ov==='light_winter'?'3':'4'} h</span><span>${ov==='light_winter'?'6':'8'}+ h</span></div><div class="ends"><span>terrain + tree crowns, estimated</span></div>`;
+  else if(ov==='productivity')h=`<b>Growing power · 2008 → 2022</b><div class="legend"><span><i class="swatch" style="background:rgb(30,200,80)"></i>Grows faster than typical</span><span><i class="swatch" style="background:rgb(235,110,60)"></i>Slower, or lost height</span></div><div class="ends"><span>tree growth as a soil and water proxy</span></div>`;
   else if(ov==='canopy_change')h=`<b>Canopy growth · 2008 → 2022</b><div class="legend"><span><i class="swatch" style="background:rgb(40,120,60)"></i>Taller now</span><span><i class="swatch" style="background:rgb(200,70,40)"></i>Lower now</span></div>`;
   else if(ov==='understorey')h=`<b>Dense understorey · 0.5–5 m</b><div class="legend"><span><i class="swatch" style="background:rgb(240,200,60)"></i>Dense</span><span><i class="swatch" style="background:rgb(230,130,30)"></i>Very dense</span><span><i class="swatch" style="background:rgb(170,40,30)"></i>Thicket</span></div><div class="ends"><span>relative to the map window; walk before treating</span></div>`;
   else if(ov==='fuel')h=`<b>Fuel structure (relative)</b><div class="legend"><span><i class="swatch" style="background:rgb(250,200,80)"></i>Moderate</span><span><i class="swatch" style="background:rgb(235,120,40)"></i>High</span><span><i class="swatch" style="background:rgb(170,30,30)"></i>Very high</span></div><div class="ends"><span>LiDAR structure only; not an official rating</span></div>`;
