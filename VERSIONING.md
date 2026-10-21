@@ -2,7 +2,7 @@
 
 ## Three layers of safety
 1. **This repository (the archive).** Every time the map is published, Claude commits the new code and files here with the version tag (v78, v79…) and a changelog line. Nothing is ever overwritten: old versions stay in the history for good.
-2. **Data snapshots.** Drawings and notes live in the map's database, not in the code. Claude exports them to `data-snapshots/<date>_v<NN>/` before any big change and at least weekly.
+2. **Data snapshots.** Drawings and notes live in the map's database, not in the code. Claude exports them to `data-snapshots/<date>_v<NN>/` before any big change. A scheduled task ("PDC map weekly backup", Mondays 6:37 am Brisbane) also exports them to `data-snapshots/<date>_weekly/` and flags any site where features or notes suddenly dropped.
 3. **The artifact's own version history.** claude.ai keeps each published version too. That's handy for a quick undo, but this repository is the permanent, browsable record.
 
 ## Day to day (what to ask Claude)
@@ -16,3 +16,6 @@
 - One live map link for everyone; versions and branches live here.
 - Keep the repository private: it holds the method, scripts and site data.
 - Big files (photos, layers) are fine here up to 50 MB each.
+
+## Scripts on the PC
+One copy of each download script lives in `Permiculture Noosa PDC\_tools\`, with a double-click file per site. A fix there reaches every site at once. Master copies are in `scripts/` here.
