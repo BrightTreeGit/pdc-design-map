@@ -334,7 +334,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('act');t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600)}
 /* ---------------- PDC sites: one map page, one data space per site ---------------- */
 const SITES=[
- {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true},
+ {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true},
  {id:'bright-tree-gemini',name:'Bright Tree (auto data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, auto-fetched boundary and rainfall',ready:true,canopy:true},
  {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true},
  {id:'nimbin',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW',ready:true},
@@ -377,6 +377,25 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
 let CANOPY=null;
+const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
+function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
+function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
+function phFmt(d){if(!d)return '';const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const [y,mo,da]=d.split('-');return (+da)+' '+m[+mo-1]+' '+y}
+function phLabel(){const r=PH.data.runs[PH.i];const dt=r.from===r.to?phFmt(r.from):phFmt(r.from)+' – '+phFmt(r.to);return `<b style="font-size:1.25em">${r.y}</b> · ${dt} · `+(r.old?`scanned film photo${r.bw?' (black & white)':''}, lined up by matching landmarks (within about 20–40 m)`:`${r.res<1?Math.round(r.res*100)+' cm':r.res+' m'} detail${r.res>=2?' (coarse)':''}`)}
+function phHTML(){if(!PH.data)return '<p class="hint">No photo history for this site yet.</p>';const n=PH.data.runs.length,R=PH.data.runs;
+ return `<div class="row"><label><input type="checkbox" id="phOn" ${PH.on?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#5b6b4a,#c9bf9a)"></i>Show photo history</label></div>
+ <div id="phLab" class="hint" style="margin:4px 0">${phLabel()}</div>
+ <input type="range" id="phSl" min="0" max="${n-1}" step="1" value="${PH.i}" style="width:100%" aria-label="Year">
+ <div class="hint" style="display:flex;justify-content:space-between;margin-top:-2px"><span>${R[0].y}</span><span>${R[n-1].y}</span></div>
+ <div class="seg"><button class="btn" id="phPrev" aria-label="Earlier">◀ Earlier</button><button class="btn" id="phPlay">${PH.timer?'❚❚ Pause':'▶ Play'}</button><button class="btn" id="phNext" aria-label="Later">Later ▶</button></div>
+ <div class="row"><label for="phOp">Fade <span class="pill" id="phOpv">${Math.round(PH.op*100)}%</span></label><input type="range" id="phOp" min="0" max="1" step="0.05" value="${PH.op}"></div>
+ <p class="hint">${n} aerial photos from ${R[0].y} to ${R[n-1].y}. From 1994 they are government orthophotos that line up exactly; earlier years are scanned film photos lined up by matching creeks and ridges, so allow 20–40 m. Drag the slider or use the ← → keys; fade it to compare with today's layers underneath. Imagery © State of Queensland (CC BY 4.0; older photos public domain).</p>`}
+function phSet(i){if(!PH.data)return;PH.i=Math.max(0,Math.min(PH.data.runs.length-1,i));if(!PH.on){PH.on=true;const c=$('#phOn');if(c)c.checked=true}phImg(PH.i);phPre(PH.i);const l=$('#phLab');if(l)l.innerHTML=phLabel();const sl=$('#phSl');if(sl)sl.value=PH.i;draw()}
+function phPlay(){if(PH.timer){clearInterval(PH.timer);PH.timer=0}else{if(PH.i>=PH.data.runs.length-1)phSet(0);PH.timer=setInterval(()=>{if(PH.i>=PH.data.runs.length-1){clearInterval(PH.timer);PH.timer=0;const b=$('#phPlay');if(b)b.textContent='▶ Play';return}phSet(PH.i+1)},1300)}const b=$('#phPlay');if(b)b.textContent=PH.timer?'❚❚ Pause':'▶ Play'}
+function wirePH(el){const c=el.querySelector('#phOn');if(!c)return;c.onchange=()=>{PH.on=c.checked;if(PH.on)phSet(PH.i);else{if(PH.timer)phPlay();draw()}};
+ el.querySelector('#phSl').oninput=e=>phSet(+e.target.value);el.querySelector('#phPrev').onclick=()=>phSet(PH.i-1);el.querySelector('#phNext').onclick=()=>phSet(PH.i+1);el.querySelector('#phPlay').onclick=phPlay;
+ el.querySelector('#phOp').oninput=e=>{PH.op=+e.target.value;el.querySelector('#phOpv').textContent=Math.round(PH.op*100)+'%';draw()}}
+document.addEventListener('keydown',e=>{if(!PH.on||!PH.data||e.target.closest('input[type=text],input[type=search],input[type=number],input:not([type]),textarea,select,[contenteditable]'))return;if(e.key==='ArrowLeft'){e.preventDefault();phSet(PH.i-1)}else if(e.key==='ArrowRight'){e.preventDefault();phSet(PH.i+1)}});
 // estimated tree protection zone: 12 x trunk diameter, trunk estimated from height for tall eucalypts (about h/45 m), capped at 15 m
 const tpzR=h=>Math.min(15,12*h/45);
 const RISK_KINDS=['building','shed','cabin','amenities','futurebuilding','carport','greenhouse','tank','container','nursery','parking','gathering','seating'];
@@ -404,6 +423,7 @@ async function boot(){renderSiteSel();
   try{T=await (await fetch(SB+'terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
   if(SITEDEF.canopy){imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
+  if(SITEDEF.history){try{PH.data=await (await fetch(SB+'history/history.json')).json();PH.i=PH.data.runs.length-1}catch(e){PH.data=null}}
   const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],SB+f)));
   applySite(); buildPaths(); fitLot();
   dem2=new Int16Array(await inflate(T.meta.dem.b64));
@@ -479,6 +499,7 @@ function render(){
   if(layers.overlay==='shadow'&&SHC){ctx.globalAlpha=layers.ovOp;ctx.imageSmoothingEnabled=true;ctx.drawImage(SHC,0,0,2000,2000);ctx.globalAlpha=1}
   else if(layers.overlay!=='none'&&IMG[layers.overlay]){ctx.globalAlpha=layers.ovOp;ctx.imageSmoothingEnabled=!(layers.overlay==='slope'||layers.overlay==='aspect');ctx.drawImage(IMG[layers.overlay],0,0,2000,2000);ctx.globalAlpha=1;ctx.imageSmoothingEnabled=true}
   if(photoOnTop)drawImgs(im=>!im.design);
+  if(PH.on&&PH.data){const im=phImg(PH.i);if(im&&im.complete&&im.naturalWidth){const d=PH.data;ctx.globalAlpha=PH.op;ctx.drawImage(im,d.x0,d.y0,d.size,d.size);ctx.globalAlpha=1}}
   drawImgs(im=>!!im.design); // design drawings always sit above the photos and terrain layers
   if(!T){return}
   const px=1/s;
@@ -498,6 +519,7 @@ function render(){
   if(freeStroke&&freeStroke.length>1&&draft){ctx.strokeStyle=KINDS[draft.kind].color;ctx.lineWidth=3*px;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([]);ctx.beginPath();freeStroke.forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q));ctx.stroke()}
   // screen-space overlays
   ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(PH.on&&PH.data){const r=PH.data.runs[PH.i];ctx.font='600 22px system-ui,sans-serif';const t=String(r.y),w=ctx.measureText(t).width;ctx.fillStyle='rgba(20,30,25,.78)';ctx.beginPath();ctx.roundRect?ctx.roundRect(W/2-w/2-14,12,w+28,36,8):ctx.rect(W/2-w/2-14,12,w+28,36);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,W/2,31);ctx.textAlign='left';ctx.textBaseline='alphabetic'}
   if(layers.labels)drawLabels();
   if(!(typeof V3!=='undefined'&&V3.tex2d)&&!window.__SHEETING)drawScale();
 }
@@ -2048,6 +2070,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
     <div class="row"><span class="lbl">Contours</span>${segHTML('conSeg',[['off','Off'],['on','On']],(layers.c1||layers.c5)?'on':'off')}</div>`)+
    sec('design','Design overlays',`<div id="dsgSec">${designHTML()}</div>`,[...imagery.values()].some(im=>im.design))+
    sec('photo','Aerial photos',`<div id="imgSec">${imageryHTML()}</div>`)+
+   (PH.data?sec('phist','Photo history (slider)',`<div id="phSec">${phHTML()}</div>`):'')+
    sec('analysis','Terrain analysis',`${segHTML('',[['none','None']],layers.overlay,'ovs')}
     ${OVERLAYS.map(g=>`<div class="sub2">${g.grp}</div>${segHTML('',g.items,layers.overlay,'ovs')}`).join('')}
     <div class="sub2">Forest${CANOPY?' · LiDAR 2008–2022':''}</div>${CANOPY?segHTML('',[['canopy_h','Canopy height & tall trees'],['canopy_change','Canopy growth since 2008'],['productivity','Growing power (growth vs typical)'],['understorey','Dense understorey'],['fuel','Fuel structure'],['light_winter','Light at ground · winter'],['light_equinox','Light at ground · equinox']],layers.overlay,'ovs'):'<div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>'}
@@ -2083,7 +2106,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   el.querySelectorAll('#conSeg button').forEach(b=>b.onclick=()=>{const on=b.dataset.v==='on';layers.c1=on;layers.c5=on;setLayer('c5',on);renderLayers()});
   const bo=e=>{setLayer('baseOp',+e.target.value);$('#baseopv').textContent=Math.round(layers.baseOp*100)+'%';render()};$('#baseop').oninput=bo;$('#baseop').onchange=bo;
   el.querySelectorAll('input[data-k]').forEach(c=>c.onchange=()=>setLayer(c.dataset.k,c.checked));
-  wireImagery(el);wirePros(el);wireSecs(el)}
+  wireImagery(el);wirePH(el);wirePros(el);wireSecs(el)}
 function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.overlay;if(!m||ov==='none'){el.hidden=true;return}
   const sunGrad='linear-gradient(90deg,rgb(30,40,110),rgb(90,70,150) 35%,rgb(220,110,70) 60%,rgb(250,200,70) 85%,rgb(255,245,170))';
   const sw=(c,a=.85)=>`background:rgba(${c[0]},${c[1]},${c[2]},${a})`;let h='';
