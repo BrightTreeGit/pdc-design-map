@@ -336,10 +336,10 @@ function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('ac
 const SITES=[
  {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true},
  {id:'bright-tree-gemini',name:'Bright Tree (auto data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, auto-fetched boundary and rainfall',ready:true,canopy:true},
- {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true},
+ {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true,history:true},
  {id:'nimbin',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW',ready:true},
  {id:'willow-vale',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW',ready:true},
- {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'Trial',area:'Kin Kin, Qld',ready:true},
+ {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'Trial',area:'Kin Kin, Qld',ready:true,history:true},
  {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
  {id:'regenify',name:'Regenify',group:'Trial',area:'Location to come',status:'Location to come'}];
 const SITEID=(()=>{let h='';try{h=(location.hash.match(/site=([\w-]+)/)||[])[1]||''}catch(e){}const s=SITES.find(x=>x.id===h&&x.ready);return s?s.id:'bright-tree'})();
@@ -380,6 +380,7 @@ let CANOPY=null;
 const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
 function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
+function phBox(){const d=PH.data;if(d.x0!=null)return d;const c=d.centre_mga56,z=d.size_m||d.size;return {x0:c[0]-z/2-T.E0,y0:T.N0-(c[1]+z/2),size:z}}
 function phFmt(d){if(!d)return '';const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const [y,mo,da]=d.split('-');return (+da)+' '+m[+mo-1]+' '+y}
 function phLabel(){const r=PH.data.runs[PH.i];const dt=r.from===r.to?phFmt(r.from):phFmt(r.from)+' – '+phFmt(r.to);return `<b style="font-size:1.25em">${r.y}</b> · ${dt} · `+(r.old?`scanned film photo${r.bw?' (black & white)':''}, lined up by matching landmarks (within about 20–40 m)`:`${r.res<1?Math.round(r.res*100)+' cm':r.res+' m'} detail${r.res>=2?' (coarse)':''}`)}
 function phHTML(){if(!PH.data)return '<p class="hint">No photo history for this site yet.</p>';const n=PH.data.runs.length,R=PH.data.runs;
@@ -499,7 +500,7 @@ function render(){
   if(layers.overlay==='shadow'&&SHC){ctx.globalAlpha=layers.ovOp;ctx.imageSmoothingEnabled=true;ctx.drawImage(SHC,0,0,2000,2000);ctx.globalAlpha=1}
   else if(layers.overlay!=='none'&&IMG[layers.overlay]){ctx.globalAlpha=layers.ovOp;ctx.imageSmoothingEnabled=!(layers.overlay==='slope'||layers.overlay==='aspect');ctx.drawImage(IMG[layers.overlay],0,0,2000,2000);ctx.globalAlpha=1;ctx.imageSmoothingEnabled=true}
   if(photoOnTop)drawImgs(im=>!im.design);
-  if(PH.on&&PH.data){const im=phImg(PH.i);if(im&&im.complete&&im.naturalWidth){const d=PH.data;ctx.globalAlpha=PH.op;ctx.drawImage(im,d.x0,d.y0,d.size,d.size);ctx.globalAlpha=1}}
+  if(PH.on&&PH.data){const im=phImg(PH.i);if(im&&im.complete&&im.naturalWidth){const d=phBox();ctx.globalAlpha=PH.op;ctx.drawImage(im,d.x0,d.y0,d.size,d.size);ctx.globalAlpha=1}}
   drawImgs(im=>!!im.design); // design drawings always sit above the photos and terrain layers
   if(!T){return}
   const px=1/s;
