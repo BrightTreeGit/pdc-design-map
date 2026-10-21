@@ -333,8 +333,8 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('act');t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600)}
 /* ---------------- PDC sites: one map page, one data space per site ---------------- */
 const SITES=[
- {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true},
- {id:'bright-tree-gemini',name:'Bright Tree (auto data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, auto-fetched boundary and rainfall',ready:true},
+ {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true},
+ {id:'bright-tree-gemini',name:'Bright Tree (auto data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, auto-fetched boundary and rainfall',ready:true,canopy:true},
  {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true},
  {id:'nimbin',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW',ready:true},
  {id:'willow-vale',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW',ready:true},
@@ -375,6 +375,12 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 /* ---------------- data loading ---------------- */
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
+let CANOPY=null;
+// estimated tree protection zone: 12 x trunk diameter, trunk estimated from height for tall eucalypts (about h/45 m), capped at 15 m
+const tpzR=h=>Math.min(15,12*h/45);
+const RISK_KINDS=['building','shed','cabin','amenities','futurebuilding','carport','greenhouse','tank','container','nursery','parking','gathering','seating'];
+function treeRisk(){const out=new Set();if(!CANOPY)return out;const targets=[];for(const f of features.values()){if(!RISK_KINDS.includes(f.kind))continue;const g=f.geom;if(g.g==='polygon')targets.push(...g.pts,centroid(f));else if(g.pts)targets.push(g.pts[0])}
+  for(const [x,y,h] of CANOPY.trees){if(h<40)continue;for(const q of targets){if(Math.hypot(q[0]-x,q[1]-y)<=h){out.add(x+','+y);break}}}return out}
 function loadImg(k,src){return new Promise(r=>{const im=new Image();im.onload=()=>{IMG[k]=im;r()};im.onerror=()=>r();im.src=src})}
 /* site settings come from terrain.json (meta.site), so the same page serves any block */
 function applySite(){const ms=T&&T.meta&&T.meta.site;
@@ -396,6 +402,7 @@ async function boot(){renderSiteSel();
   const imgs=['aerial.jpg','relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png'];
   try{T=await (await fetch(SB+'terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
+  if(SITEDEF.canopy){imgs.push('canopy_h.png','canopy_change.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
   const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],SB+f)));
   applySite(); buildPaths(); fitLot();
   dem2=new Int16Array(await inflate(T.meta.dem.b64));
@@ -481,6 +488,9 @@ function render(){
   if(layers.streams){const wd=[.8,1.3,2.2,3.4],al=[.45,.65,.85,.95];for(let k=0;k<4;k++){ctx.strokeStyle=`rgba(25,105,200,${al[k]})`;ctx.lineWidth=wd[k]*px;ctx.lineCap='round';ctx.stroke(P.st[k])}}
   if(layers.pros&&PROS)drawPros(px);
   if(layers.lot){ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke(P.lot);ctx.lineWidth=1.6*px;ctx.strokeStyle='#14898f';ctx.setLineDash([10*px,4*px]);ctx.stroke(P.lot);ctx.setLineDash([])}
+  if(layers.overlay==='canopy_h'&&CANOPY){ctx.save();const risk=treeRisk();for(const [x,y,h] of CANOPY.trees){if(h<40)continue;const tpz=tpzR(h);
+    if(view.s>1.2){ctx.beginPath();ctx.arc(x,y,tpz,0,7);ctx.setLineDash([3*px,3*px]);ctx.lineWidth=1.2*px;ctx.strokeStyle='rgba(150,40,140,.7)';ctx.stroke();ctx.setLineDash([])}
+    const hit=risk.has(x+','+y);const r=Math.max(2.2*px,Math.min(5*px,1.6));ctx.beginPath();ctx.arc(x,y,r+1.2*px,0,7);ctx.fillStyle=hit?'#ffd23f':'rgba(255,255,255,.9)';ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=hit?'#c0392b':'#96288c';ctx.fill()}ctx.restore()}
   if(layers.design)drawFeatures(px);
   if(draft)drawDraft(px);
   if(mt)drawMT(px);
@@ -1948,7 +1958,7 @@ function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);if(k==='lot'&&$('#z
 const OVERLAYS=[
  {grp:'Light & climate',items:[['shadow','Shade at a time'],['aspect','Aspect'],['sun_winter','Winter sun'],['sun_equinox','Equinox sun'],['sun_summer','Summer sun'],['cold','Cold air / frost']]},
  {grp:'Land & risk',items:[['slope','Slope'],['fire','Fire run'],['change_2008','Ground change since 2008'],['change_2014','Ground change since 2014']]}];
-const OVNAME={shadow:'Shade at a chosen time',none:'None',aspect:'Aspect',sun_winter:'Winter sun hours',sun_equinox:'Equinox sun hours',sun_summer:'Summer sun hours',cold:'Cold air pooling',slope:'Slope',fire:'Fire run potential',change_2008:'Ground change since 2008',change_2014:'Ground change since 2014'};
+const OVNAME={light_winter:'Light reaching the ground · winter',light_equinox:'Light reaching the ground · equinox',canopy_h:'Canopy height (2022)',canopy_change:'Canopy growth 2008–2022',understorey:'Dense understorey (2022)',fuel:'Fuel structure (relative, 2022)',shadow:'Shade at a chosen time',none:'None',aspect:'Aspect',sun_winter:'Winter sun hours',sun_equinox:'Equinox sun hours',sun_summer:'Summer sun hours',cold:'Cold air pooling',slope:'Slope',fire:'Fire run potential',change_2008:'Ground change since 2008',change_2014:'Ground change since 2014'};
 function sec(id,title,body,open=true){let st={};try{st=lsGet('bt.sec',{})}catch(e){}const o=st[id]??open;return `<details class="sec" data-sec="${id}" ${o?'open':''}><summary>${title}</summary><div class="secbody">${body}</div></details>`}
 function wireSecs(el){el.querySelectorAll('details.sec').forEach(d=>d.addEventListener('toggle',()=>{const st=lsGet('bt.sec',{});st[d.dataset.sec]=d.open;lsSet('bt.sec',st)}))}
 function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="${id}"`:''}>${opts.map(([k,l])=>`<button aria-pressed="${cur===k}" data-v="${k}">${l}</button>`).join('')}</div>`}
@@ -1964,7 +1974,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    sec('photo','Aerial photos',`<div id="imgSec">${imageryHTML()}</div>`)+
    sec('analysis','Terrain analysis',`${segHTML('',[['none','None']],layers.overlay,'ovs')}
     ${OVERLAYS.map(g=>`<div class="sub2">${g.grp}</div>${segHTML('',g.items,layers.overlay,'ovs')}`).join('')}
-    <div class="sub2">Forest</div><div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>
+    <div class="sub2">Forest${CANOPY?' · LiDAR 2008–2022':''}</div>${CANOPY?segHTML('',[['canopy_h','Canopy height & tall trees'],['canopy_change','Canopy growth since 2008'],['understorey','Dense understorey'],['fuel','Fuel structure'],['light_winter','Light at ground · winter'],['light_equinox','Light at ground · equinox']],layers.overlay,'ovs'):'<div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>'}
     <div id="shWrap">${layers.overlay==='shadow'?shadowCtl():''}</div>
     <div class="row"><label for="ovop">Overlay strength</label><input type="range" id="ovop" min="0.2" max="1" step="0.05" value="${layers.ovOp}"></div>
     <div id="ovLegend" class="hint"></div>`)+
@@ -1979,6 +1989,15 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    cold:'Valley floors where cold air settles on still winter nights. Frost-tender plants belong upslope on the thermal belt.',
    fire:'Where terrain alone would speed a fire: steep slopes facing the hot, dry north-west to west winds of late winter and spring (fire speed roughly doubles with every 10° of upslope). It ignores fuel, so read it with the canopy and your fire plan. A design aid, not a bushfire rating.',
    none:''};
+  if(CANOPY){const C0=CANOPY,y8=C0.years['2008'],y22=C0.years['2022'],big=C0.trees.filter(t=>t[2]>=40).length;
+   legends.canopy_h=`Tree height above the ground from the 2022 LiDAR. Inside the lot the canopy averages ${y22.meanH.toFixed(0)} m tall (top 5% over ${y22.p95.toFixed(0)} m) and covers ${Math.round(y22.cover2*100)}% of the ground. Purple dots mark ${big} emergent trees 40 m or taller inside the lot (of ${C0.trees.length} tops over 30 m): the likeliest habitat and hollow-bearing trees, to keep and check for hollows. A few of the tallest readings may be survey noise; confirm on the ground.`;
+   {const rk=treeRisk().size;legends.canopy_h+=` Zoomed in, dashed rings show each big tree's estimated root protection zone (keep pads, trenches and dam walls outside). ${rk?`<b>${rk} big tree${rk>1?'s':''} stand within falling distance of a building, tank or gathering spot you have drawn</b> (yellow-ringed red dots): have an arborist check them.`:'No big tree is within falling distance of the buildings and tanks drawn so far.'}`}
+   legends.canopy_change=`Change in canopy height between the 2008 and 2022 LiDAR, in 4 m cells. Green: taller now (regrowth); red: lower now (clearing, tree fall or storm). Inside the lot about ${C0.change.gainHa} ha grew by more than 3 m and ${C0.change.lossHa} ha dropped by more than 5 m; the canopy is on average ${C0.change.meanGrowthM} m taller. The 2008 survey was sparse, so it slightly understates old heights.`;
+   legends.understorey=`How crowded the layer from 0.5 to 5 m is, from the 2022 LiDAR returns, ranked against the whole map window (top 30% shaded). About ${C0.understorey.denseHa} ha of the lot is in the densest 15%. Dense patches are thickets: lantana and other weeds on edges and old disturbance, but also healthy vine forest, ferns and lomandra in the gullies. Walk them before treating anything.`;
+   if(C0.light){const Lw=C0.light.winter,Le=C0.light.equinox;
+    legends.light_winter=`Estimated direct sun reaching the ground on 21 June: the hills' shade combined with how open the canopy is overhead (from the share of 2022 LiDAR pulses that got through the crowns). Bright patches are where food plants can grow. Inside the lot only about ${Lw.ha2h} ha gets 2 hours or more of winter sun at ground level, and ${Lw.ha4h} ha gets 4 hours or more: mostly the house clearing and small gaps. An estimate: eucalypt crowns let dappled light through, so treat it as a ranking.`;
+    legends.light_equinox=`The same estimate for the equinox (March and September), when the sun is higher. About ${Le.ha2h} ha of the lot gets 2 hours or more of sun at ground level, and ${Le.ha4h} ha 4 hours or more. Compare with the winter layer to find spots that stay sunny all year.`}
+   legends.fuel=`An indicative, relative fuel-structure rating from the 2022 LiDAR: dense near-ground growth, ladder fuels from 2 to 10 m that let fire climb, and canopy cover. Ranked against the whole map window. Inside the lot: ${C0.fuel.vhighHa} ha very high, ${C0.fuel.highHa} ha high, ${C0.fuel.modHa} ha moderate. Not an official fuel hazard assessment; read it with the Fire run layer and your fire plan.`}
   for(const y of SITE.changeYears||[])legends['change_'+y]=`Ground that has moved since the ${y} survey, after removing survey-wide offsets: red is lower now (cut, erosion, slips, gully incision), blue is higher (fill, deposition, new pads). Faint scatter under forest is survey noise; treat patches as leads to check on the ground.`+(ch&&ch[y]?` Inside the lot: ${ch[y].lotLossHa} ha lowered and ${ch[y].lotGainHa} ha raised by more than 1 m.`:'');
   const setLeg=()=>{$('#ovLegend').innerHTML=legends[layers.overlay]||'';const sw=$('#shWrap');if(layers.overlay==='shadow'){if(!sw.innerHTML){sw.innerHTML=shadowCtl();wireShadow(el)}computeShadow()}else sw.innerHTML='';mapLegend()};setLeg();if(layers.overlay==='shadow')wireShadow(el);
   el.querySelectorAll('#baseSeg button').forEach(b=>b.onclick=()=>{setLayer('base',b.dataset.v);el.querySelectorAll('#baseSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
@@ -1997,6 +2016,11 @@ function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.
   else if(ov==='shadow'){const s=sunAtTime(SH.doy,SH.t);h=`<b>Shade · ${dayLabel(SH.doy)}, ${clockLabel(SH.t)}</b><div class="legend"><span><i class="swatch" style="background:rgba(25,30,70,.6)"></i>In shade (terrain)</span></div><div class="ends"><span>${s.alt>0?'sun '+s.alt.toFixed(0)+'° up, '+dirName(s.az):'sun below the horizon'}</span></div>`}
   else if(ov==='cold')h=`<b>Cold air pooling</b><div class="grad" style="background:linear-gradient(90deg,rgba(70,120,230,0),rgba(70,120,230,.8))"></div><div class="ends"><span>drains away</span><span>pools</span></div>`;
   else if(ov==='fire')h=`<b>Fire run potential</b><div class="legend"><span><i class="swatch" style="background:rgb(245,160,60)"></i>Moderate</span><span><i class="swatch" style="background:rgb(225,90,40)"></i>High</span><span><i class="swatch" style="background:rgb(150,30,30)"></i>Very high</span></div><div class="ends"><span>terrain and NW–W winds only</span></div>`;
+  else if(ov==='canopy_h')h=`<b>Canopy height · 2022</b><div class="grad" style="background:linear-gradient(90deg,rgb(220,215,150),rgb(180,200,90),rgb(110,170,60),rgb(40,130,60),rgb(20,90,60),rgb(60,40,110))"></div><div class="ends"><span>0 m</span><span>10</span><span>20</span><span>30</span><span>40+ m</span></div><div class="legend"><span><i class="swatch" style="background:rgb(150,40,140);border-radius:50%"></i>Emergent tree ≥40 m</span><span><i class="swatch" style="background:#c0392b;border-radius:50%;outline:2px solid #ffd23f"></i>Within falling distance of a building or tank</span></div>`;
+  else if(ov==='light_winter'||ov==='light_equinox')h=`<b>Light at ground · ${ov==='light_winter'?'21 Jun':'equinox'}</b><div class="grad" style="background:linear-gradient(90deg,rgb(25,30,70),rgb(70,60,140),rgb(200,100,70),rgb(250,190,70),rgb(255,245,170))"></div><div class="ends"><span>0 h</span><span>${ov==='light_winter'?'3':'4'} h</span><span>${ov==='light_winter'?'6':'8'}+ h</span></div><div class="ends"><span>terrain + tree crowns, estimated</span></div>`;
+  else if(ov==='canopy_change')h=`<b>Canopy growth · 2008 → 2022</b><div class="legend"><span><i class="swatch" style="background:rgb(40,120,60)"></i>Taller now</span><span><i class="swatch" style="background:rgb(200,70,40)"></i>Lower now</span></div>`;
+  else if(ov==='understorey')h=`<b>Dense understorey · 0.5–5 m</b><div class="legend"><span><i class="swatch" style="background:rgb(240,200,60)"></i>Dense</span><span><i class="swatch" style="background:rgb(230,130,30)"></i>Very dense</span><span><i class="swatch" style="background:rgb(170,40,30)"></i>Thicket</span></div><div class="ends"><span>relative to the map window; walk before treating</span></div>`;
+  else if(ov==='fuel')h=`<b>Fuel structure (relative)</b><div class="legend"><span><i class="swatch" style="background:rgb(250,200,80)"></i>Moderate</span><span><i class="swatch" style="background:rgb(235,120,40)"></i>High</span><span><i class="swatch" style="background:rgb(170,30,30)"></i>Very high</span></div><div class="ends"><span>LiDAR structure only; not an official rating</span></div>`;
   else if(ov.startsWith('change_'))h=`<b>Ground change since ${ov.slice(7)}</b><div class="legend"><span><i class="swatch" style="background:rgb(215,60,40)"></i>Lower now</span><span><i class="swatch" style="background:rgb(40,110,220)"></i>Higher now</span></div><div class="ends"><span>over about 1.2 m; check on site</span></div>`;
   el.innerHTML=h;el.hidden=!h}
 const GROUP_HINT={Observe:'Record what is there first: notes, photos, soil tests, frost and wildlife.',Zones:'Zones 0–5 by how often you visit, plus goat zones for browsing animals.',Sectors:'Energies coming onto the site: sun, fire, wind, cold air, views.',Water:'Catch, slow, store and move water.',Access:'Tracks and paths, checked against safe grades.',Built:'Existing and future buildings and assets.',Landscape:'Spaces for people, animals and shelter.',Plants:'Trees, guilds, beds and rows.'};
