@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v81 | 22 Oct 2026 11:00 | see commit history |
 | v80 | 22 Oct 2026 10:55 | see commit history |
 | v79 | 22 Oct 2026 10:40 | see commit history |
 | v78 | 22 Oct 2026 10:30 | see commit history |
@@ -34,6 +35,11 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v81 (22 Oct 2026, 11:00)
+**Fixed**
+- Light & lopping planner: where drawn zones overlap (the Hairpin Fruit Forest and Zone 3 Broadacre), a click in the overlap picked the smaller zone. Now every zone under the click is offered as a button, plus "Square", and a zone you've selected first is used by default.
+- The light result is drawn as crisp 1–2 m cells instead of a smoothed blur, so it no longer looks stretched when zoomed in on a small bed.
 
 ## v80 (22 Oct 2026, 10:55)
 **Changed**

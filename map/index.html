@@ -1413,16 +1413,18 @@ function lopImage(r,base){const c=document.createElement('canvas');c.width=r.n;c
     else{const t=Math.min(1,r.h[k]/mx);let a=ramp[0],b=ramp[ramp.length-1];for(let q=1;q<ramp.length;q++)if(t<=ramp[q][0]){a=ramp[q-1];b=ramp[q];break}const f=(t-a[0])/Math.max(1e-6,b[0]-a[0]);col=a[1].map((v0,ii)=>v0+(b[1][ii]-v0)*f)}
     im.data.set(col.map(Math.round),k*4)}g.putImageData(im,0,0);return c}
 function lopStats(r){let s=0,a2=0,a4=0,n=0;for(const v of r.h){if(isNaN(v))continue;s+=v;n++;if(v>=2)a2++;if(v>=4)a4++}const cell=r.res*r.res;return {mean:s/Math.max(1,n),a2:a2*cell,a4:a4*cell,area:n*cell}}
-function lopBed(w){if(!LOP.fit)return null;let best=null;for(const f of features.values()){if(f.geom.g!=='polygon'||f.geom.pts.length<3||!vis(f)||!inPoly(w,f.geom.pts))continue;const a=polyArea(f.geom.pts);if(a>25600)continue;if(!best||a<best.a)best={f,a}}if(!best)return null;
-  const p=best.f.geom.pts,xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);const ext=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys));
-  return {c:[(Math.max(...xs)+Math.min(...xs))/2,(Math.max(...ys)+Math.min(...ys))/2],size:Math.min(160,Math.max(10,Math.ceil((ext+2)/2)*2)),poly:p,name:best.f.name||KINDS[best.f.kind]?.label||'drawn area',id:best.f.id||best.f.name}}
+function lopBeds(w){if(!LOP.fit)return [];const L=[];for(const f of features.values()){if(f.geom.g!=='polygon'||f.geom.pts.length<3||!vis(f)||!inPoly(w,f.geom.pts))continue;const a=polyArea(f.geom.pts);if(a>25600)continue;
+    const p=f.geom.pts,xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);const ext=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys));
+    L.push({a,c:[(Math.max(...xs)+Math.min(...xs))/2,(Math.max(...ys)+Math.min(...ys))/2],size:Math.min(160,Math.max(10,Math.ceil((ext+2)/2)*2)),poly:p,name:f.name||KINDS[f.kind]?.label||'drawn area'})}
+  return L.sort((x,y)=>(selected&&features.get(selected)?.geom.pts===y.poly)-(selected&&features.get(selected)?.geom.pts===x.poly)||x.a-y.a)}
+function lopUse(bd){if(bd){mt.c=bd.c;mt.poly=bd.poly;mt.psize=bd.size;mt.polyName=bd.name}else{mt.poly=null;mt.polyName=null}mt.base=null}
 function lopSz(){return mt&&mt.poly?mt.psize:LOP.size}
 async function lopRun(){if(!mt||mt.type!=='lop'||!mt.c)return;if(!await loadCG()){toast('Canopy data is not available for this site');return}
   $('#drawbar .hint')&&($('#drawbar .hint').textContent='Working out the sun through the trees…');await new Promise(r=>setTimeout(r,30));
   const [cx,cy]=mt.c,SZ=lopSz(),key=cx+','+cy+','+SZ+','+LOP.doy+','+(mt.polyName||'');if(!mt.base||mt.baseKey!==key){mt.base=lightCalc(cx,cy,SZ,LOP.doy,[],mt.poly);mt.baseKey=key;mt.baseImg=lopImage(mt.base)}
   if(mt.edits.length){mt.after=lightCalc(cx,cy,SZ,LOP.doy,mt.edits,mt.poly);mt.afterImg=lopImage(mt.after);mt.gainImg=lopImage(mt.after,mt.base)}else{mt.after=null;mt.afterImg=null;mt.gainImg=null}
   renderMTBar();renderTools();draw()}
-function lopClick(w){if(LOP.mode==='spot'||!mt.c){const bd=lopBed(w);if(bd){mt.c=bd.c;mt.poly=bd.poly;mt.psize=bd.size;mt.polyName=bd.name}else{mt.c=r1(w);mt.poly=null;mt.polyName=null}mt.edits=[];mt.base=null;mt.sugg=[];LOP.mode=LOP.mode==='spot'?'spot':LOP.mode;lopRun();return}
+function lopClick(w){if(LOP.mode==='spot'||!mt.c){mt.beds=lopBeds(w);mt.click=r1(w);mt.c=r1(w);lopUse(mt.beds[0]);mt.edits=[];mt.base=null;mt.sugg=[];LOP.mode=LOP.mode==='spot'?'spot':LOP.mode;lopRun();return}
   const big=CANOPY?CANOPY.trees.find(t=>t[2]>=40&&Math.hypot(t[0]-w[0],t[1]-w[1])<=LOP.r+2):null;
   if(big&&LOP.mode==='remove'){toast(`That includes an emergent tree about ${Math.round(big[2])} m tall: a likely habitat tree. Try thinning or lopping a limb instead.`)}
   mt.edits.push({x:+w[0].toFixed(1),y:+w[1].toFixed(1),r:LOP.r,mode:LOP.mode,big:big?Math.round(big[2]):0});lopRun()}
@@ -1437,14 +1439,15 @@ async function lopSuggest(){if(!mt||!mt.c||!await loadCG())return;const [cx,cy]=
 function lopBar(b){const S=mt.base?lopStats(mt.base):null,A=mt.after?lopStats(mt.after):null;const season={172:'21 Jun',80:'equinox',355:'21 Dec'}[LOP.doy];
   b.innerHTML=`<span class="what">Light & lopping · ${season}</span><span class="hint">${!mt.c?'Click the garden spot to test':LOP.mode==='spot'?'Click another garden spot, or choose Remove or Thin and click trees':LOP.mode==='remove'?'Click a tree to remove it (whole crown within the radius)':'Click a crown to thin or lop it (lets about a third more light through)'}${S?` · now <b>${S.mean.toFixed(1)} h</b> average${A?` → <b>${A.mean.toFixed(1)} h</b>`:''}`:''}</span>
    <div class="seg" id="lopMode">${[['spot','◎ Garden spot'],['thin','✂ Thin crown'],['remove','✕ Remove tree']].map(([k,l])=>`<button data-v="${k}" aria-pressed="${LOP.mode===k}">${l}</button>`).join('')}</div>
-   ${mt.poly?`<span class="pill">${esc(mt.polyName)}</span>`:`<label class="gp">Area <input id="lopSzB" type="number" min="10" max="160" step="5" value="${LOP.size}" aria-label="Side of the test square in metres"> m</label>`}
+   ${mt.beds&&mt.beds.length>1?`<div class="seg" id="lopBeds">${mt.beds.map((d,i)=>`<button data-i="${i}" aria-pressed="${mt.poly===d.poly}">${esc(d.name)}</button>`).join('')}<button data-i="-1" aria-pressed="${!mt.poly}">Square</button></div>`:mt.poly?`<span class="pill">${esc(mt.polyName)}</span>`:''}${mt.poly?'':`<label class="gp">Area <input id="lopSzB" type="number" min="10" max="160" step="5" value="${LOP.size}" aria-label="Side of the test square in metres"> m</label>`}
    <label class="gp">Crown radius <input id="lopR" type="number" min="2" max="15" step="1" value="${LOP.r}" aria-label="Crown radius in metres"> m</label>
    ${mt.edits&&mt.edits.length?'<button class="btn" id="lopUndo">Undo last</button>':''}<button class="btn" id="lopDone">Done</button>`;
   b.querySelectorAll('#lopMode button').forEach(x=>x.onclick=()=>{LOP.mode=x.dataset.v;lsSet('bt.lop',LOP);renderMTBar()});
   b.querySelector('#lopR').onchange=e=>{LOP.r=Math.max(2,Math.min(15,+e.target.value||6));lsSet('bt.lop',LOP)};
+  b.querySelectorAll('#lopBeds button').forEach(x=>x.onclick=()=>{const i=+x.dataset.i;if(i<0){lopUse(null);mt.c=mt.click}else lopUse(mt.beds[i]);mt.edits=[];mt.sugg=[];lopRun()});
   const zb=b.querySelector('#lopSzB');if(zb)zb.onchange=()=>setLopSize(zb.value);
   const u=b.querySelector('#lopUndo');if(u)u.onclick=()=>{mt.edits.pop();lopRun()};b.querySelector('#lopDone').onclick=()=>{endMT();renderTools()}}
-function drawLop(px){if(!mt.c)return;const r=mt.base;if(r){ctx.save();ctx.imageSmoothingEnabled=true;ctx.globalAlpha=.85;ctx.drawImage(mt.showGain&&mt.gainImg?mt.gainImg:(mt.afterImg||mt.baseImg),r.x0,r.y0,r.n*r.res,r.n*r.res);ctx.globalAlpha=1;
+function drawLop(px){if(!mt.c)return;const r=mt.base;if(r){ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=.85;ctx.drawImage(mt.showGain&&mt.gainImg?mt.gainImg:(mt.afterImg||mt.baseImg),r.x0,r.y0,r.n*r.res,r.n*r.res);ctx.globalAlpha=1;
   ctx.strokeStyle='#fff';ctx.lineWidth=2*px;ctx.setLineDash([6*px,4*px]);if(mt.poly){ctx.beginPath();mt.poly.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.stroke()}else ctx.strokeRect(r.x0,r.y0,r.n*r.res,r.n*r.res);ctx.setLineDash([]);ctx.restore()}
   (mt.sugg||[]).forEach((e,i)=>{ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.lineWidth=2*px;ctx.strokeStyle='#f1c40f';ctx.setLineDash([2*px,3*px]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#f1c40f';ctx.beginPath();ctx.arc(e.x,e.y,9*px,0,7);ctx.fill();ctx.fillStyle='#111';ctx.font=`700 ${11*px}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),e.x,e.y+0.5*px)});
   for(const e of mt.edits||[]){ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.lineWidth=2.5*px;ctx.strokeStyle=e.mode==='remove'?'#c0392b':'#e67e22';ctx.setLineDash(e.mode==='remove'?[]:[5*px,3*px]);ctx.stroke();ctx.setLineDash([])}
