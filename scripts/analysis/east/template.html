@@ -1,0 +1,155 @@
+<title>East Ridge Catchments</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: survey sheet. Map canvas fills the right; a narrow legend column on the left (stacked on phones). */
+:root{
+  --bg:#eef0ea;--panel:#f8f9f5;--ink:#1d2621;--muted:#5d6a62;--line:#d3d9d0;--chip:#e4e9e1;
+  --accent:#1f6a57;--water:#1f6fb8;--bt:#14898f;--warn:#b4471f;--contour:#2a2a22;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;--f-body:"IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a17;--panel:#1b221e;--ink:#e3e9e4;--muted:#9aa89f;--line:#33403a;--chip:#26302b;--accent:#5cc0a2;--water:#6fb4ff;--bt:#4fd0d6;--warn:#f08a5d;--contour:#f2f2e6;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141a17;--panel:#1b221e;--ink:#e3e9e4;--muted:#9aa89f;--line:#33403a;--chip:#26302b;--accent:#5cc0a2;--water:#6fb4ff;--bt:#4fd0d6;--warn:#f08a5d;--contour:#f2f2e6;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px}
+.app{display:grid;grid-template-columns:330px 1fr;height:100%}
+aside{background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding-block:16px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+h1{font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1;margin:0;letter-spacing:.01em;text-wrap:balance}
+.sub{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-top:4px}
+h2{font-family:var(--f-display);font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+p{margin:0;line-height:1.5}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.5}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+.toggles{display:grid;gap:4px}
+.toggles label{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13.5px}
+.toggles i{width:22px;height:0;border-top:3px solid;display:inline-block}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.maj{display:grid;gap:2px}
+.maj button{display:grid;grid-template-columns:14px 1fr auto;gap:8px;align-items:start;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 2px;font:inherit;color:var(--ink);cursor:pointer}
+.maj button:hover,.maj button[aria-pressed="true"]{background:var(--chip)}
+.maj .sw{width:14px;height:14px;border-radius:3px;margin-top:2px}
+.maj .ha{font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.maj small{display:block;color:var(--muted);font-size:12px}
+.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:9px;background:color-mix(in srgb,var(--bt) 18%,transparent);color:var(--bt);font-weight:600;margin-left:4px}
+main{position:relative;overflow:hidden;background:var(--chip);min-height:0}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.read{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));right:70px;max-width:520px;background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-family:var(--f-mono);font-size:12px;line-height:1.45;pointer-events:none}
+.zoom{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:10px;display:flex;flex-direction:column;gap:6px}
+.zoom button{width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:18px;cursor:pointer}
+.scale{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));font-family:var(--f-mono);font-size:11px;color:var(--ink);background:color-mix(in srgb,var(--panel) 85%,transparent);padding:2px 6px;border-radius:4px}
+.scale i{display:block;height:4px;border:1px solid var(--ink);border-top:0;margin-top:2px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:0;font-size:12.5px}dt{color:var(--muted)}dd{margin:0;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+@media (max-width:760px){
+  .app{display:flex;flex-direction:column;height:auto}
+  main{height:64vh;order:0}
+  aside{order:1;border-right:0;border-top:1px solid var(--line);overflow:visible;padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .read{right:60px;font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div class="app">
+<aside>
+  <header>
+    <h1>East Ridge Catchments</h1>
+    <div class="sub">East of Bright Tree · 2022 LiDAR, 1 m · 0.9 × 2 km</div>
+  </header>
+  <p class="hint">Ground shape and water flow on the land east of the Bright Tree boundary, out to the edge of the LiDAR tile. Tap or hover the map to read the height, slope and which catchment a spot drains to.</p>
+  <section style="display:grid;gap:8px">
+    <h2>Base</h2>
+    <div class="seg" id="base"><button data-v="hill" aria-pressed="true">Hillshade</button><button data-v="aerial" aria-pressed="false">Aerial</button></div>
+    <div class="toggles">
+      <label><input type="checkbox" id="lCon" checked> Contours <span class="hint">2 m, labelled every 10 m</span></label>
+      <label><input type="checkbox" id="lStr" checked> <i style="border-color:var(--water)"></i> Creeks and gullies <span class="hint">from 3 ha</span></label>
+      <label><input type="checkbox" id="lCat" checked> Catchments</label>
+      <label><input type="checkbox" id="lSub" checked> Sub-catchment lines</label>
+      <label><input type="checkbox" id="lBT" checked> <i style="border-color:var(--bt);border-top-style:dashed"></i> Bright Tree boundary and catchment</label>
+    </div>
+  </section>
+  <section style="display:grid;gap:6px">
+    <h2>Catchments</h2>
+    <p class="hint">Each is the land that drains to one exit from this map. Tap one to show it on the map.</p>
+    <div class="maj" id="maj"></div>
+  </section>
+  <section style="display:grid;gap:6px">
+    <h2>How this was made</h2>
+    <p class="hint">Heights are the Queensland Government 2022 LiDAR ground model at 1 m, smoothed slightly for the contours. Flow follows the steepest way down on a 2 m grid with dips filled; a creek line starts where about 3 ha drains to it. Some catchments also take water from beyond the map's east or south edge: their exits carry more than their own area, shown as "plus inflow". The map stops at the LiDAR tile edge, about 900 m east of the boundary and 230 m past the eastern edge of the Bright Tree catchment.</p>
+  </section>
+</aside>
+<main>
+  <canvas id="cv" aria-label="Contour and catchment map east of Bright Tree"></canvas>
+  <div class="zoom"><button id="zi" aria-label="Zoom in">+</button><button id="zo" aria-label="Zoom out">−</button><button id="zf" aria-label="Fit the whole map" style="font-size:14px">⌂</button></div>
+  <div class="read" id="read">Tap or hover the map for height, slope and catchment</div>
+  <div class="scale" id="scale"></div>
+</main>
+</div>
+<script>
+const D=__DATA__;
+const SRC={hill:'__HILL__',aerial:'__AER__',con:'__CON__',pack:'__PACK__'};
+const MW=900,MH=2000;
+const HUES=[205,28,140,330,48,265,170,0,90,300,190,12,120,240,60];
+const $=s=>document.querySelector(s);
+const cv=$('#cv'),ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1,view={s:1,x:0,y:0},IMG={},PACK=null,LAYER={base:'hill',con:1,str:1,cat:1,sub:1,bt:1},SEL=0,catCv=null,conCv=null;
+try{Object.assign(LAYER,JSON.parse(localStorage.getItem('east.layers')||'{}'))}catch(e){}
+const majOf={};D.basins.forEach(b=>majOf[b.id]=b.major);
+const majColor=(m,a,l)=>`hsla(${HUES[(m-1)%HUES.length]},65%,${l??48}%,${a})`;
+function load(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=src})}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function buildCat(){const n=PACK.w,m=PACK.h,d=PACK.d;catCv=document.createElement('canvas');catCv.width=n;catCv.height=m;const g=catCv.getContext('2d');const im=g.createImageData(n,m);
+  for(let y=0;y<m;y++)for(let x=0;x<n;x++){const k=y*n+x,b=d[k*4+2];if(!b)continue;const mj=majOf[b]||0;const h=HUES[(mj-1)%HUES.length];
+    const edge=LAYER.sub&&((x+1<n&&d[(k+1)*4+2]!==b)||(y+1<m&&d[(k+n)*4+2]!==b));const majEdge=(x+1<n&&majOf[d[(k+1)*4+2]]!==mj)||(y+1<m&&majOf[d[(k+n)*4+2]]!==mj);
+    const [r,gg,bb]=hsl(h,.62,majEdge?.25:edge?.32:(b%2?.5:.56));const sel=SEL&&mj===SEL;const a=majEdge?230:edge?170:(SEL?(sel?120:30):85);
+    im.data[k*4]=r;im.data[k*4+1]=gg;im.data[k*4+2]=bb;im.data[k*4+3]=a}
+  g.putImageData(im,0,0)}
+function hsl(h,s,l){h/=360;const f=n=>{const k=(n+h*12)%12,a=s*Math.min(l,1-l);return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))))};return [f(0),f(8),f(4)]}
+function buildCon(){conCv=document.createElement('canvas');conCv.width=IMG.con.width;conCv.height=IMG.con.height;const g=conCv.getContext('2d');g.drawImage(IMG.con,0,0);
+  const im=g.getImageData(0,0,conCv.width,conCv.height),c=css('--contour'),rgb=parseColor(c);for(let i=0;i<im.data.length;i+=4){const a=im.data[i];im.data[i]=rgb[0];im.data[i+1]=rgb[1];im.data[i+2]=rgb[2];im.data[i+3]=a}g.putImageData(im,0,0)}
+function parseColor(c){const t=document.createElement('canvas').getContext('2d');t.fillStyle=c;const v=t.fillStyle;if(v[0]==='#'){return [parseInt(v.slice(1,3),16),parseInt(v.slice(3,5),16),parseInt(v.slice(5,7),16)]}const m=v.match(/\d+/g);return m.slice(0,3).map(Number)}
+function fit(){const r=cv.getBoundingClientRect();W=r.width;H=r.height;const s=Math.min(W/(MW+40),H/(MH+40));view={s,x:(W-MW*s)/2,y:(H-MH*s)/2}}
+function resize(){const r=cv.getBoundingClientRect();DPR=Math.min(2,devicePixelRatio||1);W=r.width;H=r.height;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);draw()}
+function draw(){if(!IMG.hill)return;ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=css('--chip');ctx.fillRect(0,0,W,H);
+  ctx.setTransform(DPR*view.s,0,0,DPR*view.s,DPR*view.x,DPR*view.y);const px=1/view.s;
+  ctx.imageSmoothingEnabled=true;ctx.drawImage(LAYER.base==='aerial'?IMG.aerial:IMG.hill,0,0,MW,MH);
+  if(LAYER.cat&&catCv){ctx.imageSmoothingEnabled=false;ctx.drawImage(catCv,0,0,MW,MH);ctx.imageSmoothingEnabled=true}
+  if(LAYER.con&&conCv){ctx.globalAlpha=LAYER.base==='aerial'?.75:.6;ctx.drawImage(conCv,0,0,MW,MH);ctx.globalAlpha=1}
+  if(LAYER.str){const wc=css('--water');ctx.strokeStyle=wc;ctx.lineCap='round';ctx.lineJoin='round';for(const [k,ls] of Object.entries(D.streams)){ctx.lineWidth=Math.max(1.2*px,(+k?3:1.8));for(const pl of ls){ctx.beginPath();ctx.moveTo(pl[0],pl[1]);for(let i=2;i<pl.length;i+=2)ctx.lineTo(pl[i],pl[i+1]);ctx.stroke()}}}
+  if(LAYER.bt){const bc=css('--bt');ctx.strokeStyle=bc;ctx.lineWidth=2.5*px;ctx.setLineDash([8*px,5*px]);poly(D.btc);ctx.stroke();ctx.setLineDash([]);ctx.lineWidth=3*px;poly(D.lot);ctx.stroke();
+    ctx.font=`600 ${13*px}px "Barlow Condensed",sans-serif`;ctx.fillStyle=bc;ctx.textAlign='left';const lx=Math.max(4,Math.min(...D.lot.map(q=>q[0])))+6*px;ctx.fillText('Bright Tree',lx,935);}
+  for(const m of D.majors){if(m.ha<2&&SEL!==m.id)continue;const [x,y]=m.out;const r=9*px;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=majColor(m.id,1,40);ctx.fill();ctx.lineWidth=2*px;ctx.strokeStyle='#fff';ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font=`700 ${11*px}px "IBM Plex Sans",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(m.id,x,y+.5*px);ctx.textBaseline='alphabetic'}
+  scaleBar()}
+function poly(p){ctx.beginPath();p.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath()}
+function scaleBar(){const want=110/view.s;const steps=[10,20,25,50,100,200,250,500,1000];const m=steps.find(s=>s>=want*.6)||1000;$('#scale').innerHTML=`${m} m<i style="width:${m*view.s}px"></i>`}
+function readAt(cx,cy){const x=(cx-view.x)/view.s,y=(cy-view.y)/view.s;if(!PACK||x<0||y<0||x>=MW||y>=MH){$('#read').textContent='Outside the mapped area';return}
+  const i=Math.floor(x/2),j=Math.floor(y/2),n=PACK.w,d=PACK.d,z=k=>(d[k*4]*256+d[k*4+1])/10,k=j*n+i;const zc=z(k);
+  const zx=z(j*n+Math.min(n-1,i+1))-z(j*n+Math.max(0,i-1)),zy=z(Math.min(PACK.h-1,j+1)*n+i)-z(Math.max(0,j-1)*n+i);const sl=Math.atan(Math.hypot(zx,zy)/4)*180/Math.PI;
+  const b=d[k*4+2];const B=D.basins.find(q=>q.id===b),M=B&&D.majors.find(q=>q.id===B.major);
+  $('#read').innerHTML=`<b>${zc.toFixed(1)} m</b> · slope ${sl.toFixed(0)}° (${Math.round(Math.tan(sl*Math.PI/180)*100)}%)<br>`+(M?`Catchment ${M.id}, ${M.ha} ha: ${where(M)}${B.id!==M.basins[0]||M.basins.length>1?` · sub-catchment ${B.id} (${B.ha} ha)`:''}`:'Edge strip, drains off the map nearby')}
+function where(M){return M.toLot?'flows into Bright Tree':M.side==='west'?`leaves to the west at ${Math.round(M.outz)} m`:M.side==='a low spot (sink)'?'ends in a low spot':`leaves to the ${M.side} at ${Math.round(M.outz)} m`}
+function list(){$('#maj').innerHTML=D.majors.filter(m=>m.ha>=1).map(m=>`<button data-m="${m.id}" aria-pressed="${SEL===m.id}"><span class="sw" style="background:${majColor(m.id,1,48)}"></span><span>Catchment ${m.id}${m.toLot?'<span class="pill">into Bright Tree</span>':''}<small>${where(m)}${m.acc_ha>m.ha+0.5?`, plus inflow (${m.acc_ha} ha at the exit)`:''}</small></span><span class="ha">${m.ha} ha</span></button>`).join('')+`<p class="hint" style="margin-top:6px">${D.majors.filter(m=>m.ha<1).length} small edge strips under 1 ha not listed. The whole Bright Tree catchment is ${D.btha} ha; its eastern part is catchment ${(D.majors.find(m=>m.toLot&&m.ha>5)||{}).id||'–'} here.</p>`;
+  document.querySelectorAll('#maj button').forEach(b=>b.onclick=()=>{const m=+b.dataset.m;SEL=SEL===m?0:m;buildCat();list();if(SEL)zoomTo(SEL);draw()})}
+function zoomTo(m){const n=PACK.w,d=PACK.d;let x0=1e9,y0=1e9,x1=-1,y1=-1;for(let k=0;k<n*PACK.h;k++){const b=d[k*4+2];if(b&&majOf[b]===m){const x=k%n,y=(k/n)|0;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
+  x0*=2;x1=x1*2+2;y0*=2;y1=y1*2+2;const s=Math.min(W/(x1-x0+120),H/(y1-y0+120),8);view={s,x:W/2-(x0+x1)/2*s,y:H/2-(y0+y1)/2*s}}
+function zoom(f,cx=W/2,cy=H/2){const s=Math.max(.15,Math.min(12,view.s*f));view.x=cx-(cx-view.x)*s/view.s;view.y=cy-(cy-view.y)*s/view.s;view.s=s;draw()}
+// pan, pinch, wheel
+const pts=new Map();let last=null;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.offsetX,e.offsetY]);readAt(e.offsetX,e.offsetY)});
+cv.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId)){readAt(e.offsetX,e.offsetY);return}const p=pts.get(e.pointerId);
+  if(pts.size===1){view.x+=e.offsetX-p[0];view.y+=e.offsetY-p[1];pts.set(e.pointerId,[e.offsetX,e.offsetY]);draw()}
+  else if(pts.size===2){const [a,b]=[...pts.values()];const d0=Math.hypot(a[0]-b[0],a[1]-b[1]);pts.set(e.pointerId,[e.offsetX,e.offsetY]);const [c,dd]=[...pts.values()];const d1=Math.hypot(c[0]-dd[0],c[1]-dd[1]);if(d0>0)zoom(d1/d0,(c[0]+dd[0])/2,(c[1]+dd[1])/2)}});
+const up=e=>pts.delete(e.pointerId);cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+cv.addEventListener('wheel',e=>{e.preventDefault();zoom(Math.exp(-e.deltaY*.0015),e.offsetX,e.offsetY)},{passive:false});
+$('#zi').onclick=()=>zoom(1.5);$('#zo').onclick=()=>zoom(1/1.5);$('#zf').onclick=()=>{fit();draw()};
+document.querySelectorAll('#base button').forEach(b=>b.onclick=()=>{LAYER.base=b.dataset.v;document.querySelectorAll('#base button').forEach(x=>x.setAttribute('aria-pressed',x===b));save();draw()});
+for(const [id,k] of [['lCon','con'],['lStr','str'],['lCat','cat'],['lSub','sub'],['lBT','bt']]){const el=$('#'+id);el.checked=!!LAYER[k];el.onchange=()=>{LAYER[k]=el.checked?1:0;if(k==='sub')buildCat();save();draw()}}
+function save(){try{localStorage.setItem('east.layers',JSON.stringify(LAYER))}catch(e){}}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{buildCon();draw()});
+new MutationObserver(()=>{buildCon();draw()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+addEventListener('resize',()=>{resize()});
+(async()=>{const [h,a,c,p]=await Promise.all([load(SRC.hill),load(SRC.aerial),load(SRC.con),load(SRC.pack)]);IMG={hill:h,aerial:a,con:c};
+  const t=document.createElement('canvas');t.width=p.width;t.height=p.height;const g=t.getContext('2d',{willReadFrequently:true});g.drawImage(p,0,0);PACK={w:p.width,h:p.height,d:g.getImageData(0,0,p.width,p.height).data};
+  document.querySelectorAll('#base button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===LAYER.base));
+  buildCat();buildCon();list();const r=cv.getBoundingClientRect();W=r.width;H=r.height;fit();resize()})();
+</script>
