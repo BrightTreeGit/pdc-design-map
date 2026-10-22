@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v83 | 22 Oct 2026 15:25 | see commit history |
 | v82 | 22 Oct 2026 11:05 | see commit history |
 | v81 | 22 Oct 2026 11:00 | see commit history |
 | v80 | 22 Oct 2026 10:55 | see commit history |
@@ -36,6 +37,15 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v83 (22 Oct 2026, 15:25)
+**Added**
+- Grazing & paddocks (Tools): goat fencing. It measures the fence line round all goat zones and paddocks along the ground, counting shared sides once. For mesh, electric wires or portable netting it lists rolls, posts, strainers and gates, with a rough cost from a price per metre you enter.
+- Grazing & paddocks: drinking water. Litres a day for the herd (cool or hot weather, extra for animals in milk), a year's total, storage for a chosen number of days and trough advice. One button adds it to the water balance.
+- Water balance & tanks: a field for animals' drinking water (litres a day, all year).
+
+**Fixed**
+- Sites with no dams or ponds drawn stopped loading part-way since v77 (the dam list's Show all / Hide all buttons were missing). Fixed.
 
 ## v82 (22 Oct 2026, 11:05)
 **Added**
