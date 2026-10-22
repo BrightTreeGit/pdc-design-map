@@ -313,7 +313,7 @@ function applyCZ(list){CZ=Array.isArray(list)?list.filter(z=>z&&z.id&&z.label):[
 async function saveCZ(list){applyCZ(list);if(live){try{await db.doc(C('settings')+'/zones').set({list:CZ,updatedAt:new Date().toISOString()})}catch(e){toast('Zone types did not save.')}}else lsSet('bt.czones',CZ)}
 /* tool levels: 1 Essentials, 2 Designer (default), 3 Expert. big = broadacre tools hidden on small blocks */
 const KIND_LV={customzone:2,zone0:1,zone1:1,zone2:1,tank:1,building:1,path:1,tree:1,fruittree:1,nativetree:1,shrub:1,bed:1,raisedbed:1,herbs:1,lawn:1,paving:1,fence:1,note:1,driveway:1,shed:1,solar:1,compost:1,
-  keypoint:3,diversion:3,damwall:3,coldair:3,section:3,crossing:3,reedbed:3,rockpool:3,irrigation:3,pipe:3,row:3,guild:3,hugel:3,goatzone:3,paddock:3,tpz:3,greywater:3,flow:3,soak:3,mushrooms:3,firebreak:3,obs:3};
+  keypoint:3,diversion:3,damwall:3,coldair:3,section:3,crossing:3,reedbed:3,rockpool:3,irrigation:3,pipe:3,row:3,guild:3,hugel:3,goatzone:3,paddock:3,tpz:3,greywater:3,flow:3,soak:3,mushrooms:3,firebreak:3,obs:1};
 const BIG_KINDS=['zone3','goatzone','paddock','damwall','keypoint','diversion','track','crossing','firebreak','reedbed','row','cabin','amenities','container','nursery','rockpool'];
 const LV_NAMES=[[1,'Essentials'],[2,'Designer'],[3,'Expert']];
 let drawLv=lsGet('bt.drawLv',1),drawQ='',recentKinds=lsGet('bt.recentKinds',[]);
@@ -334,7 +334,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('act');t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600)}
 /* ---------------- PDC sites: one map page, one data space per site ---------------- */
 const SITES=[
- {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true},
+ {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true,niche:true},
  {id:'bright-tree-gemini',name:'Bright Tree (auto data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, auto-fetched boundary and rainfall',ready:true,canopy:true},
  {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true},
  {id:'nimbin',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW',ready:true},
@@ -377,7 +377,7 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 /* ---------------- data loading ---------------- */
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
-let CANOPY=null;
+let CANOPY=null,NICHE=null;
 const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
 function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
@@ -423,6 +423,7 @@ async function boot(){renderSiteSel();
   const imgs=['aerial.jpg','relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png'];
   try{T=await (await fetch(SB+'terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
+  if(SITEDEF.niche){imgs.push('niche.png');try{NICHE=await (await fetch(SB+'niche.json')).json()}catch(e){NICHE=null}}
   if(SITEDEF.canopy){imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
   if(SITEDEF.history){try{PH.data=await (await fetch(SB+'history/history.json')).json();PH.i=PH.data.runs.length-1}catch(e){PH.data=null}}
   const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],SB+f)));
@@ -511,6 +512,7 @@ function render(){
   if(layers.streams){const wd=[.8,1.3,2.2,3.4],al=[.45,.65,.85,.95];for(let k=0;k<4;k++){ctx.strokeStyle=`rgba(25,105,200,${al[k]})`;ctx.lineWidth=wd[k]*px;ctx.lineCap='round';ctx.stroke(P.st[k])}}
   if(layers.pros&&PROS)drawPros(px);
   if(layers.lot){ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke(P.lot);ctx.lineWidth=1.6*px;ctx.strokeStyle='#14898f';ctx.setLineDash([10*px,4*px]);ctx.stroke(P.lot);ctx.setLineDash([])}
+  if(layers.overlay==='niche'&&NICHE){ctx.save();const C={1:'#d9a21a',2:'#d9762a',3:'#4f9a3a',6:'#8a5bb5'};NICHE.near.forEach((b,i)=>{const r=Math.max(7*px,2.2);ctx.beginPath();ctx.arc(b.x,b.y,r,0,7);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=2*px;ctx.strokeStyle=C[b.cls]||'#333';ctx.stroke();ctx.fillStyle='#222';ctx.font=`600 ${10*px}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),b.x,b.y+.5*px)});ctx.restore();ctx.textAlign='left';ctx.textBaseline='alphabetic'}
   if(layers.overlay==='canopy_h'&&CANOPY){ctx.save();const risk=treeRisk();for(const [x,y,h] of CANOPY.trees){if(h<40)continue;const tpz=tpzR(h);
     if(view.s>1.2){ctx.beginPath();ctx.arc(x,y,tpz,0,7);ctx.setLineDash([3*px,3*px]);ctx.lineWidth=1.2*px;ctx.strokeStyle='rgba(150,40,140,.7)';ctx.stroke();ctx.setLineDash([])}
     const hit=risk.has(x+','+y);const r=Math.max(2.2*px,Math.min(5*px,1.6));ctx.beginPath();ctx.arc(x,y,r+1.2*px,0,7);ctx.fillStyle=hit?'#ffd23f':'rgba(255,255,255,.9)';ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=hit?'#c0392b':'#96288c';ctx.fill()}ctx.restore()}
@@ -858,7 +860,7 @@ async function applyDoc(id,doc){if(doc){features.set(id,structuredClone(doc));if
   else{features.delete(id);multi.delete(id);if(selected===id)selected=null;if(live){try{await db.collection(C('features')).doc(id).delete()}catch(e){}}else saveLocal()}}
 async function undo(){const e=HIST.pop();if(!e){toast('Nothing to undo');return}REDO.push(e);updUndo();for(const x of e.items)await applyDoc(x.id,x.before);afterHist();toast('Undone: '+e.label)}
 async function redo(){const e=REDO.pop();if(!e){toast('Nothing to redo');return}HIST.push(e);updUndo();for(const x of e.items)await applyDoc(x.id,x.after);afterHist();toast('Redone: '+e.label)}
-function afterHist(){if(selected&&!features.has(selected))selected=null;renderFeatures();renderTools();draw()}
+function afterHist(){if(selected&&!features.has(selected))selected=null;renderFeatures();renderTools();draw();if(mt&&mt.type==='lop'&&mt.c){mt.base=null;lopRun()}}
 const newId=()=>'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function selIds(){return multi.size?[...multi]:(selected?[selected]:[])}
 function clearMulti(){multi.clear()}
@@ -1394,13 +1396,13 @@ function wireHydro(el){const box=el.querySelector('#hyRes');if(!box)return;const
     endMT();renderTools();toast('Saved the hydro scheme: penstock, intake and turbine house')}}
 
 /* ---------------- light & lopping planner: direct sun at garden height through terrain and tree crowns ---------------- */
-let CG=null;const LOP=Object.assign({doy:172,size:120,r:6,mode:'spot'},lsGet('bt.lop',{}));
+let CG=null;const LOP=Object.assign({doy:172,size:30,r:6,mode:'spot',fit:true,from:'today',plan:'none',saveStage:'now'},lsGet('bt.lop',{}));if(!LOP.v2){LOP.size=30;LOP.fit=true;LOP.v2=1}
 async function loadCG(){if(CG||!SITEDEF.canopy)return CG;try{const im=new Image();im.src=SB+'canopy_grid.png';await im.decode();const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);const d=g.getImageData(0,0,c.width,c.height).data;const n=c.width*c.height;const h=new Float32Array(n),gp=new Float32Array(n);for(let i=0;i<n;i++){h[i]=d[i*4]/3;gp[i]=d[i*4+1]/255}CG={w:c.width,h,gp}}catch(e){CG=null}return CG}
 function cgAt(x,y,edits){const i=Math.floor(x/2),j=Math.floor(y/2);if(!CG||i<0||j<0||i>=CG.w||j>=CG.w)return [0,1];let h=CG.h[j*CG.w+i],gp=CG.gp[j*CG.w+i];
   for(const e of edits){if((x-e.x)**2+(y-e.y)**2<=e.r*e.r){if(e.mode==='remove'){h=0;gp=1}else gp=Math.min(1,gp+0.35)}}return [h,gp]}
-function lightCalc(cx,cy,size,doy,edits){const res=2,n=Math.round(size/res),x0=cx-size/2,y0=cy-size/2,out=new Float32Array(n*n);const step=0.25;const suns=[];
+function lightCalc(cx,cy,size,doy,edits,poly){const res=size<=50?1:2,n=Math.round(size/res),x0=cx-size/2,y0=cy-size/2,out=new Float32Array(n*n);const step=0.25;const suns=[];
   for(let t=5;t<=19;t+=step){const s=sunAtTime(doy,t);if(s.alt>3)suns.push([Math.sin(s.az*Math.PI/180),-Math.cos(s.az*Math.PI/180),Math.tan(s.alt*Math.PI/180)])}
-  for(let j=0;j<n;j++)for(let i=0;i<n;i++){const px=x0+(i+.5)*res,py=y0+(j+.5)*res;const zg=zAt(px,py);if(!isFinite(zg))continue;const z0=zg+1;let hrs=0;
+  for(let j=0;j<n;j++)for(let i=0;i<n;i++){const px=x0+(i+.5)*res,py=y0+(j+.5)*res;if(poly&&!inPoly([px,py],poly)){out[j*n+i]=NaN;continue}const zg=zAt(px,py);if(!isFinite(zg))continue;const z0=zg+1;let hrs=0;
     for(const [dx,dy,tn] of suns){let T=1;for(let d=1;d<600;d+=2){const qx=px+dx*d,qy=py+dy*d,zr=z0+d*tn;const zt=zAt(qx,qy);if(!isFinite(zt))break;if(zt>zr){T=0;break}const hz=zr-zt;if(hz>70)break;
         const [h,gp]=cgAt(qx,qy,edits);if(h>2&&hz<h&&hz>h*0.45){T*=Math.pow(Math.max(gp,0.02),0.35);if(T<0.02){T=0;break}}}
       hrs+=T*step}
@@ -1408,62 +1410,89 @@ function lightCalc(cx,cy,size,doy,edits){const res=2,n=Math.round(size/res),x0=c
   return {x0,y0,n,res,h:out}}
 function lopImage(r,base){const c=document.createElement('canvas');c.width=r.n;c.height=r.n;const g=c.getContext('2d');const im=g.createImageData(r.n,r.n);const mx=LOP.doy===172?6:LOP.doy===80?8:10;
   const ramp=[[0,[25,30,70,190]],[.2,[70,60,140,180]],[.45,[200,100,70,190]],[.7,[250,190,70,200]],[1,[255,245,170,215]]];
-  for(let k=0;k<r.n*r.n;k++){let v,col;if(base){v=r.h[k]-base.h[k];if(v<0.1){im.data[k*4+3]=0;continue}const t=Math.min(1,v/2);col=[40+0*t,170+40*t,90-40*t,90+150*t]}
+  for(let k=0;k<r.n*r.n;k++){let v,col;if(isNaN(r.h[k])){im.data[k*4+3]=0;continue}if(base){v=r.h[k]-base.h[k];if(v<0.1){im.data[k*4+3]=0;continue}const t=Math.min(1,v/2);col=[40+0*t,170+40*t,90-40*t,90+150*t]}
     else{const t=Math.min(1,r.h[k]/mx);let a=ramp[0],b=ramp[ramp.length-1];for(let q=1;q<ramp.length;q++)if(t<=ramp[q][0]){a=ramp[q-1];b=ramp[q];break}const f=(t-a[0])/Math.max(1e-6,b[0]-a[0]);col=a[1].map((v0,ii)=>v0+(b[1][ii]-v0)*f)}
     im.data.set(col.map(Math.round),k*4)}g.putImageData(im,0,0);return c}
-function lopStats(r){let s=0,a2=0,a4=0,n=0;for(const v of r.h){s+=v;n++;if(v>=2)a2++;if(v>=4)a4++}const cell=r.res*r.res;return {mean:s/Math.max(1,n),a2:a2*cell,a4:a4*cell}}
+function lopStats(r){let s=0,a2=0,a4=0,n=0;for(const v of r.h){if(isNaN(v))continue;s+=v;n++;if(v>=2)a2++;if(v>=4)a4++}const cell=r.res*r.res;return {mean:s/Math.max(1,n),a2:a2*cell,a4:a4*cell,area:n*cell}}
+function lopBeds(w){if(!LOP.fit)return [];const L=[];for(const f of features.values()){if(f.geom.g!=='polygon'||f.geom.pts.length<3||!vis(f)||!inPoly(w,f.geom.pts))continue;const a=polyArea(f.geom.pts);if(a>25600)continue;
+    const p=f.geom.pts,xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);const ext=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys));
+    L.push({a,c:[(Math.max(...xs)+Math.min(...xs))/2,(Math.max(...ys)+Math.min(...ys))/2],size:Math.min(160,Math.max(10,Math.ceil((ext+2)/2)*2)),poly:p,name:f.name||KINDS[f.kind]?.label||'drawn area'})}
+  return L.sort((x,y)=>(selected&&features.get(selected)?.geom.pts===y.poly)-(selected&&features.get(selected)?.geom.pts===x.poly)||x.a-y.a)}
+function lopUse(bd){if(bd){mt.c=bd.c;mt.poly=bd.poly;mt.psize=bd.size;mt.polyName=bd.name}else{mt.poly=null;mt.polyName=null}mt.base=null}
+/* saved lopping jobs: done (status built, or stage Existing) change today's light; the rest are planned by stage */
+function lopJobs(){const done=[],plan=[];for(const [id,f] of features){if(f.kind!=='lop'||f.geom.g!=='point'||fHidden(f))continue;const q=f.geom.pts[0];
+    const e={x:q[0],y:q[1],r:f.geom.r||6,mode:f.lopMode||(/thin|lop limb|crown/i.test(f.name||'')&&!/remov/i.test(f.name||'')?'thin':'remove'),id,st:stageIdx(f.stage||'now'),name:f.name};
+    (f.status==='built'||f.stage==='existing'?done:plan).push(e)}return {done,plan}}
+function lopPlanned(J){if(LOP.plan==='none')return [];const k=LOP.plan==='all'?99:stageIdx(LOP.plan);return J.plan.filter(e=>e.st<=k)}
+async function lopAddJob(e,extra){const id=newId(),now=new Date().toISOString();const doc={kind:'lop',name:'',status:'idea',notes:'',stage:'now',geom:{g:'point',pts:[[e.x,e.y]],r:e.r},lopMode:e.mode,createdBy:myId||null,createdAt:now,updatedAt:now,source:'light planner',...extra};
+  features.set(id,doc);await persist(id,doc);return id}
+function lopSz(){return mt&&mt.poly?mt.psize:LOP.size}
 async function lopRun(){if(!mt||mt.type!=='lop'||!mt.c)return;if(!await loadCG()){toast('Canopy data is not available for this site');return}
   $('#drawbar .hint')&&($('#drawbar .hint').textContent='Working out the sun through the trees…');await new Promise(r=>setTimeout(r,30));
-  const [cx,cy]=mt.c;if(!mt.base||mt.baseKey!==cx+','+cy+','+LOP.size+','+LOP.doy){mt.base=lightCalc(cx,cy,LOP.size,LOP.doy,[]);mt.baseKey=cx+','+cy+','+LOP.size+','+LOP.doy;mt.baseImg=lopImage(mt.base)}
-  if(mt.edits.length){mt.after=lightCalc(cx,cy,LOP.size,LOP.doy,mt.edits);mt.afterImg=lopImage(mt.after);mt.gainImg=lopImage(mt.after,mt.base)}else{mt.after=null;mt.afterImg=null;mt.gainImg=null}
+  const [cx,cy]=mt.c,SZ=lopSz(),J=lopJobs(),be=LOP.from==='today'?J.done:[],pe=lopPlanned(J),key=[cx,cy,SZ,LOP.doy,mt.polyName||'',JSON.stringify(be)].join(',');if(!mt.base||mt.baseKey!==key){mt.base=lightCalc(cx,cy,SZ,LOP.doy,be,mt.poly);mt.baseKey=key;mt.baseImg=lopImage(mt.base)}
+  mt.nPlan=pe.length;const ae=be.concat(pe,mt.edits);if(pe.length||mt.edits.length){mt.after=lightCalc(cx,cy,SZ,LOP.doy,ae,mt.poly);mt.afterImg=lopImage(mt.after);mt.gainImg=lopImage(mt.after,mt.base)}else{mt.after=null;mt.afterImg=null;mt.gainImg=null}
   renderMTBar();renderTools();draw()}
-function lopClick(w){if(LOP.mode==='spot'||!mt.c){mt.c=r1(w);mt.edits=[];mt.base=null;mt.sugg=[];LOP.mode=LOP.mode==='spot'?'spot':LOP.mode;lopRun();return}
+function lopClick(w){if(LOP.mode==='spot'||(!mt.c&&LOP.mode!=='done')){mt.beds=lopBeds(w);mt.click=r1(w);mt.c=r1(w);lopUse(mt.beds[0]);mt.edits=[];mt.base=null;mt.sugg=[];LOP.mode=LOP.mode==='spot'?'spot':LOP.mode;lopRun();return}
+  if(LOP.mode==='done'){const e={x:+w[0].toFixed(1),y:+w[1].toFixed(1),r:LOP.r,mode:'remove'};lopAddJob(e,{name:'Removed since the 2022 survey',stage:'existing',status:'built',notes:'Already cleared (near the carport, house or solar). The 2022 LiDAR still shows this crown; the light planner treats it as gone.'}).then(id=>{pushHist('mark tree already removed',[{id,before:null,after:snapF(id)}]);LOP.from='today';mt.base=null;if(mt.c)lopRun();else{renderTools();draw()}toastAction('Marked as already removed.','Undo',undo)});return}
   const big=CANOPY?CANOPY.trees.find(t=>t[2]>=40&&Math.hypot(t[0]-w[0],t[1]-w[1])<=LOP.r+2):null;
   if(big&&LOP.mode==='remove'){toast(`That includes an emergent tree about ${Math.round(big[2])} m tall: a likely habitat tree. Try thinning or lopping a limb instead.`)}
   mt.edits.push({x:+w[0].toFixed(1),y:+w[1].toFixed(1),r:LOP.r,mode:LOP.mode,big:big?Math.round(big[2]):0});lopRun()}
 async function lopSuggest(){if(!mt||!mt.c||!await loadCG())return;const [cx,cy]=mt.c;toast('Testing the trees between the spot and the sun…');await new Promise(r=>setTimeout(r,30));
-  const tgt=30,base=lightCalc(cx,cy,tgt,LOP.doy,mt.edits),bm=lopStats(base).mean;const cands=[];
+  const tgt=Math.min(lopSz(),30),pl=tgt===lopSz()?mt.poly:null,base=lightCalc(cx,cy,tgt,LOP.doy,mt.edits,pl),bm=lopStats(base).mean;const cands=[];
   const noonAz=LOP.doy===355?(LAT<-23.4?0:180):0;
   for(let d=8;d<=48;d+=8)for(let a=-60;a<=60;a+=20){const az=(noonAz+a)*Math.PI/180;const x=cx+Math.sin(az)*d,y=cy-Math.cos(az)*d;const [h]=cgAt(x,y,mt.edits);if(h<8)continue;cands.push([x,y,h])}
-  const res=[];for(const [x,y,h] of cands){const e={x:+x.toFixed(1),y:+y.toFixed(1),r:LOP.r,mode:'remove'};const r=lightCalc(cx,cy,tgt,LOP.doy,mt.edits.concat([e]));const g=lopStats(r).mean-bm;
+  const res=[];for(const [x,y,h] of cands){const e={x:+x.toFixed(1),y:+y.toFixed(1),r:LOP.r,mode:'remove'};const r=lightCalc(cx,cy,tgt,LOP.doy,mt.edits.concat([e]),pl);const g=lopStats(r).mean-bm;
     const big=CANOPY?CANOPY.trees.find(t=>t[2]>=40&&Math.hypot(t[0]-x,t[1]-y)<=LOP.r+2):null;res.push({...e,gain:g,h:Math.round(h),big:big?Math.round(big[2]):0})}
   res.sort((a,b)=>b.gain-a.gain);mt.sugg=res.filter(r=>r.gain>0.05).slice(0,5);renderTools();draw();
   toast(mt.sugg.length?`Top ${mt.sugg.length} trees to lop for this spot are numbered on the map`:'No single tree makes a real difference here: the shade comes from many crowns or the hill')}
 function lopBar(b){const S=mt.base?lopStats(mt.base):null,A=mt.after?lopStats(mt.after):null;const season={172:'21 Jun',80:'equinox',355:'21 Dec'}[LOP.doy];
-  b.innerHTML=`<span class="what">Light & lopping · ${season}</span><span class="hint">${!mt.c?'Click the garden spot to test':LOP.mode==='spot'?'Click another garden spot, or choose Remove or Thin and click trees':LOP.mode==='remove'?'Click a tree to remove it (whole crown within the radius)':'Click a crown to thin or lop it (lets about a third more light through)'}${S?` · now <b>${S.mean.toFixed(1)} h</b> average${A?` → <b>${A.mean.toFixed(1)} h</b>`:''}`:''}</span>
-   <div class="seg" id="lopMode">${[['spot','◎ Garden spot'],['thin','✂ Thin crown'],['remove','✕ Remove tree']].map(([k,l])=>`<button data-v="${k}" aria-pressed="${LOP.mode===k}">${l}</button>`).join('')}</div>
-   <label class="gp">Radius <input id="lopR" type="number" min="2" max="15" step="1" value="${LOP.r}" aria-label="Crown radius in metres"> m</label>
+  b.innerHTML=`<span class="what">Light & lopping · ${season}</span><span class="hint">${!mt.c?'Click the garden spot to test':LOP.mode==='spot'?'Click another garden spot, or choose Remove or Thin and click trees':LOP.mode==='done'?'Click each tree that has already gone since 2022: it saves to the design and counts in today\'s light':LOP.mode==='remove'?'Click a tree to remove it (whole crown within the radius)':'Click a crown to thin or lop it (lets about a third more light through)'}${S?` · ${LOP.from==='today'?'today':'2022 survey'} <b>${S.mean.toFixed(1)} h</b>${A?` → <b>${A.mean.toFixed(1)} h</b> ${mt.nPlan?'with plan':'with test'}`:''}`:''}</span>
+   <div class="seg" id="lopMode">${[['spot','◎ Garden spot'],['done','✓ Already removed'],['thin','✂ Test thin'],['remove','✕ Test remove']].map(([k,l])=>`<button data-v="${k}" aria-pressed="${LOP.mode===k}">${l}</button>`).join('')}</div>
+   ${mt.beds&&mt.beds.length>1?`<div class="seg" id="lopBeds">${mt.beds.map((d,i)=>`<button data-i="${i}" aria-pressed="${mt.poly===d.poly}">${esc(d.name)}</button>`).join('')}<button data-i="-1" aria-pressed="${!mt.poly}">Square</button></div>`:mt.poly?`<span class="pill">${esc(mt.polyName)}</span>`:''}${mt.poly?'':`<label class="gp">Area <input id="lopSzB" type="number" min="10" max="160" step="5" value="${LOP.size}" aria-label="Side of the test square in metres"> m</label>`}
+   <label class="gp">Crown radius <input id="lopR" type="number" min="2" max="15" step="1" value="${LOP.r}" aria-label="Crown radius in metres"> m</label>
    ${mt.edits&&mt.edits.length?'<button class="btn" id="lopUndo">Undo last</button>':''}<button class="btn" id="lopDone">Done</button>`;
   b.querySelectorAll('#lopMode button').forEach(x=>x.onclick=()=>{LOP.mode=x.dataset.v;lsSet('bt.lop',LOP);renderMTBar()});
   b.querySelector('#lopR').onchange=e=>{LOP.r=Math.max(2,Math.min(15,+e.target.value||6));lsSet('bt.lop',LOP)};
+  b.querySelectorAll('#lopBeds button').forEach(x=>x.onclick=()=>{const i=+x.dataset.i;if(i<0){lopUse(null);mt.c=mt.click}else lopUse(mt.beds[i]);mt.edits=[];mt.sugg=[];lopRun()});
+  const zb=b.querySelector('#lopSzB');if(zb)zb.onchange=()=>setLopSize(zb.value);
   const u=b.querySelector('#lopUndo');if(u)u.onclick=()=>{mt.edits.pop();lopRun()};b.querySelector('#lopDone').onclick=()=>{endMT();renderTools()}}
-function drawLop(px){if(!mt.c)return;const r=mt.base;if(r){ctx.save();ctx.imageSmoothingEnabled=true;ctx.globalAlpha=.85;ctx.drawImage(mt.showGain&&mt.gainImg?mt.gainImg:(mt.afterImg||mt.baseImg),r.x0,r.y0,r.n*r.res,r.n*r.res);ctx.globalAlpha=1;
-  ctx.strokeStyle='#fff';ctx.lineWidth=2*px;ctx.setLineDash([6*px,4*px]);ctx.strokeRect(r.x0,r.y0,r.n*r.res,r.n*r.res);ctx.setLineDash([]);ctx.restore()}
+function lopDrawJobs(px){const J=lopJobs(),P=new Set(lopPlanned(J).map(e=>e.id));for(const e of J.done.concat(J.plan)){const d=J.done.includes(e),on=d||P.has(e.id);ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.fillStyle=d?'rgba(120,120,120,.35)':on?'rgba(230,126,34,.18)':'rgba(0,0,0,0)';ctx.fill();ctx.lineWidth=1.5*px;ctx.strokeStyle=d?'#bbb':on?'#e67e22':'rgba(230,126,34,.5)';ctx.setLineDash(d?[]:[3*px,3*px]);ctx.stroke();ctx.setLineDash([])}}
+function drawLop(px){lopDrawJobs(px);if(!mt.c)return;const r=mt.base;if(r){ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=.85;ctx.drawImage(mt.showGain&&mt.gainImg?mt.gainImg:(mt.afterImg||mt.baseImg),r.x0,r.y0,r.n*r.res,r.n*r.res);ctx.globalAlpha=1;
+  ctx.strokeStyle='#fff';ctx.lineWidth=2*px;ctx.setLineDash([6*px,4*px]);if(mt.poly){ctx.beginPath();mt.poly.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.stroke()}else ctx.strokeRect(r.x0,r.y0,r.n*r.res,r.n*r.res);ctx.setLineDash([]);ctx.restore()}
   (mt.sugg||[]).forEach((e,i)=>{ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.lineWidth=2*px;ctx.strokeStyle='#f1c40f';ctx.setLineDash([2*px,3*px]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#f1c40f';ctx.beginPath();ctx.arc(e.x,e.y,9*px,0,7);ctx.fill();ctx.fillStyle='#111';ctx.font=`700 ${11*px}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),e.x,e.y+0.5*px)});
   for(const e of mt.edits||[]){ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.lineWidth=2.5*px;ctx.strokeStyle=e.mode==='remove'?'#c0392b':'#e67e22';ctx.setLineDash(e.mode==='remove'?[]:[5*px,3*px]);ctx.stroke();ctx.setLineDash([])}
   ctx.beginPath();ctx.arc(mt.c[0],mt.c[1],5*px,0,7);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=2*px;ctx.strokeStyle='#111';ctx.stroke()}
 function lopHTML(){if(!SITEDEF.canopy)return '<p class="hint">Needs the LiDAR canopy layers for this site (run make_canopy for its point clouds).</p>';
   const S=mt&&mt.type==='lop'&&mt.base?lopStats(mt.base):null,A=mt&&mt.type==='lop'&&mt.after?lopStats(mt.after):null;
-  return `<p class="hint">Test where food plants will get enough sun under the forest, and how much lopping or thinning particular trees would help. It traces the sun every 15 minutes through the hills and the tree crowns measured by the 2022 LiDAR, for a square around the spot you click.</p>
-   <div class="row"><div class="field" style="flex:1"><label>Season</label>${segHTML('lopDoy',[['172','Winter'],['80','Equinox'],['355','Summer']],String(LOP.doy))}</div><div class="field" style="flex:1"><label for="lopSize">Area tested</label><select id="lopSize">${[60,90,120,160].map(v=>`<option value="${v}" ${LOP.size===v?'selected':''}>${v} × ${v} m</option>`).join('')}</select></div></div>
+  return `<p class="hint">Test where food plants will get enough sun under the forest, and how much lopping or thinning particular trees would help. It traces the sun every 15 minutes through the hills and the tree crowns measured by the 2022 LiDAR, for the square around the spot you click, or for the whole bed or zone when you click inside one you've drawn.</p>
+   <div class="row"><div class="field" style="flex:1"><label>Season</label>${segHTML('lopDoy',[['172','Winter'],['80','Equinox'],['355','Summer']],String(LOP.doy))}</div><div class="field" style="flex:1"><label for="lopSize">Test square: <b id="lopSizeV">${LOP.size} × ${LOP.size} m</b></label><input id="lopSize" type="range" min="10" max="160" step="5" value="${LOP.size}" aria-label="Side of the test square in metres"></div></div>
+   <label class="row"><input type="checkbox" id="lopFit" ${LOP.fit?'checked':''}> Fit to the bed or zone I click inside</label>
+   ${(()=>{const J=lopJobs();return `<div class="field"><label>Start from</label>${segHTML('lopFrom',[['today',`Today (${J.done.length} tree${J.done.length===1?'':'s'} gone since 2022)`],['survey','2022 survey']],LOP.from)}</div>
+   <div class="field"><label>Add planned lopping jobs (${J.plan.length} saved)</label>${segHTML('lopPlan',[['none','None'],['now','Year 0–1'],['y2','To yr 2'],['y5','To yr 5'],['all','All']],LOP.plan)}</div>`})()}
+   <p class="hint">Trees already cut since the 2022 LiDAR: use <b>✓ Already removed</b> in the top bar and click each one. Planned jobs follow their stage; mark a job Built when it's done and it moves into today.</p>
    <button class="btn primary" id="tLop">${mt&&mt.type==='lop'?'Click the map to test a spot':'Pick a garden spot'}</button>
-   ${S?`<dl class="facts"><dt>Direct sun at garden height</dt><dd><b>${S.mean.toFixed(1)} h</b> average${A?` → <b>${A.mean.toFixed(1)} h</b> after the lopping`:''}</dd>
+   ${S?`<dl class="facts"><dt>Tested</dt><dd>${mt.poly?esc(mt.polyName)+', ':''}${Math.round(S.area).toLocaleString()} m²</dd><dt>Direct sun at garden height</dt><dd><b>${S.mean.toFixed(1)} h</b> average${A?` → <b>${A.mean.toFixed(1)} h</b> after the lopping`:''}</dd>
    <dt>Area with 2 h or more</dt><dd>${Math.round(S.a2).toLocaleString()} m²${A?` → <b>${Math.round(A.a2).toLocaleString()} m²</b>`:''}</dd>
    <dt>Area with 4 h or more</dt><dd>${Math.round(S.a4).toLocaleString()} m²${A?` → <b>${Math.round(A.a4).toLocaleString()} m²</b>`:''}</dd></dl>
    <button class="btn" id="lopSug">Suggest the trees to lop for this spot</button>
    ${mt.sugg&&mt.sugg.length?`<div class="tlist">${mt.sugg.map((e,i)=>`<div class="row"><b>${i+1}.</b>&nbsp;Crown about ${e.h} m tall: +${e.gain.toFixed(1)} h at the spot${e.big?` <span class="pill">habitat tree ~${e.big} m: thin, don't remove</span>`:''}<button class="btn" data-sug="${i}" style="margin-left:auto">${e.big?'Thin':'Remove'}</button></div>`).join('')}</div>`:''}
    ${A?`<label class="row"><input type="checkbox" id="lopGain" ${mt.showGain?'checked':''}> Show only the hours gained (green)</label>`:''}
-   ${mt.edits.length?`<p class="hint">${mt.edits.length} change${mt.edits.length>1?'s':''}: ${mt.edits.map((e,i)=>`${i+1}. ${e.mode==='remove'?'remove':'thin'} ${e.r} m${e.big?` (habitat tree ~${e.big} m)`:''}`).join(' · ')}</p><button class="btn" id="lopSave">Save these as lopping jobs</button>`:''}`:''}
+   ${mt.edits.length?`<p class="hint">${mt.edits.length} change${mt.edits.length>1?'s':''}: ${mt.edits.map((e,i)=>`${i+1}. ${e.mode==='remove'?'remove':'thin'} ${e.r} m${e.big?` (habitat tree ~${e.big} m)`:''}`).join(' · ')}</p><div class="row"><label for="lopStage">Stage</label><select id="lopStage">${STAGES.filter(s=>s[0]!=='existing').map(([k,l])=>`<option value="${k}" ${LOP.saveStage===k?'selected':''}>${l}</option>`).join('')}</select><button class="btn" id="lopSave">Save as planned jobs</button></div>`:''}`:''}
    <p class="hint">Plan for 6 h or more for fruit trees and veg, 3–4 h for leafy greens, herbs, coffee and cacao, under 2 h for ferns, ginger, turmeric and mushrooms. Estimates: crowns are treated as partly see-through, and real light also comes from the open sky (diffuse light), so beds under thinned canopy do better than direct sun alone suggests. Keep habitat trees; thinning and lopping limbs is usually enough.</p>`}
+function setLopSize(v){LOP.size=Math.max(10,Math.min(160,Math.round((+v||30)/5)*5));lsSet('bt.lop',LOP);if(mt&&mt.type==='lop'&&mt.c&&!mt.poly){mt.base=null;lopRun()}else{renderTools();if(mt&&mt.type==='lop')renderMTBar()}}
 function wireLop(el){const b=el.querySelector('#tLop');if(!b)return;b.onclick=()=>{if(!(mt&&mt.type==='lop')){startMT('lop');mt.edits=[];mt.c=null;LOP.mode='spot';renderMTBar();renderTools()}};
   el.querySelectorAll('#lopDoy button').forEach(x=>x.onclick=()=>{LOP.doy=+x.dataset.v;lsSet('bt.lop',LOP);if(mt&&mt.type==='lop'&&mt.c){mt.base=null;lopRun()}else renderTools()});
-  const sz=el.querySelector('#lopSize');if(sz)sz.onchange=()=>{LOP.size=+sz.value;lsSet('bt.lop',LOP);if(mt&&mt.type==='lop'&&mt.c){mt.base=null;lopRun()}};
+  const sz=el.querySelector('#lopSize');if(sz){sz.oninput=()=>{$('#lopSizeV').textContent=sz.value+' × '+sz.value+' m'};sz.onchange=()=>setLopSize(sz.value)}
+  el.querySelectorAll('#lopFrom button,#lopPlan button').forEach(x=>x.onclick=()=>{const k=x.closest('.seg').id==='lopFrom'?'from':'plan';LOP[k]=x.dataset.v;lsSet('bt.lop',LOP);if(mt&&mt.type==='lop'&&mt.c){mt.base=null;lopRun()}else{renderTools();draw()}});
+  const ss=el.querySelector('#lopStage');if(ss)ss.onchange=()=>{LOP.saveStage=ss.value;lsSet('bt.lop',LOP)};
+  const ft=el.querySelector('#lopFit');if(ft)ft.onchange=()=>{LOP.fit=ft.checked;lsSet('bt.lop',LOP)};
   const sg=el.querySelector('#lopSug');if(sg)sg.onclick=lopSuggest;
   el.querySelectorAll('[data-sug]').forEach(x=>x.onclick=()=>{const e=mt.sugg[+x.dataset.sug];mt.edits.push({x:e.x,y:e.y,r:e.r,mode:e.big?'thin':'remove',big:e.big});mt.sugg.splice(+x.dataset.sug,1);lopRun()});
   const g=el.querySelector('#lopGain');if(g)g.onchange=()=>{mt.showGain=g.checked;draw()};
   const sv=el.querySelector('#lopSave');if(sv)sv.onclick=async()=>{const S=lopStats(mt.base),A=lopStats(mt.after);const season={172:'winter',80:'equinox',355:'summer'}[LOP.doy];
-    for(const e of mt.edits){draft={kind:'lop',pts:[]};await commit({g:'point',pts:[[e.x,e.y]],r:e.r},{name:(e.mode==='remove'?'Remove tree':'Thin crown')+(e.big?` (habitat tree ~${e.big} m: check first)`:''),stage:'now',notes:`From the light planner (${season}): this set of ${mt.edits.length} change(s) lifts direct sun in the ${LOP.size} m test area from ${S.mean.toFixed(1)} h to ${A.mean.toFixed(1)} h on average, and the area with 2 h+ from ${Math.round(S.a2)} to ${Math.round(A.a2)} m². ${e.mode==='remove'?'Remove the crown within '+e.r+' m.':'Thin or lop limbs within '+e.r+' m (about a third more light).'} Check for hollows and nesting before any work; an arborist for big trees.`})}
-    toast('Saved '+mt.edits.length+' lopping job(s) to the design');renderFeatures()}}
+    const ids=[];for(const e of mt.edits){ids.push(await lopAddJob(e,{status:'proposed',stage:LOP.saveStage||'now',name:(e.mode==='remove'?'Remove tree':'Thin crown')+(e.big?` (habitat tree ~${e.big} m: check first)`:''),stage:'now',notes:`From the light planner (${season}): this set of ${mt.edits.length} change(s) lifts direct sun in ${mt.poly?mt.polyName:'the '+LOP.size+' m test square'} from ${S.mean.toFixed(1)} h to ${A.mean.toFixed(1)} h on average, and the area with 2 h+ from ${Math.round(S.a2)} to ${Math.round(A.a2)} m². ${e.mode==='remove'?'Remove the crown within '+e.r+' m.':'Thin or lop limbs within '+e.r+' m (about a third more light).'} Check for hollows and nesting before any work; an arborist for big trees.`}))}
+    pushHist('save '+ids.length+' lopping job(s)',ids.map(id=>({id,before:null,after:snapF(id)})));mt.edits=[];LOP.plan=LOP.plan==='none'?'all':LOP.plan;lsSet('bt.lop',LOP);mt.base=null;
+    toast('Saved '+ids.length+' planned job(s). Turn on the stage under “Add planned lopping jobs” to compare.');renderFeatures();lopRun()}}
 
 /* ---------------- pipe friction: gravity feed through HDPE pipe and fittings ---------------- */
 // PE100 PN12.5 (SDR 13.6) inside diameters; Hazen-Williams C = 150 for new polyethylene
@@ -2075,7 +2104,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    sec('dams','Dams and ponds (show / hide each)',`<div id="damSec">${damsHTML()}</div>`)+
    sec('analysis','Terrain analysis',`${segHTML('',[['none','None']],layers.overlay,'ovs')}
     ${OVERLAYS.map(g=>`<div class="sub2">${g.grp}</div>${segHTML('',g.items,layers.overlay,'ovs')}`).join('')}
-    <div class="sub2">Forest${CANOPY?' · LiDAR 2008–2022':''}</div>${CANOPY?segHTML('',[['canopy_h','Canopy height & tall trees'],['canopy_change','Canopy growth since 2008'],['productivity','Growing power (growth vs typical)'],['understorey','Dense understorey'],['fuel','Fuel structure'],['light_winter','Light at ground · winter'],['light_equinox','Light at ground · equinox']],layers.overlay,'ovs'):'<div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>'}
+    <div class="sub2">Forest${CANOPY?' · LiDAR 2008–2022':''}</div>${CANOPY?segHTML('',[['canopy_h','Canopy height & tall trees'],['canopy_change','Canopy growth since 2008'],['productivity','Growing power (growth vs typical)'],['understorey','Dense understorey'],['fuel','Fuel structure'],['light_winter','Light at ground · winter'],['light_equinox','Light at ground · equinox']].concat(NICHE?[['niche','Planting niches (light, slope, moisture, frost)']]:[]),layers.overlay,'ovs'):'<div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>'}
     <div id="shWrap">${layers.overlay==='shadow'?shadowCtl():''}</div>
     <div class="row"><label for="ovop">Overlay strength</label><input type="range" id="ovop" min="0.2" max="1" step="0.05" value="${layers.ovOp}"></div>
     <div id="ovLegend" class="hint"></div>`)+
@@ -2097,6 +2126,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    legends.understorey=`How crowded the layer from 0.5 to 5 m is, from the 2022 LiDAR returns, ranked against the whole map window (top 30% shaded). About ${C0.understorey.denseHa} ha of the lot is in the densest 15%. Dense patches are thickets: lantana and other weeds on edges and old disturbance, but also healthy vine forest, ferns and lomandra in the gullies. Walk them before treating anything.`;
    if(C0.light){const Lw=C0.light.winter,Le=C0.light.equinox;
     legends.light_winter=`Estimated direct sun reaching the ground on 21 June: the hills' shade combined with how open the canopy is overhead (from the share of 2022 LiDAR pulses that got through the crowns). Bright patches are where food plants can grow. Inside the lot only about ${Lw.ha2h} ha gets 2 hours or more of winter sun at ground level, and ${Lw.ha4h} ha gets 4 hours or more: mostly the house clearing and small gaps. An estimate: eucalypt crowns let dappled light through, so treat it as a ranking.`;
+    if(NICHE){const A=NICHE.area,ha=v=>v<0.1?Math.round(v*1e4)+' m²':v.toFixed(2)+' ha';legends.niche=`Where each kind of planting fits today, combining light at ground (terrain plus measured crowns), slope, wetness from water flow, and cold-air pooling. Inside the lot: full sun ${ha(A['1'])}, part sun ${ha(A['2'])}, dappled shade ${ha(A['3'])}, deep moist shade ${ha(A['4'])}, and ${ha(A['6'])} of fast-growing ground near the house that is shaded now but could be opened with careful lopping (test it in Tools → Light & lopping planner). Ground over 27° (about 50%) stays forest, as Land for Wildlife advises. Blue dots mark frost-prone cells (${ha(NICHE.frostHa)}): keep tender plants out. Numbered spots on the map are the best patches within about 80 m of the house. The wetness model can't see springs or seeps: mark wet spots as Observations (Water / drainage) and they will be folded in at the next update.`}
     legends.light_equinox=`The same estimate for the equinox (March and September), when the sun is higher. About ${Le.ha2h} ha of the lot gets 2 hours or more of sun at ground level, and ${Le.ha4h} ha 4 hours or more. Compare with the winter layer to find spots that stay sunny all year.`}
    if(C0.productivity){const P=C0.productivity;legends.productivity=`Where trees grew faster or slower than is typical for their size between 2008 and 2022 (each tree compared with others that started at the same height). Green: faster than typical, the sign of better soil moisture, depth and nutrients: the places to give fruit trees, the food forest and nursery plantings. Orange: slower (dry ridges, shallow sandy soil, exposure) or lost height (tree fall). Inside the lot about ${P.aboveHa} ha grows clearly faster than typical and ${P.belowHa} ha clearly slower. Typical growth was about 2 m in 14 years. Match with the soil tests before committing.`}
    legends.fuel=`An indicative, relative fuel-structure rating from the 2022 LiDAR: dense near-ground growth, ladder fuels from 2 to 10 m that let fire climb, and canopy cover. Ranked against the whole map window. Inside the lot: ${C0.fuel.vhighHa} ha very high, ${C0.fuel.highHa} ha high, ${C0.fuel.modHa} ha moderate. Not an official fuel hazard assessment; read it with the Fire run layer and your fire plan.`}
@@ -2120,6 +2150,7 @@ function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.
   else if(ov==='fire')h=`<b>Fire run potential</b><div class="legend"><span><i class="swatch" style="background:rgb(245,160,60)"></i>Moderate</span><span><i class="swatch" style="background:rgb(225,90,40)"></i>High</span><span><i class="swatch" style="background:rgb(150,30,30)"></i>Very high</span></div><div class="ends"><span>terrain and NW–W winds only</span></div>`;
   else if(ov==='canopy_h')h=`<b>Canopy height · 2022</b><div class="grad" style="background:linear-gradient(90deg,rgb(220,215,150),rgb(180,200,90),rgb(110,170,60),rgb(40,130,60),rgb(20,90,60),rgb(60,40,110))"></div><div class="ends"><span>0 m</span><span>10</span><span>20</span><span>30</span><span>40+ m</span></div><div class="legend"><span><i class="swatch" style="background:rgb(150,40,140);border-radius:50%"></i>Emergent tree ≥40 m</span><span><i class="swatch" style="background:#c0392b;border-radius:50%;outline:2px solid #ffd23f"></i>Within falling distance of a building or tank</span></div>`;
   else if(ov==='light_winter'||ov==='light_equinox')h=`<b>Light at ground · ${ov==='light_winter'?'21 Jun':'equinox'}</b><div class="grad" style="background:linear-gradient(90deg,rgb(25,30,70),rgb(70,60,140),rgb(200,100,70),rgb(250,190,70),rgb(255,245,170))"></div><div class="ends"><span>0 h</span><span>${ov==='light_winter'?'3':'4'} h</span><span>${ov==='light_winter'?'6':'8'}+ h</span></div><div class="ends"><span>terrain + tree crowns, estimated</span></div>`;
+  else if(ov==='niche')h=`<b>Planting niches · today</b><div class="legend"><span><i class="swatch" style="background:rgb(250,200,60)"></i>Full sun: citrus, mango, dragon fruit, chilli</span><span><i class="swatch" style="background:rgb(240,140,60)"></i>Part sun: avocado, banana, macadamia, sapote</span><span><i class="swatch" style="background:rgb(120,190,90)"></i>Dappled: coffee, cacao, ginger, turmeric</span><span><i class="swatch" style="background:rgb(40,140,150)"></i>Deep moist shade: vanilla, ferns, mushrooms</span><span><i class="swatch" style="background:rgb(170,110,210)"></i>Openable with lopping</span><span><i class="swatch" style="background:rgb(30,80,220);border-radius:50%"></i>Frost-prone</span></div><div class="ends"><span>estimate; walk and test before planting</span></div>`;
   else if(ov==='productivity')h=`<b>Growing power · 2008 → 2022</b><div class="legend"><span><i class="swatch" style="background:rgb(30,200,80)"></i>Grows faster than typical</span><span><i class="swatch" style="background:rgb(235,110,60)"></i>Slower, or lost height</span></div><div class="ends"><span>tree growth as a soil and water proxy</span></div>`;
   else if(ov==='canopy_change')h=`<b>Canopy growth · 2008 → 2022</b><div class="legend"><span><i class="swatch" style="background:rgb(40,120,60)"></i>Taller now</span><span><i class="swatch" style="background:rgb(200,70,40)"></i>Lower now</span></div>`;
   else if(ov==='understorey')h=`<b>Dense understorey · 0.5–5 m</b><div class="legend"><span><i class="swatch" style="background:rgb(240,200,60)"></i>Dense</span><span><i class="swatch" style="background:rgb(230,130,30)"></i>Very dense</span><span><i class="swatch" style="background:rgb(170,40,30)"></i>Thicket</span></div><div class="ends"><span>relative to the map window; walk before treating</span></div>`;

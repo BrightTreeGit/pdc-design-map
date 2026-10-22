@@ -9,6 +9,11 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v82 | 22 Oct 2026 11:05 | see commit history |
+| v81 | 22 Oct 2026 11:00 | see commit history |
+| v80 | 22 Oct 2026 10:55 | see commit history |
+| v79 | 22 Oct 2026 10:40 | see commit history |
+| v78 | 22 Oct 2026 10:30 | see commit history |
 | v77 | 22 Oct 2026 05:45 | [aa9b476](https://github.com/BrightTreeGit/pdc-design-map/commit/aa9b476c9e2b1fc3d5c8d2eb783c391851c92325) |
 | v75–v76 | 21 Oct 2026 22:36 | [97ce1ac](https://github.com/BrightTreeGit/pdc-design-map/commit/97ce1ac25c0d146368745872be00726181241d2f) |
 | v74 | 21 Oct 2026 18:18 | [383f2db](https://github.com/BrightTreeGit/pdc-design-map/commit/383f2dbf3dd5fcedb35606207343f9403a66e0af) |
@@ -32,7 +37,40 @@ The v77 row is the commit that added this index; later versions are listed in th
 
 ---
 
-## v77 (22 Oct 2026, 22:37)
+## v82 (22 Oct 2026, 11:05)
+**Added**
+- Light & lopping planner: "✓ Already removed" in the top bar. Click each tree cut since the 2022 LiDAR survey; it saves as a lopping job marked Built at stage Existing, and the planner treats that crown as gone.
+- "Start from": Today (the survey plus trees already removed) or the 2022 survey as measured.
+- "Add planned lopping jobs": none, Year 0–1, to year 2, to year 5, or all. Saved jobs are applied by their stage, so you can compare the light at each stage. Mark a job Built when it's done and it moves into today's light.
+- Saved jobs show on the map while the planner is open: grey for done, orange for planned (dashed when that stage is switched off).
+
+**Changed**
+- Test-lopping buttons renamed "Test thin" and "Test remove". Saving them now asks for a stage and saves them as Proposed without leaving the planner, and undo (Ctrl+Z) works on them.
+
+## v81 (22 Oct 2026, 11:00)
+**Fixed**
+- Light & lopping planner: where drawn zones overlap (the Hairpin Fruit Forest and Zone 3 Broadacre), a click in the overlap picked the smaller zone. Now every zone under the click is offered as a button, plus "Square", and a zone you've selected first is used by default.
+- The light result is drawn as crisp 1–2 m cells instead of a smoothed blur, so it no longer looks stretched when zoomed in on a small bed.
+
+## v80 (22 Oct 2026, 10:55)
+**Changed**
+- Light & lopping planner: the test square is now a slider from 10 to 160 m (default 30 m, was 120 m), and can also be changed from the drawing bar while you work.
+- Squares up to 50 m are worked out at 1 m detail instead of 2 m.
+
+**Added**
+- "Fit to the bed or zone I click inside": click inside a drawn bed or zone (up to 160 × 160 m) and the planner tests exactly that shape, outlined on the map, with its area shown. The smallest shape under the click wins.
+
+## v79 (22 Oct 2026, 10:40)
+**Changed**
+- *Observation* (with categories such as Water / drainage) is now in the basic drawing tools, not only the Designer level.
+- Planting niches now use wet spots marked on the map: the new eastern-catchment rock pool counts as wet ground (10 m around it). Niche data also records the hairpin fruit forest as drawn (about 170 m², 0.3 h of winter sun at ground today).
+
+## v78 (22 Oct 2026, 10:30)
+**Added**
+- Bright Tree forest layer *Planting niches (light, slope, moisture, frost)*: where each kind of planting fits today, from light at ground (terrain plus measured crowns), slope, wetness from water flow and cold-air pooling. Classes: full sun, part sun, dappled shade, deep moist shade, openable with lopping, forest only (over 27°), plus frost-prone dots.
+- Numbered best patches within about 80 m of the house, focused on the hairpin fruit forest.
+
+## v77 (21 Oct 2026, 22:37)
 **Added**
 - Layers → *Dams and ponds (show / hide each)*: a tickbox and Zoom for every drawn pond, dam wall and rock pool, and for the computed pond sites P1–P8, plus Show all / Hide all.
 - Features → *Hide on map / Show on map* for any drawn item; hidden items carry a "hidden" tag in the list.
