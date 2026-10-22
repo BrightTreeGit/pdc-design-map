@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v82 | 22 Oct 2026 11:05 | see commit history |
 | v81 | 22 Oct 2026 11:00 | see commit history |
 | v80 | 22 Oct 2026 10:55 | see commit history |
 | v79 | 22 Oct 2026 10:40 | see commit history |
@@ -35,6 +36,16 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v82 (22 Oct 2026, 11:05)
+**Added**
+- Light & lopping planner: "✓ Already removed" in the top bar. Click each tree cut since the 2022 LiDAR survey; it saves as a lopping job marked Built at stage Existing, and the planner treats that crown as gone.
+- "Start from": Today (the survey plus trees already removed) or the 2022 survey as measured.
+- "Add planned lopping jobs": none, Year 0–1, to year 2, to year 5, or all. Saved jobs are applied by their stage, so you can compare the light at each stage. Mark a job Built when it's done and it moves into today's light.
+- Saved jobs show on the map while the planner is open: grey for done, orange for planned (dashed when that stage is switched off).
+
+**Changed**
+- Test-lopping buttons renamed "Test thin" and "Test remove". Saving them now asks for a stage and saves them as Proposed without leaving the planner, and undo (Ctrl+Z) works on them.
 
 ## v81 (22 Oct 2026, 11:00)
 **Fixed**
