@@ -3,8 +3,10 @@ BRIGHT TREE MAPPING FLIGHTS (DJI Mini 5 Pro, DJI Fly)
 WHAT'S HERE
   BrightTree_SW_mission1of3/2of3/3of3.kmz  take off at the SW corner (recommended: highest point, 151 m)
   BrightTree_SE_mission1of3/2of3/3of3.kmz  take off at the SE corner (124 m)
-  BrightTree_flight_plan.kml               open in Google Earth to see the paths in 3D
-  flight_plan_preview.jpg                  the grid over the aerial photo
+  BrightTree_SW_cross1of3/2of3/3of3.kmz    OPTIONAL second pass at right angles (north-south lines)
+  BrightTree_SE_cross1of3/2of3/3of3.kmz      same, from the SE corner
+  BrightTree_flight_plan.kml (+ _cross)    open in Google Earth to see the paths in 3D
+  flight_plan_preview.jpg (+ _cross)       the grids over the aerial photo
   Put mission into DJI Fly.bat             loads a mission into DJI Fly (see below)
 
 THE PLAN
@@ -40,6 +42,11 @@ ON THE DAY
   Put 5-6 targets (A3 checkerboard / painted cross) in open spots: driveway, house clearing,
   dam walls, track. No need to survey them.
   Fly mission 1 first and check the photos before doing 2 and 3.
+
+CROSS PASS (optional, recommended for the forest)
+  North-south lines 20 m apart, same 45 m above the crowns, same camera settings, 15 + 17 + 10 min.
+  Same day and similar light as the main pass if you can (shadows move). Fly it after the main
+  pass looks good; it can be another day if the weather is calm and the light is similar.
 
 AFTER
   Process in WebODM: outputs Orthophoto GeoTIFF + DSM GeoTIFF. Send both to Claude.

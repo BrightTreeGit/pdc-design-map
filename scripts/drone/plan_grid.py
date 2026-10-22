@@ -7,9 +7,10 @@ from scipy import ndimage
 from matplotlib.path import Path
 W='/tmp/claude-0/work/'; D='/mnt/user-data/uploads/Permiculture Noosa PDC/Bright Tree/Lidar-survey data/QLD Government/Canopy outputs/'
 OUT=sys.argv[1] if len(sys.argv)>1 else '.'
+CROSS=len(sys.argv)>2 and sys.argv[2]=='cross'   # second pass at right angles
 CLEAR=45.0      # m above the tallest crown under each stretch
 MINCLEAR=30.0   # never less than this anywhere on the path
-SPACING=16.0    # m between lines (75% side overlap at 45 m above crowns, 24 mm lens, 4:3)
+SPACING=20.0 if CROSS else 16.0    # m between lines (75% side overlap at 45 m above crowns, 24 mm lens, 4:3)
 SPEED=4.5       # m/s; with a 2 s timed shot = photo every 9 m (~80% front overlap)
 BUF=30.0        # m beyond the boundary so the edges are fully covered
 STEP=40.0       # m between waypoints along a line (height can change at each)
@@ -22,13 +23,14 @@ t=json.load(open('/home/claude/pdc-design-map/map/terrain.json')); E0,N0=t['E0']
 L=np.array(t['lot']).reshape(-1,2)
 TAKEOFF={'SW':(711,1209),'SE':(1091,1155)}
 ang=math.atan2(L[1][1]-L[0][1],L[1][0]-L[0][0])           # direction of the south boundary
-ux,uy=math.cos(ang),math.sin(ang); vx,vy=-uy,ux           # u along lines, v across (v<0 = north)
+if CROSS: ang+=math.pi/2
+ux,uy=math.cos(ang),math.sin(ang); vx,vy=-uy,ux           # u along lines, v across
 P=Path(L); yy,xx=np.mgrid[0:2000,0:2000]
 lot=P.contains_points(np.c_[xx.ravel()+.5,yy.ravel()+.5]).reshape(2000,2000)
 cover=ndimage.distance_transform_edt(~lot)<=BUF
 U=(xx+.5)*ux+(yy+.5)*uy; V=(xx+.5)*vx+(yy+.5)*vy
 uc,vc=U[cover],V[cover]
-lines=[]; v=vc.max()-SPACING/2   # start at the south edge
+lines=[]; v=vc.max()-SPACING/2   # first pass starts at the south edge; cross pass at the west edge
 while v>=vc.min()-SPACING/2+1e-6:
     m=np.abs(vc-v)<=SPACING/2
     if m.sum()>0:
@@ -125,6 +127,7 @@ for c in TAKEOFF:
                     'first_rel':m[0]['rel'],'wps':[{'ll':p['ll'],'rel':p['rel'],'x':round(p['x'],1),'y':round(p['y'],1),'transit':bool(p.get('transit'))} for p in m]})
     res[c]={'rth_rel':rth,'takeoff_xy':[tx,ty],'takeoff_ll':ll(tx,ty),'takeoff_elev':round(z0,1),'missions':out}
 meta={'clear':CLEAR,'spacing':SPACING,'speed':SPEED,'interval_s':2,'buffer':BUF,'lines':len(lines),'source':'2022 LiDAR (QLD), crowns dilated 2 m'}
-json.dump({'meta':meta,'plans':res},open(OUT+'/mission_plan.json','w'))
+meta['pass']='cross' if CROSS else 'main'
+json.dump({'meta':meta,'plans':res},open(OUT+('/mission_plan_cross.json' if CROSS else '/mission_plan.json'),'w'))
 for c,r in res.items():
     print(c,r['takeoff_elev'],'RTH',r['rth_rel'],[{k:v for k,v in m.items() if k!='wps'} for m in r['missions']])
