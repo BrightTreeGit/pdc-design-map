@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Design Map Trial</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -114,16 +116,33 @@ canvas#map.drawing{cursor:crosshair}
 .empty ol{margin:6px 0 0 18px;padding:0}
 .kpl button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 0;font:inherit;color:var(--ink);cursor:pointer}
 .kpl small{color:var(--muted);font-family:var(--f-mono);font-size:11px}
+.grab{display:none}
 @media (max-width:760px){
-  #app{grid-template-columns:1fr;grid-template-rows:1fr auto}
-  #mapwrap{grid-row:1}
-  #panel{grid-row:2;border-right:0;border-top:1px solid var(--line);max-height:46vh}
-  #panel.min .tabbody{display:none}
-  header.brand{padding:8px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-  .brand h1{font-size:20px} .brand .sub{display:none} .sync{margin-top:0}
-  .tabbody{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
-  .hud{bottom:10px;font-size:10.5px}
-  .drawbar{max-width:calc(100% - 70px);left:calc(8px + env(safe-area-inset-left,0px));transform:none}
+  /* phone: the map fills the screen; the panel is a bottom sheet (peek / half / full) */
+  html,body{height:100dvh}
+  #app{display:block;height:100dvh;position:relative}
+  #mapwrap{position:absolute;inset:0}
+  #panel{position:absolute;left:0;right:0;bottom:0;z-index:20;border-right:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.18);height:var(--sheet-h,50dvh);max-height:calc(100dvh - 56px);transition:height .22s ease;padding-bottom:env(safe-area-inset-bottom,0px)}
+  #panel.dragging{transition:none}
+  #panel.min{height:auto}
+  #panel.min .tabbody,#panel.min header.brand{display:none!important}
+  .grab{-webkit-user-select:none;user-select:none;display:flex;justify-content:center;align-items:center;height:22px;flex:none;cursor:grab;touch-action:none}
+  .grab i{width:44px;height:5px;border-radius:3px;background:var(--line);display:block}
+  #panel>.grab{order:0} #panel>nav.tabs{order:1} #panel>header.brand{order:2} #panel>.tabbody{order:3}
+  nav.tabs{touch-action:none;-webkit-user-select:none;user-select:none}
+  nav.tabs button{padding:4px 1px 8px;font-size:10px;letter-spacing:0;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1}
+  nav.tabs button::before{font-size:17px;line-height:1;font-family:system-ui,sans-serif;text-transform:none}
+  #t-layers::before{content:"◧"}#t-draw::before{content:"✎"}#t-feat::before{content:"◉"}#t-plan::before{content:"▦"}#t-notes::before{content:"✉"}#t-tools::before{content:"⚒"}#t-site::before{content:"⌂"}
+  header.brand{padding:6px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .brand h1{font-size:17px} .brand .sub{display:none} .sync{margin-top:0}
+  .sitesel{margin-top:0;flex:1 1 160px} .hdrrow{margin-top:0}
+  .tabbody{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .hud{top:8px;bottom:auto;left:8px;right:auto;transform:none;font-size:10.5px;max-width:calc(100% - 70px)}
+  .zoom{top:8px}
+  .drawbar{max-width:calc(100% - 70px);left:calc(8px + env(safe-area-inset-left,0px));transform:none;top:auto;bottom:calc(var(--sheet-vis,90px) + 10px)}
+  .toast{bottom:calc(var(--sheet-vis,90px) + 12px)}
+  .tool,.seg button,.btn{min-height:38px}
+  .row input[type=checkbox]{width:20px;height:20px}
 }
 details.sec{border-bottom:1px solid var(--line);padding:2px 0 8px}
 .shctl{display:flex;flex-direction:column;gap:6px;margin:6px 0;padding:8px;border:1px solid var(--line);border-radius:6px}
@@ -156,6 +175,7 @@ details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset
 
 <div id="app">
   <aside id="panel">
+    <div class="grab" id="grab" title="Drag to resize; tap to switch size" aria-hidden="true"><i></i></div>
     <header class="brand">
       <h1 id="siteName">Design Map</h1>
       <div class="sub" id="siteSub">Loading…</div>
@@ -1335,7 +1355,7 @@ function featTasksHTML(id){const list=[...tasks.entries()].filter(([i,t])=>t.fea
 
 /* ---------------- design tools: height & pressure, dam calculator, presentation sheet ---------------- */
 let mt=null; // active measuring tool
-function startMT(type){cancelDraft();if(align)endAlign();selected=null;mt={type,pts:[],H:+lsGet('bt.damH',3)};cv.classList.add('drawing');renderMTBar();renderFeatures();draw();if(matchMedia('(max-width:760px)').matches)$('#panel').classList.add('min')}
+function startMT(type){cancelDraft();if(align)endAlign();selected=null;mt={type,pts:[],H:+lsGet('bt.damH',3)};cv.classList.add('drawing');renderMTBar();renderFeatures();draw();if(isPhone())setSheet('peek')}
 function endMT(){if(!mt)return;mt=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;draw()}
 function mtClick(w){if(mt.type==='bound')return;if(mt.type==='lop'){lopClick(w);return}if(mt.type==='hydro'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===2)mt.res=hydroCalc(mt.pts[0],mt.pts[1]);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='route'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){$('#drawbar .hint')&&($('#drawbar .hint').textContent='Finding a route…');setTimeout(()=>{mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade);renderMTBar();draw()},20)}renderMTBar();draw();return}
   if(mt.type==='fire'){let foot=null;for(const f of features.values()){if(['building','shed','greenhouse','futurebuilding','carport'].includes(f.kind)&&f.geom.g==='polygon'&&inPoly(w,f.geom.pts)){foot=f.geom.pts;break}}mt.res=fireCheck(foot?centroid({geom:{g:'polygon',pts:foot}}):r1(w),foot);renderMTBar();renderTools();draw();return}
@@ -2080,8 +2100,23 @@ function renderNotes(){const el=$('#tab-notes');if(!el||el.hidden&&!renderNotes.
   el.querySelectorAll('[data-nbdel]').forEach(b=>b.onclick=()=>delNote(b.dataset.nbdel));
   el.querySelectorAll('[data-nbrep]').forEach(b=>b.onclick=()=>{const id=b.dataset.nbrep;const box=el.querySelector(`[data-nbbox="${id}"]`);box.innerHTML=`<div class="field"><textarea id="nbR_${id}" placeholder="Your reply"></textarea></div><button class="btn primary">Post reply</button>`;const ta=box.querySelector('textarea');ta.focus();
     box.querySelector('button').onclick=()=>{const t=ta.value.trim();if(!t)return;nbName=who.value.trim()||nbName;const n=notes.get(id);saveNote(id,{...n,replies:[...(n.replies||[]),{text:t,who:nbName||'Someone',at:new Date().toISOString()}]})}})}
-function showTab(t){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));for(const id of ['layers','draw','feat','plan','notes','tools','site'])$('#tab-'+id).hidden=id!==t;$('#panel').classList.remove('min');lsSet('bt.tab',t);if(t==='tools')renderTools();if(t==='notes')renderNotes()}
-document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{if(b.getAttribute('aria-selected')==='true'&&matchMedia('(max-width:760px)').matches){$('#panel').classList.toggle('min');setTimeout(resize,0);return}showTab(b.dataset.tab);setTimeout(resize,0)});
+function showTab(t){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));for(const id of ['layers','draw','feat','plan','notes','tools','site'])$('#tab-'+id).hidden=id!==t;sheetOpen();lsSet('bt.tab',t);if(t==='tools')renderTools();if(t==='notes')renderNotes()}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{if(sheetTap)return;if(b.getAttribute('aria-selected')==='true'&&isPhone()){setSheet($('#panel').classList.contains('min')?'half':'peek');return}showTab(b.dataset.tab);setTimeout(resize,0)});
+/* ---------------- phone bottom sheet: drag the handle or tab bar; snaps to peek, half or full ---------------- */
+const isPhone=()=>matchMedia('(max-width:760px)').matches;let sheetTap=false;
+function sheetVis(){const p=$('#panel');document.documentElement.style.setProperty('--sheet-vis',(isPhone()?p.getBoundingClientRect().height:0)+'px')}
+function setSheet(st){const p=$('#panel');if(!isPhone())return;p.classList.toggle('min',st==='peek');const vh=innerHeight;
+  if(st!=='peek')p.style.setProperty('--sheet-h',st==='full'?(vh-56)+'px':Math.round(vh*.5)+'px');p.dataset.sheet=st;lsSet('bt.sheet',st);setTimeout(sheetVis,240)}
+function sheetOpen(){const p=$('#panel');if(isPhone()&&p.classList.contains('min'))setSheet('half');else p.classList.remove('min')}
+(function(){const p=$('#panel');const hs=[$('#grab'),document.querySelector('nav.tabs')];let y0=null,h0=0,moved=false,t0=0;
+  const down=e=>{if(!isPhone())return;y0=e.clientY;h0=p.getBoundingClientRect().height;moved=false;t0=Date.now();sheetTap=false};
+  const move=e=>{if(y0===null)return;const dy=e.clientY-y0;if(Math.abs(dy)>6){if(!moved)try{e.currentTarget.setPointerCapture(e.pointerId)}catch(_){}moved=true;p.classList.add('dragging');p.classList.remove('min');p.style.setProperty('--sheet-h',Math.max(70,Math.min(innerHeight-56,h0-dy))+'px')}};
+  const up=e=>{if(y0===null)return;const dy=e.clientY-y0;y0=null;p.classList.remove('dragging');
+    if(!moved){if(e.currentTarget.id==='grab'){const c=p.dataset.sheet||'half';setSheet(c==='peek'?'half':c==='half'?'full':'peek')}return}
+    sheetTap=true;setTimeout(()=>sheetTap=false,50);const h=p.getBoundingClientRect().height,vh=innerHeight,fast=Math.abs(dy)/(Date.now()-t0)>.6;
+    let st=h<vh*.28?'peek':h<vh*.7?'half':'full';if(fast)st=dy>0?(h0>vh*.7?'half':'peek'):(h0<vh*.28?'half':'full');setSheet(st)};
+  hs.forEach(h=>{if(!h)return;h.addEventListener('pointerdown',down);h.addEventListener('pointermove',move);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up)});
+  addEventListener('resize',()=>{if(isPhone()&&p.dataset.sheet)setSheet(p.dataset.sheet);sheetVis()})})();
 function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);if(k==='lot'&&$('#zLot'))$('#zLot').style.opacity=v?1:.45;draw()}
 const OVERLAYS=[
  {grp:'Light & climate',items:[['shadow','Shade at a time'],['aspect','Aspect'],['sun_winter','Winter sun'],['sun_equinox','Equinox sun'],['sun_summer','Summer sun'],['cold','Cold air / frost']]},
@@ -2173,7 +2208,7 @@ function renderDraw(){const el=$('#tab-draw');const groups={};const q=drawQ.trim
   wireCZ(el);
   el.querySelectorAll('#drawLvSeg button').forEach(b=>b.onclick=()=>{drawLv=+b.dataset.v;lsSet('bt.drawLv',drawLv);renderDraw()});
   const fi=el.querySelector('#drawFind');if(fi)fi.oninput=()=>{drawQ=fi.value;const pos=fi.selectionStart;renderDraw();const n=$('#drawFind');n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}};
-  el.querySelectorAll('.tool').forEach(b=>b.onclick=()=>{endMT();if(tool===b.dataset.k){cancelDraft();return}startTool(b.dataset.k);if(matchMedia('(max-width:760px)').matches)$('#panel').classList.add('min');setTimeout(resize,0)});wireSecs(el)}
+  el.querySelectorAll('.tool').forEach(b=>b.onclick=()=>{endMT();if(tool===b.dataset.k){cancelDraft();return}startTool(b.dataset.k);if(isPhone())setSheet('peek');setTimeout(resize,0)});wireSecs(el)}
 
 function measure(f){const g=f.geom,out=[];
   if(g.g==='point'){const z=zAt(...g.pts[0]),s=slopeAt(...g.pts[0]);out.push(['Elevation',z.toFixed(1)+' m'],['Slope',`${s.pct.toFixed(0)}% (${s.deg.toFixed(0)}°), faces ${dirName(s.asp)}`],['Direct sun',`${sunAt('winter',...g.pts[0]).toFixed(1)} h winter · ${sunAt('summer',...g.pts[0]).toFixed(1)} h summer`]);if(g.r)out.push(['Radius',g.r+' m'])}
@@ -2378,6 +2413,6 @@ function renderSite(){const el=$('#tab-site');const m=T.meta;const lot=T.catch[0
   el.querySelectorAll('.kpl button').forEach(b=>b.onclick=()=>{const k=T.kp[+b.dataset.i];view.cx=k.x;view.cy=k.y;view.s=Math.max(view.s,2.5);layers.kp=true;draw()})}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='govAer'){setLayer('base',e.target.checked?'aerial':'relief');renderLayers()}});
 showTab(lsGet('bt.tab','layers')==='feat'?'layers':lsGet('bt.tab','layers'));
-if(matchMedia('(max-width:760px)').matches)$('#panel').classList.add('min');
+if(isPhone())setSheet('peek');
 boot();
 </script>
