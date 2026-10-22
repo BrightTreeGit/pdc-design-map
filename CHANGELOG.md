@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v84 | 23 Oct 2026 07:10 | see commit history |
 | v83 | 22 Oct 2026 15:25 | see commit history |
 | v82 | 22 Oct 2026 11:05 | see commit history |
 | v81 | 22 Oct 2026 11:00 | see commit history |
@@ -37,6 +38,18 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v84 (23 Oct 2026, 07:10)
+**Changed**
+- Phones: the map fills the screen and the panel is a bottom sheet (peek, half, full). Drag or tap the handle, or drag the tab bar; the tabs have icons. Picking a drawing tool drops the sheet to peek. Scrolling now reaches the bottom of every tab in the app. (Tested on the trial map first.)
+- Light & lopping planner: light is now also given as a share of open-field light, counting the open sky (diffuse light) as well as direct sun, with a map view for it, the area with 30% light or more, and what crops suit that light.
+
+**Added**
+- Light & lopping planner: "Compare winter, equinox and summer" table, before and after the lopping.
+- Tools → Drone survey changes: after a drone flight, the changes found against the 2022 LiDAR (trees gone, new roofs, new clearings) show as pink dashed outlines to accept or reject one by one. Accepted trees gone become lopping jobs marked Built, so the light planner counts them.
+
+**Fixed**
+- Saving test lopping as planned jobs always used "Now"; it now keeps the stage you pick.
 
 ## v83 (22 Oct 2026, 15:25)
 **Added**
