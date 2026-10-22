@@ -1,29 +1,30 @@
 BRIGHT TREE MAPPING FLIGHTS (DJI Mini 5 Pro, DJI Fly)
 
 WHAT'S HERE
-  BrightTree_SW_mission1of3/2of3/3of3.kmz  take off at the SW corner (recommended: highest point, 151 m)
-  BrightTree_SE_mission1of3/2of3/3of3.kmz  take off at the SE corner (124 m)
-  BrightTree_SW_cross1of3/2of3/3of3.kmz    OPTIONAL second pass at right angles (north-south lines)
-  BrightTree_SE_cross1of3/2of3/3of3.kmz      same, from the SE corner
-  BrightTree_flight_plan.kml (+ _cross)    open in Google Earth to see the paths in 3D
-  flight_plan_preview.jpg (+ _cross)       the grids over the aerial photo
-  Put mission into DJI Fly.bat             loads a mission into DJI Fly (see below)
-  BrightTree_boundary.geojson              the lot boundary, for cropping the results (privacy)
+  0 m inside boundary (test)\   the drone stays inside the boundary the whole time, turns and
+                                 transit included. 2 missions + 2 cross. Fly this first.
+                                 (Edges will be a bit soft in the results: fine for a test.)
+  15 m past boundary\           the full-quality version: lines run 15 m past the boundary.
+                                 3 missions + 2 cross.
+  In each folder: _SW_ files take off at the SW corner (recommended, 151 m high),
+                  _SE_ files at the SE corner (124 m); preview_main / preview_cross images;
+                  .kml files to view the paths in 3D in Google Earth.
+  BrightTree_boundary.geojson    the boundary, for cropping the results (privacy)
+  Put mission into DJI Fly.bat   loads a mission into DJI Fly (see below)
 
 THE PLAN
-  23 lines, 16 m apart, parallel to the south boundary, 30 m past the boundary all round.
-  Each stretch flies 45 m above the tallest crown under it (2022 LiDAR), never closer than 38 m,
-  and never more than 117 m above the ground directly below (legal limit 120 m).
-  Heights are measured from the take-off spot, so TAKE OFF AT THE CORNER YOU CHOSE
-  (within about 10 m, from open sky). Somewhere else: tell Claude, it re-makes the files.
-  Each mission: climbs over the take-off spot, crosses high to its first line, flies the lines,
-  crosses back high, lands at home. 15-17 min each, one battery each.
+  Lines 16 m apart (cross pass 20 m), each stretch 45 m above the tallest crown under it
+  (2022 LiDAR), never closer than 30 m, never more than 117 m above the ground below.
+  Heights are measured from the take-off spot: TAKE OFF AT THE CORNER YOU CHOSE (within ~10 m,
+  open sky). Somewhere else: tell Claude and the files get re-made.
+  Each mission climbs over the take-off spot, crosses high to its first line, flies the lines,
+  crosses back high and lands at home. 13-18 min each, one battery each.
   Return-to-home height in DJI Fly settings: SW take-off 65 m, SE take-off 90 m.
 
 LOADING A MISSION (once per mission)
   1. DJI Fly > camera view > Waypoints > drop 2 points anywhere > save. One dummy per mission.
   2. Controller to PC by USB-C. Open Internal storage\Android\data\dji.go.v5\files\waypoint\
-     Open the newest folder; copy its .kmz (long name) into THIS folder.
+     Open the newest folder; copy its .kmz (long name) into THIS (top) folder.
   3. Double-click "Put mission into DJI Fly.bat", pick the mission number.
      It writes a file with the same long name into the to_controller folder, using your drone's
      own details from the dummy.
@@ -45,7 +46,7 @@ ON THE DAY
   Fly mission 1 first and check the photos before doing 2 and 3.
 
 CROSS PASS (optional, recommended for the forest)
-  North-south lines 20 m apart, same 45 m above the crowns, same camera settings, 15 + 17 + 10 min.
+  North-south lines 20 m apart, same height rule and camera settings.
   Same day and similar light as the main pass if you can (shadows move). Fly it after the main
   pass looks good; it can be another day if the weather is calm and the light is similar.
 

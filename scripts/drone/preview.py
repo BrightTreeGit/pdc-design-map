@@ -17,8 +17,8 @@ for k_,m in enumerate(SW['missions']):
     lx=min(w['x'] for w in g);ly=np.mean([w['y'] for w in g])
 for c,(tx,ty) in [('SW',SW['takeoff_xy']),('SE',d['plans']['SE']['takeoff_xy'])]:
     X,Y=P(tx,ty);dr.ellipse([X-12,Y-12,X+12,Y+12],fill=(255,255,255,255),outline=(0,0,0,255),width=3);dr.text((X+16,Y-30),'Take-off '+c,font=F,fill=(255,255,255,255),stroke_width=3,stroke_fill=(0,0,0,255))
-dr.rectangle([0,0,700,126],fill=(0,0,0,150));y=12
+dr.rectangle([0,0,1000,126],fill=(0,0,0,150));y=12
 for k_,m in enumerate(SW['missions']):
     dr.rectangle([12,y+4,40,y+20],fill=cols[k_]);dr.text((48,y),f"{'Cross ' if d['meta'].get('pass')=='cross' else 'Mission '}{k_+1}: {m['minutes']:.0f} min, ~{m['photos']} photos",font=f,fill=(255,255,255,255),stroke_width=3,stroke_fill=(0,0,0,255));y+=28
-dr.text((12,y),f"Lines {d['meta']['spacing']:.0f} m apart · {d['meta']['clear']:.0f} m above the tallest crown · {d['meta']['speed']} m/s · photo every 2 s",font=f,fill=(255,255,255,255),stroke_width=3,stroke_fill=(0,0,0,255))
+dr.text((12,y),("Inside the boundary · " if d["meta"]["buffer"]==0 else f"{d['meta']['buffer']:.0f} m past the boundary · ")+f"Lines {d['meta']['spacing']:.0f} m apart · {d['meta']['clear']:.0f} m above the tallest crown · {d['meta']['speed']} m/s · photo every 2 s",font=f,fill=(255,255,255,255),stroke_width=3,stroke_fill=(0,0,0,255))
 im.save(out,quality=88);print(im.size)

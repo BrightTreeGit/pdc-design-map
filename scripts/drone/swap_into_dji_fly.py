@@ -8,12 +8,12 @@
 """
 import zipfile, re, sys, os, glob
 here=os.path.dirname(os.path.abspath(__file__))
-missions=sorted(glob.glob(os.path.join(here,'BrightTree_*.kmz')))
+missions=sorted(glob.glob(os.path.join(here,'**','BrightTree_*.kmz'),recursive=True))
 dummies=[f for f in glob.glob(os.path.join(here,'*.kmz')) if not os.path.basename(f).startswith('BrightTree_')]
 if not dummies: sys.exit('Copy the dummy mission .kmz from the controller into this folder first.')
 dummy=max(dummies,key=os.path.getmtime)
 print('Dummy mission from the controller:',os.path.basename(dummy))
-for i,m in enumerate(missions): print(f'  {i+1}. {os.path.basename(m)}')
+for i,m in enumerate(missions): print(f'  {i+1}. {os.path.relpath(m,here)}')
 pick=missions[int(input('Which mission number? '))-1]
 def blocks(z):
     t=z.read('wpmz/template.kml').decode('utf-8')
