@@ -8,6 +8,7 @@ WHAT'S HERE
   BrightTree_flight_plan.kml (+ _cross)    open in Google Earth to see the paths in 3D
   flight_plan_preview.jpg (+ _cross)       the grids over the aerial photo
   Put mission into DJI Fly.bat             loads a mission into DJI Fly (see below)
+  BrightTree_boundary.geojson              the lot boundary, for cropping the results (privacy)
 
 THE PLAN
   23 lines, 16 m apart, parallel to the south boundary, 30 m past the boundary all round.
@@ -50,4 +51,9 @@ CROSS PASS (optional, recommended for the forest)
 
 AFTER
   Process in WebODM: outputs Orthophoto GeoTIFF + DSM GeoTIFF. Send both to Claude.
+  PRIVACY: in WebODM's task options, set "boundary" to BrightTree_boundary.geojson. The photo,
+  surface model and 3D model then stop at the boundary, so neighbours' land isn't in the results.
+  (Use all the photos for processing - the edge ones are needed - just crop the outputs.)
+  Keep the raw photos private: don't share or upload them anywhere public, and delete any taken
+  outside the block (e.g. during take-off and transit) once processing is done.
   Or send the raw photos (all three folders) and Claude can advise.
