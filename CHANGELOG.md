@@ -9,6 +9,8 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v86 | 23 Oct 2026 07:20 | see commit history |
+| v85 | 23 Oct 2026 07:00 | (published, no separate commit; included in v86) |
 | v84 | 23 Oct 2026 07:10 | see commit history |
 | v83 | 22 Oct 2026 15:25 | see commit history |
 | v82 | 22 Oct 2026 11:05 | see commit history |
@@ -38,6 +40,14 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v86 (23 Oct 2026, 07:20)
+**Changed**
+- Privacy zones now show the area at low detail, like a standard satellite view (10 m pixels by default; 5 or 30 m to choose), fading out over about 15 m beyond the edge so the area doesn't draw the eye. Other looks per zone: map colours (tree cover and open ground only) or blank. The zone's own outline and label only show when it is selected.
+
+## v85 (23 Oct 2026, 07:00)
+**Added**
+- Draw → Zones → Privacy zone: a landholder can hide part of the map. Photos (government aerial, photo history, uploads, drone) and shading are covered inside it for everyone, including prints, 3D and exports, and map items inside are hidden (optional). The drone processing script also blanks privacy zones from the surface model and photo.
 
 ## v84 (23 Oct 2026, 07:10)
 **Changed**

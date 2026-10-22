@@ -124,7 +124,7 @@ def oriented_rect(xs, ys, pad=0.5):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--dsm', required=True); ap.add_argument('--ortho'); ap.add_argument('--out', required=True)
-    ap.add_argument('--date', default=''); ap.add_argument('--dem', default=W + 'dem2022.npy'); ap.add_argument('--lidar', default=LIDAR)
+    ap.add_argument('--date', default=''); ap.add_argument('--privacy', help='folder of map feature JSON files (a data snapshot); privacy zones in it are blanked'); ap.add_argument('--dem', default=W + 'dem2022.npy'); ap.add_argument('--lidar', default=LIDAR)
     a = ap.parse_args(); os.makedirs(a.out, exist_ok=True)
     dem = np.load(a.dem).astype(np.float32); z = np.load(a.lidar); top = z['top'].astype(np.float32)
     surf = np.where(np.isfinite(top), np.maximum(top, dem), dem)
@@ -133,6 +133,19 @@ def main():
     arr, org, px, epsg, nod = read_geotiff(a.dsm)
     if epsg not in (None, 7856, 28356, 32756): print(f'  WARNING: unexpected projection EPSG:{epsg}; expected MGA zone 56 or UTM 56S')
     dsm = to_map_grid(arr if arr.ndim == 2 else arr[..., 0], org, px, 'max', nod)
+    PZ = []
+    if a.privacy:
+        import glob
+        from matplotlib.path import Path as MP
+        for fn in glob.glob(os.path.join(a.privacy, '*.json')):
+            d = json.load(open(fn)); d = d.get('data', d)
+            if d.get('kind') == 'privacy' and d.get('geom', {}).get('g') == 'polygon': PZ.append(MP(np.array(d['geom']['pts'])))
+        if PZ:
+            jj, ii = np.mgrid[0:SIZE, 0:SIZE]; pts = np.c_[ii.ravel() + .5, jj.ravel() + .5]
+            pm = np.zeros(SIZE * SIZE, bool)
+            for P_ in PZ: pm |= P_.contains_points(pts)
+            PRIV = pm.reshape(SIZE, SIZE); print(f'  {len(PZ)} privacy zone(s): {PRIV.sum()} m² blanked')
+    else: PRIV = None
     cover = np.isfinite(dsm); print(f'  {cover.sum()/1e4:.2f} ha covered, {px[0]*100:.0f} cm cells, EPSG:{epsg}')
     dx, dy, cc = register(dsm, surf); dsm = shift(dsm, dx, dy); cover = np.isfinite(dsm)
     print(f'  horizontal shift to line up with the LiDAR: {dx:+d} m east, {-dy:+d} m north (match {cc:.2f})')
@@ -141,6 +154,7 @@ def main():
     d = (dsm - dem)[open_ground]; d = d[np.abs(d - np.median(d)) < 3] if d.size else d
     dz = float(np.median(d)) if d.size > 200 else float(np.nanmedian(dsm - surf))
     dsm = dsm - dz; print(f'  vertical offset removed: {dz:+.2f} m ({open_ground.sum()} m² of open ground used)')
+    if PRIV is not None: dsm[PRIV] = np.nan; cover = np.isfinite(dsm)
     chm = np.clip(dsm - dem, 0, 85)
     sug = []; T = a.date or 'drone survey'
     # crowns gone since 2022
@@ -158,6 +172,8 @@ def main():
         print('Reading the orthophoto…')
         oa, oorg, opx, oepsg, onod = read_geotiff(a.ortho)
         rgb = to_map_grid(oa[..., :3], oorg, opx, 'mean'); rgb = shift(rgb, dx, dy)
+        if PRIV is not None: rgb[PRIV] = np.nan   # privacy zones: no photo kept
+        if PRIV is not None: rgb[PRIV] = np.nan
         exg = 2 * rgb[..., 1] - rgb[..., 0] - rgb[..., 2]
     else: rgb = None; exg = np.zeros_like(chm)
     cz = np.nan_to_num(chm); m1 = ndimage.uniform_filter(cz, 3); rough = np.sqrt(np.maximum(ndimage.uniform_filter(cz * cz, 3) - m1 * m1, 0))   # bumpiness of the surface above the ground

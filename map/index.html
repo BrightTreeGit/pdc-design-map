@@ -324,6 +324,7 @@ const KINDS={
   lop:{g:'Plants',label:'Lopping / thinning job',geom:'point',color:'#e67e22',sym:'diamond',r:6},
   apz:{g:'Sectors',label:'Bushfire asset protection zone',geom:'polygon',color:'#c0311f',dash:[6,4]},
   customzone:{g:'Zones',label:'Other zone',geom:'polygon',color:'#5a7d9a',dash:[6,3]},
+  privacy:{g:'Zones',label:'Privacy zone (low detail)',geom:'polygon',color:'#6b6f73',dash:[4,4]},
 };
 /* custom zone types: made by the team (Designer level and up), shared per site */
 let CZ=[];
@@ -332,7 +333,7 @@ function applyCZ(list){CZ=Array.isArray(list)?list.filter(z=>z&&z.id&&z.label):[
   if(typeof renderDraw==='function'&&$('#tab-draw'))renderDraw();if(typeof draw==='function')draw()}
 async function saveCZ(list){applyCZ(list);if(live){try{await db.doc(C('settings')+'/zones').set({list:CZ,updatedAt:new Date().toISOString()})}catch(e){toast('Zone types did not save.')}}else lsSet('bt.czones',CZ)}
 /* tool levels: 1 Essentials, 2 Designer (default), 3 Expert. big = broadacre tools hidden on small blocks */
-const KIND_LV={customzone:2,zone0:1,zone1:1,zone2:1,tank:1,building:1,path:1,tree:1,fruittree:1,nativetree:1,shrub:1,bed:1,raisedbed:1,herbs:1,lawn:1,paving:1,fence:1,note:1,driveway:1,shed:1,solar:1,compost:1,
+const KIND_LV={customzone:2,privacy:1,zone0:1,zone1:1,zone2:1,tank:1,building:1,path:1,tree:1,fruittree:1,nativetree:1,shrub:1,bed:1,raisedbed:1,herbs:1,lawn:1,paving:1,fence:1,note:1,driveway:1,shed:1,solar:1,compost:1,
   keypoint:3,diversion:3,damwall:3,coldair:3,section:3,crossing:3,reedbed:3,rockpool:3,irrigation:3,pipe:3,row:3,guild:3,hugel:3,goatzone:3,paddock:3,tpz:3,greywater:3,flow:3,soak:3,mushrooms:3,firebreak:3,obs:1};
 const BIG_KINDS=['zone3','goatzone','paddock','damwall','keypoint','diversion','track','crossing','firebreak','reedbed','row','cabin','amenities','container','nursery','rockpool'];
 const LV_NAMES=[[1,'Essentials'],[2,'Designer'],[3,'Expert']];
@@ -522,6 +523,7 @@ function render(){
   if(photoOnTop)drawImgs(im=>!im.design);
   if(PH.on&&PH.data){const im=phImg(PH.i);if(im&&im.complete&&im.naturalWidth){const d=PH.data;ctx.globalAlpha=PH.op;ctx.drawImage(im,d.x0,d.y0,d.size,d.size);ctx.globalAlpha=1}}
   drawImgs(im=>!!im.design); // design drawings always sit above the photos and terrain layers
+  drawPrivacy(1/s);
   if(!T){return}
   const px=1/s;
   if(layers.catch){for(const c of P.catch){ctx.lineWidth=(c.main?2.2:1.3)*px;ctx.setLineDash(c.main?[8*px,5*px]:[3*px,4*px]);ctx.strokeStyle=c.main?'rgba(20,90,170,.9)':'rgba(20,90,170,.65)';if(c.main){ctx.fillStyle='rgba(60,140,220,.07)';ctx.fill(c.path)}ctx.stroke(c.path)}ctx.setLineDash([])}
@@ -547,7 +549,7 @@ function render(){
   if(!(typeof V3!=='undefined'&&V3.tex2d)&&!window.__SHEETING)drawScale();
 }
 const PRC={pond:'#0d5fa8',pad:'#a14e07',tank:'#0d5fa8',flat:'#3f7a1f'};
-function drawPros(px){for(const p of PROS.items){if(isHid('pros:'+p.id))continue;const c=PRC[p.kind];ctx.setLineDash([]);
+function drawPros(px){const PZ=privZones();for(const p of PROS.items){if(isHid('pros:'+p.id))continue;if(PZ.length&&PZ.some(z=>z.hideItems!==false&&inPoly(p.at||(p.poly&&p.poly[0])||[0,0],z.geom.pts)))continue;const c=PRC[p.kind];ctx.setLineDash([]);
   if(p.poly){ctx.beginPath();p.poly.forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q));ctx.closePath();
     if(p.kind==='pond'){ctx.fillStyle='rgba(45,143,213,.38)';ctx.fill();ctx.lineWidth=1.2*px;ctx.strokeStyle=c;ctx.stroke()}
     else if(p.kind==='pad'){ctx.fillStyle='rgba(230,140,40,.22)';ctx.fill();ctx.lineWidth=2*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke();ctx.lineWidth=1.4*px;ctx.strokeStyle=c;ctx.setLineDash([4*px,3*px]);ctx.stroke();ctx.setLineDash([])}
@@ -574,7 +576,7 @@ function darker(hex,k=.62){const n=parseInt(hex.slice(1),16);const c=[(n>>16)&25
 function drawSectionEnds(){for(const [id,f] of secOrder()){if(!vis(f)||f.geom.pts.length<2)continue;const [a,b]=secLetters(id);const P=f.geom.pts;
   [[P[0],a],[P[P.length-1],b]].forEach(([p,t])=>{const [x,y]=w2s(...p);ctx.fillStyle='#fff';ctx.strokeStyle='#c0392b';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,11,0,7);ctx.fill();ctx.stroke();ctx.font='700 12px "IBM Plex Sans",sans-serif';ctx.fillStyle='#c0392b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,x,y+.5)})}}
 function drawFeatureLabels(){const L=[];
-  for(const [id,f] of features){if(!vis(f))continue;const k=KINDS[f.kind]||KINDS.note;const isZ=k.g==='Zones';if(f.kind==='section')continue;if(isZ?!layers.zlabels:!layers.flabels)continue;const g=f.geom;
+  for(const [id,f] of features){if(!vis(f))continue;const k=KINDS[f.kind]||KINDS.note;const isZ=k.g==='Zones';if(f.kind==='section'||(f.kind==='privacy'&&id!==selected))continue;if(isZ?!layers.zlabels:!layers.flabels)continue;const g=f.geom;
     let a,inner=0;if(g.g==='polygon'){const ip=interiorPoint(g);a=ip.p;inner=ip.r*view.s}else{a=centroid(f);if(!a)continue;if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}if(a1<a0)a1+=360;const m=((a0+a1)/2)*Math.PI/180;a=[g.cx+Math.sin(m)*g.r*.72,g.cy-Math.cos(m)*g.r*.72]}}
     const [x,y]=w2s(...a);if(x<-200||y<-60||x>W+200||y>H+60)continue;
     const area=g.g==='polygon'?polyArea(g.pts):0;const name=f.name||k.label;
@@ -658,7 +660,7 @@ function drawFeature(f,px,sel){
 const ORDER={Zones:0,Sectors:1,Landscape:2,Plants:3,Built:4,Water:5,Access:6,Observe:7};
 const DRAW_ORDER=['Observe','Zones','Sectors','Water','Access','Built','Landscape','Plants'];
 function fmtArea(a){return a<2000?Math.round(a).toLocaleString()+' m²':(a/4046.86).toFixed(a<40469?2:1)+' ac'}
-function drawFeatures(px){const arr=[...features.entries()].filter(([i,f])=>vis(f)).sort((a,b)=>(ORDER[(KINDS[a[1].kind]||{}).g]??9)-(ORDER[(KINDS[b[1].kind]||{}).g]??9));for(const [id,f] of arr){try{drawFeature(f,px,id===selected||multi.has(id))}catch(e){}}
+function drawFeatures(px){const arr=[...features.entries()].filter(([i,f])=>vis(f)&&(f.kind!=='privacy'||i===selected||multi.has(i)))   // privacy zones stay invisible unless selected, so they don't draw the eye.sort((a,b)=>(ORDER[(KINDS[a[1].kind]||{}).g]??9)-(ORDER[(KINDS[b[1].kind]||{}).g]??9));for(const [id,f] of arr){try{drawFeature(f,px,id===selected||multi.has(id))}catch(e){}}
   if(multi.size){ctx.save();ctx.setLineDash([4*px,3*px]);ctx.strokeStyle='#ff7a00';ctx.lineWidth=1.5*px;for(const id of multi){const f=features.get(id);const c=f&&centroid(f);if(c){ctx.beginPath();ctx.arc(c[0],c[1],10*px,0,7);ctx.stroke()}}ctx.restore()}
   if(selBox){const {a,b}=selBox;ctx.save();ctx.fillStyle='rgba(255,122,0,.08)';ctx.strokeStyle='#ff7a00';ctx.lineWidth=1.5*px;ctx.setLineDash([6*px,4*px]);ctx.fillRect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));ctx.strokeRect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));ctx.restore()}}
 function drawDraft(px){const k=KINDS[draft.kind];if(boxDrag){const {a,b}=boxDrag;ctx.strokeStyle=k.color;ctx.fillStyle=hexA(k.color,.15);ctx.lineWidth=2*px;ctx.setLineDash([6*px,4*px]);ctx.beginPath();ctx.rect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));ctx.fill();ctx.stroke();ctx.setLineDash([]);return}const pts=draft.pts.concat(draft.preview||[]);
@@ -2342,7 +2344,43 @@ function wireDams(el){const box=el.querySelector('#damSec');if(!box)return;
    const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);fitBox(Math.min(...xs)-40,Math.min(...ys)-40,Math.max(...xs)+40,Math.max(...ys)+40);draw()});
  const all=h=>{box.querySelectorAll('[data-hid]').forEach(c=>{c.checked=!h;const s=hid();h?s.add(c.dataset.hid):s.delete(c.dataset.hid)});lsSet('hide',[...hid()]);draw();renderFeatures()};
  const da=box.querySelector('#damAll'),dn=box.querySelector('#damNone');if(da)da.onclick=()=>all(false);if(dn)dn.onclick=()=>all(true)}
-function vis(f){if(fHidden(f))return false;if(!layers.stage||layers.stage==='all')return true;return stageIdx(f.stage||defStage(f.kind))<=stageIdx(layers.stage)}
+/* privacy zones: a landholder can blank out part of the map. Photos (government aerial, history, uploads, drone), terrain
+   shading and overlays are covered inside the zone for everyone and in prints, 3D and exports; map items inside are hidden too. */
+const privZones=()=>[...features.values()].filter(f=>f.kind==='privacy'&&f.geom.g==='polygon'&&f.geom.pts.length>2);
+function fCenter(f){const g=f.geom;if(g.cx!==undefined)return [g.cx,g.cy];const p=g.pts||[];if(!p.length)return [0,0];let x=0,y=0;for(const q of p){x+=q[0];y+=q[1]}return [x/p.length,y/p.length]}
+function privHidden(f){if(f.kind==='privacy')return false;const Z=privZones();if(!Z.length)return false;const c=fCenter(f);return Z.some(z=>z.hideItems!==false&&inPoly(c,z.geom.pts))}
+function drawPrivacy(px){const Z=privZones();if(!Z.length)return;
+  /* default look: the area shown at low detail (about 10 m pixels, like standard-resolution satellite), with a soft edge so it doesn't stand out.
+     Other looks per zone: 'map' = plain map colours (green where there is tree cover, pale ground elsewhere), 'blank' = plain fill. */
+  const Wd=cv.width,Hd=cv.height;if(!Wd||!Hd)return;const sc=view.s*DPR;   // device pixels per metre
+  const look=z=>z.look||'low';
+  const path=(g,z)=>{g.beginPath();z.geom.pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.closePath()};
+  const T=ctx.getTransform();
+  const mk=()=>{const c=document.createElement('canvas');c.width=Wd;c.height=Hd;return c};
+  for(const kind of ['low','map','blank']){const zs=Z.filter(z=>look(z)===kind);if(!zs.length)continue;
+    const res=Math.max(2,+(zs[0].res||10));
+    // 1. what to show inside
+    const fill=mk(),fg=fill.getContext('2d');
+    if(kind==='low'){const k=Math.max(1,res*sc/1);const w=Math.max(1,Math.round(Wd/k)),h=Math.max(1,Math.round(Hd/k));const sm=document.createElement('canvas');sm.width=w;sm.height=h;const sg=sm.getContext('2d');
+      sg.imageSmoothingEnabled=true;sg.imageSmoothingQuality='high';sg.drawImage(cv,0,0,w,h);fg.imageSmoothingEnabled=true;fg.imageSmoothingQuality='high';fg.drawImage(sm,0,0,Wd,Hd)}
+    else if(kind==='map'){fg.setTransform(T);fg.fillStyle='#e9e6dc';for(const z of zs){path(fg,z);fg.fill()}
+      if(PRIVMAP){fg.imageSmoothingEnabled=true;fg.drawImage(PRIVMAP,0,0,2000,2000)}}
+    else{fg.fillStyle=css('--mapbg');fg.fillRect(0,0,Wd,Hd)}
+    // 2. soft-edged mask of the zones (fades out over about 15 m beyond the edge)
+    const m=mk(),mg=m.getContext('2d');mg.setTransform(T);mg.fillStyle='#000';for(const z of zs){path(mg,z);mg.fill()}
+    const fe=Math.max(8,15*sc);const mb=mk(),mbg=mb.getContext('2d');try{mbg.filter=`blur(${Math.min(90,fe)}px)`}catch(e){}mbg.drawImage(m,0,0);mbg.drawImage(m,0,0);
+    // keep the inside fully covered: union of the sharp mask and the blurred one, so only the outer edge fades
+    mbg.filter='none';mbg.setTransform(T);mbg.fillStyle='#000';for(const z of zs){path(mbg,z);mbg.fill()}mbg.setTransform(1,0,0,1,0,0);
+    fg.globalCompositeOperation='destination-in';fg.setTransform(1,0,0,1,0,0);fg.drawImage(mb,0,0);fg.globalCompositeOperation='source-over';
+    ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(fill,0,0);ctx.restore();
+    if(kind==='map'&&!PRIVMAP)buildPrivMap();
+    if(kind==='blank'){ctx.save();ctx.font=`600 ${12*px}px "IBM Plex Sans",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(80,85,90,.8)';for(const z of zs){const c=fCenter(z);ctx.fillText('Private area',c[0],c[1])}ctx.restore()}}
+}
+let PRIVMAP=null;
+async function buildPrivMap(){if(PRIVMAP||!SITEDEF.canopy)return;const cg=await loadCG();if(!cg)return;const n=cg.w;const c=document.createElement('canvas');c.width=n;c.height=n;const g=c.getContext('2d');const im=g.createImageData(n,n);
+  for(let k=0;k<n*n;k++){const t=cg.h[k]>5;im.data[k*4]=t?200:233;im.data[k*4+1]=t?222:230;im.data[k*4+2]=t?190:220;im.data[k*4+3]=255}g.putImageData(im,0,0);
+  const b=document.createElement('canvas');b.width=n;b.height=n;const bg=b.getContext('2d');try{bg.filter='blur(3px)'}catch(e){}bg.drawImage(c,0,0);PRIVMAP=b;draw()}
+function vis(f){if(fHidden(f)||privHidden(f))return false;if(!layers.stage||layers.stage==='all')return true;return stageIdx(f.stage||defStage(f.kind))<=stageIdx(layers.stage)}
 const visList=()=>[...features.values()].filter(vis);
 // Plant library: starting values for the Sunshine Coast hinterland; check local references before planting.
 const SPECIES={
@@ -2410,6 +2448,10 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
       ${assets?`<input type="file" id="fphoto" accept="image/png,image/jpeg,image/webp" hidden><button class="btn" id="fphotob">${f.photo?'Replace photo':'Add a photo'}</button>`:'<p class="hint">Photos can be added by map editors.</p>'}`:''}
     ${f.kind==='paddock'||f.kind==='goatzone'?`${f.kind==='goatzone'?'<p class="hint">Goats browse shrubs and weeds more than grass. Fence with mesh or 5-strand electric, give a dry shelter, keep them out of creek lines, the vine-forest gullies and young plantings, and rotate before they strip the bark off trees.</p>':''}<div class="field"><label for="fpq">Pasture quality</label><select id="fpq">${Object.entries(PQ).map(([k,v])=>`<option value="${k}" ${(f.pq||'fair')===k?'selected':''}>${v[0]}</option>`).join('')}</select></div><p class="hint">${(()=>{const r=paddockCalc(f);return `${GZ.n} ${ANIMALS[GZ.animal][0].toLowerCase()} can graze it for about ${r.days<1?'under a day':Math.round(r.days)+' days'}, then it needs about ${Math.round(r.rest)} days to regrow (${GZ.season==='summer'?'growing season':'winter'}).`})()}</p>`:''}
     ${f.kind==='tank'?`<div class="field"><label for="flit">Tank size (litres)</label><input id="flit" type="number" min="0" max="1000000" step="500" value="${+f.litres||''}" placeholder="e.g. 20000"></div>`:''}
+    ${f.kind==='privacy'?`<div class="field"><label>How the area looks</label>${segHTML('fplook',[['low','Low detail'],['map','Map colours'],['blank','Blank']],f.look||'low')}</div>
+    ${(f.look||'low')==='low'?`<div class="field"><label>Detail</label>${segHTML('fpres',[['5','5 m'],['10','10 m'],['30','30 m']],String(f.res||10))}</div>`:''}
+    <div class="row"><label><input type="checkbox" id="fpriv" ${f.hideItems!==false?'checked':''}> Also hide map items inside</label></div>
+    <p class="hint">Low detail shows the area like a standard satellite view (10 m pixels by default) with a soft edge, so it doesn't draw the eye. Map colours shows only tree cover and open ground. This applies for everyone, including prints, 3D and exports. The original photo files still hold full detail; ask Claude to remove the area from them permanently.</p>`:''}
     ${ROOF_KINDS.includes(f.kind)||(f.kind==='zone0'&&f.geom.g==='polygon'&&!z0HasRoof(f))?`<div class="row"><label><input type="checkbox" id="froof" ${roofOn(f)?'checked':''}> Roof collects to tanks (${fmtArea(polyArea(f.geom.pts))})${f.kind==='zone0'?' · Zone 0 counts as the house roof until a building is drawn inside it':''}</label></div>`:''}
     <div class="row"><div class="field" style="flex:1"><label for="fkind">Type</label><select id="fkind">${Object.entries(KINDS).filter(([kk,v])=>v.geom===k.geom).map(([kk,v])=>`<option value="${kk}" ${kk===f.kind?'selected':''}>${esc(v.g)} · ${esc(v.label)}</option>`).join('')}</select></div>
       <div class="field" style="flex:1"><label for="fstage">Stage</label><select id="fstage">${STAGES.map(([kk,l])=>`<option value="${kk}" ${(f.stage||defStage(f.kind))===kk?'selected':''}>${l}</option>`).join('')}</select></div></div>
@@ -2437,6 +2479,9 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
     if($('#fpq'))$('#fpq').onchange=e=>{saveFields(selected,{pq:e.target.value});renderFeatures();renderTools()};
     if($('#flit'))$('#flit').onchange=e=>{saveFields(selected,{litres:Math.max(0,+e.target.value||0)});renderTools()};
     if($('#froof'))$('#froof').onchange=e=>{saveFields(selected,{roof:e.target.checked});renderTools()};
+    if($('#fpriv'))$('#fpriv').onchange=e=>{saveFields(selected,{hideItems:e.target.checked});renderFeatures();draw()};
+    document.querySelectorAll('#fplook button').forEach(b=>b.onclick=()=>{saveFields(selected,{look:b.dataset.v});renderFeatures();draw()});
+    document.querySelectorAll('#fpres button').forEach(b=>b.onclick=()=>{saveFields(selected,{res:+b.dataset.v});renderFeatures();draw()});
     $('#fkind').onchange=e=>{saveFields(selected,{kind:e.target.value});renderFeatures()};
     $('#fstage').onchange=e=>{saveFields(selected,{stage:e.target.value});draw()};
     el.querySelectorAll('#fstat button').forEach(b=>b.onclick=()=>{saveFields(selected,{status:b.dataset.v});renderFeatures()});
@@ -2477,7 +2522,7 @@ function drawProfile(f){const c=$('#profile');const r=c.getBoundingClientRect();
 function geoOf(f){const g=f.geom,ll=q=>xy2ll(q[0],q[1]).map(v=>+v.toFixed(7));
   if(g.g==='point')return {type:'Point',coordinates:ll(g.pts[0])};if(g.g==='line')return {type:'LineString',coordinates:g.pts.map(ll)};if(g.g==='polygon')return {type:'Polygon',coordinates:[g.pts.concat([g.pts[0]]).map(ll)]};
   let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(KINDS[f.kind].decl);a0=b.set;a1=b.rise}if(a1<=a0)a1+=360;const ring=[[g.cx,g.cy]];for(let a=a0;a<=a1+.01;a+=5){const r=a*Math.PI/180;ring.push([g.cx+Math.sin(r)*g.r,g.cy-Math.cos(r)*g.r])}ring.push([g.cx,g.cy]);return {type:'Polygon',coordinates:[ring.map(ll)]}}
-async function exportFile(fmt){const feats=[...features.values()].map(f=>({type:'Feature',properties:{name:f.name,type:(KINDS[f.kind]||{}).label,status:f.status,notes:f.notes},geometry:geoOf(f)}));
+async function exportFile(fmt){const feats=[...features.values()].filter(f=>!privHidden(f)).map(f=>({type:'Feature',properties:{name:f.name,type:(KINDS[f.kind]||{}).label,status:f.status,notes:f.notes},geometry:geoOf(f)}));
   let data,name;if(fmt==='geojson'){data=JSON.stringify({type:'FeatureCollection',features:feats},null,1);name=slug()+'-design.geojson'}
   else{const coords=c=>c.map(p=>p.join(',')+',0').join(' ');const pm=f=>{const g=f.geometry;let geo=g.type==='Point'?`<Point><coordinates>${g.coordinates.join(',')},0</coordinates></Point>`:g.type==='LineString'?`<LineString><tessellate>1</tessellate><coordinates>${coords(g.coordinates)}</coordinates></LineString>`:`<Polygon><outerBoundaryIs><LinearRing><coordinates>${coords(g.coordinates[0])}</coordinates></LinearRing></outerBoundaryIs></Polygon>`;return `<Placemark><name>${esc(f.properties.name)}</name><description>${esc((f.properties.type||'')+' · '+f.properties.status+(f.properties.notes?' · '+f.properties.notes:''))}</description>${geo}</Placemark>`};
     data=`<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${esc(SITE.name)} design</name>${feats.map(pm).join('')}</Document></kml>`;name=slug()+'-design.kml'}
