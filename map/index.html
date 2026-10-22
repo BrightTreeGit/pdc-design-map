@@ -1137,7 +1137,7 @@ function tankStore(){let l=0;const list=[];for(const f of features.values()){if(
 function wbSim(cap,roof,rainArr){rainArr=rainArr||(WB.scen==='dry'?RAIN.median.map(v=>v*(+WB.dryPct||70)/100):WB.scen==='mean'?RAIN.mean:RAIN.median);
   // start full at the end of the wet season (1 May), run two years, report the second
   let S=cap;const out=[];let short=0,over=0;
-  for(let yr=0;yr<2;yr++)for(let k=0;k<12;k++){const m=(k+4)%12;const inflow=rainArr[m]*roof*(+WB.eff||0.8);const use=MDAYS[m]*((+WB.people||0)*(+WB.lpp||0)+((WB.gardenMonths||[]).includes(m)?(+WB.garden||0):0));
+  for(let yr=0;yr<2;yr++)for(let k=0;k<12;k++){const m=(k+4)%12;const inflow=rainArr[m]*roof*(+WB.eff||0.8);const use=MDAYS[m]*((+WB.people||0)*(+WB.lpp||0)+(+WB.stock||0)+((WB.gardenMonths||[]).includes(m)?(+WB.garden||0):0));
     let s=S+inflow-use,sh=0,ov=0;if(s<0){sh=-s;s=0}if(s>cap){ov=s-cap;s=cap}S=s;if(yr===1){out.push({m,inflow,use,end:S,sh,ov});short+=sh;over+=ov}}
   return {months:out,short,over}}
 function wbNeeded(roof){for(let cap=10000;cap<=1000000;cap+=5000){if(wbSim(cap,roof).short<1)return cap}return null}
@@ -1149,6 +1149,7 @@ function wbHTML(){const R=roofArea(),Tk=tankStore();const sim=wbSim(Tk.l,R.a);co
   return `<p class="hint">Rain on your roofs, minus household and garden use, month by month, using ${RAIN.station} rainfall (${RAIN.period}). Tanks start full at the end of the wet season.</p>
    <div class="row"><div class="field" style="flex:1"><label for="wbPeople">People</label><input id="wbPeople" type="number" min="0" max="50" value="${WB.people}"></div><div class="field" style="flex:1"><label for="wbLpp">Litres per person a day</label><input id="wbLpp" type="number" min="20" max="400" step="10" value="${WB.lpp}"></div></div>
    <div class="field"><label for="wbGarden">Garden watering in the dry spring (Sep–Dec), litres a day</label><input id="wbGarden" type="number" min="0" max="20000" step="50" value="${WB.garden}"></div>
+   <div class="field"><label for="wbStock">Animals' drinking water, litres a day (all year)</label><input id="wbStock" type="number" min="0" max="50000" step="10" value="${+WB.stock||0}"></div>
    <div class="row"><div class="field" style="flex:1"><label for="wbRoof">Roof area not drawn (m²)</label><input id="wbRoof" type="number" min="0" max="5000" step="10" value="${WB.extraRoof}"></div><div class="field" style="flex:1"><label for="wbTank">Storage not drawn (L)</label><input id="wbTank" type="number" min="0" max="2000000" step="1000" value="${WB.extraTank}"></div></div>
    <div class="field"><label>Rainfall year</label>${segHTML('wbScen',[['median','Typical (median)'],['mean','Average'],['dry','Dry year']],WB.scen)}</div>
    ${WB.scen==='dry'?`<div class="field"><label for="wbDry">Dry year: <b id="wbDryV">${WB.dryPct}%</b> of a typical year's rain</label><input type="range" id="wbDry" min="40" max="95" step="5" value="${WB.dryPct}"></div>`:''}
@@ -1158,7 +1159,7 @@ function wbHTML(){const R=roofArea(),Tk=tankStore();const sim=wbSim(Tk.l,R.a);co
    ${sim.short>0?`<div class="warn"><p>The tanks run dry, about <b>${Math.round(sim.short/1000)} kL</b> short over the year (${sim.months.filter(x=>x.sh>0).map(x=>MON[x.m]).join(', ')}).</p><p>To close the gap: about <b>${need?Math.round(need/1000).toLocaleString()+' kL':'over 1,000 kL'}</b> of storage with this roof, or about <b>${roofNeed?roofNeed+' m²':'over 3,000 m²'}</b> of roof with this storage, or less use in the dry months.</p></div>`:`<p class="hint ok">Enough water for this year, with ${Math.round(sim.over/1000)} kL overflowing in the wet months: room to catch more or plan a pond.</p>`}
    <p class="hint">Buildings inside Zone 0 (the house) count as collecting roof automatically; if Zone 0 has no building drawn in it, its own area is taken as the house roof. Tick or untick “Roof collects to tanks” on any building to change this, and give each tank its size. Roof run-off is taken as ${Math.round(WB.eff*100)}% of rain after first-flush and losses.</p>`}
 function wireWB(el){const n=(id,k)=>{const e=el.querySelector('#'+id);if(e)e.onchange=()=>{WB[k]=+e.value;saveWB();renderTools()}};
-  n('wbPeople','people');n('wbLpp','lpp');n('wbGarden','garden');n('wbRoof','extraRoof');n('wbTank','extraTank');
+  n('wbPeople','people');n('wbLpp','lpp');n('wbGarden','garden');n('wbStock','stock');n('wbRoof','extraRoof');n('wbTank','extraTank');
   el.querySelectorAll('#wbScen button').forEach(b=>b.onclick=()=>{WB.scen=b.dataset.v;saveWB();renderTools()});
   const d=el.querySelector('#wbDry');if(d){d.oninput=()=>{el.querySelector('#wbDryV').textContent=d.value+'%'};d.onchange=()=>{WB.dryPct=+d.value;saveWB();renderTools()}}}
 
@@ -1311,7 +1312,43 @@ function soilSiteHTML(){const tests=[...features.values()].filter(f=>f.kind==='o
 /* ---------------- grazing and paddock rotation (rules of thumb) ---------------- */
 const ANIMALS={goats:['Goats',1.6],sheep:['Sheep',1.5],cattle:['Cattle',11],alpacas:['Alpacas',1.3],horses:['Horses',9]};
 const PQ={poor:['Poor (weedy, sparse)',600,15,4],fair:['Fair',1200,35,10],good:['Good (dense, improved)',2000,55,18]}; // grazeable kg DM/ha per visit, growth kg DM/ha/day summer, winter
-let GZ=Object.assign({animal:'goats',n:6,season:'summer'},lsGet('bt.gz',{}));
+let GZ=Object.assign({animal:'goats',n:6,season:'summer',fence:'hinge',gates:2,lact:0,hot:false,store:30,cost:{hinge:10,electric:4,net:7}},lsGet('bt.gz',{}));
+/* drinking water, litres per head a day: [cool weather, hot weather over ~30 °C]; milking does/cows need extra */
+const DRINK={goats:[5,9],sheep:[4,8],cattle:[45,80],alpacas:[5,8],horses:[30,55]};const MILK_EXTRA={goats:4,sheep:3,cattle:30,alpacas:2,horses:10};
+const FENCES={
+  hinge:{name:'Hinge-joint mesh, 1.2 m, plus a top wire',note:'Goat-proof if tight to the ground: 8/90/30 hinge-joint (ringlock) on steel posts every 4 m, a plain or electric wire 10–15 cm above, strainer assemblies at corners, gates and every 200 m.'},
+  electric:{name:'Permanent electric, 5–6 wires',note:'Goats need wires close together: 5–6 hot wires up to 1.1–1.2 m, the lowest about 15 cm off the ground, posts and insulators every 8–12 m, at least 6,000–8,000 V. Train them on it in a small yard first.'},
+  net:{name:'Portable electric netting',note:'For moving goats around browse cells: 0.9–1.2 m goat netting in 50 m rolls with its own posts, on an energiser. Easy to move every few days; keep it clear of long grass or it shorts.'}};
+function fenceLength(polys){/* fence line round all goat zones and paddocks; shared boundaries counted once; measured along the slope */
+  const done=[];let flat=0,slope=0,corners=0;
+  for(const P of polys){for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];const d=Math.hypot(b[0]-a[0],b[1]-a[1]);const n=Math.max(1,Math.round(d));let turn=false;
+      for(let k=0;k<n;k++){const x=a[0]+(b[0]-a[0])*(k+.5)/n,y=a[1]+(b[1]-a[1])*(k+.5)/n;if(done.some(([x2,y2])=>Math.abs(x2-x)<1.5&&Math.abs(y2-y)<1.5))continue;
+        const x1=a[0]+(b[0]-a[0])*k/n,y1=a[1]+(b[1]-a[1])*k/n,x2=a[0]+(b[0]-a[0])*(k+1)/n,y2=a[1]+(b[1]-a[1])*(k+1)/n,dz=(zAt(x2,y2)-zAt(x1,y1))||0,dl=d/n;flat+=dl;slope+=Math.sqrt(dl*dl+(isFinite(dz)?dz*dz:0));turn=true}
+      if(turn)corners++}
+    for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];const n=Math.max(1,Math.round(Math.hypot(b[0]-a[0],b[1]-a[1])));for(let k=0;k<n;k++)done.push([a[0]+(b[0]-a[0])*(k+.5)/n,a[1]+(b[1]-a[1])*(k+.5)/n])}}
+  return {flat,slope,corners}}
+function fenceHTML(pads){if(!pads.length)return '';const L=fenceLength(pads.map(f=>f.geom.pts)),len=L.slope,F=FENCES[GZ.fence]||FENCES.hinge,g=+GZ.gates||0;
+  const strain=L.corners+g*2+Math.floor(len/200),cpm=+(GZ.cost||{})[GZ.fence]||0;let items;
+  if(GZ.fence==='hinge')items=[[`${Math.ceil(len*1.05/100)} rolls`,'hinge-joint mesh, 100 m rolls (5% spare)'],[`${Math.ceil(len/4)}`,'steel star posts (every 4 m)'],[`${strain}`,'strainer assemblies (corners, gates, every 200 m)'],[`${Math.ceil(len*1.05)} m`,'plain or electric top wire'],[`${g}`,'gates']];
+  else if(GZ.fence==='electric')items=[[`${Math.ceil(len*5.5/100)*100} m`,'electric wire for 5–6 strands'],[`${Math.ceil(len/10)}`,'posts with insulators (every 10 m)'],[`${strain}`,'strainer assemblies'],['1','energiser (at least 1 J) and earth stakes'],[`${g}`,'gate handles / insulated gates']];
+  else items=[[`${Math.ceil(len/50)}`,'50 m rolls of goat netting'],['1','energiser and earth stake'],[`${g}`,'gaps or gate kits']];
+  return `<h3 class="sub2">Goat fencing</h3>
+   <div class="field"><label>Fence type</label>${segHTML('gzF',[['hinge','Mesh'],['electric','Electric wires'],['net','Netting']],GZ.fence)}</div>
+   <div class="row"><div class="field" style="flex:1"><label for="gzG">Gates</label><input id="gzG" type="number" min="0" max="40" value="${g}"></div><div class="field" style="flex:1"><label for="gzC">Cost per metre ($, your quote)</label><input id="gzC" type="number" min="0" max="200" step="0.5" value="${cpm}"></div></div>
+   <dl class="facts"><dt>Fence line</dt><dd><b>${Math.round(len).toLocaleString()} m</b> along the ground (${Math.round(L.flat).toLocaleString()} m on the map; shared sides counted once)</dd>
+    ${items.map(([q,w])=>`<dt>${q}</dt><dd>${w}</dd>`).join('')}
+    ${cpm?`<dt>Rough cost</dt><dd>about <b>$${Math.round(len*cpm).toLocaleString()}</b> at $${cpm}/m</dd>`:''}</dl>
+   <p class="hint"><b>${F.name}.</b> ${F.note} The cost per metre is a placeholder: replace it with your supplier's price.</p>`}
+function goatWaterHTML(){const d=DRINK[GZ.animal]||DRINK.goats,n=+GZ.n||0,l=Math.min(n,+GZ.lact||0);const per=GZ.hot?d[1]:d[0];const day=n*per+l*(MILK_EXTRA[GZ.animal]||0);const st=+GZ.store||30;
+  return `<h3 class="sub2">Drinking water</h3>
+   <div class="row"><div class="field" style="flex:1"><label for="gzL">Of these, in milk</label><input id="gzL" type="number" min="0" max="500" value="${l}"></div><div class="field" style="flex:1"><label for="gzD">Days of storage</label><input id="gzD" type="number" min="1" max="365" value="${st}"></div></div>
+   <label class="row"><input type="checkbox" id="gzH" ${GZ.hot?'checked':''}> Hot weather (over about 30 °C)</label>
+   <dl class="facts"><dt>Each day</dt><dd><b>${Math.round(day)} L</b> (${per} L a head${l?`, plus ${MILK_EXTRA[GZ.animal]} L for each in milk`:''})</dd>
+    <dt>Each year</dt><dd>about ${(day*365/1000).toFixed(1)} kL${GZ.hot?' (hot-weather rate; less in winter)':''}</dd>
+    <dt>Storage for ${st} days</dt><dd><b>${Math.round(day*st).toLocaleString()} L</b></dd>
+    <dt>Trough</dt><dd>at least ${Math.max(1,Math.ceil(n/15))} trough${n>15?'s':''} with about ${Math.max(30,Math.ceil(n/10)*30)} cm of drinking edge, 40–50 cm high for goats, in shade, cleaned weekly</dd></dl>
+   <button class="btn" id="gzWB">Add ${Math.round(n*d[0]+l*(MILK_EXTRA[GZ.animal]||0))} L a day to the water balance</button>
+   <p class="hint">Goats drink little but won't drink dirty or warm water, so clean, shaded troughs matter more than size. A float valve from a header tank keeps troughs topped up; keep troughs out of the creek and riparian zone.</p>`}
 function paddockCalc(f){const a=polyArea(f.geom.pts)/1e4,q=PQ[f.pq||'fair'],an=ANIMALS[GZ.animal];const need=Math.max(.1,(+GZ.n||0)*an[1]);
   const days=a*q[1]/need,grow=GZ.season==='summer'?q[2]:q[3],rest=q[1]/grow;return {ha:a,days,rest,slope:avgSlope(f.geom.pts)}}
 function avgSlope(poly){const xs=poly.map(q=>q[0]),ys=poly.map(q=>q[1]);let s=0,n=0;const st=Math.max(2,Math.sqrt(polyArea(poly))/15);for(let x=Math.min(...xs);x<=Math.max(...xs);x+=st)for(let y=Math.min(...ys);y<=Math.max(...ys);y+=st)if(inPoly([x,y],poly)){s+=slopeAt(x,y).pct;n++}return n?s/n:0}
@@ -1322,9 +1359,15 @@ function grazeHTML(){const pads=[...features.values()].filter(f=>(f.kind==='padd
    <div class="field"><label>Season</label>${segHTML('gzS',[['summer','Growing season'],['winter','Winter / dry']],GZ.season)}</div>
    ${rows.length?`<dl class="facts">${rows.map(([f,r])=>`<dt>${esc(f.name)}</dt><dd>${r.ha.toFixed(2)} ha · ${r.days<1?'under a day':Math.round(r.days)+' days'} grazing${r.slope>50?' · steep, erosion risk':''}</dd>`).join('')}</dl>
      ${rows.length>1?(Math.round(cycle-Math.min(...rows.map(([f,r])=>r.days)))>=Math.round(restNeed)?`<p class="hint ok">A full rotation takes about ${Math.round(cycle)} days, so each paddock rests about ${Math.round(cycle-Math.min(...rows.map(([f,r])=>r.days)))} days: enough for the roughly ${Math.round(restNeed)} days regrowth this season.</p>`:`<div class="warn"><p>Each paddock rests only about ${Math.round(cycle-Math.min(...rows.map(([f,r])=>r.days)))} days, but needs about ${Math.round(restNeed)} to regrow this season. Add paddocks, improve the pasture, or carry fewer animals.</p></div>`):'<p class="hint">Add at least two paddocks to plan a rotation.</p>'}`:'<p class="hint">No paddocks drawn yet.</p>'}
-   <p class="hint">Goats browse more than they graze: shrubs and weeds count as feed, but keep them out of the vine-forest gullies and regeneration. Hooves on slopes over 50% start erosion, so fence those out or keep visits short.</p>`}
+   <p class="hint">Goats browse more than they graze: shrubs and weeds count as feed, but keep them out of the vine-forest gullies and regeneration. Hooves on slopes over 50% start erosion, so fence those out or keep visits short.</p>
+   ${fenceHTML(pads)}${goatWaterHTML()}`}
 function wireGraze(el){const a=el.querySelector('#gzA'),n=el.querySelector('#gzN');if(!a)return;a.onchange=()=>{GZ.animal=a.value;lsSet('bt.gz',GZ);renderTools()};n.onchange=()=>{GZ.n=+n.value;lsSet('bt.gz',GZ);renderTools()};
-  el.querySelectorAll('#gzS button').forEach(b=>b.onclick=()=>{GZ.season=b.dataset.v;lsSet('bt.gz',GZ);renderTools()})}
+  el.querySelectorAll('#gzS button').forEach(b=>b.onclick=()=>{GZ.season=b.dataset.v;lsSet('bt.gz',GZ);renderTools()});
+  el.querySelectorAll('#gzF button').forEach(b=>b.onclick=()=>{GZ.fence=b.dataset.v;lsSet('bt.gz',GZ);renderTools()});
+  const num=(id,k)=>{const x=el.querySelector('#'+id);if(x)x.onchange=()=>{GZ[k]=Math.max(0,+x.value||0);lsSet('bt.gz',GZ);renderTools()}};num('gzG','gates');num('gzL','lact');num('gzD','store');
+  const c=el.querySelector('#gzC');if(c)c.onchange=()=>{GZ.cost=Object.assign({},GZ.cost,{[GZ.fence]:Math.max(0,+c.value||0)});lsSet('bt.gz',GZ);renderTools()};
+  const h=el.querySelector('#gzH');if(h)h.onchange=()=>{GZ.hot=h.checked;lsSet('bt.gz',GZ);renderTools()};
+  const w=el.querySelector('#gzWB');if(w)w.onclick=()=>{const d=DRINK[GZ.animal]||DRINK.goats,n=+GZ.n||0,l=Math.min(n,+GZ.lact||0);WB.stock=Math.round(n*d[0]+l*(MILK_EXTRA[GZ.animal]||0));lsSet('bt.wb',WB);renderTools();toast('Added '+WB.stock+' L a day of animal drinking water to the water balance (cool-weather rate, all year)')}}
 
 /* ---------------- tasks linked to design features ---------------- */
 const tasks=new Map();let planFilter=lsGet('bt.planF','open'),planFeat=null;
@@ -2251,7 +2294,7 @@ function wireDams(el){const box=el.querySelector('#damSec');if(!box)return;
    if(isHid(k)){setHid(k,false);const c=box.querySelector(`[data-hid="${k}"]`);if(c)c.checked=true}
    const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);fitBox(Math.min(...xs)-40,Math.min(...ys)-40,Math.max(...xs)+40,Math.max(...ys)+40);draw()});
  const all=h=>{box.querySelectorAll('[data-hid]').forEach(c=>{c.checked=!h;const s=hid();h?s.add(c.dataset.hid):s.delete(c.dataset.hid)});lsSet('hide',[...hid()]);draw();renderFeatures()};
- box.querySelector('#damAll').onclick=()=>all(false);box.querySelector('#damNone').onclick=()=>all(true)}
+ const da=box.querySelector('#damAll'),dn=box.querySelector('#damNone');if(da)da.onclick=()=>all(false);if(dn)dn.onclick=()=>all(true)}
 function vis(f){if(fHidden(f))return false;if(!layers.stage||layers.stage==='all')return true;return stageIdx(f.stage||defStage(f.kind))<=stageIdx(layers.stage)}
 const visList=()=>[...features.values()].filter(vis);
 // Plant library: starting values for the Sunshine Coast hinterland; check local references before planting.
