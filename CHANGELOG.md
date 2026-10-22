@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v80 | 22 Oct 2026 10:55 | see commit history |
 | v79 | 22 Oct 2026 10:40 | see commit history |
 | v78 | 22 Oct 2026 10:30 | see commit history |
 | v77 | 22 Oct 2026 05:45 | [aa9b476](https://github.com/BrightTreeGit/pdc-design-map/commit/aa9b476c9e2b1fc3d5c8d2eb783c391851c92325) |
@@ -33,6 +34,14 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v80 — 22 Oct 2026 10:55
+**Changed**
+- Light & lopping planner: the test square is now a slider from 10 to 160 m (default 30 m, was 120 m), and can also be changed from the drawing bar while you work.
+- Squares up to 50 m are worked out at 1 m detail instead of 2 m.
+
+**Added**
+- "Fit to the bed or zone I click inside": click inside a drawn bed or zone (up to 160 × 160 m) and the planner tests exactly that shape, outlined on the map, with its area shown. The smallest shape under the click wins.
 
 ## v79 (22 Oct 2026, 10:40)
 **Changed**
