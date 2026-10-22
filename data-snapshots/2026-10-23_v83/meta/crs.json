@@ -1,0 +1,8 @@
+{
+  "E0": 492000,
+  "N0": 7043000,
+  "crs": "GDA2020 / MGA zone 56 (EPSG:7856)",
+  "features": "collection 'features': {kind, name, status, notes, geom:{g:'point'|'line'|'polygon'|'sector'|'sun', pts:[[x,y],...] | cx,cy,r,a0,a1}, createdBy, createdAt, updatedAt, source}",
+  "x": "E - E0 (metres east)",
+  "y": "N0 - N (metres south)"
+}

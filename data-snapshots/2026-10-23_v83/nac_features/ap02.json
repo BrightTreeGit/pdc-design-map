@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1002.9,
+        1001.3
+      ],
+      [
+        1003.7,
+        998.4
+      ],
+      [
+        1009.3,
+        999.1
+      ],
+      [
+        1008.4,
+        1001.9
+      ]
+    ]
+  },
+  "kind": "solar",
+  "name": "Solar",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m).",
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}
