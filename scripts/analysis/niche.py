@@ -12,7 +12,7 @@ M='/home/claude/pdc-design-map/map/'
 t=json.load(open(M+'terrain.json')); ex=json.load(open(M+'extra.json'))
 cold=np.frombuffer(zlib.decompress(base64.b64decode(ex['cold'])),dtype=np.uint8); n=int(np.sqrt(cold.size)); cold=cold.reshape(n,n).astype(float)
 if n!=1000: cold=ndimage.zoom(cold,1000/n,order=1)
-L=np.array(t['lot']).reshape(-1,2)/2; yy,xx=np.mgrid[0:1000,0:1000]
+yy,xx=np.mgrid[0:1000,0:1000]; L=np.array(t['lot']).reshape(-1,2)/2
 lot=MP(L).contains_points(np.c_[xx.ravel()+.5,yy.ravel()+.5]).reshape(1000,1000)
 # productivity residual (4 m grid) from canopy npz
 D='/mnt/user-data/uploads/Permiculture Noosa PDC/Bright Tree/Lidar-survey data/QLD Government/Canopy outputs/'
@@ -31,6 +31,14 @@ res=np.where(ok,g-med,0); prod=ndimage.zoom(ndimage.uniform_filter(np.nan_to_num
 # classes
 twl=twi[lot]; t85,t60=np.percentile(twl,[85,60])
 wet=twi>=t85; moist=(twi>=t60)&~wet
+# wet spots marked on the map (rock pools, ponds, water/drainage observations): 10 m buffer
+import os
+WS=json.load(open('wetspots.json')) if os.path.exists('wetspots.json') else []
+ws=np.zeros_like(wet)
+for p in WS:
+    P=np.array(p)/2; ws|=MP(P).contains_points(np.c_[xx.ravel()+.5,yy.ravel()+.5]).reshape(1000,1000) if len(P)>2 else ws
+    if len(P)<=2: ws[int(P[0][1]),int(P[0][0])]=True
+ws=ndimage.binary_dilation(ws,iterations=5); wet|=ws; moist&=~wet
 frost=cold>60
 deg=np.degrees(np.arctan(slope))
 sun=np.select([W>=4, (W>=2)|(E>=5), (W>=0.5)&(E>=2)],[3,2,1],0)   # 3 full,2 part,1 dappled,0 deep
@@ -71,3 +79,9 @@ for k,c in col.items(): img[cls==k]=c
 yy2,xx2=np.mgrid[0:1000,0:1000]; dots=frostp&((yy2%4==0)&(xx2%4==0))
 img[dots]=(30,80,220,255)
 Image.fromarray(img,'RGBA').resize((2000,2000),Image.NEAREST).save('niche.png',optimize=True)
+HP=np.array([[874.9,949.8],[879.9,944.6],[865.1,931.2],[860.6,941.4]])
+hm=MP(HP/2).contains_points(np.c_[xx.ravel()+.5,yy.ravel()+.5]).reshape(1000,1000)
+hb=ndimage.binary_dilation(hm,iterations=10)
+J=json.load(open('niche.json'))
+J['hairpin']=dict(areaM2=int(hm.sum()*4),mix={str(k):int(((cls==k)&hm).sum()*4) for k in (1,2,3,4,5,6)},winter=round(float(W[hm].mean()),1),winterMax=round(float(W[hm].max()),1),buffer20={str(k):int(((cls==k)&hb).sum()*4) for k in (1,2,3,4,5,6)},cx=870,cy=941)
+json.dump(J,open('niche.json','w'));print(J['hairpin'])

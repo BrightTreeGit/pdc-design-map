@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v79 | 22 Oct 2026 10:40 | see commit history |
 | v78 | 22 Oct 2026 10:30 | see commit history |
 | v77 | 22 Oct 2026 05:45 | [aa9b476](https://github.com/BrightTreeGit/pdc-design-map/commit/aa9b476c9e2b1fc3d5c8d2eb783c391851c92325) |
 | v75–v76 | 21 Oct 2026 22:36 | [97ce1ac](https://github.com/BrightTreeGit/pdc-design-map/commit/97ce1ac25c0d146368745872be00726181241d2f) |
@@ -32,6 +33,11 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v79 (22 Oct 2026, 10:40)
+**Changed**
+- *Observation* (with categories such as Water / drainage) is now in the basic drawing tools, not only the Designer level.
+- Planting niches now use wet spots marked on the map: the new eastern-catchment rock pool counts as wet ground (10 m around it). Niche data also records the hairpin fruit forest as drawn (about 170 m², 0.3 h of winter sun at ground today).
 
 ## v78 (22 Oct 2026, 10:30)
 **Added**

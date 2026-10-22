@@ -313,7 +313,7 @@ function applyCZ(list){CZ=Array.isArray(list)?list.filter(z=>z&&z.id&&z.label):[
 async function saveCZ(list){applyCZ(list);if(live){try{await db.doc(C('settings')+'/zones').set({list:CZ,updatedAt:new Date().toISOString()})}catch(e){toast('Zone types did not save.')}}else lsSet('bt.czones',CZ)}
 /* tool levels: 1 Essentials, 2 Designer (default), 3 Expert. big = broadacre tools hidden on small blocks */
 const KIND_LV={customzone:2,zone0:1,zone1:1,zone2:1,tank:1,building:1,path:1,tree:1,fruittree:1,nativetree:1,shrub:1,bed:1,raisedbed:1,herbs:1,lawn:1,paving:1,fence:1,note:1,driveway:1,shed:1,solar:1,compost:1,
-  keypoint:3,diversion:3,damwall:3,coldair:3,section:3,crossing:3,reedbed:3,rockpool:3,irrigation:3,pipe:3,row:3,guild:3,hugel:3,goatzone:3,paddock:3,tpz:3,greywater:3,flow:3,soak:3,mushrooms:3,firebreak:3,obs:3};
+  keypoint:3,diversion:3,damwall:3,coldair:3,section:3,crossing:3,reedbed:3,rockpool:3,irrigation:3,pipe:3,row:3,guild:3,hugel:3,goatzone:3,paddock:3,tpz:3,greywater:3,flow:3,soak:3,mushrooms:3,firebreak:3,obs:1};
 const BIG_KINDS=['zone3','goatzone','paddock','damwall','keypoint','diversion','track','crossing','firebreak','reedbed','row','cabin','amenities','container','nursery','rockpool'];
 const LV_NAMES=[[1,'Essentials'],[2,'Designer'],[3,'Expert']];
 let drawLv=lsGet('bt.drawLv',1),drawQ='',recentKinds=lsGet('bt.recentKinds',[]);
