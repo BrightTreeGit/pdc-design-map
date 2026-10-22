@@ -40,14 +40,20 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     print("Saving into", out)
     common = {"bbox": ",".join(map(str, BBOX)), "bboxSR": 7856, "imageSR": 7856, "size": f"{W},{Hh}", "f": "image"}
-    fn = out / "coast_dem_15m.tif"
-    if fn.exists() and fn.stat().st_size > 100000: print("Heights already downloaded")
-    else:
-        print(f"Downloading heights ({W} x {Hh} cells)... this can take a minute")
-        d = get(DEM, {**common, "format": "tiff", "pixelType": "F32", "noData": -9999},
-                lambda b: b[:2] in (b"II", b"MM"))
-        if not d: sys.exit("Could not download the heights. Check the internet connection and run again.")
-        fn.write_bytes(d); print("   saved", fn.name, round(len(d)/1e6, 1), "MB")
+    # the server limits each image to a few million cells, so fetch 2 x 2 tiles
+    NX, NY = 2, 2
+    tw, th = W // NX, Hh // NY
+    for j in range(NY):
+        for i in range(NX):
+            fn = out / f"coast_dem_15m_r{j}c{i}.tif"
+            if fn.exists() and fn.stat().st_size > 100000: print(f"Tile {j}{i} already downloaded"); continue
+            e0 = BBOX[0] + i * tw * RES; e1 = e0 + tw * RES
+            n1 = BBOX[3] - j * th * RES; n0 = n1 - th * RES
+            print(f"Downloading heights, tile {j*NX+i+1} of {NX*NY} ({tw} x {th} cells)...")
+            d = get(DEM, {"bbox": f"{e0},{n0},{e1},{n1}", "bboxSR": 7856, "imageSR": 7856, "size": f"{tw},{th}", "f": "image",
+                          "format": "tiff", "pixelType": "F32", "noData": -9999}, lambda b: b[:2] in (b"II", b"MM"))
+            if not d: sys.exit("Could not download the heights. Check the internet connection and run again.")
+            fn.write_bytes(d); print("   saved", fn.name, round(len(d)/1e6, 1), "MB"); time.sleep(1)
     fa = out / "coast_aerial_15m.jpg"
     if fa.exists() and fa.stat().st_size > 100000: print("Photo already downloaded")
     else:
