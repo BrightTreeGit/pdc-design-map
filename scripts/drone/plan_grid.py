@@ -12,7 +12,9 @@ CLEAR=45.0      # m above the tallest crown under each stretch
 MINCLEAR=30.0   # never less than this anywhere on the path
 SPACING=20.0 if CROSS else 16.0    # m between lines (75% side overlap at 45 m above crowns, 24 mm lens, 4:3)
 SPEED=4.5       # m/s; with a 2 s timed shot = photo every 9 m (~80% front overlap)
-BUF=float(sys.argv[3]) if len(sys.argv)>3 else 15.0   # m flown beyond the boundary (0 = stay inside)
+ROAD=len(sys.argv)>3 and sys.argv[3]=='road'   # stay inside, but may use the near half of the Cumner Road reserve (west edge)
+BUF=0.0 if ROAD else (float(sys.argv[3]) if len(sys.argv)>3 else 15.0)   # m flown beyond the boundary (0 = stay inside)
+ROADHALF=10.0   # half of an assumed 20 m road reserve
 STEP=40.0       # m between waypoints along a line (height can change at each)
 MAXWP=100       # waypoints per mission
 MAXAGL=117.0    # legal limit is 120 m above the ground directly below
@@ -27,8 +29,19 @@ if CROSS: ang+=math.pi/2
 ux,uy=math.cos(ang),math.sin(ang); vx,vy=-uy,ux           # u along lines, v across
 P=Path(L); yy,xx=np.mgrid[0:2000,0:2000]
 lot=P.contains_points(np.c_[xx.ravel()+.5,yy.ravel()+.5]).reshape(2000,2000)
-cover=ndimage.distance_transform_edt(~lot)<=BUF if BUF>0 else ndimage.distance_transform_edt(lot)>=3
-inner=ndimage.distance_transform_edt(lot)>=1.0
+if ROAD:   # west edges: NW corner (vertex 5) round to the SW corner (vertex 0)
+    from matplotlib.path import Path as _P
+    W_=[L[5],L[6],L[7],L[8],L[0]];strip=np.zeros_like(lot)
+    for a_,b_ in zip(W_,W_[1:]):
+        d_=b_-a_;n_=np.array([d_[1],-d_[0]])/np.linalg.norm(d_)   # outward normal (west)
+        if (np.c_[xx.ravel(),yy.ravel()]-a_).dot(n_).mean()>0: pass
+        q_=[a_,b_,b_+n_*ROADHALF,a_+n_*ROADHALF]
+        if lot[int((a_[1]+b_[1])/2+n_[1]*5),int((a_[0]+b_[0])/2+n_[0]*5)]: q_=[a_,b_,b_-n_*ROADHALF,a_-n_*ROADHALF]
+        strip|=_P(np.array(q_)).contains_points(np.c_[xx.ravel()+.5,yy.ravel()+.5]).reshape(2000,2000)
+    allowed=lot|strip
+else: allowed=lot
+cover=ndimage.distance_transform_edt(~lot)<=BUF if BUF>0 else ndimage.distance_transform_edt(allowed)>=3
+inner=ndimage.distance_transform_edt(allowed)>=1.0
 import heapq
 def seg_ok(a,b,skip=6):
     d=math.hypot(b[0]-a[0],b[1]-a[1]);n=max(2,int(d))
@@ -155,7 +168,7 @@ def outside(path):
         d=math.hypot(b['x']-a['x'],b['y']-a['y']);n=max(2,int(d/2))
         for s_ in np.linspace(0,1,n):
             x=a['x']+(b['x']-a['x'])*s_;y=a['y']+(b['y']-a['y'])*s_
-            if not lot[int(y),int(x)]: o+=d/n
+            if not allowed[int(y),int(x)]: o+=d/n
     return o
 def check(z0,path):
     """sample every 2 m: clearance over crowns and height above the ground directly below"""
@@ -181,6 +194,7 @@ for c in TAKEOFF:
     res[c]={'rth_rel':rth,'takeoff_xy':[tx,ty],'takeoff_ll':ll(tx,ty),'takeoff_elev':round(z0,1),'missions':out}
 meta={'clear':CLEAR,'spacing':SPACING,'speed':SPEED,'interval_s':2,'buffer':BUF,'lines':len(lines),'source':'2022 LiDAR (QLD), crowns dilated 2 m'}
 meta['pass']='cross' if CROSS else 'main'
-json.dump({'meta':meta,'plans':res},open(OUT+f"/mission_plan_{'cross' if CROSS else 'main'}_buf{int(BUF)}.json",'w'))
+meta['road']=ROAD
+json.dump({'meta':meta,'plans':res},open(OUT+f"/mission_plan_{'cross' if CROSS else 'main'}_{'road' if ROAD else 'buf'+str(int(BUF))}.json",'w'))
 for c,r in res.items():
     print(c,r['takeoff_elev'],'RTH',r['rth_rel'],[{k:v for k,v in m.items() if k!='wps'} for m in r['missions']])

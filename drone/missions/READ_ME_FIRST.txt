@@ -4,6 +4,10 @@ WHAT'S HERE
   0 m inside boundary (test)\   the drone stays inside the boundary the whole time, turns and
                                  transit included. 2 missions + 2 cross. Fly this first.
                                  (Edges will be a bit soft in the results: fine for a test.)
+  Inside + half Cumner Rd reserve\  as the 0 m test, but on the west side it may use the near half of
+                                 the Cumner Road reserve (taken as 20 m wide, so up to 10 m out).
+                                 Better west edge with nothing over the neighbours. 2 + 2 cross.
+                                 Pause if a car or person is on the road below.
   15 m past boundary\           the full-quality version: lines run 15 m past the boundary.
                                  3 missions + 2 cross.
   In each folder: _SW_ files take off at the SW corner (recommended, 151 m high),

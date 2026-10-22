@@ -9,6 +9,13 @@ try: F=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 except: F=f=ImageFont.load_default()
 t=json.load(open('/home/claude/pdc-design-map/map/terrain.json'));L=np.array(t['lot']).reshape(-1,2)
 dr.line([P(*q) for q in L]+[P(*L[0])],fill=(0,255,255,255),width=3)
+if d['meta'].get('road'):
+    W_=[L[5],L[6],L[7],L[8],L[0]]
+    for a_,b_ in zip(W_,W_[1:]):
+        dd=b_-a_;n_=np.array([dd[1],-dd[0]])/np.linalg.norm(dd);mid=(a_+b_)/2+n_*5
+        from matplotlib.path import Path as _P
+        if _P(L).contains_point(mid): n_=-n_
+        dr.line([P(*(a_+n_*10)),P(*(b_+n_*10))],fill=(255,255,0,255),width=2)
 cols=[(255,165,0,255),(50,220,50,255),(80,160,255,255)]
 SW=d['plans']['SW']
 for k_,m in enumerate(SW['missions']):
@@ -20,5 +27,5 @@ for c,(tx,ty) in [('SW',SW['takeoff_xy']),('SE',d['plans']['SE']['takeoff_xy'])]
 dr.rectangle([0,0,1000,126],fill=(0,0,0,150));y=12
 for k_,m in enumerate(SW['missions']):
     dr.rectangle([12,y+4,40,y+20],fill=cols[k_]);dr.text((48,y),f"{'Cross ' if d['meta'].get('pass')=='cross' else 'Mission '}{k_+1}: {m['minutes']:.0f} min, ~{m['photos']} photos",font=f,fill=(255,255,255,255),stroke_width=3,stroke_fill=(0,0,0,255));y+=28
-dr.text((12,y),("Inside the boundary · " if d["meta"]["buffer"]==0 else f"{d['meta']['buffer']:.0f} m past the boundary · ")+f"Lines {d['meta']['spacing']:.0f} m apart · {d['meta']['clear']:.0f} m above the tallest crown · {d['meta']['speed']} m/s · photo every 2 s",font=f,fill=(255,255,255,255),stroke_width=3,stroke_fill=(0,0,0,255))
+dr.text((12,y),("Inside + half Cumner Rd · " if d["meta"].get("road") else "Inside the boundary · " if d["meta"]["buffer"]==0 else f"{d['meta']['buffer']:.0f} m past the boundary · ")+f"Lines {d['meta']['spacing']:.0f} m apart · {d['meta']['clear']:.0f} m above the tallest crown · {d['meta']['speed']} m/s · photo every 2 s",font=f,fill=(255,255,255,255),stroke_width=3,stroke_fill=(0,0,0,255))
 im.save(out,quality=88);print(im.size)
