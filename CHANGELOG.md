@@ -35,7 +35,7 @@ The v77 row is the commit that added this index; later versions are listed in th
 
 ---
 
-## v80 — 22 Oct 2026 10:55
+## v80 (22 Oct 2026, 10:55)
 **Changed**
 - Light & lopping planner: the test square is now a slider from 10 to 160 m (default 30 m, was 120 m), and can also be changed from the drawing bar while you work.
 - Squares up to 50 m are worked out at 1 m detail instead of 2 m.
