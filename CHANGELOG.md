@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v78 | 22 Oct 2026 10:30 | see commit history |
 | v77 | 22 Oct 2026 05:45 | [aa9b476](https://github.com/BrightTreeGit/pdc-design-map/commit/aa9b476c9e2b1fc3d5c8d2eb783c391851c92325) |
 | v75–v76 | 21 Oct 2026 22:36 | [97ce1ac](https://github.com/BrightTreeGit/pdc-design-map/commit/97ce1ac25c0d146368745872be00726181241d2f) |
 | v74 | 21 Oct 2026 18:18 | [383f2db](https://github.com/BrightTreeGit/pdc-design-map/commit/383f2dbf3dd5fcedb35606207343f9403a66e0af) |
@@ -32,7 +33,12 @@ The v77 row is the commit that added this index; later versions are listed in th
 
 ---
 
-## v77 (22 Oct 2026, 22:37)
+## v78 (22 Oct 2026, 10:30)
+**Added**
+- Bright Tree forest layer *Planting niches (light, slope, moisture, frost)*: where each kind of planting fits today, from light at ground (terrain plus measured crowns), slope, wetness from water flow and cold-air pooling. Classes: full sun, part sun, dappled shade, deep moist shade, openable with lopping, forest only (over 27°), plus frost-prone dots.
+- Numbered best patches within about 80 m of the house, focused on the hairpin fruit forest.
+
+## v77 (21 Oct 2026, 22:37)
 **Added**
 - Layers → *Dams and ponds (show / hide each)*: a tickbox and Zoom for every drawn pond, dam wall and rock pool, and for the computed pond sites P1–P8, plus Show all / Hide all.
 - Features → *Hide on map / Show on map* for any drawn item; hidden items carry a "hidden" tag in the list.
