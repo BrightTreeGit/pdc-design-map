@@ -1,0 +1,80 @@
+{
+  "createdAt": "2026-10-18T13:36:00.506Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        995.1,
+        1153
+      ],
+      [
+        995,
+        1161
+      ],
+      [
+        997,
+        1167
+      ],
+      [
+        999,
+        1169
+      ],
+      [
+        1011,
+        1143
+      ],
+      [
+        1023,
+        1125
+      ],
+      [
+        1033,
+        1115
+      ],
+      [
+        1039,
+        1111
+      ],
+      [
+        1053,
+        1105
+      ],
+      [
+        1061,
+        1105
+      ],
+      [
+        1067,
+        1107
+      ],
+      [
+        1075,
+        1111
+      ],
+      [
+        1093,
+        1123
+      ],
+      [
+        1081,
+        1119
+      ],
+      [
+        1069,
+        1119
+      ],
+      [
+        1063.3,
+        1120.3
+      ]
+    ]
+  },
+  "kind": "track",
+  "name": "Track (≤10%) 4",
+  "notes": "Route at up to 20%: 179 m, steepest 22%. Roughly 13 m³ of cut and fill for a 1 m bench. Computed from the 2022 LiDAR; walk it before machines go in.",
+  "source": "map",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-18T13:36:02.354Z"
+}

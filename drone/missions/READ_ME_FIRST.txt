@@ -25,15 +25,20 @@ THE PLAN
   crosses back high and lands at home. 13-18 min each, one battery each.
   Return-to-home height in DJI Fly settings: SW take-off 65 m, SE take-off 90 m.
 
-LOADING A MISSION (once per mission)
-  1. DJI Fly > camera view > Waypoints > drop 2 points anywhere > save. One dummy per mission.
-  2. Controller to PC by USB-C. Open Internal storage\Android\data\dji.go.v5\files\waypoint\
-     Open the newest folder; copy its .kmz (long name) into THIS (top) folder.
-  3. Double-click "Put mission into DJI Fly.bat", pick the mission number.
-     It writes a file with the same long name into the to_controller folder, using your drone's
-     own details from the dummy.
-  4. Copy that file back over the dummy on the controller. Restart DJI Fly, open the mission:
-     you should see the grid. Delete the dummy .kmz from this folder before doing the next one.
+LOADING MISSIONS (all at once)
+  1. DJI Fly > camera view > Waypoints > drop 2 points anywhere > save. One dummy per mission (16 = all
+     inside and half-Cumner-Rd missions for both corners).
+  2. Controller to PC by USB-C (controller on; swipe down on its screen > USB > File transfer).
+     Open Internal storage\Android\data\dji.go.v5\files\waypoint and copy the long-named folders
+     (not 'capability') into THIS (top) folder.
+  3. Double-click "Put mission into DJI Fly.bat" and press Enter. It fills the dummies in this order:
+     SW inside M1, M2, cross 1, cross 2 / SW half Cumner Rd M1, M2, cross 1, cross 2 /
+     SE inside M1, M2, cross 1, cross 2 / SE half Cumner Rd M1, M2, cross 1, cross 2.
+     (Or type your own mission numbers, separated by spaces.)
+  4. Drag every folder inside 'to_controller' onto the controller's waypoint folder, choose Replace.
+     Restart DJI Fly. to_controller\WHICH_IS_WHICH.txt says which folder holds which mission: rename
+     the missions in DJI Fly to match (e.g. "SW Inside M1").
+  Before re-running for a new batch, delete the old long-named folders from THIS folder.
 
 CAMERA (photos, not video)
   Photo mode: Timed Shot, every 2 s, 12 MP, 4:3, JPEG. Gimbal straight down (-90).

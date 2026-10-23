@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1000.6,
+        1006
+      ],
+      [
+        1003.6,
+        996.5
+      ],
+      [
+        1017.3,
+        998.7
+      ],
+      [
+        1013.6,
+        1008.3
+      ]
+    ]
+  },
+  "kind": "building",
+  "name": "Home",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m). Roof collects for the tanks.",
+  "roof": true,
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

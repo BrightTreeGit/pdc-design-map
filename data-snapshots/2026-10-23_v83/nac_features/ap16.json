@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1005.3,
+        1007.9
+      ],
+      [
+        1005.6,
+        1007.1
+      ],
+      [
+        1010.8,
+        1007.5
+      ],
+      [
+        1010.5,
+        1008.4
+      ]
+    ]
+  },
+  "kind": "herbs",
+  "name": "Herbs",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m). Ange: the herbs are shade tolerant, so the south side of the house suits them.",
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

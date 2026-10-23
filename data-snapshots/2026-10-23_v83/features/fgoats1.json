@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-10-19T02:25:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        725,
+        1203
+      ],
+      [
+        765,
+        1128
+      ],
+      [
+        841.7,
+        1100.1
+      ],
+      [
+        801.8,
+        1194
+      ]
+    ]
+  },
+  "kind": "goatzone",
+  "name": "Goat zone 1 (south-west)",
+  "notes": "Starting sketch from the design brief: far south-west corner, molasses grass to browse down, goats in years 1–2 (zone 3–4). Drag the corners to the real fence line.",
+  "pq": "fair",
+  "source": "claude",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-19T03:11:18.354Z"
+}

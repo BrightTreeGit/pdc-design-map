@@ -1,0 +1,184 @@
+<title>Bright Tree Water</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a river atlas sheet. Map fills the right; a narrow column tells the journey (stacked on phones). */
+:root{
+  --bg:#edf0ec;--panel:#f7f9f6;--ink:#1b2622;--muted:#5a6a63;--line:#d0d9d3;--chip:#e2e9e4;
+  --accent:#1f6a57;--route:#d9480f;--water:#1d6fb8;--bt:#0f8a8f;--contour:#24241e;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;--f-body:"IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121916;--panel:#19211d;--ink:#e2e9e4;--muted:#98a89f;--line:#31403a;--chip:#24302a;--accent:#5cc0a2;--route:#ff8a4c;--water:#6fb4ff;--bt:#4fd0d6;--contour:#f0f0e4;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121916;--panel:#19211d;--ink:#e2e9e4;--muted:#98a89f;--line:#31403a;--chip:#24302a;--accent:#5cc0a2;--route:#ff8a4c;--water:#6fb4ff;--bt:#4fd0d6;--contour:#f0f0e4;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px}
+.app{display:grid;grid-template-columns:350px 1fr;height:100%}
+aside{background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding-block:16px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px;display:flex;flex-direction:column;gap:16px;min-width:0}
+h1{font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1;margin:0;letter-spacing:.01em}
+.sub{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-top:4px}
+h2{font-family:var(--f-display);font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+p{margin:0;line-height:1.5}
+.lead{font-size:15px;line-height:1.45;text-wrap:balance}
+.lead b{color:var(--route)}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{border-top:2px solid var(--route);padding-top:4px}
+.stats b{display:block;font-family:var(--f-display);font-size:24px;line-height:1.05;font-variant-numeric:tabular-nums}
+.stats span{font-size:11.5px;color:var(--muted)}
+.prof{width:100%;height:auto;display:block}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button,.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+.toggles{display:grid;gap:4px}
+.toggles label{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13.5px}
+.toggles i{width:22px;height:0;border-top:3px solid;display:inline-block;flex:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.maj{display:grid}
+.maj button{display:grid;grid-template-columns:14px 1fr auto;gap:8px;align-items:start;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 2px;font:inherit;color:var(--ink);cursor:pointer}
+.maj button:hover,.maj button[aria-pressed="true"]{background:var(--chip)}
+.maj .sw{width:14px;height:14px;border-radius:3px;margin-top:2px}
+.maj .ha{font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.maj small{display:block;color:var(--muted);font-size:12px}
+.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:9px;background:color-mix(in srgb,var(--route) 16%,transparent);color:var(--route);font-weight:600;margin-left:4px}
+main{position:relative;overflow:hidden;background:var(--chip);min-height:0}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.read{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));right:84px;max-width:540px;background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-family:var(--f-mono);font-size:12px;line-height:1.45;pointer-events:none}
+.zoom{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:10px;display:flex;flex-direction:column;gap:6px}
+.zoom button{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:18px;cursor:pointer}
+.zoom button.t{font-size:11px;font-weight:600;font-family:var(--f-display);letter-spacing:.03em}
+.scale{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));font-family:var(--f-mono);font-size:11px;color:var(--ink);background:color-mix(in srgb,var(--panel) 85%,transparent);padding:2px 6px;border-radius:4px}
+.scale i{display:block;height:4px;border:1px solid var(--ink);border-top:0;margin-top:2px}
+@media (max-width:760px){
+  .app{display:flex;flex-direction:column;height:auto}
+  main{height:62vh}
+  aside{order:1;border-right:0;border-top:1px solid var(--line);overflow:visible;padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .read{right:60px;font-size:11px}
+}
+</style>
+<div class="app">
+<aside>
+  <header>
+    <h1>Bright Tree Water</h1>
+    <div class="sub">From the block to the sea · Qld elevation model, 15 m</div>
+  </header>
+  <p class="lead" id="lead"></p>
+  <div class="stats" id="stats"></div>
+  <section style="display:grid;gap:6px">
+    <h2>The fall to the sea</h2>
+    <svg class="prof" id="prof" viewBox="0 0 320 150" role="img" aria-label="Height of the creek bed from Bright Tree to the sea"></svg>
+  </section>
+  <section style="display:grid;gap:8px">
+    <h2>Map</h2>
+    <div class="seg" id="base"><button data-v="relief" aria-pressed="true">Relief</button><button data-v="hill" aria-pressed="false">Hillshade</button></div>
+    <div class="toggles">
+      <label><input type="checkbox" id="lRoute" checked> <i style="border-color:var(--route)"></i> Bright Tree's water</label>
+      <label><input type="checkbox" id="lStr" checked> <i style="border-color:var(--water)"></i> Creeks and rivers <span class="hint">from 1 km²</span></label>
+      <label><input type="checkbox" id="lCat" checked> Catchments</label>
+      <label><input type="checkbox" id="lCon"> Contours <span class="hint">20 m, labelled every 100 m</span></label>
+      <label><input type="checkbox" id="lPl" checked> Towns <span class="hint">positions approximate</span></label>
+    </div>
+  </section>
+  <section style="display:grid;gap:6px">
+    <h2>Catchments on this map</h2>
+    <p class="hint">Each colour is the land draining to one place where water reaches tidal water or leaves the map. Tap one to show it.</p>
+    <div class="maj" id="maj"></div>
+  </section>
+  <section style="display:grid;gap:6px">
+    <h2>How this was made</h2>
+    <p class="hint">Heights are the Queensland Government elevation model sampled every 15 m over a 40 × 36 km area. Hollows were filled so water can always find a way down, then each cell drains to its steepest neighbour. Ground at or below half a metre that connects to the ocean is treated as sea and tidal water. Creek names are not in this data: "likely Eudlo Creek" comes from the route passing beside Eudlo. Town positions are approximate. Bright Tree's boundary and catchment come from the 1 m LiDAR on the design map.</p>
+  </section>
+</aside>
+<main>
+  <canvas id="cv" aria-label="Map of where Bright Tree's water flows to the sea"></canvas>
+  <div class="zoom"><button id="zi" aria-label="Zoom in">+</button><button id="zo" aria-label="Zoom out">−</button><button id="zf" aria-label="Show the whole area" style="font-size:14px">⌂</button><button class="t" id="zb" aria-label="Zoom to Bright Tree">BT</button></div>
+  <div class="read" id="read">Tap or hover the map for height and where that spot drains</div>
+  <div class="scale" id="scale"></div>
+</main>
+</div>
+<script>
+const D=__DATA__;
+const SRC={relief:'__REL__',hill:'__HILL__',con:'__CON__',pack:'__PACK__'};
+const MW=D.W,MH=D.H,R=D.R;
+const HUES=[205,28,140,330,48,265,170,0,90,300,190,12,120,240,60,180,35,280,100,220];
+const $=s=>document.querySelector(s);
+const cv=$('#cv'),ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1,view={s:1,x:0,y:0},IMG={},PACK=null,L={base:'relief',route:1,str:1,cat:1,con:0,pl:1},SEL=0,catCv=null,conCv=null;
+try{Object.assign(L,JSON.parse(localStorage.getItem('btw.layers')||'{}'))}catch(e){}
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const majById={};D.majors.forEach(m=>majById[m.id]=m);
+const route=D.path.concat(D.est.slice(1));const rdist=D.dist.concat(D.edist.slice(1));
+const tidalAt=D.dist[D.dist.length-1],total=D.edist[D.edist.length-1];
+const BTMAJ=(()=>{return null})();
+function load(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=src})}
+function hsl(h,s,l){h/=360;const f=n=>{const k=(n+h*12)%12,a=s*Math.min(l,1-l);return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))))};return [f(0),f(8),f(4)]}
+function parseColor(c){const t=document.createElement('canvas').getContext('2d');t.fillStyle=c;const v=t.fillStyle;if(v[0]==='#')return [parseInt(v.slice(1,3),16),parseInt(v.slice(3,5),16),parseInt(v.slice(5,7),16)];return v.match(/\d+/g).slice(0,3).map(Number)}
+function where(m){if(m.kind==='sea')return m.near?`reaches tidal water, out to sea at the ${m.near.replace(/,.*$/,'')}`:'reaches tidal water';return `leaves the map to the ${m.side}`}
+function buildCat(){const n=PACK.w,mh=PACK.h,d=PACK.d;catCv=document.createElement('canvas');catCv.width=n;catCv.height=mh;const g=catCv.getContext('2d');const im=g.createImageData(n,mh);
+  for(let y=0;y<mh;y++)for(let x=0;x<n;x++){const k=y*n+x,b=d[k*4+2];if(!b||b===255)continue;const edge=(x+1<n&&d[(k+1)*4+2]!==b&&d[(k+1)*4+2]!==255)||(y+1<mh&&d[(k+n)*4+2]!==b&&d[(k+n)*4+2]!==255);
+    const [r,gg,bb]=hsl(HUES[(b-1)%HUES.length],.6,edge?.28:.5);const a=edge?210:(SEL?(b===SEL?120:22):70);im.data[k*4]=r;im.data[k*4+1]=gg;im.data[k*4+2]=bb;im.data[k*4+3]=a}
+  g.putImageData(im,0,0)}
+function buildCon(){conCv=document.createElement('canvas');conCv.width=IMG.con.width;conCv.height=IMG.con.height;const g=conCv.getContext('2d');g.drawImage(IMG.con,0,0);
+  const im=g.getImageData(0,0,conCv.width,conCv.height),rgb=parseColor(css('--contour'));for(let i=0;i<im.data.length;i+=4){const a=im.data[i];im.data[i]=rgb[0];im.data[i+1]=rgb[1];im.data[i+2]=rgb[2];im.data[i+3]=a}g.putImageData(im,0,0)}
+function fit(){const s=Math.min(W/(MW+20),H/(MH+20));view={s,x:(W-MW*s)/2,y:(H-MH*s)/2}}
+function fitBT(){const xs=D.btc.map(q=>q[0]),ys=D.btc.map(q=>q[1]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);const s=Math.min(W/(x1-x0+80),H/(y1-y0+80));view={s,x:W/2-(x0+x1)/2*s,y:H/2-(y0+y1)/2*s}}
+function resize(){const r=cv.getBoundingClientRect();DPR=Math.min(2,devicePixelRatio||1);W=r.width;H=r.height;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);draw()}
+function line(pl){ctx.beginPath();ctx.moveTo(pl[0]+.5,pl[1]+.5);for(let i=2;i<pl.length;i+=2)ctx.lineTo(pl[i]+.5,pl[i+1]+.5)}
+function poly(p){ctx.beginPath();p.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath()}
+function draw(){if(!IMG.relief)return;ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=css('--chip');ctx.fillRect(0,0,W,H);
+  ctx.setTransform(DPR*view.s,0,0,DPR*view.s,DPR*view.x,DPR*view.y);const px=1/view.s;
+  ctx.imageSmoothingEnabled=true;ctx.drawImage(L.base==='hill'?IMG.hill:IMG.relief,0,0,MW,MH);
+  if(L.cat&&catCv){ctx.imageSmoothingEnabled=false;ctx.drawImage(catCv,0,0,MW,MH);ctx.imageSmoothingEnabled=true}
+  if(L.con&&conCv){ctx.globalAlpha=.6;ctx.drawImage(conCv,0,0,MW,MH);ctx.globalAlpha=1}
+  if(L.str){ctx.strokeStyle=css('--water');ctx.lineCap='round';ctx.lineJoin='round';const wd=[0.9,1.6,2.6,3.8];for(const [k,ls] of Object.entries(D.streams)){ctx.lineWidth=Math.max(wd[k]*px,wd[k]*0.35);for(const pl of ls){line(pl);ctx.stroke()}}}
+  const bt=css('--bt');ctx.strokeStyle=bt;ctx.lineWidth=2*px;ctx.setLineDash([6*px,4*px]);poly(D.btc);ctx.stroke();ctx.setLineDash([]);ctx.lineWidth=2.5*px;poly(D.lot);ctx.stroke();
+  if(L.route){const rc=css('--route');ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=css('--panel');ctx.lineWidth=7*px;line(D.path.flat());ctx.stroke();ctx.strokeStyle=rc;ctx.lineWidth=4*px;line(D.path.flat());ctx.stroke();
+    ctx.setLineDash([7*px,5*px]);ctx.lineWidth=3.5*px;line(D.est.flat());ctx.stroke();ctx.setLineDash([]);
+    const km=[5,10,15,20,25,30];ctx.font=`600 ${11*px}px "IBM Plex Sans",sans-serif`;ctx.textAlign='left';ctx.textBaseline='middle';
+    for(const k of km){const i=rdist.findIndex(d=>d>=k*1000);if(i<0)continue;const [x,y]=route[i];ctx.beginPath();ctx.arc(x+.5,y+.5,4*px,0,7);ctx.fillStyle=rc;ctx.fill();ctx.lineWidth=1.5*px;ctx.strokeStyle=css('--panel');ctx.stroke();label(k+' km',x+8*px,y,rc)}
+    const e=D.est[D.est.length-1];label('to the sea',e[0]+8*px,e[1],rc);const s=D.path[0];label('Bright Tree',s[0]+10*px,s[1]+12*px,bt)}
+  if(L.pl){ctx.font=`600 ${12*px}px "Barlow Condensed",sans-serif`;for(const [n,x,y] of D.places){ctx.beginPath();ctx.arc(x,y,2.5*px,0,7);ctx.fillStyle=css('--ink');ctx.fill();label(n,x+5*px,y-1*px,css('--ink'))}}
+  scaleBar()}
+function label(t,x,y,c){ctx.lineWidth=3/view.s;ctx.strokeStyle=css('--panel');ctx.strokeText(t,x,y);ctx.fillStyle=c;ctx.fillText(t,x,y)}
+function scaleBar(){const want=110/(view.s/R);const steps=[100,200,250,500,1000,2000,2500,5000,10000];const m=steps.find(s=>s>=want*.6)||10000;$('#scale').innerHTML=`${m>=1000?m/1000+' km':m+' m'}<i style="width:${m/R*view.s}px"></i>`}
+function readAt(cx,cy){const x=(cx-view.x)/view.s,y=(cy-view.y)/view.s;if(!PACK||x<0||y<0||x>=MW||y>=MH){$('#read').textContent='Outside the mapped area';return}
+  const n=PACK.w,i=Math.min(n-1,Math.floor(x/2)),j=Math.min(PACK.h-1,Math.floor(y/2)),d=PACK.d,k=j*n+i,z=(d[k*4]*256+d[k*4+1])/10,b=d[k*4+2];
+  if(b===255){$('#read').textContent='Sea or tidal water';return}
+  const M=majById[b];$('#read').innerHTML=`<b>${z.toFixed(0)} m</b> above sea level<br>`+(M?`Catchment ${M.id} (${Math.round(M.km2)} km²): ${where(M)}`:'Small coastal or edge catchment')}
+function profile(){const s=$('#prof'),w=320,h=150,ml=34,mr=8,mt=10,mb=26;const zmax=Math.ceil(Math.max(...D.z)/10)*10;const X=d=>ml+(w-ml-mr)*d/total,Y=z=>mt+(h-mt-mb)*(1-z/zmax);
+  const ink=css('--muted'),rc=css('--route'),ln=css('--line');let g='';
+  for(let z=0;z<=zmax;z+=Math.max(10,Math.round(zmax/4/10)*10)){g+=`<line x1="${ml}" x2="${w-mr}" y1="${Y(z)}" y2="${Y(z)}" stroke="${ln}" stroke-width="1"/><text x="${ml-5}" y="${Y(z)+3.5}" font-size="10" text-anchor="end" fill="${ink}" font-family="IBM Plex Mono,monospace">${z}</text>`}
+  for(let k=0;k<=total/1000;k+=5){g+=`<text x="${X(k*1000)}" y="${h-10}" font-size="10" text-anchor="middle" fill="${ink}" font-family="IBM Plex Mono,monospace">${k}</text>`}
+  g+=`<text x="${w-mr}" y="${h-1}" font-size="10" text-anchor="end" fill="${ink}">km along the water</text><text x="2" y="9" font-size="10" fill="${ink}">m</text>`;
+  const pts=D.dist.map((d,i)=>`${X(d).toFixed(1)},${Y(D.z[i]).toFixed(1)}`).join(' ');
+  g+=`<polygon points="${X(0)},${Y(0)} ${pts} ${X(tidalAt)},${Y(0)}" fill="${rc}" fill-opacity=".14"/><polyline points="${pts}" fill="none" stroke="${rc}" stroke-width="2"/>`;
+  g+=`<line x1="${X(tidalAt)}" x2="${X(total)}" y1="${Y(0)}" y2="${Y(0)}" stroke="${rc}" stroke-width="2" stroke-dasharray="5 4"/><line x1="${X(tidalAt)}" x2="${X(tidalAt)}" y1="${mt}" y2="${Y(0)}" stroke="${ln}" stroke-dasharray="2 3"/><text x="${X(tidalAt)+3}" y="${mt+9}" font-size="10" fill="${ink}">tidal water</text>`;
+  const ie=D.dist[nearestIdx('Eudlo')];g+=`<circle cx="${X(ie)}" cy="${Y(D.z[nearestIdx('Eudlo')])}" r="3" fill="${rc}"/><text x="${X(ie)+5}" y="${Y(D.z[nearestIdx('Eudlo')])-4}" font-size="10" fill="${ink}">near Eudlo</text>`;
+  s.innerHTML=g}
+function nearestIdx(name){const p=D.places.find(q=>q[0]===name);let bi=0,bd=1e9;D.path.forEach(([x,y],i)=>{const d=Math.hypot(x-p[1],y-p[2]);if(d<bd){bd=d;bi=i}});return bi}
+function summary(){const fall=Math.round(D.z[0]);$('#lead').innerHTML=`Water leaving Bright Tree heads <b>north past Eudlo</b>, likely along Eudlo Creek, then east into the tidal reaches of the <b>Maroochy River</b> and out to sea near Maroochydore.`;
+  $('#stats').innerHTML=`<div><b>${(tidalAt/1000).toFixed(0)} km</b><span>of creek to tidal water</span></div><div><b>${(total/1000).toFixed(0)} km</b><span>to the ocean</span></div><div><b>${fall} m</b><span>fall from the boundary</span></div>`}
+function list(){const big=D.majors.filter(m=>m.km2>=4);const btm=(()=>{const t=D.est[0];const n=PACK.w;let best=null;return null})();
+  $('#maj').innerHTML=big.map(m=>`<button data-m="${m.id}" aria-pressed="${SEL===m.id}"><span class="sw" style="background:hsl(${HUES[(m.id-1)%HUES.length]},60%,50%)"></span><span>Catchment ${m.id}${m.id===D.btMaj?'<span class="pill">Bright Tree is here</span>':''}<small>${where(m)}</small></span><span class="ha">${Math.round(m.km2)} km²</span></button>`).join('');
+  document.querySelectorAll('#maj button').forEach(b=>b.onclick=()=>{const m=+b.dataset.m;SEL=SEL===m?0:m;buildCat();list();draw()})}
+function zoom(f,cx=W/2,cy=H/2){const s=Math.max(.05,Math.min(40,view.s*f));view.x=cx-(cx-view.x)*s/view.s;view.y=cy-(cy-view.y)*s/view.s;view.s=s;draw()}
+const pts=new Map();
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.offsetX,e.offsetY]);readAt(e.offsetX,e.offsetY)});
+cv.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId)){readAt(e.offsetX,e.offsetY);return}const p=pts.get(e.pointerId);
+  if(pts.size===1){view.x+=e.offsetX-p[0];view.y+=e.offsetY-p[1];pts.set(e.pointerId,[e.offsetX,e.offsetY]);draw()}
+  else if(pts.size===2){const [a,b]=[...pts.values()];const d0=Math.hypot(a[0]-b[0],a[1]-b[1]);pts.set(e.pointerId,[e.offsetX,e.offsetY]);const [c,dd]=[...pts.values()];const d1=Math.hypot(c[0]-dd[0],c[1]-dd[1]);if(d0>0)zoom(d1/d0,(c[0]+dd[0])/2,(c[1]+dd[1])/2)}});
+const up=e=>pts.delete(e.pointerId);cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+cv.addEventListener('wheel',e=>{e.preventDefault();zoom(Math.exp(-e.deltaY*.0015),e.offsetX,e.offsetY)},{passive:false});
+$('#zi').onclick=()=>zoom(1.6);$('#zo').onclick=()=>zoom(1/1.6);$('#zf').onclick=()=>{fit();draw()};$('#zb').onclick=()=>{fitBT();draw()};
+document.querySelectorAll('#base button').forEach(b=>b.onclick=()=>{L.base=b.dataset.v;document.querySelectorAll('#base button').forEach(x=>x.setAttribute('aria-pressed',x===b));save();draw()});
+for(const [id,k] of [['lRoute','route'],['lStr','str'],['lCat','cat'],['lCon','con'],['lPl','pl']]){const el=$('#'+id);el.checked=!!L[k];el.onchange=()=>{L[k]=el.checked?1:0;save();draw()}}
+function save(){try{localStorage.setItem('btw.layers',JSON.stringify(L))}catch(e){}}
+const retheme=()=>{buildCon();profile();draw()};matchMedia('(prefers-color-scheme: dark)').addEventListener('change',retheme);
+new MutationObserver(retheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+addEventListener('resize',resize);
+(async()=>{const [rl,hl,cn,pk]=await Promise.all([load(SRC.relief),load(SRC.hill),load(SRC.con),load(SRC.pack)]);IMG={relief:rl,hill:hl,con:cn};
+  const t=document.createElement('canvas');t.width=pk.width;t.height=pk.height;const g=t.getContext('2d',{willReadFrequently:true});g.drawImage(pk,0,0);PACK={w:pk.width,h:pk.height,d:g.getImageData(0,0,pk.width,pk.height).data};
+  {const [x,y]=D.path[0];const k=Math.floor(y/2)*PACK.w+Math.floor(x/2);D.btMaj=PACK.d[k*4+2]}
+  document.querySelectorAll('#base button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===L.base));
+  summary();buildCat();buildCon();list();profile();const r=cv.getBoundingClientRect();W=r.width;H=r.height;
+  const xs=route.map(q=>q[0]),ys=route.map(q=>q[1]);const x0=Math.min(...xs)-120,x1=Math.max(...xs)+120,y0=Math.min(...ys)-120,y1=Math.max(...ys)+120;const s=Math.min(W/(x1-x0),H/(y1-y0));view={s,x:W/2-(x0+x1)/2*s,y:H/2-(y0+y1)/2*s};resize()})();
+</script>

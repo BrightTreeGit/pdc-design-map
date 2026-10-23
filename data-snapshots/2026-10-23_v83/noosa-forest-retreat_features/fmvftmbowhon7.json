@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-19T22:23:25.616Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1027.9,
+        811.7
+      ],
+      [
+        1041.4,
+        811.7
+      ],
+      [
+        1041.4,
+        833.4
+      ],
+      [
+        1027.9,
+        833.4
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · Orchard",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-19T22:23:25.616Z"
+}

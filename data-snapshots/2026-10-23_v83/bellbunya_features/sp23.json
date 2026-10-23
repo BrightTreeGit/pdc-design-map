@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T00:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1047.1,
+        1312.9
+      ],
+      [
+        1042.3,
+        1305.8
+      ],
+      [
+        1049.4,
+        1300.9
+      ],
+      [
+        1054.2,
+        1308.1
+      ]
+    ]
+  },
+  "kind": "futurebuilding",
+  "name": "Proposed accommodation building 10",
+  "notes": "On the site plan: design to be confirmed.",
+  "source": "site plan",
+  "stage": "y5",
+  "status": "proposed",
+  "updatedAt": "2026-10-20T00:00:00.000Z"
+}

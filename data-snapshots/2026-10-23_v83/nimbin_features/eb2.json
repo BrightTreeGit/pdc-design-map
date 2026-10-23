@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-10-20T04:35:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        572,
+        830
+      ],
+      [
+        590,
+        831.7
+      ],
+      [
+        589.2,
+        840
+      ],
+      [
+        571.3,
+        838.3
+      ]
+    ]
+  },
+  "kind": "cabin",
+  "name": "Cabin",
+  "notes": "Existing cabin near the north boundary, traced from the NSW aerial photo.",
+  "roof": true,
+  "source": "traced from aerial",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-20T04:35:00.000Z"
+}
