@@ -2465,11 +2465,28 @@ function setHid(id,h){const s=hid();h?s.add(id):s.delete(id);lsSet('hide',[...s]
 function fHidden(f){if(!hid().size)return false;let id=FID.get(f);if(id===undefined){fidMap();id=FID.get(f)}return id!==undefined&&HIDE.has(id)}
 const WATER_KINDS=['pond','damwall','rockpool'];
 function pondML(f){const m=/([0-9]+(?:\.[0-9]+)?)\s*ML/i.exec(f.notes||'');if(m)return {ml:+m[1],est:false};if(f.kind==='pond'&&f.geom.g==='polygon'){return {ml:polyArea(f.geom.pts)*1.2/1000,est:true}}if(f.kind==='rockpool'&&f.geom.g==='polygon')return {ml:polyArea(f.geom.pts)*0.8/1000,est:true};return null}
+/* combined catchment of the ticked dams: each cell counted once, so dams in a chain (an upper dam
+   inside a lower dam's catchment) don't double the area */
+let DCU=null;
+function damTargets(){const out=[];
+ const cellsOf=(poly,line)=>{const S=new Set();const add=(x,y)=>{const c=Math.floor(x/2),r=Math.floor(y/2);if(c>=0&&r>=0&&c<1000&&r<1000)S.add(r*1000+c)};
+  if(poly&&poly.length>2){const xs=poly.map(q=>q[0]),ys=poly.map(q=>q[1]);for(let y=Math.floor(Math.min(...ys)/2)*2+1;y<=Math.max(...ys);y+=2)for(let x=Math.floor(Math.min(...xs)/2)*2+1;x<=Math.max(...xs);x+=2)if(inPoly([x,y],poly))add(x,y);for(const q of poly)add(q[0],q[1])}
+  if(line)for(let a=1;a<line.length;a++){const p=line[a-1],q=line[a],n=Math.max(1,Math.ceil(dist(p,q)));for(let k=0;k<=n;k++)add(p[0]+(q[0]-p[0])*k/n,p[1]+(q[1]-p[1])*k/n)}
+  return [...S]};
+ for(const [i,f] of features){if(!['pond','rockpool'].includes(f.kind)||isHid(i)||f.geom.g!=='polygon')continue;out.push({key:i,name:f.name||KINDS[f.kind].label,cells:cellsOf(f.geom.pts)})}
+ if(PROS)for(const p of PROS.items){if(p.kind!=='pond'||isHid('pros:'+p.id))continue;out.push({key:'pros:'+p.id,name:p.id,cells:cellsOf(p.poly,p.wall)})}
+ return out}
+function damCatchUnion(){if(!EXTRA||!EXTRA.d8)return null;const D=damTargets();if(!D.length)return null;const key=D.map(d=>d.key).join('|');if(DCU&&DCU.key===key)return DCU;
+ const N=1000,d8=EXTRA.d8,own=D.map(d=>{const up=new Uint8Array(N*N);const q=[];for(const i of d.cells){if(!up[i]){up[i]=1;q.push(i)}}
+   while(q.length){const c=q.pop(),r=(c/N)|0,cc=c%N;for(let k=0;k<8;k++){const nr=r+D8OFF[k][0],nc=cc+D8OFF[k][1];if(nr<0||nc<0||nr>=N||nc>=N)continue;const n=nr*N+nc;if(up[n])continue;const code=d8[n];if(code<8&&nr+D8OFF[code][0]===r&&nc+D8OFF[code][1]===cc){up[n]=1;q.push(n)}}}return up});
+ const uni=new Uint8Array(N*N);own.forEach(u=>{for(let i=0;i<N*N;i++)if(u[i])uni[i]=1});let cnt=0;for(let i=0;i<N*N;i++)cnt+=uni[i];
+ const per=D.map((d,j)=>{let c=0;const u=own[j];for(let i=0;i<N*N;i++)c+=u[i];const inside=D.some((e,k)=>k!==j&&d.cells.length&&d.cells.filter(i=>own[k][i]).length>d.cells.length/2);return {name:d.name,ha:c*4/1e4,inside}});
+ DCU={key,ha:cnt*4/1e4,sum:per.reduce((s,x)=>s+x.ha,0),per,ends:per.filter(x=>!x.inside).map(x=>x.name)};return DCU}
 function damTotHTML(){let n=0,ml=0,est=false,ha=0;
  for(const [i,f] of features){if(!['pond','rockpool'].includes(f.kind)||isHid(i))continue;const v=pondML(f);if(!v)continue;n++;ml+=v.ml;est=est||v.est}
  if(PROS)for(const p of PROS.items){if(p.kind!=='pond'||isHid('pros:'+p.id))continue;n++;ml+=p.ml;ha+=p.catchHa||0}
  if(!n)return '<p class="hint">Tick dams above to add up their storage.</p>';
- return `<div class="row" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,#2d8fd5 12%,transparent)"><span><b>${n} selected: about ${ml<10?ml.toFixed(1):Math.round(ml)} ML</b> (${Math.round(ml*1000).toLocaleString()} m³, ${(Math.round(ml*1e3)*1000).toLocaleString()} L)${ha?` · ${ha.toFixed(1)} ha of catchment above the prospects (may overlap where ponds sit in a chain)`:''}${est?' · drawn ponds without a volume are estimated at 1.2 m average depth':''}</span></div>`}
+ return `<div class="row" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,#2d8fd5 12%,transparent)"><span><b>${n} selected: about ${ml<10?ml.toFixed(1):Math.round(ml)} ML</b> (${Math.round(ml*1000).toLocaleString()} m³, ${(Math.round(ml*1e3)*1000).toLocaleString()} L)${(()=>{const u=damCatchUnion();if(!u)return ha?` · ${ha.toFixed(1)} ha of catchment above the prospects (may overlap where ponds sit in a chain)`:'';return ` · <b>${u.ha.toFixed(1)} ha</b> of land drains into them${u.sum>u.ha*1.05?`, counted once: dams in a chain share it (adding each dam's own catchment would give ${u.sum.toFixed(1)} ha). The lowest dam${u.ends.length>1?'s':''} in each chain: ${u.ends.map(esc).join(', ')}`:''}`})()}${est?' · drawn ponds without a volume are estimated at 1.2 m average depth':''}</span></div>`}
 
 /* ---- dam water balance: will the ticked dams last the dry season? (monthly, 2-year spin-up) ----
    inflow = rain on the catchment x a runoff share that rises in wet months; losses = open-water
@@ -2483,7 +2500,7 @@ function damPool(){const out=[];const acc=hyAcc();
   out.push({name:f.name||KINDS[f.kind].label,ml:v.ml,area:polyArea(f.geom.pts),catchM2:Math.max(A,polyArea(f.geom.pts))})}
  if(PROS)for(const p of PROS.items){if(p.kind!=='pond'||isHid('pros:'+p.id))continue;out.push({name:p.label,ml:p.ml,area:p.poly?polyArea(p.poly):p.ml*1000/1.5,catchM2:(p.catchHa||0)*1e4})}
  return out}
-function damSim(rain){const D=damPool();if(!D.length)return null;const cap=D.reduce((s,d)=>s+d.ml*1e6,0),Af=D.reduce((s,d)=>s+d.area,0),C=D.reduce((s,d)=>s+d.catchM2,0);
+function damSim(rain){const D=damPool();if(!D.length)return null;const cap=D.reduce((s,d)=>s+d.ml*1e6,0),Af=D.reduce((s,d)=>s+d.area,0),U=damCatchUnion(),C=U?U.ha*1e4:D.reduce((s,d)=>s+d.catchM2,0);
  let S=cap;const out=[];for(let yr=0;yr<2;yr++)for(let k=0;k<12;k++){const m=(k+4)%12;const A=Af*Math.pow(Math.max(S,0)/cap,2/3);
   const inflow=rain[m]*runoffShare(rain[m])*Math.max(C-Af,0)+rain[m]*A,evap=0.8*PAN_SEQ[m]*A,seep=(+DWB.seep||0)*MDAYS[m]*A,use=(+DWB.use||0)*MDAYS[m];
   let s=S+inflow-evap-seep-use,over=0;if(s>cap){over=s-cap;s=cap}if(s<0)s=0;S=s;if(yr===1)out.push({m,inflow,evap,seep,use,end:S,pct:S/cap,over})}
