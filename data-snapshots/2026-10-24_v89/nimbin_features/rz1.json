@@ -1,0 +1,92 @@
+{
+  "createdAt": "2026-10-20T04:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        605,
+        922
+      ],
+      [
+        589,
+        922
+      ],
+      [
+        586,
+        919
+      ],
+      [
+        588,
+        889
+      ],
+      [
+        597,
+        894
+      ],
+      [
+        601,
+        892
+      ],
+      [
+        620,
+        871
+      ],
+      [
+        596,
+        845
+      ],
+      [
+        604,
+        835
+      ],
+      [
+        593,
+        820
+      ],
+      [
+        621,
+        828
+      ],
+      [
+        622,
+        841
+      ],
+      [
+        633,
+        842
+      ],
+      [
+        644,
+        853
+      ],
+      [
+        648,
+        863
+      ],
+      [
+        648,
+        879
+      ],
+      [
+        644,
+        889
+      ],
+      [
+        615,
+        918
+      ],
+      [
+        605,
+        922
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Zone 1 · Daily",
+  "notes": "Recommended draft zone from distance to the house, slope and height: reshape freely. Within about 35 m of the house: kitchen garden, herbs, nursery, compost, chickens.",
+  "source": "recommended plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T04:30:00.000Z"
+}
