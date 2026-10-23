@@ -401,7 +401,7 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 /* ---------------- data loading ---------------- */
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
-let CANOPY=null,NICHE=null,HYDRO=null;
+let CANOPY=null,NICHE=null,HYDRO=null,VEG=null;
 const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
 function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
@@ -450,7 +450,7 @@ async function boot(){renderSiteSel();
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
   try{const hy=await fetch(SB+'hydro.json');HYDRO=hy.ok?await hy.json():null}catch(e){HYDRO=null}
   if(SITEDEF.niche){imgs.push('niche.png');try{NICHE=await (await fetch(SB+'niche.json')).json()}catch(e){NICHE=null}}
-  if(SITEDEF.canopy){imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
+  if(SITEDEF.canopy){try{const vr=await fetch(SB+'veg.json');VEG=vr.ok?await vr.json():null;if(VEG)imgs.push('veg.png')}catch(e){VEG=null}imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
   if(SITEDEF.history){try{PH.data=await (await fetch(SB+'history/history.json')).json();PH.i=PH.data.runs.length-1}catch(e){PH.data=null}}
   const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],SB+f)));
   applySite(); buildPaths(); fitLot();
@@ -2336,7 +2336,7 @@ function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);if(k==='lot'&&$('#z
 const OVERLAYS=[
  {grp:'Light & climate',items:[['shadow','Shade at a time'],['aspect','Aspect'],['sun_winter','Winter sun'],['sun_equinox','Equinox sun'],['sun_summer','Summer sun'],['cold','Cold air / frost']]},
  {grp:'Land & risk',items:[['slope','Slope'],['wet','Wetness: where water gathers'],['erosion','Erosion risk if bare'],['fire','Fire run'],['change_2008','Ground change since 2008'],['change_2014','Ground change since 2014']]}];
-const OVNAME={productivity:'Growing power: tree growth vs typical, 2008–2022',light_winter:'Light reaching the ground · winter',light_equinox:'Light reaching the ground · equinox',canopy_h:'Canopy height (2022)',canopy_change:'Canopy growth 2008–2022',understorey:'Dense understorey (2022)',fuel:'Fuel structure (relative, 2022)',shadow:'Shade at a chosen time',none:'None',aspect:'Aspect',sun_winter:'Winter sun hours',sun_equinox:'Equinox sun hours',sun_summer:'Summer sun hours',cold:'Cold air pooling',slope:'Slope',fire:'Fire run potential',wet:'Wetness: where water gathers',erosion:'Erosion risk if the ground were bare',change_2008:'Ground change since 2008',change_2014:'Ground change since 2014'};
+const OVNAME={productivity:'Growing power: tree growth vs typical, 2008–2022',light_winter:'Light reaching the ground · winter',light_equinox:'Light reaching the ground · equinox',canopy_h:'Canopy height (2022)',canopy_change:'Canopy growth 2008–2022',understorey:'Dense understorey (2022)',fuel:'Fuel structure (relative, 2022)',shadow:'Shade at a chosen time',none:'None',aspect:'Aspect',sun_winter:'Winter sun hours',sun_equinox:'Equinox sun hours',sun_summer:'Summer sun hours',cold:'Cold air pooling',slope:'Slope',fire:'Fire run potential',veg:'Vegetation zones (forest height and gaps)',wet:'Wetness: where water gathers',erosion:'Erosion risk if the ground were bare',change_2008:'Ground change since 2008',change_2014:'Ground change since 2014'};
 function sec(id,title,body,open=true){let st={};try{st=lsGet('bt.sec',{})}catch(e){}const o=st[id]??open;return `<details class="sec" data-sec="${id}" ${o?'open':''}><summary>${title}</summary><div class="secbody">${body}</div></details>`}
 function wireSecs(el){el.querySelectorAll('details.sec').forEach(d=>d.addEventListener('toggle',()=>{const st=lsGet('bt.sec',{});st[d.dataset.sec]=d.open;lsSet('bt.sec',st)}))}
 function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="${id}"`:''}>${opts.map(([k,l])=>`<button aria-pressed="${cur===k}" data-v="${k}">${l}</button>`).join('')}</div>`}
@@ -2354,7 +2354,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    sec('dams','Dams and ponds (show / hide each)',`<div id="damSec">${damsHTML()}</div>`)+
    sec('analysis','Terrain analysis',`${segHTML('',[['none','None']],layers.overlay,'ovs')}
     ${OVERLAYS.map(g=>`<div class="sub2">${g.grp}</div>${segHTML('',g.items,layers.overlay,'ovs')}`).join('')}
-    <div class="sub2">Forest${CANOPY?' · LiDAR 2008–2022':''}</div>${CANOPY?segHTML('',[['canopy_h','Canopy height & tall trees'],['canopy_change','Canopy growth since 2008'],['productivity','Growing power (growth vs typical)'],['understorey','Dense understorey'],['fuel','Fuel structure'],['light_winter','Light at ground · winter'],['light_equinox','Light at ground · equinox']].concat(NICHE?[['niche','Planting niches (light, slope, moisture, frost)']]:[]),layers.overlay,'ovs'):'<div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>'}
+    <div class="sub2">Forest${CANOPY?' · LiDAR 2008–2022':''}</div>${CANOPY?segHTML('',(VEG?[['veg','Vegetation zones (forest height and gaps)']]:[]).concat([['canopy_h','Canopy height & tall trees'],['canopy_change','Canopy growth since 2008'],['productivity','Growing power (growth vs typical)'],['understorey','Dense understorey'],['fuel','Fuel structure'],['light_winter','Light at ground · winter'],['light_equinox','Light at ground · equinox']].concat(NICHE?[['niche','Planting niches (light, slope, moisture, frost)']]:[])),layers.overlay,'ovs'):'<div class="seg"><button disabled title="Needs the LiDAR treetop surface (DSM)">Canopy height · needs treetop data</button></div>'}
     <div id="shWrap">${layers.overlay==='shadow'?shadowCtl():''}</div>
     <div class="row"><label for="ovop">Overlay strength</label><input type="range" id="ovop" min="0.2" max="1" step="0.05" value="${layers.ovOp}"></div>
     <div id="ovLegend" class="hint"></div>`)+
@@ -2369,6 +2369,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    cold:'Valley floors where cold air settles on still winter nights. Frost-tender plants belong upslope on the thermal belt.',
    fire:'Where terrain alone would speed a fire: steep slopes facing the hot, dry north-west to west winds of late winter and spring (fire speed roughly doubles with every 10° of upslope). It ignores fuel, so read it with the canopy and your fire plan. A design aid, not a bushfire rating.',
    none:''};
+  if(VEG){legends.veg=`<div class="legend">${VEG.classes.filter(k=>k.lotShare>0.001).map(k=>`<span title="${esc(k.note)}"><i class="swatch" style="background:rgba(${k.rgba[0]},${k.rgba[1]},${k.rgba[2]},${(k.rgba[3]/255).toFixed(2)})"></i>${esc(k.label)} · ${k.lotHa} ha</span>`).join('')}</div>Zones of the property by the height of the tallest layer, from the LiDAR, with the openings in the canopy picked out. Hover a class for what it means for the design. Hectares are inside the boundary. Read it with Canopy growth and Dense understorey to see where the forest is young, recovering or crowded.`}
   if(HYDRO){const sw=(cl,sh)=>cl.map(([lo,hi,c,lab],i)=>`<span><i class="swatch" style="background:${c?`rgba(${c[0]},${c[1]},${c[2]},${(c[3]/255).toFixed(2)})`:'transparent;border:1px solid #bbb'}"></i>${lab} · ${Math.round(sh[i]*100)}%</span>`).join('');
    legends.wet=`<div class="legend">${sw(HYDRO.wet.classes,HYDRO.wet.lotShare)}</div>Topographic wetness: big uphill catchment plus gentle ground means soil stays moist and water gathers. Percentages are shares of the property. Use it for swales and ponds (the wet lines), water-loving and riparian planting, and to keep buildings, tracks and septic out of the very wet cells. It is shape only: soil type and springs aren't in it.`;
    legends.erosion=`<div class="legend">${sw(HYDRO.erosion.classes,HYDRO.erosion.lotShare)}</div>How hard running water would cut into this ground if it were bare (the terrain part of soil loss, RUSLE slope-length factor). Percentages are shares of the property. Keep the high to extreme areas under permanent cover (trees, grass, mulch), cross them on contour, and check every track, drain and earthwork here. Groundcover cuts real loss by 90% or more.`}
@@ -2396,7 +2397,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
 function srcNote(ov){if(!ov||ov==='none')return '';const st=(T&&T.meta&&T.meta.site)||{};const terr=st.source||'LiDAR terrain';let s;
   if(['slope','aspect','cold','fire','sun_winter','sun_equinox','sun_summer','shadow','wet','erosion'].includes(ov))s=`Computed by the map from ${terr}.`+(ov==='wet'||ov==='erosion'?' Flow routing at 2 m (24 Oct 2026).':'');
   else if(ov.startsWith('change_'))s=`Difference between the ${ov.slice(7)} and ${st.main||'latest'} LiDAR surveys (ELVIS).`;
-  else if(['canopy_h','canopy_change','productivity','understorey','fuel','light_winter','light_equinox','niche'].includes(ov))s=`From the ${(st.years||[]).slice().sort().join(', ')} LiDAR point clouds (ELVIS), computed by the map.`;
+  else if(['veg','canopy_h','canopy_change','productivity','understorey','fuel','light_winter','light_equinox','niche'].includes(ov))s=`From the ${(st.years||[]).slice().sort().join(', ')} LiDAR point clouds (ELVIS), computed by the map.`;
   else return '';return `<div class="hint" style="margin-top:4px">Source: ${esc(s)}</div>`}
 function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.overlay;if(!m||ov==='none'){el.hidden=true;return}
   const sunGrad='linear-gradient(90deg,rgb(30,40,110),rgb(90,70,150) 35%,rgb(220,110,70) 60%,rgb(250,200,70) 85%,rgb(255,245,170))';
