@@ -358,7 +358,7 @@ function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('ac
 const SITES=[
  {id:'bright-tree',name:'Bright Tree (manual)',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true,niche:true},
  {id:'bright-tree-gemini',name:'Bright Tree (auto data)',group:'Comparison',area:'Diamond Valley, Qld · same LiDAR, auto-fetched boundary and rainfall',ready:true,canopy:true},
- {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true},
+ {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true,history:true},
  {id:'nimbin',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW',ready:true},
  {id:'willow-vale',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW',ready:true},
 {id:'willow-vale-team',name:'Willow Vale · team draft (trial)',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct) mapped onto the same data',base:'sites/willow-vale/',ready:true},
@@ -366,7 +366,7 @@ const SITES=[
 {id:'nimbin-combined',name:'Firefly Farm · combined design (trial)',group:'Group 1',area:'Nimbin, NSW · group plan plus review suggestions, whole property',base:'sites/nimbin/',ready:true},
 {id:'nimbin-house-group',name:'Firefly Farm · house area · group draft (trial)',group:'Group 1',area:'Nimbin, NSW · the group plan, house-area boundary',base:'sites/nimbin/',data:'nimbin-group',lot:[528,816,631,816,631,888,528,888],ready:true},
 {id:'nimbin-house-combined',name:'Firefly Farm · house area · combined (trial)',group:'Group 1',area:'Nimbin, NSW · group plan plus suggestions, house-area boundary',base:'sites/nimbin/',data:'nimbin-combined',lot:[528,816,631,816,631,888,528,888],ready:true},
- {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'Trial',area:'Kin Kin, Qld',ready:true},
+ {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'Trial',area:'Kin Kin, Qld',ready:true,history:true},
  {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
  {id:'regenify',name:'Regenify',group:'Trial',area:'Location to come',status:'Location to come'}];
 const SITEID=(()=>{let h='';try{h=(location.hash.match(/site=([\w-]+)/)||[])[1]||''}catch(e){}const s=SITES.find(x=>x.id===h&&x.ready);return s?s.id:'bright-tree'})();
@@ -404,7 +404,7 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 /* ---------------- data loading ---------------- */
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
-let CANOPY=null,NICHE=null;
+let CANOPY=null,NICHE=null,HYDRO=null;
 const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
 function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
@@ -447,10 +447,11 @@ function siteBanner(){return; // banner removed: the site picker shows which sit
 function renderSiteSel(){siteBanner();const el=$('#siteSel');if(!el)return;el.innerHTML=SITES.map(x=>`<option value="${x.id}" ${x.id===SITEID?'selected':''} ${x.ready?'':'disabled'}>${esc(x.name)} · ${esc(x.group)}${x.ready?'':' (coming soon)'}</option>`).join('');el.onchange=()=>{const id=el.value;if(id!==SITEID)switchSite(id)}}
 async function boot(){renderSiteSel();
   resize(); fitLot(); draw();
-  const imgs=['aerial.jpg','relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png'];
+  const imgs=['aerial.jpg','relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png','wet.png','erosion.png'];
   try{T=await (await fetch(SB+'terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
   if(SITEDEF.lot)T.lot=SITEDEF.lot.slice();
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
+  try{const hy=await fetch(SB+'hydro.json');HYDRO=hy.ok?await hy.json():null}catch(e){HYDRO=null}
   if(SITEDEF.niche){imgs.push('niche.png');try{NICHE=await (await fetch(SB+'niche.json')).json()}catch(e){NICHE=null}}
   if(SITEDEF.canopy){imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
   if(SITEDEF.history){try{PH.data=await (await fetch(SB+'history/history.json')).json();PH.i=PH.data.runs.length-1}catch(e){PH.data=null}}
@@ -2308,8 +2309,8 @@ function sheetOpen(){const p=$('#panel');if(isPhone()&&p.classList.contains('min
 function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);if(k==='lot'&&$('#zLot'))$('#zLot').style.opacity=v?1:.45;if(k==='sectors'){if(!v&&selected&&features.get(selected)&&SECTOR_KINDS.has(features.get(selected).kind))selected=null;renderFeatures()}draw()}
 const OVERLAYS=[
  {grp:'Light & climate',items:[['shadow','Shade at a time'],['aspect','Aspect'],['sun_winter','Winter sun'],['sun_equinox','Equinox sun'],['sun_summer','Summer sun'],['cold','Cold air / frost']]},
- {grp:'Land & risk',items:[['slope','Slope'],['fire','Fire run'],['change_2008','Ground change since 2008'],['change_2014','Ground change since 2014']]}];
-const OVNAME={productivity:'Growing power: tree growth vs typical, 2008–2022',light_winter:'Light reaching the ground · winter',light_equinox:'Light reaching the ground · equinox',canopy_h:'Canopy height (2022)',canopy_change:'Canopy growth 2008–2022',understorey:'Dense understorey (2022)',fuel:'Fuel structure (relative, 2022)',shadow:'Shade at a chosen time',none:'None',aspect:'Aspect',sun_winter:'Winter sun hours',sun_equinox:'Equinox sun hours',sun_summer:'Summer sun hours',cold:'Cold air pooling',slope:'Slope',fire:'Fire run potential',change_2008:'Ground change since 2008',change_2014:'Ground change since 2014'};
+ {grp:'Land & risk',items:[['slope','Slope'],['wet','Wetness: where water gathers'],['erosion','Erosion risk if bare'],['fire','Fire run'],['change_2008','Ground change since 2008'],['change_2014','Ground change since 2014']]}];
+const OVNAME={productivity:'Growing power: tree growth vs typical, 2008–2022',light_winter:'Light reaching the ground · winter',light_equinox:'Light reaching the ground · equinox',canopy_h:'Canopy height (2022)',canopy_change:'Canopy growth 2008–2022',understorey:'Dense understorey (2022)',fuel:'Fuel structure (relative, 2022)',shadow:'Shade at a chosen time',none:'None',aspect:'Aspect',sun_winter:'Winter sun hours',sun_equinox:'Equinox sun hours',sun_summer:'Summer sun hours',cold:'Cold air pooling',slope:'Slope',fire:'Fire run potential',wet:'Wetness: where water gathers',erosion:'Erosion risk if the ground were bare',change_2008:'Ground change since 2008',change_2014:'Ground change since 2014'};
 function sec(id,title,body,open=true){let st={};try{st=lsGet('bt.sec',{})}catch(e){}const o=st[id]??open;return `<details class="sec" data-sec="${id}" ${o?'open':''}><summary>${title}</summary><div class="secbody">${body}</div></details>`}
 function wireSecs(el){el.querySelectorAll('details.sec').forEach(d=>d.addEventListener('toggle',()=>{const st=lsGet('bt.sec',{});st[d.dataset.sec]=d.open;lsSet('bt.sec',st)}))}
 function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="${id}"`:''}>${opts.map(([k,l])=>`<button aria-pressed="${cur===k}" data-v="${k}">${l}</button>`).join('')}</div>`}
@@ -2342,6 +2343,9 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    cold:'Valley floors where cold air settles on still winter nights. Frost-tender plants belong upslope on the thermal belt.',
    fire:'Where terrain alone would speed a fire: steep slopes facing the hot, dry north-west to west winds of late winter and spring (fire speed roughly doubles with every 10° of upslope). It ignores fuel, so read it with the canopy and your fire plan. A design aid, not a bushfire rating.',
    none:''};
+  if(HYDRO){const sw=(cl,sh)=>cl.map(([lo,hi,c,lab],i)=>`<span><i class="swatch" style="background:${c?`rgba(${c[0]},${c[1]},${c[2]},${(c[3]/255).toFixed(2)})`:'transparent;border:1px solid #bbb'}"></i>${lab} · ${Math.round(sh[i]*100)}%</span>`).join('');
+   legends.wet=`<div class="legend">${sw(HYDRO.wet.classes,HYDRO.wet.lotShare)}</div>Topographic wetness: big uphill catchment plus gentle ground means soil stays moist and water gathers. Percentages are shares of the property. Use it for swales and ponds (the wet lines), water-loving and riparian planting, and to keep buildings, tracks and septic out of the very wet cells. It is shape only: soil type and springs aren't in it.`;
+   legends.erosion=`<div class="legend">${sw(HYDRO.erosion.classes,HYDRO.erosion.lotShare)}</div>How hard running water would cut into this ground if it were bare (the terrain part of soil loss, RUSLE slope-length factor). Percentages are shares of the property. Keep the high to extreme areas under permanent cover (trees, grass, mulch), cross them on contour, and check every track, drain and earthwork here. Groundcover cuts real loss by 90% or more.`}
   if(CANOPY){const C0=CANOPY,y8=C0.years['2008'],y22=C0.years['2022'],big=C0.trees.filter(t=>t[2]>=40).length;
    legends.canopy_h=`Tree height above the ground from the 2022 LiDAR. Inside the lot the canopy averages ${y22.meanH.toFixed(0)} m tall (top 5% over ${y22.p95.toFixed(0)} m) and covers ${Math.round(y22.cover2*100)}% of the ground. Purple dots mark ${big} emergent trees 40 m or taller inside the lot (of ${C0.trees.length} tops over 30 m): the likeliest habitat and hollow-bearing trees, to keep and check for hollows. A few of the tallest readings may be survey noise; confirm on the ground.`;
    {const rk=treeRisk().size;legends.canopy_h+=` Zoomed in, dashed rings show each big tree's estimated root protection zone (keep pads, trenches and dam walls outside). ${rk?`<b>${rk} big tree${rk>1?'s':''} stand within falling distance of a building, tank or gathering spot you have drawn</b> (yellow-ringed red dots): have an arborist check them.`:'No big tree is within falling distance of the buildings and tanks drawn so far.'}`}
@@ -2354,7 +2358,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    if(C0.productivity){const P=C0.productivity;legends.productivity=`Where trees grew faster or slower than is typical for their size between 2008 and 2022 (each tree compared with others that started at the same height). Green: faster than typical, the sign of better soil moisture, depth and nutrients: the places to give fruit trees, the food forest and nursery plantings. Orange: slower (dry ridges, shallow sandy soil, exposure) or lost height (tree fall). Inside the lot about ${P.aboveHa} ha grows clearly faster than typical and ${P.belowHa} ha clearly slower. Typical growth was about 2 m in 14 years. Match with the soil tests before committing.`}
    legends.fuel=`An indicative, relative fuel-structure rating from the 2022 LiDAR: dense near-ground growth, ladder fuels from 2 to 10 m that let fire climb, and canopy cover. Ranked against the whole map window. Inside the lot: ${C0.fuel.vhighHa} ha very high, ${C0.fuel.highHa} ha high, ${C0.fuel.modHa} ha moderate. Not an official fuel hazard assessment; read it with the Fire run layer and your fire plan.`}
   for(const y of SITE.changeYears||[])legends['change_'+y]=`Ground that has moved since the ${y} survey, after removing survey-wide offsets: red is lower now (cut, erosion, slips, gully incision), blue is higher (fill, deposition, new pads). Faint scatter under forest is survey noise; treat patches as leads to check on the ground.`+(ch&&ch[y]?` Inside the lot: ${ch[y].lotLossHa} ha lowered and ${ch[y].lotGainHa} ha raised by more than 1 m.`:'');
-  const setLeg=()=>{$('#ovLegend').innerHTML=legends[layers.overlay]||'';const sw=$('#shWrap');if(layers.overlay==='shadow'){if(!sw.innerHTML){sw.innerHTML=shadowCtl();wireShadow(el)}computeShadow()}else sw.innerHTML='';mapLegend()};setLeg();if(layers.overlay==='shadow')wireShadow(el);
+  const setLeg=()=>{$('#ovLegend').innerHTML=(legends[layers.overlay]||'')+srcNote(layers.overlay);const sw=$('#shWrap');if(layers.overlay==='shadow'){if(!sw.innerHTML){sw.innerHTML=shadowCtl();wireShadow(el)}computeShadow()}else sw.innerHTML='';mapLegend()};setLeg();if(layers.overlay==='shadow')wireShadow(el);
   el.querySelectorAll('#baseSeg button').forEach(b=>b.onclick=()=>{setLayer('base',b.dataset.v);el.querySelectorAll('#baseSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
   el.querySelectorAll('.ovs button').forEach(b=>b.onclick=()=>{setLayer('overlay',b.dataset.v);el.querySelectorAll('.ovs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===b.dataset.v));setLeg()});
   $('#ovop').oninput=e=>setLayer('ovOp',+e.target.value);
@@ -2362,6 +2366,12 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   const bo=e=>{setLayer('baseOp',+e.target.value);$('#baseopv').textContent=Math.round(layers.baseOp*100)+'%';render()};$('#baseop').oninput=bo;$('#baseop').onchange=bo;
   el.querySelectorAll('input[data-k]').forEach(c=>c.onchange=()=>setLayer(c.dataset.k,c.checked));
   wireImagery(el);wirePH(el);wireDams(el);wirePros(el);wireSecs(el)}
+/* every overlay says where its data comes from (Brett's rule 4) */
+function srcNote(ov){if(!ov||ov==='none')return '';const st=(T&&T.meta&&T.meta.site)||{};const terr=st.source||'LiDAR terrain';let s;
+  if(['slope','aspect','cold','fire','sun_winter','sun_equinox','sun_summer','shadow','wet','erosion'].includes(ov))s=`Computed by the map from ${terr}.`+(ov==='wet'||ov==='erosion'?' Flow routing at 2 m (24 Oct 2026).':'');
+  else if(ov.startsWith('change_'))s=`Difference between the ${ov.slice(7)} and ${st.main||'latest'} LiDAR surveys (ELVIS).`;
+  else if(['canopy_h','canopy_change','productivity','understorey','fuel','light_winter','light_equinox','niche'].includes(ov))s=`From the ${(st.years||[]).slice().sort().join(', ')} LiDAR point clouds (ELVIS), computed by the map.`;
+  else return '';return `<div class="hint" style="margin-top:4px">Source: ${esc(s)}</div>`}
 function mapLegend(){const el=$('#mapLegend');const m=T&&T.meta;const ov=layers.overlay;if(!m||ov==='none'){el.hidden=true;return}
   const sunGrad='linear-gradient(90deg,rgb(30,40,110),rgb(90,70,150) 35%,rgb(220,110,70) 60%,rgb(250,200,70) 85%,rgb(255,245,170))';
   const sw=(c,a=.85)=>`background:rgba(${c[0]},${c[1]},${c[2]},${a})`;let h='';
@@ -2432,15 +2442,48 @@ function damTotHTML(){let n=0,ml=0,est=false,ha=0;
  if(PROS)for(const p of PROS.items){if(p.kind!=='pond'||isHid('pros:'+p.id))continue;n++;ml+=p.ml;ha+=p.catchHa||0}
  if(!n)return '<p class="hint">Tick dams above to add up their storage.</p>';
  return `<div class="row" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,#2d8fd5 12%,transparent)"><span><b>${n} selected: about ${ml<10?ml.toFixed(1):Math.round(ml)} ML</b> (${Math.round(ml*1000).toLocaleString()} m³, ${(Math.round(ml*1e3)*1000).toLocaleString()} L)${ha?` · ${ha.toFixed(1)} ha of catchment above the prospects (may overlap where ponds sit in a chain)`:''}${est?' · drawn ponds without a volume are estimated at 1.2 m average depth':''}</span></div>`}
+
+/* ---- dam water balance: will the ticked dams last the dry season? (monthly, 2-year spin-up) ----
+   inflow = rain on the catchment x a runoff share that rises in wet months; losses = open-water
+   evaporation (0.8 x a regional pan figure) + seepage; use = what you draw off per day. */
+const PAN_SEQ=[190,155,145,115,85,70,80,105,135,165,180,195];   // mm/month, coastal SE Qld / Northern Rivers Class A pan (approx.)
+let DWB=Object.assign({use:0,seep:2,ro:'typ'},lsGet('bt.dwb',{}));
+function runoffShare(P){const k={low:0.6,typ:1,high:1.5}[DWB.ro]||1;return Math.min(0.45,Math.max(0.01,(0.02+0.25*(P-60)/250)*k))}
+function damPool(){const out=[];const acc=hyAcc();
+ for(const [i,f] of features){if(!['pond','rockpool'].includes(f.kind)||isHid(i)||f.geom.g!=='polygon')continue;const v=pondML(f);if(!v)continue;
+  let A=0;if(acc){for(const q of f.geom.pts){const c=Math.floor(q[0]/2),r=Math.floor(q[1]/2);for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++){const rr=r+dr,cc=c+dc;if(rr>=0&&cc>=0&&rr<1000&&cc<1000)A=Math.max(A,acc[rr*1000+cc])}}}
+  out.push({name:f.name||KINDS[f.kind].label,ml:v.ml,area:polyArea(f.geom.pts),catchM2:Math.max(A,polyArea(f.geom.pts))})}
+ if(PROS)for(const p of PROS.items){if(p.kind!=='pond'||isHid('pros:'+p.id))continue;out.push({name:p.label,ml:p.ml,area:p.poly?polyArea(p.poly):p.ml*1000/1.5,catchM2:(p.catchHa||0)*1e4})}
+ return out}
+function damSim(rain){const D=damPool();if(!D.length)return null;const cap=D.reduce((s,d)=>s+d.ml*1e6,0),Af=D.reduce((s,d)=>s+d.area,0),C=D.reduce((s,d)=>s+d.catchM2,0);
+ let S=cap;const out=[];for(let yr=0;yr<2;yr++)for(let k=0;k<12;k++){const m=(k+4)%12;const A=Af*Math.pow(Math.max(S,0)/cap,2/3);
+  const inflow=rain[m]*runoffShare(rain[m])*Math.max(C-Af,0)+rain[m]*A,evap=0.8*PAN_SEQ[m]*A,seep=(+DWB.seep||0)*MDAYS[m]*A,use=(+DWB.use||0)*MDAYS[m];
+  let s=S+inflow-evap-seep-use,over=0;if(s>cap){over=s-cap;s=cap}if(s<0)s=0;S=s;if(yr===1)out.push({m,inflow,evap,seep,use,end:S,pct:S/cap,over})}
+ return {cap,Af,C,months:out,n:D.length}}
+function damWBHTML(){const med=damSim(RAIN.median);if(!med)return '';const dry=damSim(RAIN.median.map(v=>v*0.7)),dr=damSim(RAIN.median.map(v=>v*0.5));
+ const W=300,H=120,bw=W/12,line=(sim,col,dash)=>`<polyline fill="none" stroke="${col}" stroke-width="2" ${dash?'stroke-dasharray="4 3"':''} points="${sim.months.map((x,i)=>`${(i+.5)*bw},${H-16-x.pct*(H-30)}`).join(' ')}"/>`;
+ const lab=sim=>{const lo=sim.months.reduce((a,b)=>b.pct<a.pct?b:a);return lo.pct<0.01?`<b style="color:var(--warn)">runs dry by ${MON[sim.months.find(x=>x.pct<0.01).m]}</b>`:`lowest ${Math.round(lo.pct*100)}% in ${MON[lo.m]}`};
+ const yr=f=>Math.round(med.months.reduce((s,x)=>s+x[f],0)/1e3).toLocaleString();
+ return `<div class="sub2" style="margin-top:10px">Will they last the dry season?</div>
+  <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Storage through the year">${[0,.5,1].map(t=>`<line x1="0" x2="${W}" y1="${H-16-t*(H-30)}" y2="${H-16-t*(H-30)}" stroke="currentColor" stroke-opacity=".12"/><text x="2" y="${H-19-t*(H-30)}" font-size="9" fill="currentColor" fill-opacity=".6">${t*100}%</text>`).join('')}
+  ${med.months.map((x,i)=>`<text x="${(i+.5)*bw}" y="${H-3}" font-size="9" text-anchor="middle" fill="currentColor" fill-opacity=".6">${MON[x.m][0]}</text>`).join('')}${line(med,'#2d8fd5')}${line(dry,'#e0a400',1)}${line(dr,'#c0392b',1)}</svg>
+  <div class="legend"><span><i class="swatch" style="background:#2d8fd5"></i>Typical year: ${lab(med)}</span><span><i class="swatch" style="background:#e0a400"></i>Dry year (70%): ${lab(dry)}</span><span><i class="swatch" style="background:#c0392b"></i>Drought year (50%, like 2019): ${lab(dr)}</span></div>
+  <p class="hint">${(med.C/1e4).toFixed(1)} ha of catchment feeds ${med.n} dam${med.n>1?'s':''} with about ${Math.round(med.Af).toLocaleString()} m² of water surface. In a typical year: about ${yr('inflow')} m³ runs in, ${yr('evap')} m³ evaporates, ${yr('seep')} m³ seeps away and you draw ${yr('use')} m³.</p>
+  <div class="row"><label>Draw-off, litres a day <input type="number" id="dwbUse" min="0" step="500" value="${DWB.use}" style="width:90px"></label></div>
+  <div class="row"><label>Seepage <select id="dwbSeep">${[[0.5,'Sealed or lined (0.5 mm/day)'],[2,'Good clay (2 mm/day)'],[5,'Leaky (5 mm/day)']].map(([v,l])=>`<option value="${v}" ${+DWB.seep===v?'selected':''}>${l}</option>`).join('')}</select></label></div>
+  <div class="row"><label>Catchment runoff <select id="dwbRo">${[['low','Low: deep soil, thick forest'],['typ','Typical: pasture and forest mix'],['high','High: compacted, cleared or rocky']].map(([v,l])=>`<option value="${v}" ${DWB.ro===v?'selected':''}>${l}</option>`).join('')}</select></label></div>
+  <p class="hint">Source: rainfall ${esc(RAIN.station)}${RAIN.period?' ('+esc(RAIN.period)+')':''}, monthly medians; evaporation is a typical coastal SE Queensland / Northern Rivers pan figure x 0.8; catchments from the terrain. A planning estimate: check a big dam with a designer.</p>`}
+function wireDamWB(box){const go=()=>{lsSet('bt.dwb',DWB);const w=box.querySelector('#damWB');if(w){w.innerHTML=damWBHTML();wireDamWB(box)}};
+ const u=box.querySelector('#dwbUse');if(u)u.onchange=()=>{DWB.use=Math.max(0,+u.value||0);go()};const se=box.querySelector('#dwbSeep');if(se)se.onchange=()=>{DWB.seep=+se.value;go()};const ro=box.querySelector('#dwbRo');if(ro)ro.onchange=()=>{DWB.ro=ro.value;go()}}
 function damsHTML(){const mine=[...features.entries()].filter(([i,f])=>WATER_KINDS.includes(f.kind)).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
  const pr=PROS?PROS.items.filter(p=>p.kind==='pond'):[];
  if(!mine.length&&!pr.length)return '<p class="hint">No dams or ponds drawn yet. Draw one with Water → Pond / dam, or switch on the computed prospects.</p>';
  const row=(key,name,sw,extra)=>`<div class="row"><label><input type="checkbox" data-hid="${key}" ${isHid(key)?'':'checked'}><i class="swatch" style="background:${sw}"></i>${esc(name)}${extra||''}</label><button class="btn" data-hz="${key}" style="padding:2px 8px">Zoom</button></div>`;
  return (mine.length?'<div class="sub2">Drawn in the design</div>'+mine.map(([i,f])=>row(i,f.name||KINDS[f.kind].label,KINDS[f.kind].color,f.kind==='pond'?` <span class="pill">${fmtArea(polyArea(f.geom.pts))}</span>`:'')).join(''):'')+
   (pr.length?'<div class="sub2">Computed pond sites (prospects)</div>'+pr.map(p=>row('pros:'+p.id,p.label,'#2d8fd5','')).join('')+(layers.pros?'':'<p class="hint">Prospects are switched off: tick “Prospects” under Water, contours & labels to see them.</p>'):'')+
-  `<div id="damTot">${damTotHTML()}</div>`+`<div class="seg" style="margin-top:6px"><button class="btn" id="damAll">Show all</button><button class="btn" id="damNone">Hide all</button></div><p class="hint">Untick a dam to hide it and leave it out of the totals, to compare options. This only changes your own view, not what others see.</p>`}
+  `<div id="damTot">${damTotHTML()}</div>`+`<div id="damWB">${damWBHTML()}</div>`+`<div class="seg" style="margin-top:6px"><button class="btn" id="damAll">Show all</button><button class="btn" id="damNone">Hide all</button></div><p class="hint">Untick a dam to hide it and leave it out of the totals, to compare options. This only changes your own view, not what others see.</p>`}
 function wireDams(el){const box=el.querySelector('#damSec');if(!box)return;
- const tot=()=>{const t=box.querySelector('#damTot');if(t)t.innerHTML=damTotHTML()};box.querySelectorAll('[data-hid]').forEach(c=>c.onchange=()=>{setHid(c.dataset.hid,!c.checked);renderFeatures();tot()});
+ const tot=()=>{const t=box.querySelector('#damTot');if(t)t.innerHTML=damTotHTML();const w=box.querySelector('#damWB');if(w){w.innerHTML=damWBHTML();wireDamWB(box)}};wireDamWB(box);box.querySelectorAll('[data-hid]').forEach(c=>c.onchange=()=>{setHid(c.dataset.hid,!c.checked);renderFeatures();tot()});
  box.querySelectorAll('[data-hz]').forEach(b=>b.onclick=()=>{const k=b.dataset.hz;let pts;if(k.startsWith('pros:')){const p=PROS.items.find(q=>'pros:'+q.id===k);pts=p.poly||[p.at];if(!layers.pros)setLayer('pros',true)}else{const f=features.get(k);if(!f)return;pts=f.geom.pts||[[f.geom.cx,f.geom.cy]]}
    if(isHid(k)){setHid(k,false);const c=box.querySelector(`[data-hid="${k}"]`);if(c)c.checked=true}
    const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);fitBox(Math.min(...xs)-40,Math.min(...ys)-40,Math.max(...xs)+40,Math.max(...ys)+40);draw()});

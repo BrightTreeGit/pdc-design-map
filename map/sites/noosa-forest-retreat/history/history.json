@@ -1,0 +1,218 @@
+{
+"x0": 549,
+"y0": 516,
+"size": 1000,
+"source": "State of Queensland: TimeSeries AerialOrtho and QImagery historical aerial photography (CC BY 4.0)",
+"runs": [
+{
+"y": 1994,
+"id": 4621,
+"from": "1994-05-21",
+"to": "1994-05-21",
+"res": 2.5,
+"f": "h1994_4621.jpg",
+"name": "Gympie_1994_250cm_9445",
+"cover": 0.94
+},
+{
+"y": 1996,
+"id": 4593,
+"from": "1996-08-01",
+"to": "1996-08-01",
+"res": 0.6,
+"f": "h1996_4593.jpg",
+"name": "Gympie_1996_60cm_9445",
+"cover": 0.94
+},
+{
+"y": 2002,
+"id": 4552,
+"from": "2002-06-27",
+"to": "2002-06-28",
+"res": 1.0,
+"f": "h2002_4552.jpg",
+"name": "Gympie_2002_100cm_9445",
+"cover": 0.94
+},
+{
+"y": 2006,
+"id": 4457,
+"from": "2006-12-01",
+"to": "2006-12-01",
+"res": 0.3,
+"f": "h2006_4457.jpg",
+"name": "Noosa_2006_30cm_SISP_Urban",
+"cover": 0.55
+},
+{
+"y": 2006,
+"id": 4458,
+"from": "2006-12-01",
+"to": "2006-12-01",
+"res": 0.5,
+"f": "h2006_4458.jpg",
+"name": "Noosa_2006_50cm_SISP_Urban",
+"cover": 0.39
+},
+{
+"y": 2008,
+"id": 4694,
+"from": "2008-10-31",
+"to": "2009-06-13",
+"res": 0.5,
+"f": "h2008_4694.jpg",
+"name": "SEQ_2008_2009_50cm_SISP_PeriUrban",
+"cover": 0.94
+},
+{
+"y": 2010,
+"id": 4678,
+"from": "2010-07-20",
+"to": "2010-12-20",
+"res": 0.5,
+"f": "h2010_4678.jpg",
+"name": "Capricorn_Wide_Bay_2010_50cm_SISP_PeriUrban",
+"cover": 0.94
+},
+{
+"y": 2011,
+"id": 4749,
+"from": "2011-09-07",
+"to": "2011-09-16",
+"res": 10,
+"f": "h2011_4749.jpg",
+"name": "Sunshine_Coast_2011_10cm_SISP_LGA_Jul_Sep",
+"cover": 0.94
+},
+{
+"y": 2012,
+"id": 4138,
+"from": "2012-08-04",
+"to": "2012-12-26",
+"res": 10,
+"f": "h2012_4138.jpg",
+"name": "Sunshine_Coast_2012_10cm_SISP_LGA_Aug_Dec",
+"cover": 0.94
+},
+{
+"y": 2013,
+"id": 4070,
+"from": "2013-09-18",
+"to": "2013-09-24",
+"res": 10,
+"f": "h2013_4070.jpg",
+"name": "Sunshine_Coast_2013_10cm_SISP_LGA",
+"cover": 0.94
+},
+{
+"y": 2014,
+"id": 3881,
+"from": "2014-06-29",
+"to": "2014-09-01",
+"res": 0.25,
+"f": "h2014_3881.jpg",
+"name": "Capricorn_Wide_Bay_2014_25cm_SISP_PeriUrban",
+"cover": 0.94
+},
+{
+"y": 2015,
+"id": 3960,
+"from": "2015-04-25",
+"to": "2015-04-26",
+"res": 10,
+"f": "h2015_3960.jpg",
+"name": "Noosa_2015_10cm_SISP_LGA",
+"cover": 0.94
+},
+{
+"y": 2016,
+"id": 3925,
+"from": "2016-07-06",
+"to": "2016-07-06",
+"res": 10,
+"f": "h2016_3925.jpg",
+"name": "Noosa_2016_10cm_SISP_LGA",
+"cover": 0.94
+},
+{
+"y": 2017,
+"id": 3785,
+"from": "2017-06-07",
+"to": "2017-06-25",
+"res": 10,
+"f": "h2017_3785.jpg",
+"name": "Noosa_2017_10cm_SISP_LGA",
+"cover": 0.93
+},
+{
+"y": 2017,
+"id": 3376,
+"from": "2017-07-20",
+"to": "2017-10-27",
+"res": 20,
+"f": "h2017_3376.jpg",
+"name": "Capricorn_Wide_Bay_2017_20cm_SISP_PeriUrban",
+"cover": 0.94
+},
+{
+"y": 2018,
+"id": 3687,
+"from": "2018-05-14",
+"to": "2018-05-14",
+"res": 10,
+"f": "h2018_3687.jpg",
+"name": "Noosa_2018_10cm_SISP_LGA",
+"cover": 0.94
+},
+{
+"y": 2019,
+"id": 4885,
+"from": "2019-05-05",
+"to": "2019-05-28",
+"res": 10,
+"f": "h2019_4885.jpg",
+"name": "Noosa_2019_10cm_SISP_LGA",
+"cover": 0.94
+},
+{
+"y": 2020,
+"id": 5194,
+"from": "2020-05-02",
+"to": "2020-05-02",
+"res": 10,
+"f": "h2020_5194.jpg",
+"name": "Noosa_2020_10cm_SISP_LGA",
+"cover": 0.94
+},
+{
+"y": 2020,
+"id": 5258,
+"from": "2020-07-16",
+"to": "2020-07-20",
+"res": 20,
+"f": "h2020_5258.jpg",
+"name": "Capricorn_Wide_Bay_South_2020_20cm_SISP_PeriUrban",
+"cover": 0.94
+},
+{
+"y": 2021,
+"id": 5312,
+"from": "2021-07-27",
+"to": "2021-08-06",
+"res": 10,
+"f": "h2021_5312.jpg",
+"name": "Noosa_LGA_2021_10cm_SISP",
+"cover": 0.94
+},
+{
+"y": 2022,
+"id": 5635,
+"from": "2022-07-24",
+"to": "2022-09-12",
+"res": 10,
+"f": "h2022_5635.jpg",
+"name": "Noosa_LGA_2022_10cm_SISP",
+"cover": 0.94
+}
+]
+}
