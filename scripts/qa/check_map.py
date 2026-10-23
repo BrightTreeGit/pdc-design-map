@@ -3,12 +3,12 @@ that terrain loads, every tab renders, no JavaScript errors occur, and drawn sha
 
 usage: python3 scripts/qa/check_map.py            (serves map/ on port 8765 itself)
 Exit code 1 if anything fails. Run it before every publish (see CLAUDE.md)."""
-import subprocess, sys, time, json, os
+import subprocess, sys, time, json, os, re
 from playwright.sync_api import sync_playwright
 here = os.path.dirname(os.path.abspath(__file__)); root = os.path.join(here, '..', '..', 'map')
 srv = subprocess.Popen([sys.executable, '-m', 'http.server', '8765'], cwd=root, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 time.sleep(1)
-SITES = ['bright-tree', 'bright-tree-gemini', 'bellbunya', 'nimbin', 'willow-vale', 'noosa-forest-retreat', 'nac'] + [s for s in ('willow-vale-team', 'nimbin-group') if "id:'" + s + "'" in open(os.path.join(root, 'index.html')).read()]
+SITES = re.findall(r"\{id:'([\w-]+)'[^}]*ready:true", open(os.path.join(root, 'index.html')).read())   # every site in the picker
 TEST = {'t1': {'kind': 'shed', 'name': 'QA shed', 'geom': {'g': 'polygon', 'pts': [[900, 1000], [930, 1000], [930, 1020], [900, 1020]]}, 'status': 'built', 'stage': 'existing'}}
 bad = 0
 try:
