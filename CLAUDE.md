@@ -9,7 +9,9 @@
 - The repo is private: it holds the method, scripts and site data. Public-facing outputs use first names only and no addresses or lot numbers.
 - The session's git proxy allows branch pushes but not tags, so versions are marked by commit messages rather than git tags.
 
-## Brett's workflow (agreed 24 Oct 2026; Brett is not a programmer, so keep all of this in plain language)
+## Brett's workflow (agreed 24 Oct 2026)
+
+Brett isn't a programmer, but he grew up with DOS, did Visual Basic at university and wants to learn. Use the proper term now and then (commit, branch, function, JSON, raster…) with a one-line plain explanation the first time, so he picks it up as he goes.
 
 1. **Feedback lives on the map.** Groups leave comments on the trial map (https://claude.ai/artifact/CCUp4A9sdGDGXoKdh4ocpL) or live map. "Go through the map comments" = read them all (ArtifactComments), sort into fix now / later / no, reply on each thread, and log the "later" ones in docs/feedback-log.md.
 2. **One-line approvals.** "Approve X for live" = move that change from the trial branch to main, publish to the live map, give it a version number, CHANGELOG entry and commit. Nothing reaches the live map without that.
