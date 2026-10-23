@@ -432,7 +432,7 @@ function applySite(){const ms=T&&T.meta&&T.meta.site;
   if(ms){SITE=Object.assign({name:'Our block',subtitle:'',state:'',council:'',lfw:false,years:[],changeYears:[],boundaryNote:'',source:'',soilNote:''},ms)}
   if(T){E0=T.E0;N0=T.N0}if(ms){LAT=ms.lat;LON=ms.lon;ZONE=ms.zone;if(ms.rain)RAIN=ms.rain;else{RAIN=Object.assign({},RAIN,{placeholder:true,station:RAIN.station+' (placeholder until your nearest station is added)'})}}
   document.title=SITE.name+' Design Map';$('#siteName').textContent=SITE.name+' Design Map';
-  $('#siteSub').textContent=[SITE.subtitle,(/NSW 5 m/.test(SITE.source||'')?'NSW elevation, ':'LiDAR '+SITE.main+', ')+SITE.res].filter(Boolean).join(' · ');
+  $('#siteSub').textContent=[SITE.subtitle,(/^PLACEHOLDER/.test(SITE.source||'')?'level placeholder, LiDAR to come':(/NSW 5 m/.test(SITE.source||'')?'NSW elevation, ':'LiDAR '+SITE.main+', ')+SITE.res)].filter(Boolean).join(' · ');
   cv.setAttribute('aria-label','Terrain and design map of '+SITE.name);
   const R3n=SITE.state==='NSW'?'Weed in NSW: under the Biosecurity Act 2015 every landholder has a general biosecurity duty to prevent, eliminate or minimise its risk; check NSW WeedWise for what your region requires.':SITE.state==='QLD'||!SITE.state?R3:'Declared or environmental weed in many parts of Australia: check your state weed list.';
   const LOCn=SITE.council==='Sunshine Coast'?LOC:SITE.council?`Check ${SITE.council} Council's local weed list; control it and don't plant it.`:'Check your council\'s local weed list; control it and don\'t plant it.';
@@ -635,7 +635,7 @@ function centroid(f){const g=f.geom;if(!g)return null;if(g.g==='point')return g.
   let A=0,x=0,y=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length],c=a[0]*b[1]-b[0]*a[1];A+=c;x+=(a[0]+b[0])*c;y+=(a[1]+b[1])*c}
   if(Math.abs(A)>1e-6)return [x/(3*A),y/(3*A)];x=0;y=0;for(const q of p){x+=q[0];y+=q[1]}return [x/p.length,y/p.length]}
 function rotPos(f){const g=f.geom;if(!(g.g==='polygon'||g.g==='line')||!g.pts||g.pts.length<2)return null;const c=centroid(f);if(!c)return null;let R=0;for(const q of g.pts)R=Math.max(R,dist(q,c));return [c[0],c[1]-R-18/view.s]}
-function handlePos(f){const g=f.geom;if(g.g==='polygon'){const c=centroid(f);let R=0;for(const q of g.pts)R=Math.max(R,dist(q,c));return [c[0]+R+6/view.s,c[1]]}
+function handlePos(f){const g=f.geom;if(g.g==='polygon'||(g.g==='line'&&g.pts.length>2)){const c=centroid(f);let R=0;for(const q of g.pts)R=Math.max(R,dist(q,c));return [c[0]+R+6/view.s,c[1]]}
   if(g.g==='point'&&g.r)return [g.pts[0][0]+g.r,g.pts[0][1]];if(g.g==='sector'||g.g==='sun')return [g.cx+g.r,g.cy];return null}
 function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16},${n>>8&255},${n&255},${a})`}
 function wedge(cx,cy,r,a0,a1){const p=new Path2D();p.moveTo(cx,cy);const s=(a0-90)*Math.PI/180;let e=(a1-90)*Math.PI/180;if(e<=s)e+=2*Math.PI;p.arc(cx,cy,r,s,e);p.closePath();return p}
@@ -759,10 +759,11 @@ cv.addEventListener('pointermove',e=>{const pt=[e.offsetX,e.offsetY];if(pointers
     if(vdrag.rot){const c=vdrag.c;let da=Math.atan2(w[1]-c[1],w[0]-c[0])-vdrag.a0;if(e.shiftKey)da=Math.round(da/(Math.PI/12))*(Math.PI/12);const cs=Math.cos(da),sn=Math.sin(da);g.pts=vdrag.orig.pts.map(q=>r1([c[0]+(q[0]-c[0])*cs-(q[1]-c[1])*sn,c[1]+(q[0]-c[0])*sn+(q[1]-c[1])*cs]));vdrag.deg=((da*180/Math.PI)%360+360)%360;$('#hud').innerHTML=`Rotated <b>${(vdrag.deg>180?vdrag.deg-360:vdrag.deg).toFixed(0)}°</b> · hold Shift to snap to 15°`;features.set(selected,{...f,geom:g});draw();return}
     if(vdrag.move){const dx=w[0]-vdrag.w0[0],dy=w[1]-vdrag.w0[1];g.pts=vdrag.orig.pts.map(q=>r1([q[0]+dx,q[1]+dy]));features.set(selected,{...f,geom:g});draw();return}
     if(vdrag.scale){const k=Math.max(.05,dist(w,vdrag.c)/vdrag.d0),o=vdrag.orig,c=vdrag.c;
-    if(o.g==='polygon')g.pts=o.pts.map(q=>r1([c[0]+(q[0]-c[0])*k,c[1]+(q[1]-c[1])*k]));else if(o.g==='point')g.r=+Math.max(.3,o.r*k).toFixed(1);else g.r=+Math.max(5,o.r*k).toFixed(1)}
+    if(o.g==='polygon'||o.g==='line')g.pts=o.pts.map(q=>r1([c[0]+(q[0]-c[0])*k,c[1]+(q[1]-c[1])*k]));else if(o.g==='point')g.r=+Math.max(.3,o.r*k).toFixed(1);else g.r=+Math.max(5,o.r*k).toFixed(1)}
   else if(vdrag.center){g.cx=w[0];g.cy=w[1]}else g.pts[vdrag.i]=[+w[0].toFixed(1),+w[1].toFixed(1)];features.set(selected,{...f,geom:g});draw();return}
   if(dragStart){const dx=pt[0]-dragStart.x,dy=pt[1]-dragStart.y;if(Math.hypot(dx,dy)>4)moved=true;if(moved){view.cx=dragStart.cx-dx/view.s;view.cy=dragStart.cy-dy/view.s;draw()}}
   if(mt&&mt.type==='ruler'&&!mt.closed&&mt.pts.length){mt.hover=w;draw()}
+  if(mt&&mt.type==='pattern'&&mt.pts.length&&mt.pts.length<PAT_SHAPES[PAT.shape].clicks){mt.hover=w;draw()}
   if(draft&&!penOn()&&draft.pts.length&&['line','polygon'].includes(KINDS[draft.kind].geom)&&!draft.pen){const hw=SNAP.on?snapW(w):w;const last=draft.pts[draft.pts.length-1];const tot=lineLen(draft.pts)+dist(last,hw);const k=KINDS[draft.kind];
     $('#hud').innerHTML=`This side <b>${dist(last,hw).toFixed(1)} m</b> · ${k.geom==='polygon'&&draft.pts.length>=2?`area <b>${fmtArea(polyArea([...draft.pts,hw]))}</b> · perimeter ${(tot+dist(hw,draft.pts[0])).toFixed(1)} m`:`total <b>${tot.toFixed(1)} m</b>`}${SNAP.on?' · snapping to '+SNAP.step+' m':''}`}
   if(draft){draft.hover=SNAP.on&&!draft.pen?snapW(w):w;if(draft.pen&&draft.pts.length){draft.preview=gradePath(draft.pts[draft.pts.length-1],w,gradePen.grade,gradePen.dir)}draw()}});
@@ -1421,7 +1422,7 @@ function featTasksHTML(id){const list=[...tasks.entries()].filter(([i,t])=>t.fea
 let mt=null; // active measuring tool
 function startMT(type){cancelDraft();if(align)endAlign();selected=null;mt={type,pts:[],H:+lsGet('bt.damH',3),T:lsGet('bt.damT','auto')};cv.classList.add('drawing');renderMTBar();renderFeatures();draw();if(isPhone())setSheet('peek')}
 function endMT(){if(!mt)return;mt=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;draw()}
-function mtClick(w){if(mt.type==='bound')return;if(mt.type==='lop'){lopClick(w);return}if(mt.type==='ram'){if(mt.pts.length>=3){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===3)mt.res=ramCalc(...mt.pts);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='hydro'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===2)mt.res=hydroCalc(mt.pts[0],mt.pts[1]);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='route'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){$('#drawbar .hint')&&($('#drawbar .hint').textContent='Finding a route…');setTimeout(()=>{mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade);renderMTBar();draw()},20)}renderMTBar();draw();return}
+function mtClick(w){if(mt.type==='bound')return;if(mt.type==='pattern'){patClick(w);return}if(mt.type==='lop'){lopClick(w);return}if(mt.type==='ram'){if(mt.pts.length>=3){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===3)mt.res=ramCalc(...mt.pts);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='hydro'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===2)mt.res=hydroCalc(mt.pts[0],mt.pts[1]);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='route'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){$('#drawbar .hint')&&($('#drawbar .hint').textContent='Finding a route…');setTimeout(()=>{mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade);renderMTBar();draw()},20)}renderMTBar();draw();return}
   if(mt.type==='fire'){let foot=null;for(const f of features.values()){if(['building','shed','greenhouse','futurebuilding','carport'].includes(f.kind)&&f.geom.g==='polygon'&&inPoly(w,f.geom.pts)){foot=f.geom.pts;break}}mt.res=fireCheck(foot?centroid({geom:{g:'polygon',pts:foot}}):r1(w),foot);renderMTBar();renderTools();draw();return}
   if(mt.type==='ruler'){if(mt.closed){mt.pts=[];mt.closed=false}mt.pts.push(r1(w));renderMTBar();draw();return}
   if(mt.type==='measure'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){mt.res=headCalc(mt.pts[0],mt.pts[1]);showTab('tools');renderTools();const d=document.querySelector('details[data-sec="t-head"]');if(d){d.open=true;d.scrollIntoView({block:'start'})}}}
@@ -1739,9 +1740,78 @@ function wirePipe(el){const box=el.querySelector('#headRes');if(!box)return;cons
 function headText(r){const hi=r.dz>=0?'A':'B',lo=r.dz>=0?'B':'A';return `${hi} is ${Math.abs(r.dz).toFixed(1)} m higher than ${lo}, ${Math.round(r.L)} m apart (${r.grade.toFixed(0)}% average). Water stored at ${hi} arrives at ${lo} with about <b>${Math.round(r.kpa)} kPa</b> (${(r.kpa/100).toFixed(2)} bar, ${Math.round(r.kpa*0.145)} psi) of static pressure (taps shut, before friction).${(()=>{const p=pipeLoss(20,r),res=Math.max(0,r.kpa-9.81*p.hf);return ` Running a hose (20 L/min) through ${PIPES[PIPE.size].label.split(' (')[0]} HDPE and fittings: about <b>${Math.round(res)} kPa</b> left.`})()} Full table in Tools.`}
 const fmtLen=m=>m<1000?m.toFixed(m<100?1:0)+' m':(m/1000).toFixed(2)+' km';
 function rulerStats(){const p=mt.pts;if(p.length<2)return null;const ring=mt.closed?p.concat([p[0]]):p;const L=lineLen(ring);const d=densify(ring,1);let S=0;for(let i=1;i<d.length;i++)S+=Math.hypot(d[i].d-d[i-1].d,(d[i].z-d[i-1].z)||0);return {L,S,A:mt.closed&&p.length>=3?polyArea(p):0}}
+/* ---------------- natural patterns: spirals, waves, rings, keyhole and flower beds, rows that follow the contours ---------------- */
+const PAT_SHAPES={
+  spiral:{label:'Spiral',clicks:2,hint:'Click the centre, then click again to set the size and where the spiral ends.',closed:false},
+  wave:{label:'Wave (sine curve)',clicks:2,hint:'Click where the curve starts, then where it ends.',closed:false},
+  rings:{label:'Rings & spokes (mandala)',clicks:2,hint:'Click the centre, then the outer edge.',closed:true},
+  keyhole:{label:'Keyhole bed',clicks:2,hint:'Click the centre, then click on the side the path comes in from.',closed:true},
+  flower:{label:'Flower bed (petals)',clicks:2,hint:'Click the centre, then the tip of a petal.',closed:true},
+  contour:{label:'Rows on contour (swales, tree rows)',clicks:1,hint:'Click where the top row starts. Each row follows the level ground across the slope.',closed:false}};
+const PAT_DEF={shape:'spiral',kind:'row',turns:3,golden:false,ccw:false,wl:8,amp:1.5,rows:1,gap:3,rings:3,spokes:4,petals:6,depth:35,keyW:0.8,keyR:1.2,cRows:4,cGap:6,cMode:'dist',cLen:120,inLot:true};
+let PAT=Object.assign({},PAT_DEF,lsGet('bt.pat',{}));const savePAT=()=>lsSet('bt.pat',PAT);
+const PAT_LINE_KINDS=['row','swale','path','hedge','screen','irrigation','pipe','fence','retaining','diversion'];
+const PAT_POLY_KINDS=['bed','raisedbed','herbs','foodforest','groundcover','raingarden','paving','lawn'];
+function patKinds(){return (PAT_SHAPES[PAT.shape].closed?PAT_POLY_KINDS.concat(PAT_LINE_KINDS):PAT_LINE_KINDS).filter(k=>KINDS[k])}
+function startPattern(shape){if(shape)PAT.shape=shape;PAT.kindBy=PAT.kindBy||{};PAT.kind=PAT.kindBy[PAT.shape]||(PAT.shape==='contour'?'swale':PAT_SHAPES[PAT.shape].closed?'bed':'row');if(!patKinds().includes(PAT.kind))PAT.kind=PAT_SHAPES[PAT.shape].closed?'bed':'row';savePAT();startMT('pattern');showTab('tools')}
+// world gradient (metres per metre), y pointing south as on the map
+function gradW(x,y){const d=1.5;return [(zAt(x+d,y)-zAt(x-d,y))/(2*d),(zAt(x,y+d)-zAt(x,y-d))/(2*d)]}
+function traceLevel(p0,maxLen,clip){const z0=zAt(...p0);if(!isFinite(z0))return null;const g0=gradW(...p0);if(Math.hypot(...g0)<.004)return null;
+  const run=sgn=>{const out=[];let p=p0.slice(),L=0,prev=null;for(let n=0;n<600&&L<maxLen/2;n++){const g=gradW(...p),m=Math.hypot(...g);if(!(m>.002))break;let t=[-g[1]/m*sgn,g[0]/m*sgn];if(prev&&t[0]*prev[0]+t[1]*prev[1]<0)t=[-t[0],-t[1]];
+      let q=[p[0]+t[0]*2,p[1]+t[1]*2];for(let k=0;k<3;k++){const z=zAt(...q),gq=gradW(...q),mq=gq[0]*gq[0]+gq[1]*gq[1];if(!isFinite(z)||!(mq>1e-6))break;let s=(z-z0)/mq;const sl=Math.hypot(gq[0]*s,gq[1]*s);if(sl>1.5)s*=1.5/sl;q=[q[0]-gq[0]*s,q[1]-gq[1]*s]}
+      if(!isFinite(zAt(...q))||Math.abs(zAt(...q)-z0)>.25||(clip&&!inPoly(q,clip)))break;L+=dist(p,q);prev=[q[0]-p[0],q[1]-p[1]];const pm=Math.hypot(...prev);prev=[prev[0]/pm,prev[1]/pm];p=q;out.push(q);if(n>8&&dist(q,p0)<3)break}return out};
+  const a=run(1),b=run(-1);const pts=b.reverse().concat([p0],a);return pts.length>2?dp(pts,.25).map(r1):null}
+function descend(p,amt,mode){let q=p.slice(),z0=zAt(...p),L=0;for(let n=0;n<2000;n++){const g=gradW(...q),m=Math.hypot(...g);if(!(m>.002))return null;const done=mode==='height'?z0-zAt(...q):L;if(done>=amt)return q;const zp=zAt(...q);q=[q[0]-g[0]/m*.5,q[1]-g[1]/m*.5];L+=.5;const zq=zAt(...q);if(!isFinite(zq)||zq>zp+.005)return null}return null}
+function patGeoms(){const P=mt&&mt.pts,s=PAT.shape;if(!P||!P.length)return [];const B=P[1]||mt.hover;if(s!=='contour'&&!B)return [];
+  const out=[];const C=P[0];const R=s==='contour'?0:Math.max(.3,dist(C,B));const a0=s==='contour'?0:Math.atan2(B[1]-C[1],B[0]-C[0]);const at=(r,t)=>r1([C[0]+r*Math.cos(t),C[1]+r*Math.sin(t)]);
+  if(s==='spiral'){const T=Math.max(.5,PAT.turns),dir=PAT.ccw?-1:1,n=Math.max(24,Math.round(T*48)),pts=[];
+    for(let i=0;i<=n;i++){const f=i/n,th=a0-dir*2*Math.PI*T*(1-f);const r=PAT.golden?R*Math.pow(1.618034,-(1-f)*T*4):R*f;pts.push(at(r,th))}out.push({g:'line',pts})}
+  else if(s==='wave'){const L=dist(C,B),ux=(B[0]-C[0])/L,uy=(B[1]-C[1])/L,wl=Math.max(.5,PAT.wl),n=Math.max(2,Math.round(L/Math.min(.5,wl/16)));const rows=Math.max(1,Math.round(PAT.rows));
+    for(let k=0;k<rows;k++){const off=(k-(rows-1)/2)*PAT.gap,pts=[];for(let i=0;i<=n;i++){const u=L*i/n,v=off+PAT.amp*Math.sin(2*Math.PI*u/wl);pts.push(r1([C[0]+ux*u-uy*v,C[1]+uy*u+ux*v]))}out.push({g:'line',pts:dp(pts,.04)})}}
+  else if(s==='rings'){const N=Math.max(1,Math.round(PAT.rings)),gap=R/N;for(let k=0;k<N;k++){const r=R-k*gap;if(r<.2)break;const pts=[];const m=Math.max(16,Math.round(r*8));for(let i=0;i<m;i++)pts.push(at(r,a0+i/m*2*Math.PI));out.push({g:'polygon',pts,ring:true})}
+    const S=Math.round(PAT.spokes);for(let k=0;k<S;k++){const t=a0+k*2*Math.PI/S;out.push({g:'line',pts:[at(gap*.5,t),at(R,t)],spoke:true})}}
+  else if(s==='keyhole'){const w=Math.min(PAT.keyW,R*.8)/2,kr=Math.max(w*1.15,Math.min(PAT.keyR,R*.7));const dO=Math.asin(Math.min(.99,w/R)),dK=Math.asin(Math.min(.99,w/kr)),pts=[];const m=Math.max(24,Math.round(R*10));
+    for(let i=0;i<=m;i++)pts.push(at(R,a0+dO+(2*Math.PI-2*dO)*i/m));const mk=Math.max(12,Math.round(kr*12));for(let i=0;i<=mk;i++)pts.push(at(kr,a0-dK-(2*Math.PI-2*dK)*i/mk));out.push({g:'polygon',pts})}
+  else if(s==='flower'){const k=Math.max(3,Math.round(PAT.petals)),d=Math.min(.9,PAT.depth/100),m=k*24,pts=[];for(let i=0;i<m;i++){const t=i/m*2*Math.PI;const r=R*(1-d+d*Math.pow(Math.abs(Math.cos(k*t/2)),.8));pts.push(at(r,a0+t))}out.push({g:'polygon',pts})}
+  else if(s==='contour'){const N=Math.max(1,Math.round(PAT.cRows));let p=C;for(let k=0;k<N;k++){if(k){p=descend(p,PAT.cGap,PAT.cMode);if(!p)break}const l=traceLevel(p,PAT.cLen,PAT.inLot&&T.lot?flat(T.lot):null);if(l)out.push({g:'line',pts:l})}}
+  // closed shapes drawn as a line kind (a path round a bed, an irrigation ring): close the line
+  out.forEach(o=>{if(o.g==='polygon'||s==='spiral'){const t=Math.max(.01,R*.003);o.pts=o.g==='polygon'?ringDP(o.pts,t):dp(o.pts,t)}});
+  const lineKind=KINDS[PAT.kind]&&KINDS[PAT.kind].geom==='line';return out.map(o=>o.g==='polygon'&&lineKind?{g:'line',pts:o.pts.concat([o.pts[0]])}:o)}
+function patStats(G){let L=0,A=0;for(const o of G){if(o.g==='line')L+=lineLen(o.pts);else{A+=polyArea(o.pts);L+=lineLen(o.pts.concat([o.pts[0]]))}}return {L,A,n:G.length}}
+function patBar(b){const S=PAT_SHAPES[PAT.shape],G=patGeoms(),st=patStats(G);const num=(id,label,v,min,max,step,unit='')=>`<label class="gp" title="${label}">${label} <input type="number" data-pv="${id}" value="${v}" min="${min}" max="${max}" step="${step}" style="width:4.2em">${unit}</label>`;
+  let opts='';const s=PAT.shape;
+  if(s==='spiral')opts=num('turns','Turns',PAT.turns,.5,12,.5)+`<label class="gp"><input type="checkbox" data-pc="golden" ${PAT.golden?'checked':''}> Golden (Fibonacci)</label><label class="gp"><input type="checkbox" data-pc="ccw" ${PAT.ccw?'checked':''}> Anticlockwise</label>`;
+  if(s==='wave')opts=num('wl','Wavelength',PAT.wl,.5,200,.5,' m')+num('amp','Height',PAT.amp,0,50,.1,' m')+num('rows','Rows',PAT.rows,1,30,1)+num('gap','Apart',PAT.gap,.3,50,.1,' m');
+  if(s==='rings')opts=num('rings','Rings',PAT.rings,1,20,1)+num('spokes','Paths',PAT.spokes,0,16,1);
+  if(s==='keyhole')opts=num('keyW','Path width',PAT.keyW,.3,3,.1,' m')+num('keyR','Keyhole',PAT.keyR,.4,5,.1,' m');
+  if(s==='flower')opts=num('petals','Petals',PAT.petals,3,16,1)+num('depth','Depth',PAT.depth,5,90,5,'%');
+  if(s==='contour')opts=num('cRows','Rows',PAT.cRows,1,40,1)+num('cGap','Apart',PAT.cGap,.2,100,.1,PAT.cMode==='height'?' m drop':' m')+`<button class="btn" data-pmode>${PAT.cMode==='height'?'by height':'by distance'}</button>`+num('cLen','Max length',PAT.cLen,10,2000,10,' m')+`<label class="gp"><input type="checkbox" data-pc="inLot" ${PAT.inLot?'checked':''}> Inside the boundary</label>`;
+  const kinds=patKinds().map(k=>`<option value="${k}" ${k===PAT.kind?'selected':''}>${KINDS[k].label}</option>`).join('');
+  const shapes=Object.entries(PAT_SHAPES).map(([k,v])=>`<option value="${k}" ${k===s?'selected':''}>${v.label}</option>`).join('');
+  const flat=s==='contour'&&mt.pts.length&&!G.length;
+  b.innerHTML=`<select id="patShape" aria-label="Pattern">${shapes}</select><select id="patKind" aria-label="Draw as">${kinds}</select>${opts}
+   <span class="hint">${flat?'The ground here is level (or still placeholder), so there are no contours to follow. Try a wave or a straight row.':G.length?`${st.n>1?st.n+' pieces · ':''}${fmtLen(st.L)}${st.A?' · '+fmtArea(st.A):''}${mt.pts.length<S.clicks?' · click to fix it':''}`:S.hint}</span>
+   ${mt.pts.length>=S.clicks&&G.length?'<button class="btn primary" id="patAdd">Add to design</button>':''}<button class="btn" id="patClear">Start again</button><button class="btn" id="mtClose">Close</button>`;
+  b.querySelector('#patShape').onchange=e=>{mt.pts=[];startPattern(e.target.value)};b.querySelector('#patKind').onchange=e=>{PAT.kind=e.target.value;PAT.kindBy=PAT.kindBy||{};PAT.kindBy[PAT.shape]=PAT.kind;savePAT();draw()};
+  b.querySelectorAll('[data-pv]').forEach(x=>x.onchange=()=>{const v=+x.value;if(isFinite(v)){PAT[x.dataset.pv]=Math.max(+x.min,Math.min(+x.max,v));savePAT();renderMTBar();draw()}});
+  b.querySelectorAll('[data-pc]').forEach(x=>x.onchange=()=>{PAT[x.dataset.pc]=x.checked;savePAT();renderMTBar();draw()});
+  {const m=b.querySelector('[data-pmode]');if(m)m.onclick=()=>{PAT.cMode=PAT.cMode==='height'?'dist':'height';PAT.cGap=PAT.cMode==='height'?1:6;savePAT();renderMTBar();draw()}}
+  {const a=b.querySelector('#patAdd');if(a)a.onclick=()=>addPattern(G)}
+  b.querySelector('#patClear').onclick=()=>{mt.pts=[];renderMTBar();draw()};b.querySelector('#mtClose').onclick=()=>{endMT();renderTools()}}
+function patClick(w){const S=PAT_SHAPES[PAT.shape];if(mt.pts.length>=S.clicks)mt.pts=[];mt.pts.push(r1(w));renderMTBar();draw()}
+function drawPattern(px){const G=patGeoms();const col=(KINDS[PAT.kind]||{}).color||'#4e9a3c';ctx.lineCap='round';ctx.lineJoin='round';
+  for(const o of G){const p=new Path2D();o.pts.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));if(o.g==='polygon'){p.closePath();ctx.fillStyle=hexA(col,.18);ctx.fill(p)}ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=5*px;ctx.setLineDash([]);ctx.stroke(p);ctx.strokeStyle=col;ctx.lineWidth=2.5*px;if(mt.pts.length<PAT_SHAPES[PAT.shape].clicks)ctx.setLineDash([6*px,4*px]);ctx.stroke(p);ctx.setLineDash([])}
+  for(const q of mt.pts){ctx.fillStyle='#fff';ctx.strokeStyle=col;ctx.lineWidth=2*px;ctx.beginPath();ctx.arc(q[0],q[1],4*px,0,2*Math.PI);ctx.fill();ctx.stroke()}}
+async function addPattern(G){if(!G.length)return;const kind=PAT.kind,K=KINDS[kind],S=PAT_SHAPES[PAT.shape];const base=S.label.split(' (')[0];const ids=[],items=[];const now=new Date().toISOString();
+  const desc=PAT.shape==='spiral'?`${PAT.turns} turns${PAT.golden?', golden ratio':''}`:PAT.shape==='wave'?`wavelength ${PAT.wl} m, height ${PAT.amp} m`:PAT.shape==='contour'?`level rows ${PAT.cGap} m ${PAT.cMode==='height'?'drop':'apart'}; check on the ground before digging`:PAT.shape==='flower'?`${PAT.petals} petals`:PAT.shape==='rings'?`${PAT.rings} rings, ${PAT.spokes} paths`:`path ${PAT.keyW} m wide`;
+  G.forEach((o,i)=>{const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+i;const g=o.g==='polygon'&&K.geom!=='polygon'?{g:'line',pts:o.pts.concat([o.pts[0]])}:{g:o.g,pts:o.pts};const kk=o.g==='line'&&K.geom==='polygon'?'path':kind,KK=KINDS[kk];
+    const doc={kind:kk,name:`${base} ${KK.label.toLowerCase()}${G.length>1?' '+(i+1):''}`,status:'idea',notes:`Drawn with the natural-pattern tool: ${desc}.`,stage:defStage(kk),geom:g,createdBy:myId||null,createdAt:now,updatedAt:now,source:'map'};features.set(id,doc);ids.push(id);items.push({id,before:null,after:structuredClone(doc)})});
+  pushHist(`add ${base.toLowerCase()} (${ids.length})`,items);multi.clear();ids.forEach(i=>multi.add(i));selected=ids.length===1?ids[0]:null;mt.pts=[];renderMTBar();renderFeatures();draw();
+  toast(`Added ${ids.length>1?ids.length+' pieces':'it'} to the design. ${ids.length>1?'They are selected together: drag to move them.':'Select it to move, rotate or resize.'}`);for(const id of ids)await persist(id,features.get(id))}
 function renderMTBar(){const b=$('#drawbar');if(!mt){b.hidden=true;return}b.hidden=false;
   if(mt.type==='bound'){boundBar(b);return}
   if(mt.type==='lop'){lopBar(b);return}
+  if(mt.type==='pattern'){patBar(b);return}
   if(mt.type==='route'){routeBar(b);return}
   if(mt.type==='fire'){const r=mt.res;b.innerHTML=`<span class="what">Bushfire site check</span><span class="hint">${r?(r.closest?`Vegetation ${Math.round(r.closest.dv)} m away at the closest (${dirName(r.closest.az)}); land falls away up to ${r.steep.deg.toFixed(0)}° (${dirName(r.steep.az)}).${r.over20?' Over 20° in '+r.over20+' directions: detailed assessment needed.':''} Click another building to compare.`:'No unmanaged vegetation within 100 m.'):'Click a building (or any point)'}</span><button class="btn" id="mtClose">Close</button>`;
     $('#mtClose').onclick=()=>{endMT();renderTools()};return}
@@ -1770,6 +1840,7 @@ function renderMTBar(){const b=$('#drawbar');if(!mt){b.hidden=true;return}b.hidd
 function drawMT(px){if(!mt)return;ctx.setLineDash([]);
   if(mt.type==='bound'){drawBound(px);return}
   if(mt.type==='lop'){drawLop(px);return}
+  if(mt.type==='pattern'){drawPattern(px);return}
   if(mt.type==='fire'){drawFire(px);return}
   if(mt.type==='route'){drawRoute(px);return}
   if(mt.type==='ruler'){const p=mt.pts;if(!p.length)return;const path=new Path2D();p.forEach((q,i)=>i?path.lineTo(...q):path.moveTo(...q));if(mt.closed)path.closePath();else if(mt.hover)path.lineTo(...mt.hover);
@@ -1843,6 +1914,7 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
    sec('t-section','Cross-section A–B',`<p class="hint">Click point A, then point B, to cut a side view through the land: ground shape, height, grade and the zones it crosses. Sections stay on the map (marked A–B, C–D…) and can go on the A3 sheet.</p><button class="btn primary" id="tSection">Draw a cross-section</button>${secOrder().map(([i,f])=>{const [a,b]=secLetters(i);const L=lineLen(f.geom.pts);return `<div class="row" style="margin-top:6px"><span style="flex:1"><b style="color:#c0392b">${a}–${b}</b> · ${Math.round(L)} m</span><button class="btn" data-secv="${i}">View profile</button></div>`}).join('')}`)+
    sec('t-ruler','Distance & area',`<p class="hint">Click points to measure a distance, then close it to get an area and perimeter. Shows map distance and the longer distance along the slope. Nothing is saved to the design.</p><button class="btn primary" id="tRuler">Measure distance or area</button>`)+
    sec('t-route','Track builder (route finder)',`<p class="hint">Click a start and an end. The map finds the route with the least earthworks that never gets steeper than your limit (10% is a common limit on erodible soils), avoiding buildings, tanks and ponds you have drawn. Switchbacks appear where the slope demands them.</p><button class="btn primary" id="tRoute">Find a route</button><p class="hint">For level pads, select a building, shed, greenhouse or parking area: its details show the cut and fill to level it.</p>`)+
+   sec('t-pattern','Natural patterns: spirals, waves, contour rows',`<p class="hint">Draw with the shapes nature uses instead of straight lines: spirals, wave curves, mandala rings, keyhole and flower beds, and rows or swales that follow the contours. Pick a pattern, choose what it is (planting row, path, swale, bed…), click on the map, then change the numbers in the bar to scale and shape it before adding it. Afterwards each piece can be moved, rotated and resized like anything else.</p><div class="seg" style="flex-wrap:wrap">${Object.entries(PAT_SHAPES).map(([k,v])=>`<button class="btn" data-pat="${k}">${v.label.split(' (')[0]}</button>`).join('')}</div><details class="mini"><summary>Where each one helps</summary><dl class="facts"><dt>Spiral</dt><dd>Herb spirals, spiral paths through a food forest, a meditation walk. Golden (Fibonacci) spirals widen like a shell or sunflower.</dd><dt>Wave</dt><dd>Curved planting rows and hedges: more edge, more microclimates, and wind is broken better than by a straight row. Several rows give a wavy alley crop.</dd><dt>Rings & spokes</dt><dd>Mandala gardens: circular beds with paths between, everything within arm's reach.</dd><dt>Keyhole bed</dt><dd>A round bed reached from a central notch, so you can tend it all without stepping on the soil.</dd><dt>Flower bed</dt><dd>Petal-shaped beds around a tree, pond or seat: lots of edge in a small space.</dd><dt>Rows on contour</dt><dd>Swales, tree rows and hedgerows that stay level across the slope so water soaks in rather than running off. Space them by distance or by height drop (keyline style). Needs real ground levels: it won't work on a placeholder flat site.</dd></dl></details>`,false)+
    sec('t-water','Water balance & tanks',wbHTML())+
    (SITEDEF.canopy?sec('t-lop','Light & lopping planner',`<div id="lopRes">${lopHTML()}</div>`):'')+
    (SITEDEF.canopy||SUG.size?sec('t-drone','Drone survey changes',droneHTML(),!!SUG.size):'')+
@@ -1858,7 +1930,7 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
    sec('t-sheet','Presentation sheet (A3 PDF)',sheetHTML())+
    sec('t-data','Export design data',`<div class="seg"><button class="btn" id="exGeo">GeoJSON</button><button class="btn" id="exKml">KML</button></div><p class="hint">KML opens in Google Earth, Avenza and Queensland Globe.</p>`);
   wireWB(el);wireFire(el);wireGraze(el);$('#tRoute').onclick=()=>startMT('route');$('#tRuler').onclick=()=>startMT('ruler');{const h=$('#tHydro');if(h)h.onclick=()=>startMT('hydro');wireHydro(el)}{const h=$('#tRam');if(h)h.onclick=()=>startMT('ram');wireRam(el)}{const b=$('#tSection');if(b)b.onclick=()=>{showTab('draw');startTool('section')};el.querySelectorAll('[data-secv]').forEach(x=>x.onclick=()=>{selected=x.dataset.secv;showTab('feat');renderFeatures();zoomTo(features.get(selected));draw()})}$('#tMeasure').onclick=()=>startMT('measure');wirePipe(el);$('#tDam').onclick=()=>startMT('dam');
-  wireSheet(el);wireLop(el);wireDrone(el);
+  wireSheet(el);wireLop(el);wireDrone(el);el.querySelectorAll('[data-pat]').forEach(x=>x.onclick=()=>startPattern(x.dataset.pat));
   $('#exGeo').onclick=()=>exportFile('geojson');$('#exKml').onclick=()=>exportFile('kml');wireP3(el);wireSecs(el)}
 /* ---------------- A3 presentation sheet: options, layout engine, panels, PNG or PDF ---------------- */
 const SHEET_DEF={sections:true,orient:'land',base:'current',bases:['current'],v3:{auto:true,bearing:135,tilt:32,ex:1.6,drape:'relief',zoom:1},theme:'standard',fmt:'pdf',grid:true,north:true,inset:true,contours:true,callouts:false,legend:true,
