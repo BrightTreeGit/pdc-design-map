@@ -2395,17 +2395,32 @@ function wire3D(){const c=$('#gl');
 
 /* ---------------- panels ---------------- */
 /* ---------------- notebook: everyone's thoughts on the design, and where they differ from Claude's ---------------- */
+const BRIEF_Q=[['The heart of it',[['must','If the design could do only one thing really well, what would it be? (the must-have)',1],['problem','What is the biggest problem or frustration on the land now?',1],['love','What do you love about the place and want to keep exactly as it is?']]],
+ ['People and lifestyle',[['who','Who lives here or visits (ages, abilities, pets, guests)? Will that change?'],['day','What does a typical day look like, and where do you spend time outdoors?'],['time','How many hours a week can go into the land, now and in ten years? Low-care or hands-on?',1],['body','Anything physical to plan around (bending, lifting, ladders, heat)?']]],
+ ['Vision and values',[['feel','What should the place feel like?'],['years','Picture it in 1, 5 and 10 years: what is there?'],['meaning','Any cultural, spiritual or personal meaning to the place?'],['blue','Blue-sky: with no limits, what would you add? Anything you always wanted to try?']]],
+ ['Resources and budget',[['budget','Roughly what is comfortable to spend this year and over three years?',1],['diy','Do it yourself, hire help, or a mix? Any skills or trades to draw on?'],['have','Materials and equipment already on hand?']]],
+ ['The property',[['history','How long have you been here? What was the land used for before?'],['water','Where is the water: tanks (sizes), dams, bores, town water, and which roofs feed them?',1],['services','Sewer or septic, power, gas and other underground services: where do they run?',1],['problem2','Which areas are underused, overgrown, wet, eroding or a problem?']]],
+ ['Site conditions',[['sun','Which parts get winter sun at 9 am, noon and 3 pm?',1],['soil','Soil: sandy, clay or loam? Hard to dig? Any test results?'],['wet','After heavy rain, where does water pond or run?'],['wind','Where do the strong or cold winds come from? Any frost?']]],
+ ['Ecology',[['wild','Which animals visit, and which are welcome or a problem?'],['weeds','Weeds that keep coming back?'],['natives','Native or heritage plants to keep or feature?']]],
+ ['Food and animals',[['eat','Which fruit, vegetables and herbs do you actually eat most?',1],['animals','Chickens, bees, goats or other animals: now or wanted?'],['share','Would you share or sell surplus?']]],
+ ['Access and zones',[['routes','Which routes do you walk every day? Hard-to-reach spots?'],['special','Where would a seat, a fire pit or a quiet corner feel right?']]],
+ ['Constraints',[['rules','Council, bushfire, vegetation or other rules you know of?'],['neigh','Neighbours, shared boundaries, easements?'],['nope','Anything you definitely do not want?']]]];
+function briefHTML(){const n=BRIEF_Q.reduce((a,[,qs])=>a+qs.length,0),done=[...notes.values()].filter(v=>v.tag==='brief'&&v.text).length;
+  return sec('nb-brief',`Client interview &amp; design brief · ${done} of ${n} answered`,`<p class="hint">The questions from the PDC client interview, adapted for any site. Not every question needs an answer; ★ marks the ones that matter most. Answers save as you go and everyone on the map sees them.</p>
+   ${BRIEF_Q.map(([g,qs])=>`<div class="sub2">${g}</div>${qs.map(([k,q,star])=>{const v=notes.get('brief_'+k);return `<div class="field"><label for="bq_${k}">${star?'★ ':''}${esc(q)}</label><textarea id="bq_${k}" data-bq="${k}" rows="2">${esc(v?v.text:'')}</textarea></div>`}).join('')}`).join('')}
+   <button class="btn" id="briefCopy">Copy the brief as text</button>`,false)}
 const NB_TAGS=[['thought','Thought',''],['diff','Different from the design','diff'],['q','Question','q'],['dec','Decision','dec']];
 const notes=new Map();let nbFilter='all',nbName=lsGet('bt.nbName','');
 async function saveNote(id,doc){notes.set(id,doc);if(live){try{await db.collection(C('notebook')).doc(id).set(doc)}catch(e){toast('That note did not save.')}}else lsSet('bt.notes',Object.fromEntries(notes));renderNotes()}
+async function saveBrief(id,doc){notes.set(id,doc);if(live){try{await db.collection(C('notebook')).doc(id).set(doc)}catch(e){toast('That answer did not save.')}}else lsSet('bt.notes',Object.fromEntries(notes))}
 async function delNote(id){const old=notes.get(id);notes.delete(id);renderNotes();if(live){try{await db.collection(C('notebook')).doc(id).delete()}catch(e){}}else lsSet('bt.notes',Object.fromEntries(notes));
   if(old)toastAction('Note deleted.','Undo',()=>saveNote(id,old))}
 function renderNotes(){const el=$('#tab-notes');if(!el||el.hidden&&!renderNotes.force)return;if(el.contains(document.activeElement)&&document.activeElement.matches('textarea,input'))return;
-  const arr=[...notes.entries()].filter(([i,n])=>nbFilter==='all'||(nbFilter==='open'?!n.done:n.tag===nbFilter)).sort((a,b)=>(b[1].at||'').localeCompare(a[1].at||''));
+  const arr=[...notes.entries()].filter(([i,n])=>n.tag!=='brief').filter(([i,n])=>nbFilter==='all'||(nbFilter==='open'?!n.done:n.tag===nbFilter)).sort((a,b)=>(b[1].at||'').localeCompare(a[1].at||''));
   const fopts=[...features.entries()].sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||'')).map(([id,f])=>`<option value="${id}">${esc(f.name||'item')}</option>`).join('');
   const tag=k=>{const t=NB_TAGS.find(x=>x[0]===k)||NB_TAGS[0];return `<span class="nbtag ${t[2]}">${t[1]}</span>`};
   el.innerHTML=`<p class="hint">The design notebook for this site. Share thoughts, questions and decisions, and note anywhere your thinking differs from the computed or Claude design. Everyone on the map sees it.</p>
-   <div class="nbform"><div class="row"><div class="field" style="flex:1"><label for="nbWho">Your name</label><input id="nbWho" value="${esc(nbName)}" placeholder="First name"></div><div class="field" style="flex:1"><label for="nbTag">Kind of note</label><select id="nbTag">${NB_TAGS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></div></div>
+   ${briefHTML()}<div class="nbform"><div class="row"><div class="field" style="flex:1"><label for="nbWho">Your name</label><input id="nbWho" value="${esc(nbName)}" placeholder="First name"></div><div class="field" style="flex:1"><label for="nbTag">Kind of note</label><select id="nbTag">${NB_TAGS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></div></div>
     <div class="field"><label for="nbAbout">About (optional)</label><select id="nbAbout"><option value="">The whole design</option>${fopts}</select></div>
     <div class="field"><label for="nbTxt">Note</label><textarea id="nbTxt" placeholder="e.g. The herbs are shade tolerant, so the south side works."></textarea></div><button class="btn primary" id="nbAdd">Add note</button></div>
    ${segHTML('nbF',[['all','All'],['open','Open'],['diff','Differences'],['q','Questions'],['dec','Decisions']],nbFilter)}
@@ -2416,6 +2431,9 @@ function renderNotes(){const el=$('#tab-notes');if(!el||el.hidden&&!renderNotes.
   if(selected&&features.has(selected))$('#nbAbout').value=selected;
   $('#nbAdd').onclick=()=>{const text=$('#nbTxt').value.trim();if(!text){toast('Write a note first');return}nbName=who.value.trim();lsSet('bt.nbName',nbName);
     const id='n'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);$('#nbTxt').value='';saveNote(id,{text,who:nbName||'Someone',tag:$('#nbTag').value,about:$('#nbAbout').value||null,at:new Date().toISOString(),by:myId||null,replies:[],done:false});toast('Note added')};
+  el.querySelectorAll('[data-bq]').forEach(t=>t.onchange=()=>{const k=t.dataset.bq,id='brief_'+k,text=t.value.trim();if(!text){if(notes.has(id)){notes.delete(id);if(live){db.collection(C('notebook')).doc(id).delete().catch(()=>{})}else lsSet('bt.notes',Object.fromEntries(notes))}return}const o=notes.get(id)||{};saveBrief(id,{...o,text,tag:'brief',q:k,who:nbName||o.who||'Someone',at:new Date().toISOString(),by:myId||null,replies:[],done:true})});
+  {const bc=$('#briefCopy');if(bc)bc.onclick=async()=>{const lines=[`${SITE.name||'Site'}: design brief`,''];for(const [g,qs] of BRIEF_Q){lines.push(g.toUpperCase());for(const [k,q] of qs){const v=notes.get('brief_'+k);lines.push('- '+q,'  '+(v?v.text:'(no answer yet)'))}lines.push('')}try{await navigator.clipboard.writeText(lines.join('\n'));toast('Brief copied: paste it into an email or document')}catch(e){toast('Copy did not work in this browser')}}}
+  wireSecs(el);
   el.querySelectorAll('#nbF button').forEach(b=>b.onclick=()=>{nbFilter=b.dataset.v;renderNotes()});
   el.querySelectorAll('[data-nbf]').forEach(b=>b.onclick=()=>{selected=b.dataset.nbf;const f=features.get(selected);if(f){zoomTo(f);showTab('feat');renderFeatures();draw()}});
   el.querySelectorAll('[data-nbdone]').forEach(b=>b.onclick=()=>{const n=notes.get(b.dataset.nbdone);saveNote(b.dataset.nbdone,{...n,done:!n.done})});
