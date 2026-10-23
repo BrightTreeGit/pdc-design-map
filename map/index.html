@@ -260,6 +260,8 @@ const KINDS={
   keypoint:{g:'Water',label:'Keypoint',geom:'point',color:'#0b5c8f',sym:'diamond'},
   flow:{g:'Water',label:'Water flow',geom:'line',color:'#2878c8',arrow:true},
   pipe:{g:'Water',label:'Pipe / hose',geom:'line',color:'#5c6f80',dash:[6,4]},
+  sewer:{g:'Water',label:'Sewer / house drain (underground)',geom:'line',color:'#7a3b9a',dash:[7,3],w:3},
+  service:{g:'Built',label:'Underground service (power, water, gas, NBN)',geom:'line',color:'#c2571a',dash:[2,3],w:3},
   track:{g:'Access',label:'Track (≤10%)',geom:'line',color:'#8a5a2b',grade:8,checkGrade:10},
   path:{g:'Access',label:'Footpath',geom:'line',color:'#a8794a',dash:[3,3],checkGrade:15},
   building:{g:'Built',label:'Building',geom:'polygon',color:'#575757'},
@@ -334,7 +336,7 @@ function applyCZ(list){CZ=Array.isArray(list)?list.filter(z=>z&&z.id&&z.label):[
   if(typeof renderDraw==='function'&&$('#tab-draw'))renderDraw();if(typeof draw==='function')draw()}
 async function saveCZ(list){applyCZ(list);if(live){try{await db.doc(C('settings')+'/zones').set({list:CZ,updatedAt:new Date().toISOString()})}catch(e){toast('Zone types did not save.')}}else lsSet('bt.czones',CZ)}
 /* tool levels: 1 Essentials, 2 Designer (default), 3 Expert. big = broadacre tools hidden on small blocks */
-const KIND_LV={track:1,customzone:2,privacy:1,zone0:1,zone1:1,zone2:1,tank:1,building:1,path:1,tree:1,fruittree:1,nativetree:1,shrub:1,bed:1,raisedbed:1,herbs:1,lawn:1,paving:1,fence:1,note:1,driveway:1,shed:1,solar:1,compost:1,
+const KIND_LV={sewer:1,service:2,track:1,customzone:2,privacy:1,zone0:1,zone1:1,zone2:1,tank:1,building:1,path:1,tree:1,fruittree:1,nativetree:1,shrub:1,bed:1,raisedbed:1,herbs:1,lawn:1,paving:1,fence:1,note:1,driveway:1,shed:1,solar:1,compost:1,
   keypoint:3,diversion:3,damwall:3,coldair:3,section:3,crossing:3,reedbed:3,rockpool:3,irrigation:3,pipe:3,row:3,guild:3,hugel:3,goatzone:3,paddock:3,tpz:3,greywater:3,flow:3,soak:3,mushrooms:3,firebreak:3,obs:1};
 const BIG_KINDS=['zone3','goatzone','paddock','damwall','keypoint','diversion','track','crossing','firebreak','reedbed','row','cabin','amenities','container','nursery','rockpool'];
 const LV_NAMES=[[1,'Essentials'],[2,'Designer'],[3,'Expert']];
@@ -390,7 +392,7 @@ const xy2ll=(x,y)=>PJ.toLL(x+E0,N0-y);
 let T=null, EXTRA=null, PROS=null; const IMG={};
 let dem2=null, dem1=null, sunGrid={};
 const view={cx:960,cy:960,s:1};
-const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
+const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,svc:true,sewerBands:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
 if(!lsGet('bt.namesOnHover',false)){layers.flabels=false;lsSet('bt.layers',layers);lsSet('bt.namesOnHover',true)}
 const features=new Map(); // id -> data
 let selected=null, tool=null, draft=null, gradePen=lsGet('bt.gradePen',{on:false,grade:0,dir:'down'});
@@ -401,7 +403,7 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 /* ---------------- data loading ---------------- */
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
-let CANOPY=null,NICHE=null,HYDRO=null,VEG=null;
+let CANOPY=null,NICHE=null,HYDRO=null,VEG=null,SERV=null;
 const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
 function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
@@ -450,6 +452,7 @@ async function boot(){renderSiteSel();
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
   try{const hy=await fetch(SB+'hydro.json');HYDRO=hy.ok?await hy.json():null}catch(e){HYDRO=null}
   if(SITEDEF.niche){imgs.push('niche.png');try{NICHE=await (await fetch(SB+'niche.json')).json()}catch(e){NICHE=null}}
+  try{const sr=await fetch(SB+'services.json');SERV=sr.ok?await sr.json():null}catch(e){SERV=null}
   if(SITEDEF.canopy){try{const vr=await fetch(SB+'veg.json');VEG=vr.ok?await vr.json():null;if(VEG)imgs.push('veg.png')}catch(e){VEG=null}imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
   if(SITEDEF.history){try{PH.data=await (await fetch(SB+'history/history.json')).json();PH.i=PH.data.runs.length-1}catch(e){PH.data=null}}
   const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],SB+f)));
@@ -544,6 +547,8 @@ function render(){
   if(layers.overlay==='canopy_h'&&CANOPY){ctx.save();const risk=treeRisk();for(const [x,y,h] of CANOPY.trees){if(h<40)continue;const tpz=tpzR(h);
     if(view.s>1.2){ctx.beginPath();ctx.arc(x,y,tpz,0,7);ctx.setLineDash([3*px,3*px]);ctx.lineWidth=1.2*px;ctx.strokeStyle='rgba(150,40,140,.7)';ctx.stroke();ctx.setLineDash([])}
     const hit=risk.has(x+','+y);const r=Math.max(2.2*px,Math.min(5*px,1.6));ctx.beginPath();ctx.arc(x,y,r+1.2*px,0,7);ctx.fillStyle=hit?'#ffd23f':'rgba(255,255,255,.9)';ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=hit?'#c0392b':'#96288c';ctx.fill()}ctx.restore()}
+  if(SERV&&layers.svc)drawServ(px);
+  if(layers.design&&layers.sewerBands!==false)drawSewerBands(px);
   if(layers.design)drawFeatures(px);
   if(SUG.size&&layers.sug!==false)drawSug(px);
   if(draft)drawDraft(px);
@@ -1908,6 +1913,28 @@ async function saveDam(){const r=mt.res,pts=mt.pts.slice();const H=mt.H;const ol
   draft={kind:'damwall',pts:[]};await commit({g:'line',pts});await saveFields(selected,{name:`${t.label} wall · ${H} m`,notes:note});renderTools();toast(old?'Resized: the old one was replaced':'Saved the pond and its wall to the design')}
 /* reopen a wall (drawn or a computed prospect) in the dam calculator to try other heights and types */
 function resizeDam(pts,replaceId,H){startMT('dam');mt.pts=pts.map(q=>q.slice());mt.replace=replaceId||null;if(H){mt.H=H}mt.res=damCalc(mt.pts,mt.H,mt.T);renderMTBar();renderTools();const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);fitBox(Math.min(...xs)-60,Math.min(...ys)-60,Math.max(...xs)+60,Math.max(...ys)+60);draw();toast('Try a different type or height in the bar below, then Save')}
+
+/* ---------------- services: public power network (state open data) and drawn sewer lines with root-distance bands ---------------- */
+const SV_STYLE={'132kV':['#7b1fa2',3.2],'110kV':['#8e24aa',3],'33kV':['#c62828',2.6],'11kV':['#e65100',2.1],'LV':['#f9a825',1.6]};
+function drawServ(px){const P=SERV.power||{};ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  for(const l of (P.lines||[])){const st=SV_STYLE[l.v]||['#999',1.5];const path=new Path2D();l.p.forEach((q,i)=>i?path.lineTo(q[0],q[1]):path.moveTo(q[0],q[1]));
+    ctx.setLineDash(l.u?[5*px,4*px]:[]);ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=(st[1]+2)*px;ctx.stroke(path);ctx.strokeStyle=st[0];ctx.lineWidth=st[1]*px;ctx.stroke(path)}
+  ctx.setLineDash([]);if(view.s>0.8){const dot=(pts,c,r)=>{for(const q of pts||[]){ctx.beginPath();ctx.arc(q[0],q[1],r*px,0,7);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=1.4*px;ctx.strokeStyle=c;ctx.stroke()}};
+    dot(P.poles,'#6d4c41',2.6);dot(P.pillars,'#2e7d32',2.6);if(P.subs)for(const q of P.subs){ctx.fillStyle='#c62828';ctx.fillRect(q[0]-4*px,q[1]-4*px,8*px,8*px)}}
+  ctx.restore()}
+function sewerLines(){return [...features.values()].filter(f=>f.kind==='sewer'&&f.geom&&f.geom.g==='line'&&vis(f))}
+function drawSewerBands(px){const L=sewerLines();if(!L.length)return;ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  for(const [w,c] of [[10,'rgba(243,213,138,.38)'],[4,'rgba(232,140,130,.42)']])for(const f of L){const path=new Path2D();f.geom.pts.forEach((q,i)=>i?path.lineTo(...q):path.moveTo(...q));ctx.strokeStyle=c;ctx.lineWidth=w;ctx.stroke(path)}
+  ctx.restore()}
+const ROOT_CLASS={tree:5,nativetree:10,fruittree:5,guild:5,shrub:2,hedge:2,screen:2,foodforest:5,tpz:10};
+function sewerDist(pt){let d=Infinity;for(const f of sewerLines()){const P=f.geom.pts;for(let i=1;i<P.length;i++)d=Math.min(d,segDist(pt,P[i-1],P[i]))}return d}
+function sewerNote(f){if(!(f.kind in ROOT_CLASS)||!sewerLines().length)return null;const g=f.geom;const pts=g.g==='point'?[g.pts[0]]:(g.pts||[]);if(!pts.length)return null;
+  const d=Math.min(...pts.map(sewerDist)),need=ROOT_CLASS[f.kind];
+  return [`From the sewer`,`${d.toFixed(1)} m${d<need?` · closer than the ${need} m usually advised for ${KINDS[f.kind].label.toLowerCase()}s: choose a small, gentle-rooted plant or move it`:' · fine'}`]}
+function servHTML(){if(!SERV)return '';const P=SERV.power||{};const n=(P.lines||[]).length;const v=[...new Set((P.lines||[]).map(l=>l.v))];
+  return `<div class="row"><label><input type="checkbox" data-k="svc" ${layers.svc?'checked':''}><i class="swatch" style="background:#f9a825"></i>Power network (${n} line sections${P.poles?`, ${P.poles.length} poles`:''})</label></div>
+   <div class="legend">${Object.entries(SV_STYLE).filter(([k])=>v.includes(k)).map(([k,[c]])=>`<span><i class="swatch" style="background:${c}"></i>${k==='LV'?'Low voltage (street)':k}</span>`).join('')}<span><i class="swatch" style="background:#6d4c41"></i>Pole</span><span><i class="swatch" style="background:#2e7d32"></i>Pillar</span></div>
+   <p class="hint">Solid = overhead, dashed = underground. Source: ${esc(SERV.source||'state open data')}. Indicative only: lines inside the block (house connections) are not included. Always get a free Before You Dig Australia enquiry before digging.</p>`}
 function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&mt.type==='dam'&&mt.res&&!mt.res.err?mt.res:null;
   const rain=dr?dr.catchHa*RAIN.mean.reduce((a,b)=>a+b,0)/100:0;
   el.innerHTML=
@@ -2438,6 +2465,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
     <div id="shWrap">${layers.overlay==='shadow'?shadowCtl():''}</div>
     <div class="row"><label for="ovop">Overlay strength</label><input type="range" id="ovop" min="0.2" max="1" step="0.05" value="${layers.ovOp}"></div>
     <div id="ovLegend" class="hint"></div>`)+
+   sec('svcs','Services (power, sewer)',`${servHTML()}<div class="row"><label><input type="checkbox" data-k="sewerBands" ${layers.sewerBands!==false?'checked':''}><i class="swatch" style="background:#e88c82"></i>Root-distance bands around drawn sewer lines (2 m and 5 m)</label></div><p class="hint">Draw the sewer or house drain from the council plan with Draw → Water → Sewer. Trees then show their distance from it.</p>`,!!SERV)+
    sec('lines','Water, contours & labels',lines.map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join(''))+
    (PROS?sec('pros','Prospects (computed sites)',`<p class="hint">Screening sites found by scanning the terrain: where small pond walls store the most water for the least earth, where level building pads need the least cut and fill with good winter sun, the highest tank site, and the few flat spots. A starting point for a site walk, not a design.</p>`+prosHTML()):'')+
    `<p class="hint">Terrain from the ${SITE.main} LiDAR survey (bare earth, ${SITE.res}). Sun hours count terrain shading only, not trees.</p>`;
@@ -2529,6 +2557,7 @@ function measure(f){const g=f.geom,out=[];
     if(f.kind==='swale'||f.kind==='row')out.push(['Off level',`${(Math.max(...zs)-Math.min(...zs)).toFixed(2)} m between high and low point`])}
   if(g.g==='sector'){out.push(['Bearings',`${g.a0.toFixed(0)}° → ${g.a1.toFixed(0)}° clockwise`],['Radius',Math.round(g.r)+' m'])}
   if(g.g==='sun'){const b=sunBearings(KINDS[f.kind].decl);out.push(['Sunrise',`${b.rise.toFixed(0)}° (${dirName(b.rise)})`],['Sunset',`${b.set.toFixed(0)}° (${dirName(b.set)})`],['Noon altitude',b.noonAlt.toFixed(0)+'° above the northern horizon'])}
+  {const sn=sewerNote(f);if(sn)out.push(sn)}
   const c=centroid(f);if(c){const ll=xy2ll(...c);out.push(['Lat, long',`${ll[1].toFixed(6)}, ${ll[0].toFixed(6)}`])}
   return out}
 let nameCache={};
