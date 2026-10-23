@@ -1211,15 +1211,18 @@ function drawFire(px){const r=mt.res;if(!r){return}const c=r.c;ctx.setLineDash([
 function fireLabels(){const r=mt.res;if(!r)return;ctx.textAlign='center';ctx.textBaseline='middle';for(const R of [20,50,100]){const [x,y]=w2s(r.c[0],r.c[1]-R);haloText(R+' m',x,y,10,'#8e1b1b')}}
 
 /* ---------------- track route finder (least effort under a grade limit) and pad earthworks ---------------- */
-const RT={grade:+lsGet('bt.rtGrade',10),width:+lsGet('bt.rtWidth',4),inLot:lsGet('bt.rtInLot',true)};
+const RT={grade:+lsGet('bt.rtGrade',10),width:+lsGet('bt.rtWidth',4),inLot:lsGet('bt.rtInLot',true),area:'',compact:+lsGet('bt.rtCompact',1)};
+/* drawn areas that contain both ends of a route: the track can be kept inside one (a fenced goat zone, a paddock, a zone) */
+function routeAreas(A,B){const out=[];for(const [i,f] of features){if(f.geom.g!=='polygon'||!vis(f)||BLOCK_KINDS.includes(f.kind))continue;if(inPoly(A,f.geom.pts)&&inPoly(B,f.geom.pts))out.push([i,f.name||KINDS[f.kind].label,polyArea(f.geom.pts)])}return out.sort((a,b)=>a[2]-b[2])}
+const RT_STYLE=[['Long sweeps',0],['Balanced',1],['Compact',2],['Tight switchbacks',3]];
 const BLOCK_KINDS=['building','shed','greenhouse','pond','rockpool','futurebuilding','tank'];
 function findRoute(A,B,maxG){const N=1000,z=i=>dem2[i]/10;const m=75;
   const c0=Math.max(1,Math.floor(Math.min(A[0],B[0])/2)-m),c1=Math.min(N-2,Math.ceil(Math.max(A[0],B[0])/2)+m),r0=Math.max(1,Math.floor(Math.min(A[1],B[1])/2)-m),r1_=Math.min(N-2,Math.ceil(Math.max(A[1],B[1])/2)+m);
   const W=c1-c0+1,H=r1_-r0+1,n=W*H;const id=(r,c)=>(r-r0)*W+(c-c0);
   const blocked=new Uint8Array(n),side=new Float32Array(n);
-  const blockers=[...features.values()].filter(f=>BLOCK_KINDS.includes(f.kind)&&f.geom.g==='polygon');const lotPoly=flat(T.lot);
+  const blockers=[...features.values()].filter(f=>BLOCK_KINDS.includes(f.kind)&&f.geom.g==='polygon');const lotPoly=flat(T.lot);const areaF=RT.area&&features.get(RT.area);const areaPoly=areaF&&areaF.geom.g==='polygon'?areaF.geom.pts:null;
   for(let r=r0;r<=r1_;r++)for(let c=c0;c<=c1;c++){const k=id(r,c),g=r*N+c;const gx=(z(g+1)-z(g-1))/4,gy=(z(g+N)-z(g-N))/4;side[k]=Math.hypot(gx,gy);
-    const p=[c*2+1,r*2+1];if(RT.inLot&&!inPoly(p,lotPoly)){blocked[k]=1;continue}
+    const p=[c*2+1,r*2+1];if(RT.inLot&&!inPoly(p,lotPoly)){blocked[k]=1;continue}if(areaPoly&&!inPoly(p,areaPoly)){blocked[k]=1;continue}
     if(blockers.length){for(const f of blockers)if(inPoly(p,f.geom.pts)){blocked[k]=1;break}}}
   const sA=id(Math.floor(A[1]/2),Math.floor(A[0]/2)),sB=id(Math.floor(B[1]/2),Math.floor(B[0]/2));blocked[sA]=0;blocked[sB]=0;
   // smoothed heights (two 3x3 passes) so 2 m grid noise doesn't block gentle benches
@@ -1232,13 +1235,16 @@ function findRoute(A,B,maxG){const N=1000,z=i=>dem2[i]/10;const m=75;
   const bx=(sB%W),by=(sB/W)|0;const h=k=>Math.hypot((k%W)-bx,((k/W)|0)-by)*2;
   const hk=[],hv=[];const push=(k,v)=>{hk.push(k);hv.push(v);let i=hk.length-1;while(i>0){const p=(i-1)>>1;if(hv[p]<=hv[i])break;[hk[p],hk[i]]=[hk[i],hk[p]];[hv[p],hv[i]]=[hv[i],hv[p]];i=p}};
   const pop=()=>{const k=hk[0];const lk=hk.pop(),lv=hv.pop();if(hk.length){hk[0]=lk;hv[0]=lv;let i=0;for(;;){const l=2*i+1,r=l+1;let s2=i;if(l<hk.length&&hv[l]<hv[s2])s2=l;if(r<hk.length&&hv[r]<hv[s2])s2=r;if(s2===i)break;[hk[s2],hk[i]]=[hk[i],hk[s2]];[hv[s2],hv[i]]=[hv[i],hv[s2]];i=s2}}return k};
+  const ax=sA%W,ay=(sA/W)|0,abx=bx-ax,aby=by-ay,ab2=abx*abx+aby*aby||1;
+  const off=k=>{const x=k%W-ax,y=((k/W)|0)-ay;let t=(x*abx+y*aby)/ab2;t=Math.max(0,Math.min(1,t));return Math.hypot(x-t*abx,y-t*aby)*2}; // metres away from the straight line A-B
+  const CP=+RT.compact||0,detW=[0,0.004,0.015,0.04][CP],turnW=[1,0.7,0.4,0.2][CP];
   const s0=sA*S+ND;g[s0]=0;push(s0,h(sA));const lim=maxG/100;let it=0,goal=-1;
   while(hk.length&&it++<6e6){const st=pop();if(closed[st])continue;closed[st]=1;const k=(st/S)|0,d0=st%S;if(k===sB){goal=st;break}const r=(k/W)|0,c=k%W,zk=zw[k];
     for(let d=0;d<ND;d++){const [dr,dc]=moves[d];const rr=r+dr,cc=c+dc;if(rr<0||cc<0||rr>=H||cc>=W)continue;const q=rr*W+cc;if(blocked[q])continue;const qs=q*S+d;if(closed[qs])continue;
       const L=Math.hypot(dr,dc)*2,dz=zw[q]-zk,gr=Math.abs(dz)/L;if(gr>lim)continue;
       let turn=0;if(d0<ND){let t=Math.abs(ang[d]-ang[d0]);if(t>Math.PI)t=2*Math.PI-t;turn=t<0.35?t*2:t<2.2?4+t*6:30}
-      const cost=L*(1+0.8*side[q]+0.3*gr/lim)+turn;if(g[st]+cost<g[qs]){g[qs]=g[st]+cost;from[qs]=st;push(qs,g[qs]+h(q))}}}
-  if(goal<0)return {err:`No route stays under ${maxG}% between these points. Try a higher limit, or points on gentler ground.`};
+      const cost=L*(1+0.8*side[q]+0.3*gr/lim+detW*off(q))+turn*turnW;if(g[st]+cost<g[qs]){g[qs]=g[st]+cost;from[qs]=st;push(qs,g[qs]+h(q))}}}
+  if(goal<0)return {err:`No route stays under ${maxG}% between these points${areaPoly?' inside '+esc(areaF.name||'that area'):''}. Try a higher limit, Tight switchbacks, or points on gentler ground.`};
   const path=[];for(let st=goal;st!==-1;st=from[st]){const k=(st/S)|0,r=(k/W)|0,c=k%W;const pnt=[(c+c0)*2+1,(r+r0)*2+1];if(!path.length||path[path.length-1][0]!==pnt[0]||path[path.length-1][1]!==pnt[1])path.push(pnt)}path.reverse();path[0]=A;path[path.length-1]=B;
   const pts=dp(path,0.6).map(r1);return routeStats(pts)}
 function routeStats(pts){const d=densify(pts,2);const L=d[d.length-1].d;let maxg=0,vol=0;
@@ -1250,13 +1256,15 @@ function padStats(poly){const xs=poly.map(q=>q[0]),ys=poly.map(q=>q[1]);const zs
   if(zs.length<2)return null;zs.sort((a,b)=>a-b);let lo=zs[0],hi=zs[zs.length-1];for(let i=0;i<40;i++){const L=(lo+hi)/2;let c=0,f=0;for(const v of zs){if(v>L)c+=v-L;else f+=L-v}if(c>f)lo=L;else hi=L}
   const L=(lo+hi)/2;let cut=0,fill=0;for(const v of zs){if(v>L)cut+=v-L;else fill+=L-v}return {L,cut,fill,maxCut:zs[zs.length-1]-L,maxFill:L-zs[0],fall:zs[zs.length-1]-zs[0]}}
 function routeBar(b){const r=mt.res;b.innerHTML=`<span class="what">Track route</span><span class="hint">${!mt.pts.length?'Click the start':mt.pts.length===1?'Click the end':!r?'Finding a route…':r.err?esc(r.err):`<b>${Math.round(r.L)} m</b> long, ${r.climb>=0?'climbs':'falls'} ${Math.abs(r.climb).toFixed(0)} m, steepest 10 m on today's ground ${r.maxg.toFixed(0)}% (the built bench evens this out). Earthworks roughly <b>${Math.round(r.vol).toLocaleString()} m³</b> cut and fill for a ${RT.width} m bench.`}</span>
-   <label class="gp">Max grade <input type="number" id="rtG" min="3" max="25" step="1" value="${RT.grade}">%</label><label class="gp"><input type="checkbox" id="rtIn" ${RT.inLot?'checked':''}> Stay inside the lot</label><label class="gp">Width <input type="number" id="rtW" min="1" max="8" step="0.5" value="${RT.width}"> m</label>
+   <label class="gp">Max grade <input type="number" id="rtG" min="3" max="25" step="1" value="${RT.grade}">%</label><label class="gp"><input type="checkbox" id="rtIn" ${RT.inLot?'checked':''}> Stay inside the lot</label>${(()=>{const ar=mt.pts.length===2?routeAreas(mt.pts[0],mt.pts[1]):[];if(RT.area&&!ar.some(a=>a[0]===RT.area))RT.area='';return ar.length?`<label class="gp">Keep inside <select id="rtA"><option value="">${RT.inLot?'the lot':'anywhere'}</option>${ar.map(([i,n])=>`<option value="${i}" ${RT.area===i?'selected':''}>${esc(n)}</option>`).join('')}</select></label>`:''})()}<label class="gp">Shape <select id="rtS">${RT_STYLE.map(([l,v])=>`<option value="${v}" ${+RT.compact===v?'selected':''}>${l}</option>`).join('')}</select></label><label class="gp">Width <input type="number" id="rtW" min="1" max="8" step="0.5" value="${RT.width}"> m</label>
    ${r&&!r.err?'<button class="btn primary" id="rtTrack">Save as track</button><button class="btn" id="rtRoad">Save as road</button>':''}${mt.pts.length?'<button class="btn" id="rtNew">New route</button>':''}<button class="btn" id="mtClose">Close</button>`;
   const rerun=()=>{if(mt.pts.length===2){mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade)}renderMTBar();draw()};
   $('#rtG').onchange=e=>{RT.grade=Math.max(3,Math.min(25,+e.target.value||10));lsSet('bt.rtGrade',RT.grade);rerun()};
   $('#rtIn').onchange=e=>{RT.inLot=e.target.checked;lsSet('bt.rtInLot',RT.inLot);rerun()};
+  if($('#rtA'))$('#rtA').onchange=e=>{RT.area=e.target.value;rerun()};
+  $('#rtS').onchange=e=>{RT.compact=+e.target.value;lsSet('bt.rtCompact',RT.compact);rerun()};
   $('#rtW').onchange=e=>{RT.width=Math.max(1,Math.min(8,+e.target.value||4));lsSet('bt.rtWidth',RT.width);if(mt.res&&!mt.res.err)mt.res=routeStats(mt.res.pts);renderMTBar()};
-  const save=async kind=>{const r=mt.res;endMT();draft={kind,pts:[]};await commit({g:'line',pts:r.pts});await saveFields(selected,{notes:`Route at up to ${RT.grade}%: ${Math.round(r.L)} m, steepest ${r.maxg.toFixed(0)}%. Roughly ${Math.round(r.vol)} m³ of cut and fill for a ${RT.width} m bench. Computed from the ${esc(((T.meta.site&&T.meta.site.source)||"terrain data").split(",")[0])}; walk it before machines go in.`});toast('Saved the route to the design')};
+  const save=async kind=>{const r=mt.res;endMT();draft={kind,pts:[]};await commit({g:'line',pts:r.pts});await saveFields(selected,{notes:`Route at up to ${RT.grade}%${RT.area&&features.get(RT.area)?', kept inside '+(features.get(RT.area).name||'the chosen area'):''}: ${Math.round(r.L)} m, steepest ${r.maxg.toFixed(0)}%. Roughly ${Math.round(r.vol)} m³ of cut and fill for a ${RT.width} m bench. Computed from the ${esc(((T.meta.site&&T.meta.site.source)||"terrain data").split(",")[0])}; walk it before machines go in.`});toast('Saved the route to the design')};
   if($('#rtTrack'))$('#rtTrack').onclick=()=>save('track');if($('#rtRoad'))$('#rtRoad').onclick=()=>save('road');
   if($('#rtNew'))$('#rtNew').onclick=()=>{mt.pts=[];mt.res=null;renderMTBar();draw()};$('#mtClose').onclick=()=>{endMT();renderTools()}}
 function drawRoute(px){const r=mt.res;if(r&&!r.err){const p=new Path2D();r.pts.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=7*px;ctx.stroke(p);ctx.strokeStyle='#8a5a2b';ctx.lineWidth=4*px;ctx.stroke(p)}
