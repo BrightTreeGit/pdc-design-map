@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        640,
+        880
+      ],
+      [
+        700,
+        905
+      ],
+      [
+        760,
+        930
+      ],
+      [
+        820,
+        950
+      ]
+    ]
+  },
+  "kind": "path",
+  "name": "Bush walking trail on contour (idea)",
+  "notes": "Long-term idea: a walking or bike trail on contour with drainage turnouts every 20–30 m.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y10",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

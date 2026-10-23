@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        586,
+        852
+      ]
+    ]
+  },
+  "kind": "obs",
+  "name": "Soil test and infiltration: boggy patch",
+  "notes": "Suggested: test the boggy ground by the driveway (slake and infiltration tests too) to see whether it is seepage, compaction or sodic clay.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

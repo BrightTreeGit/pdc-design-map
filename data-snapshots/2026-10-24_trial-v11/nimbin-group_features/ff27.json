@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "cx": 574,
+    "cy": 863,
+    "g": "sun",
+    "r": 90
+  },
+  "kind": "sunS",
+  "name": "Summer sun",
+  "notes": "Group sector analysis. The map draws the correct bearings (sunrise about 117°, sunset about 243°).",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

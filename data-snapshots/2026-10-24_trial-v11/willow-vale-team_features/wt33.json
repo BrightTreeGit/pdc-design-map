@@ -1,0 +1,22 @@
+{
+  "cat": "Erosion",
+  "createdAt": "2026-10-22T00:30:00.000Z",
+  "createdBy": null,
+  "date": "2026-10-21",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1100,
+        1022
+      ]
+    ]
+  },
+  "kind": "obs",
+  "name": "Landslip: orchard end, western slope (owner observed)",
+  "notes": "Owner observation via the team: landslip, location indicative. Claude: keep overflow and basins away; keep groundcover; watch for cracks after heavy rain. (Positions are indicative, traced from the team's bubble plan onto the aerial; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-22T00:30:00.000Z"
+}

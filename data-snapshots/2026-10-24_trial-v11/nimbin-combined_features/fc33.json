@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        588,
+        870
+      ],
+      [
+        592,
+        880
+      ],
+      [
+        588,
+        893
+      ],
+      [
+        581,
+        899
+      ]
+    ]
+  },
+  "kind": "flow",
+  "name": "Swale spillway",
+  "notes": "Suggested: rock-lined spillway from the swale end to the rain garden.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y2",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

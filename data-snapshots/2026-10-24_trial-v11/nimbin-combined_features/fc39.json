@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        583,
+        879
+      ]
+    ]
+  },
+  "kind": "obs",
+  "name": "Soil test: vegetable patch",
+  "notes": "Suggested: lab soil test plus arsenic and organochlorine screen before growing vegetables (NSW EPA names arsenic and dieldrin as the main leftovers on old banana land).",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

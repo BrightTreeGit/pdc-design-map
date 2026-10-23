@@ -1,0 +1,52 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        622,
+        842
+      ],
+      [
+        689,
+        823
+      ],
+      [
+        708,
+        840
+      ],
+      [
+        735,
+        844
+      ],
+      [
+        790,
+        873
+      ],
+      [
+        760,
+        1127
+      ],
+      [
+        561,
+        1094
+      ],
+      [
+        575,
+        900
+      ],
+      [
+        631,
+        888
+      ]
+    ]
+  },
+  "kind": "zone4",
+  "name": "Zone 4 · lower forested slopes",
+  "notes": "Suggested: managed bush and lower slopes: lantana control from the good bush outward, firewood, a trail on contour.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y5",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

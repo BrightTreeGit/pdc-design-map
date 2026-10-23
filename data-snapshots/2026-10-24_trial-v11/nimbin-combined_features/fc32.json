@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        597,
+        840
+      ],
+      [
+        592,
+        850
+      ],
+      [
+        589,
+        860
+      ],
+      [
+        588,
+        870
+      ]
+    ]
+  },
+  "kind": "swale",
+  "name": "Swale on contour (from elevation), spillway south",
+  "notes": "Suggested: set out the level line on site with an A-frame after a wet season of watching. From the 5 m elevation the level line here is about 119 m and runs north–south between the house and cabin. The bench sits on a spur, so only about 0.1 ha drains to it: the boggy patch is more likely seepage or poorly draining clay. Spill at the south end into the rain garden, never toward the house.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y2",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

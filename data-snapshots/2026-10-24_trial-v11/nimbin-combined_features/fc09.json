@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        603,
+        820
+      ],
+      [
+        598,
+        832
+      ],
+      [
+        590,
+        843
+      ],
+      [
+        586,
+        852
+      ]
+    ]
+  },
+  "kind": "road",
+  "name": "Driveway spur to the house and cabin",
+  "notes": "Existing spur from the driveway loop down past the shed. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

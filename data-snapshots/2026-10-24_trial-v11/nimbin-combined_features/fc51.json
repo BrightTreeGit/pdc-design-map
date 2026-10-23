@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        545,
+        903
+      ]
+    ]
+  },
+  "kind": "shrub",
+  "name": "Finger lime (local native)",
+  "notes": "Suggested native understorey; thorny, good near the chicken run edge.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

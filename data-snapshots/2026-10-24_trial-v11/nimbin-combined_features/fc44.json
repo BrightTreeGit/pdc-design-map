@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        548,
+        874
+      ],
+      [
+        558,
+        874
+      ],
+      [
+        558,
+        884
+      ],
+      [
+        548,
+        884
+      ]
+    ]
+  },
+  "kind": "greywater",
+  "name": "Laundry greywater to bananas and citrus",
+  "notes": "Suggested: a greywater diverter from the laundry to a mulched banana circle; not on leafy greens; keep clear of the septic field (location to confirm) and check council rules.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

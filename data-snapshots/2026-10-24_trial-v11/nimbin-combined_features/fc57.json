@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "a0": 240,
+    "a1": 290,
+    "cx": 574,
+    "cy": 863,
+    "g": "sector",
+    "r": 75
+  },
+  "kind": "wind",
+  "name": "Winter westerlies (check)",
+  "notes": "Suggested to check: cold dry westerlies are common inland of the coast in winter and spring. Confirm with the Lismore wind roses and observation.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

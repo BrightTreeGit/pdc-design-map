@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        595,
+        840
+      ],
+      [
+        590,
+        850
+      ],
+      [
+        587,
+        860
+      ],
+      [
+        586,
+        870
+      ]
+    ]
+  },
+  "kind": "screen",
+  "name": "Privacy screen on the swale berm (under 2 m)",
+  "notes": "Suggested species under about 2 m: native ginger, cordyline, lilly pilly hedge kept clipped, finger lime, midyim. Keeps morning sun on the house.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y2",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

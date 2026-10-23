@@ -1,0 +1,36 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        562,
+        838
+      ],
+      [
+        604,
+        838
+      ],
+      [
+        606,
+        880
+      ],
+      [
+        586,
+        886
+      ],
+      [
+        562,
+        880
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Zone 1 · house, shed and cabin surrounds",
+  "notes": "Group zone sketch: daily-use area around the house, shed and cabin. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}
