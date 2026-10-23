@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v87 | 23 Oct 2026 21:35 | see commit history |
 | v86 | 23 Oct 2026 07:20 | see commit history |
 | v85 | 23 Oct 2026 07:00 | (published, no separate commit; included in v86) |
 | v84 | 23 Oct 2026 07:10 | see commit history |
@@ -40,6 +41,10 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v87 · 23 Oct 2026 21:35
+### Fixed
+- Drawn shapes (zones, beds, buildings, lines) show on the map again. Since v85 a code comment had hidden the drawing step, so only labels and the areas in the panels appeared.
 
 ## v86 (23 Oct 2026, 07:20)
 **Changed**
