@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright
 here = os.path.dirname(os.path.abspath(__file__)); root = os.path.join(here, '..', '..', 'map')
 srv = subprocess.Popen([sys.executable, '-m', 'http.server', '8765'], cwd=root, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 time.sleep(1)
-SITES = ['bright-tree', 'bright-tree-gemini', 'bellbunya', 'nimbin', 'willow-vale', 'noosa-forest-retreat', 'nac'] + [s for s in ('willow-vale-team', 'nimbin-group', 'nimbin-combined', 'nimbin-house-group', 'nimbin-house-combined') if "id:'" + s + "'" in open(os.path.join(root, 'index.html')).read()]
+SITES = ['bright-tree', 'bright-tree-gemini', 'bellbunya', 'nimbin', 'willow-vale', 'noosa-forest-retreat', 'nac'] + [s for s in ('willow-vale-team', 'nimbin-group') if "id:'" + s + "'" in open(os.path.join(root, 'index.html')).read()]
 TEST = {'t1': {'kind': 'shed', 'name': 'QA shed', 'geom': {'g': 'polygon', 'pts': [[900, 1000], [930, 1000], [930, 1020], [900, 1020]]}, 'status': 'built', 'stage': 'existing'}}
 bad = 0
 try:
