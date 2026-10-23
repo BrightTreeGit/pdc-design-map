@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v88 | 23 Oct 2026 21:45 | see commit history |
 | v87 | 23 Oct 2026 21:35 | see commit history |
 | v86 | 23 Oct 2026 07:20 | see commit history |
 | v85 | 23 Oct 2026 07:00 | (published, no separate commit; included in v86) |
@@ -41,6 +42,13 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v88 · 23 Oct 2026 21:45
+### Changed
+- Sector map (sun arcs, wind, fire, view and cold-air sectors) is now a layer you can turn on under Layers → Water, contours & labels. It is off by default and turns on by itself when you draw a sector or add wind sectors.
+- Names on structures and features are off by default. Hover over an item to see its name, or press and hold on a phone. Zone names still show. Turn all names back on under Layers.
+### Fixed
+- The loading message no longer sits invisibly over the map after loading in some browsers.
 
 ## v87 · 23 Oct 2026 21:35
 ### Fixed
