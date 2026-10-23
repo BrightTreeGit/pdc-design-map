@@ -25,7 +25,7 @@ for i,(v,l) in enumerate(tiles):
     x=0.05+(i%4)*0.235;y=0.58-(i//4)*0.27
     ax=f.add_axes([x,y,0.215,0.22]);ax.axis('off');ax.add_patch(Rectangle((0,0),1,1,fc='#f1f2ee',ec='none',transform=ax.transAxes))
     ax.text(0.08,0.55,v,fontsize=26,color=ACC if i in (2,4) else INK,weight='bold',transform=ax.transAxes);import textwrap;ax.text(0.08,0.3,textwrap.fill(l,24),fontsize=10.5,color=MUT,transform=ax.transAxes,va='top')
-f.text(0.05,0.2,'Contents: 2 whole property · 3 house area · 4 rain · 5 temperature · 6 sun and sectors · 7 slope\n8 creek-to-ridge profile · 9 water · 10 harvest calendar · 11 phasing · 12 weekly hours',fontsize=11,color=INK,linespacing=1.6)
+f.text(0.05,0.2,'Contents: 2 whole property · 3 house area · 4 rain · 5 temperature · 6 sun and sectors · 7 slope\n8 west-to-east profile · 9 water · 10 harvest calendar · 11 phasing · 12 weekly hours',fontsize=11,color=INK,linespacing=1.6)
 src(f,'Sources: map data (NSW 5 m elevation, 2019 aerial), SILO, group draft');pp.savefig(f);plt.close(f)
 # helpers for maps
 img=Image.open(B+'aerial.jpg');S=1.5
@@ -52,10 +52,10 @@ def drawmap(ax,x0,y0,x1,y1,kinds,labels=True,fs=8):
     ax.set_xlim(x0,x1);ax.set_ylim(y1,y0);ax.set_xticks([]);ax.set_yticks([]);ax.set_aspect('equal')
 def scalebar(ax,x,y,l,lab):ax.plot([x,x+l],[y,y],color='white',lw=4);ax.plot([x,x+l],[y,y],color=INK,lw=2);ax.text(x+l/2,y-6*l/100,lab,ha='center',fontsize=9,color=INK,bbox=dict(fc='white',ec='none',alpha=.8,pad=1))
 # 2 whole property
-f=page('The whole property: steep bush above a small house bench','Suggested zones over the 2019 aerial. Red = property outline; blue = creeks; dashed box = the group\'s house-area boundary')
+f=page('The whole property: steep bush above a small house bench','Suggested zones on the 2019 aerial. Red: property outline; blue: creeks; white box: house area; dashes: profile line')
 ax=f.add_axes([0.05,0.08,0.9,0.78]);drawmap(ax,360,700,1650,1300,['zone3','zone4','zone5','customzone'],labels=False)
 for lab,(x,y) in {'Zone 5 · upper bush':(1150,1000),'Zone 4 · lower forested slopes':(680,1020),'Zone 3 · creek flats':(470,960),'Creek riparian buffer':(380,760)}.items():ax.text(x,y,lab,fontsize=10,ha='center',color=INK,bbox=dict(fc='white',ec='none',alpha=.8,pad=2))
-ax.add_patch(Rectangle((528,816),103,72,fc='none',ec='white',lw=2.2,ls='--'));ax.text(531,812,'House area (detail on page 3)',fontsize=9,color='white',weight='bold')
+ax.add_patch(Rectangle((528,816),103,72,fc='none',ec='white',lw=2.2,ls='--'));_pl=np.array([(415,875),(574,863),(700,880),(1000,960),(1300,1060),(1590,1245)]);ax.plot(_pl[:,0],_pl[:,1],color='white',lw=3);ax.plot(_pl[:,0],_pl[:,1],color=ACC,lw=1.6,ls='--');ax.text(1300,1085,'Profile line (page 8)',color='white',fontsize=9.5,weight='bold');ax.text(531,812,'House area (detail on page 3)',fontsize=9,color='white',weight='bold')
 scalebar(ax,1450,1270,100,'100 m');ax.annotate('N',(1620,740),xytext=(1620,790),arrowprops=dict(arrowstyle='->',color='white',lw=2),color='white',ha='center',fontsize=12,weight='bold')
 src(f,'Map data: NSW 5 m elevation, 2019 aerial; zones are suggestions');pp.savefig(f);plt.close(f)
 # 3 house area
@@ -89,7 +89,7 @@ for k,(x,y) in labs.items():ax.text(x,y,k,fontsize=8.5,ha='center',va='center',c
 ax.set_xlim(x0,x1);ax.set_ylim(y1,y0);ax.set_xticks([]);ax.set_yticks([]);ax.set_aspect('equal');scalebar(ax,612,905,20,'20 m')
 ax2=f.add_axes([0.7,0.1,0.27,0.74]);ax2.axis('off')
 txt=['Solid lines: existing and the group plan','Dashed lines, square dots: suggestions','',
-'Suggested','• Swale on the level line (about 119 m),','  spillway south to a rain garden','• Privacy screen under 2 m on the berm','• Garden tank on the high side (about 121 m),','  gravity to the beds (about 30 kPa)','• Raised or wicking beds after a soil test','  (arsenic and organochlorines: old banana land)','• Greywater to a banana circle','• Mango guild; native shrubs and macadamia','• Low-fuel zone round the house and cabin','','Contours: 1 m (yellow), 5 m labelled','Positions indicative: check on site']
+'Suggested','• Swale on the level line (about 119 m),','  spillway south to a rain garden','  (small catchment: the bench is a spur)','• Privacy screen under 2 m on the berm','• Garden tank on the high side (about 121 m),','  gravity to the beds (about 30 kPa)','• Raised or wicking beds after a soil test','  (arsenic and organochlorines: old banana land)','• Greywater to a banana circle','• Mango guild; native shrubs and macadamia','• Low-fuel zone round the house and cabin','','Contours: 1 m (yellow), 5 m labelled','Positions indicative: check on site']
 for i,s in enumerate(txt):ax2.text(0,1-i*0.055,s,fontsize=10.5,color=ACC if s=='Suggested' else INK,weight='bold' if s=='Suggested' else 'normal',va='top')
 src(f,'Map data: NSW 5 m elevation, 2019 aerial; group draft 23 Oct 2026');pp.savefig(f);plt.close(f)
 # 4 rain
@@ -144,15 +144,23 @@ ax.set_ylabel('Share of property (%)');ax.set_xlabel('Slope');ax.set_ylim(0,42)
 for i,s in enumerate(['gardens, buildings','gentle tracks, pasture','orchards on contour','tree crops, care','forest, trails only','forest (Zone 5)']):ax.text(i,-6.0,s,ha='center',fontsize=9,color=MUT)
 src(f,'Map data: NSW 5 m elevation (2 m analysis)');pp.savefig(f);plt.close(f)
 # 8 profile
-D1=t['meta']['dem1'];arr=np.frombuffer(zlib.decompress(base64.b64decode(D1['b64'])),np.int16).reshape(D1['h'],D1['w'])/10
-xs=np.arange(425,760);zs=[arr[863-D1['y0'],x-D1['x0']] for x in xs]
-f=page('Creek to ridge: the house sits on a bench at about 117 m','West–east profile through the house (vertical scale exaggerated about 3 times)')
-ax=f.add_axes([0.08,0.14,0.86,0.66]);ax.fill_between(xs-425,zs,85,color='#e6e2d6');ax.plot(xs-425,zs,color=INK,lw=2)
-for x,lab in [(431,'Creek\n~93 m'),(574,'House\n~117 m'),(595,'Cabin\n~120 m'),(588,''),(700,'Ridge\n~142 m')]:
-    if lab:
-        z=arr[863-D1['y0'],x-D1['x0']];ax.plot(x-425,z,'o',color=ACC,ms=7);ax.text(x-425,z+4,lab,ha='center',fontsize=10)
-ax.annotate('swale on the\nlevel line (~119 m)',(588-425,arr[863-D1['y0'],588-D1['x0']]),xytext=(150,100),arrowprops=dict(arrowstyle='->',color=MUT),fontsize=10,color=MUT)
-ax.set_xlabel('Distance east from the creek (m)');ax.set_ylabel('Height (m)');ax.set_ylim(85,155);ax.grid(color='#eee')
+D2=np.frombuffer(zlib.decompress(base64.b64decode(m['dem']['b64'])),np.int16).reshape(1000,1000)/10
+PL=[(415,875),(574,863),(700,880),(1000,960),(1300,1060),(1590,1245)]
+dd=[];zz=[];d=0
+for (xa,ya),(xb,yb) in zip(PL,PL[1:]):
+    n=int(np.hypot(xb-xa,yb-ya)//2)
+    for k in range(n):
+        x=xa+(xb-xa)*k/n;y=ya+(yb-ya)*k/n;dd.append(d+np.hypot(x-xa,y-ya));zz.append(D2[int(y//2),int(x//2)])
+    d+=np.hypot(xb-xa,yb-ya)
+dd=np.array(dd);zz=np.array(zz)
+f=page('West to east: the land climbs from 93 m to over 400 m','Along the line on page 2, about 1.25 km. Highest point about 432 m at the far eastern corner. Vertical scale about 2 ×')
+ax=f.add_axes([0.08,0.14,0.86,0.66]);ax.fill_between(dd,zz,80,color='#e6e2d6');ax.plot(dd,zz,color=INK,lw=2)
+def mark(dist,lab,dy=12):
+    k=np.argmin(abs(dd-dist));ax.plot(dd[k],zz[k],'o',color=ACC,ms=7);ax.text(dd[k],zz[k]+dy,lab+f'\n~{zz[k]:.0f} m',ha='center',fontsize=10)
+mark(16,'Creek');mark(160,'House');mark(415,'Lower forested\nslope',14);mark(760,'Bench',14);mark(1000,'');mark(dd[-1]-5,'Eastern tip',14)
+ax.axvspan(0,230,color=ACC,alpha=0.06);ax.text(115,395,'House parcel and\nhouse bench',ha='center',fontsize=10,color=ACC)
+ax.text(700,395,'Main block: steep forest climbing east (Zone 4 then Zone 5)',ha='center',fontsize=10,color=MUT)
+ax.set_xlabel('Distance from the creek along the profile line (m)');ax.set_ylabel('Height (m)');ax.set_ylim(80,440);ax.set_xlim(0,dd[-1]+10);ax.grid(color='#eee')
 src(f,'Map data: NSW 5 m elevation');pp.savefig(f);plt.close(f)
 # 9 water
 roofE=0.85;house=300;shed=160
