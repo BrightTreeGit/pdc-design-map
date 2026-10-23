@@ -112,6 +112,7 @@ canvas#map.drawing{cursor:crosshair}
 .cmenu button:hover,.cmenu button:focus-visible{background:var(--hover,rgba(0,0,0,.07));outline:none}.cmenu .cmh{padding:6px 10px 4px;font-weight:600;font-size:12px;color:var(--muted)}.cmenu hr{border:0;border-top:1px solid var(--line,#ddd);margin:4px 0}.cmenu select{flex:1;font:inherit}
 .multi{display:grid;gap:8px}.multi .names{font-size:12px;color:var(--muted);max-height:120px;overflow:auto}.lockpill{font-size:11px;padding:1px 6px;border-radius:9px;background:var(--hover,rgba(0,0,0,.08));margin-left:6px}.czbox{margin-top:8px}.czbox>summary{cursor:pointer;font-size:13px;color:var(--accent,#2a7)}.czrow{display:flex;gap:6px;align-items:center}.czrow #czName{flex:1;min-width:0}.czrow input[type=color]{width:40px;height:32px;padding:0;border:none;background:none}.czlist{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:4px}.czlist li{display:flex;align-items:center;gap:6px;font-size:13px}.toast.act{pointer-events:auto;display:flex;gap:10px;align-items:center}.toastbtn{background:none;border:1px solid currentColor;color:inherit;border-radius:4px;padding:3px 10px;font:inherit;font-weight:600;cursor:pointer}.toastbtn:focus-visible{outline:2px solid var(--accent,#3a7)}
 .loading{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.loading[hidden]{display:none}
 .empty{border:1px dashed var(--line);border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:var(--muted)}
 .empty ol{margin:6px 0 0 18px;padding:0}
 .kpl button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 0;font:inherit;color:var(--ink);cursor:pointer}
@@ -392,7 +393,8 @@ const xy2ll=(x,y)=>PJ.toLL(x+E0,N0-y);
 let T=null, EXTRA=null, PROS=null; const IMG={};
 let dem2=null, dem1=null, sunGrid={};
 const view={cx:960,cy:960,s:1};
-const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,sectors:false,labels:true,flabels:true,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
+const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
+if(!lsGet('bt.namesOnHover',false)){layers.flabels=false;lsSet('bt.layers',layers);lsSet('bt.namesOnHover',true)}
 const features=new Map(); // id -> data
 let selected=null, tool=null, draft=null, gradePen=lsGet('bt.gradePen',{on:false,grade:0,dir:'down'});
 let db=null, userCap=null, myId=null, downloads=null, live=false, assets=null;
@@ -582,11 +584,11 @@ function darker(hex,k=.62){const n=parseInt(hex.slice(1),16);const c=[(n>>16)&25
 function drawSectionEnds(){for(const [id,f] of secOrder()){if(!vis(f)||f.geom.pts.length<2)continue;const [a,b]=secLetters(id);const P=f.geom.pts;
   [[P[0],a],[P[P.length-1],b]].forEach(([p,t])=>{const [x,y]=w2s(...p);ctx.fillStyle='#fff';ctx.strokeStyle='#c0392b';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,11,0,7);ctx.fill();ctx.stroke();ctx.font='700 12px "IBM Plex Sans",sans-serif';ctx.fillStyle='#c0392b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,x,y+.5)})}}
 function drawFeatureLabels(){const L=[];
-  for(const [id,f] of features){if(!vis(f))continue;const k=KINDS[f.kind]||KINDS.note;const isZ=k.g==='Zones';if(f.kind==='section'||(f.kind==='privacy'&&id!==selected))continue;if(isZ?!layers.zlabels:!layers.flabels)continue;const g=f.geom;
+  for(const [id,f] of features){if(!vis(f))continue;const k=KINDS[f.kind]||KINDS.note;const isZ=k.g==='Zones';if(f.kind==='section'||(f.kind==='privacy'&&id!==selected))continue;if(isZ?!layers.zlabels:!(layers.flabels||id===selected||id===hoverId))continue;const g=f.geom;
     let a,inner=0;if(g.g==='polygon'){const ip=interiorPoint(g);a=ip.p;inner=ip.r*view.s}else{a=centroid(f);if(!a)continue;if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}if(a1<a0)a1+=360;const m=((a0+a1)/2)*Math.PI/180;a=[g.cx+Math.sin(m)*g.r*.72,g.cy-Math.cos(m)*g.r*.72]}}
     const [x,y]=w2s(...a);if(x<-200||y<-60||x>W+200||y>H+60)continue;
     const area=g.g==='polygon'?polyArea(g.pts):0;const name=f.name||k.label;
-    if(!isZ&&id!==selected&&((g.g==='polygon'&&Math.sqrt(area)*view.s<26)||(g.g==='point'&&view.s<1.1)||(g.g==='line'&&lineLen(g.pts)*view.s<60)))continue; // small things: name appears when zoomed in
+    if(!isZ&&id!==selected&&id!==hoverId&&((g.g==='polygon'&&Math.sqrt(area)*view.s<26)||(g.g==='point'&&view.s<1.1)||(g.g==='line'&&lineLen(g.pts)*view.s<60)))continue; // small things: name appears when zoomed in
     const col=isZ&&layers.zcol!==false?darker(k.color):'#1d2621';
     const sub=g.g==='polygon'&&(isZ||area*view.s*view.s>2500)?fmtArea(area):'';
     L.push({id,f,isZ,x,y,inner,area,name,sub,col,acol:k.color,point:g.g==='point',poly:g.g==='polygon'?g.pts:null})}
@@ -730,7 +732,7 @@ function finishFree(stroke){if(!draft||stroke.length<3)return;const k=KINDS[draf
   const r=fitShape(stroke,penMode);if(r.pts.length<3)return;toast(`Drawn as ${r.shape === 'freeform' ? 'a smoothed shape' : (r.shape==='oval'?'an ':'a ')+r.shape} · ${fmtArea(polyArea(r.pts))}`);commit({g:'polygon',pts:r.pts})}
 
 /* ---------------- interaction ---------------- */
-const pointers=new Map();let dragStart=null,pinch=null,vdrag=null,moved=false,boxDrag=null,selBox=null,grpDrag=null,lpT=null,selMode=false;
+const pointers=new Map();let dragStart=null,pinch=null,vdrag=null,moved=false,boxDrag=null,selBox=null,grpDrag=null,lpT=null,selMode=false,hoverId=null;
 cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,[e.offsetX,e.offsetY]);moved=false;
   if(pointers.size===2){const [a,b]=[...pointers.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),s:view.s,c:s2w((a[0]+b[0])/2,(a[1]+b[1])/2)};dragStart=null;freeStroke=null;return}
   if(penOn()&&penMode==='box'&&KINDS[draft.kind].geom==='polygon'){const w0=s2w(e.offsetX,e.offsetY);boxDrag={a:w0,b:w0};dragStart=null;draw();return}
@@ -738,13 +740,14 @@ cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pointers
   dragStart={x:e.offsetX,y:e.offsetY,cx:view.cx,cy:view.cy};
   if(align&&align.mode==='move'){const im=imagery.get(align.id);if(im){imgDrag={x:e.offsetX,y:e.offsetY,c:im.c,d:im.d};dragStart=null}return}
   if(mt&&mt.type==='bound'){const hb=boundHit(e.offsetX,e.offsetY);if(hb){if(hb.insert)mt.pts.splice(hb.i,0,r1(s2w(e.offsetX,e.offsetY)));bdrag=hb;mt.dirty=true;dragStart=null;draw()}return}
-  if(e.pointerType==='touch'&&!draft&&!mt){clearTimeout(lpT);const p0=[e.offsetX,e.offsetY];lpT=setTimeout(()=>{if(!moved&&pointers.size===1){dragStart=null;openCtx(p0[0],p0[1])}},560)}
+  if(e.pointerType==='touch'&&!draft&&!mt){clearTimeout(lpT);if(hoverId){hoverId=null;draw()}const p0=[e.offsetX,e.offsetY];lpT=setTimeout(()=>{if(!moved&&pointers.size===1){dragStart=null;hoverId=hitFeature(s2w(p0[0],p0[1]))||null;draw();openCtx(p0[0],p0[1])}},560)}
   if(!tool&&!draft&&!mt&&(e.shiftKey||selMode)&&e.button===0&&!(selMode&&multi.size>1&&multi.has(hitFeature(s2w(e.offsetX,e.offsetY))))){const w0=s2w(e.offsetX,e.offsetY);selBox={a:w0,b:w0};dragStart=null;draw();return}
   if(!tool&&!draft&&!mt&&multi.size>1){const w0=s2w(e.offsetX,e.offsetY);const hid=hitFeature(w0);if(hid&&multi.has(hid)){const ids=[...multi].filter(id=>features.has(id)&&!features.get(id).locked);if(ids.length){grpDrag={w0,orig:new Map(ids.map(id=>[id,snapF(id)]))};dragStart=null;return}}}
   if(!tool&&selected&&e.altKey){const vi=vertexAt(e.offsetX,e.offsetY);if(vi>=0){dragStart=null;deleteVertex(vi);return}}
   if(!tool&&selected){const sf=features.get(selected);if(sf&&sf.locked)return;const h=hitVertex(e.offsetX,e.offsetY);if(h){h.before=snapF(selected);vdrag=h;dragStart=null}}});
+cv.addEventListener('pointerleave',()=>{if(hoverId){hoverId=null;draw()}});
 cv.addEventListener('pointermove',e=>{const pt=[e.offsetX,e.offsetY];if(pointers.has(e.pointerId))pointers.set(e.pointerId,pt);
-  const w=s2w(...pt);hud(w);if(lpT&&dragStart&&Math.hypot(pt[0]-dragStart.x,pt[1]-dragStart.y)>6)clearTimeout(lpT);
+  const w=s2w(...pt);hud(w);if(e.pointerType==='mouse'&&!e.buttons&&!draft&&!mt&&!layers.flabels){const h=hitFeature(w)||null;if(h!==hoverId){hoverId=h;draw()}}if(lpT&&dragStart&&Math.hypot(pt[0]-dragStart.x,pt[1]-dragStart.y)>6)clearTimeout(lpT);
   if(selBox){selBox.b=w;draw();return}
   if(grpDrag){moved=true;const dx=w[0]-grpDrag.w0[0],dy=w[1]-grpDrag.w0[1];for(const [id,o] of grpDrag.orig){const f=features.get(id);if(f)features.set(id,{...f,geom:shiftGeom(o.geom,dx,dy)})}$('#hud').innerHTML=`Moving <b>${grpDrag.orig.size}</b> items · ${Math.hypot(dx,dy).toFixed(1)} m`;draw();return}
   if(boxDrag){boxDrag.b=w;const dx=Math.abs(w[0]-boxDrag.a[0]),dy=Math.abs(w[1]-boxDrag.a[1]);$('#hud').innerHTML=`<b>${dx.toFixed(1)} × ${dy.toFixed(1)} m</b> · ${fmtArea(dx*dy)}`;draw();return}
@@ -2313,7 +2316,7 @@ function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="$
 function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   const sc=m.slopeClasses.map(([lo,hi,c])=>`<span><i class="swatch" style="background:rgba(${c[0]},${c[1]},${c[2]},.85)"></i>${hi?lo+'–'+hi:'>'+lo}%</span>`).join('');
   const ac=Object.entries(m.aspectColors).map(([n,c])=>`<span><i class="swatch" style="background:rgb(${c})"></i>${n}</span>`).join('');
-  const lines=[['lot','Property boundary','#14898f'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],...(PROS?[['pros','Prospects: ponds, pads, tank (computed)','#a14e07']]:[]),['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['sectors','Sector map (sun, wind, fire, views)','#e0a400'],['labels','All labels','#777'],['flabels','Names on structures & features','#575757'],['zlabels','Names on zones','#7d5aa6'],['zcol','Colour zone names to match the zone','#d6453d']];
+  const lines=[['lot','Property boundary','#14898f'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],...(PROS?[['pros','Prospects: ponds, pads, tank (computed)','#a14e07']]:[]),['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['sectors','Sector map (sun, wind, fire, views)','#e0a400'],['labels','All labels','#777'],['flabels','Names on structures & features (otherwise shown on hover, or a long press on a phone)','#575757'],['zlabels','Names on zones','#7d5aa6'],['zcol','Colour zone names to match the zone','#d6453d']];
   el.innerHTML=
    sec('base','Base map',`${segHTML('baseSeg',[['none','None'],['relief','Relief'],['hillshade','Hillshade']].concat(IMG.aerial?[['aerial','Aerial']]:[]),layers.base)}
     <div class="row"><label for="baseop">Strength <span id="baseopv" class="pill">${Math.round(layers.baseOp*100)}%</span></label><input type="range" id="baseop" min="0" max="1" step="0.05" value="${layers.baseOp}"></div>
