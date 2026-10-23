@@ -38,6 +38,8 @@ def get(url, params, what, binary=False):
             r = requests.get(url, params=params, headers=H, timeout=180)
         except Exception as e:
             print(f"  {what}: request failed: {e}"); continue
+        if r.status_code == 404 and "Service not found" in r.text:
+            print(f"  {what}: the state server says this service is offline right now"); return None
         if not r.ok:
             print(f"  {what}: status {r.status_code}: {r.text[:160]!r}"); continue
         if binary:
@@ -158,7 +160,10 @@ def main():
         for c in range(2):
             b = f"{E0 + c*1000},{N0 - (r+1)*1000},{E0 + (c+1)*1000},{N0 - r*1000}"
             d = get(IMG, {"bbox": b, "bboxSR": win["epsg"], "imageSR": win["epsg"], "size": "2000,2000", "format": "jpg", "compression": "JPEG", "compressionQuality": 85, "f": "image"}, f"aerial tile {r}{c}", binary=True)
-            if d: (out / f"aerial_r{r}c{c}.jpg").write_bytes(d); tiles.append((r, c))
+            if not d:
+                print("  Aerial photo service unavailable: skipping the photo. Run this again later to fetch it."); break
+            (out / f"aerial_r{r}c{c}.jpg").write_bytes(d); tiles.append((r, c))
+        if len(tiles) < (r + 1) * 2: break
     try:
         from PIL import Image
         if len(tiles) == 4:
