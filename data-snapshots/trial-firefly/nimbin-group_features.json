@@ -1,0 +1,852 @@
+{
+"ff01": {
+"kind": "building",
+"name": "Main house",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+566,
+855
+],
+[
+584,
+855
+],
+[
+584,
+872
+],
+[
+566,
+872
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "Existing house with solar panels; four 10,000 L tanks on the west side. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff02": {
+"kind": "shed",
+"name": "Four-bay shed",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+570,
+828
+],
+[
+590,
+828
+],
+[
+590,
+837
+],
+[
+570,
+837
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "Existing four-bay shed, about 160 m\u00b2 of roof. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff03": {
+"kind": "cabin",
+"name": "Cabin (family member)",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+590,
+860
+],
+[
+600,
+860
+],
+[
+600,
+871
+],
+[
+590,
+871
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "Existing cabin, occupied by a family member and two children. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff04": {
+"kind": "tank",
+"name": "Water tank 1 (about 10,000 L)",
+"geom": {
+"g": "point",
+"pts": [
+[
+563,
+857
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "One of four existing tanks of about 10,000 L each. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z",
+"litres": 10000
+},
+"ff05": {
+"kind": "tank",
+"name": "Water tank 2 (about 10,000 L)",
+"geom": {
+"g": "point",
+"pts": [
+[
+563,
+861
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "One of four existing tanks of about 10,000 L each. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z",
+"litres": 10000
+},
+"ff06": {
+"kind": "tank",
+"name": "Water tank 3 (about 10,000 L)",
+"geom": {
+"g": "point",
+"pts": [
+[
+563,
+865
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "One of four existing tanks of about 10,000 L each. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z",
+"litres": 10000
+},
+"ff07": {
+"kind": "tank",
+"name": "Water tank 4 (about 10,000 L)",
+"geom": {
+"g": "point",
+"pts": [
+[
+563,
+869
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "One of four existing tanks of about 10,000 L each. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z",
+"litres": 10000
+},
+"ff08": {
+"kind": "road",
+"name": "Driveway loop",
+"geom": {
+"g": "line",
+"pts": [
+[
+431,
+875
+],
+[
+470,
+898
+],
+[
+500,
+908
+],
+[
+522,
+902
+],
+[
+531,
+878
+],
+[
+534,
+850
+],
+[
+541,
+828
+],
+[
+560,
+819
+],
+[
+590,
+818
+],
+[
+615,
+822
+],
+[
+630,
+830
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "Existing driveway: crosses the creek (floods regularly) and loops round the orchard to the shed and house. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff09": {
+"kind": "road",
+"name": "Driveway spur to the house and cabin",
+"geom": {
+"g": "line",
+"pts": [
+[
+603,
+820
+],
+[
+598,
+832
+],
+[
+590,
+843
+],
+[
+586,
+852
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "Existing spur from the driveway loop down past the shed. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff10": {
+"kind": "crossing",
+"name": "Creek crossing (floods)",
+"geom": {
+"g": "point",
+"pts": [
+[
+431,
+876
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "The driveway crosses the creek here; about 160 ha drains to this point, so it floods regularly. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff11": {
+"kind": "foodforest",
+"name": "Existing orchard (citrus and mango)",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+534,
+830
+],
+[
+562,
+830
+],
+[
+565,
+852
+],
+[
+561,
+876
+],
+[
+538,
+873
+],
+[
+533,
+850
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "Existing citrus and mango orchard: lemon, bush lemon, pink grapefruit, Valencia orange, quince, jaboticaba. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff12": {
+"kind": "herbspiral",
+"name": "Herb spiral",
+"geom": {
+"g": "point",
+"pts": [
+[
+575,
+846
+]
+]
+},
+"status": "proposed",
+"stage": "now",
+"notes": "Group plan: herb spiral beside the house, between it and the shed. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff13": {
+"kind": "compost",
+"name": "Compost bays",
+"geom": {
+"g": "point",
+"pts": [
+[
+566,
+836
+]
+]
+},
+"status": "proposed",
+"stage": "now",
+"notes": "Group plan: compost bays at the end of the shed. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff14": {
+"kind": "bed",
+"name": "Annual vegetable garden",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+577,
+874
+],
+[
+591,
+874
+],
+[
+591,
+884
+],
+[
+577,
+884
+]
+]
+},
+"status": "proposed",
+"stage": "now",
+"notes": "Group plan: annual vegetable and herb garden south of the house. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff15": {
+"kind": "chickens",
+"name": "Chicken enclosure",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+554,
+852
+],
+[
+564,
+852
+],
+[
+564,
+872
+],
+[
+576,
+872
+],
+[
+576,
+892
+],
+[
+554,
+892
+]
+]
+},
+"status": "proposed",
+"stage": "now",
+"notes": "Group plan: chickens fenced in a run along the west and south of the house, reaching the kitchen window for scraps. 5\u20138 birds; at least 0.5 m\u00b2 coop and 1 m\u00b2 run per bird. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff16": {
+"kind": "structure",
+"name": "Chicken coop (mobile)",
+"geom": {
+"g": "point",
+"pts": [
+[
+562,
+888
+]
+]
+},
+"status": "proposed",
+"stage": "now",
+"notes": "Group plan: mobile coop south of the house for shade, trees between coop and house for noise. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff17": {
+"kind": "swale",
+"name": "Swale and drain (privacy screen on the berm)",
+"geom": {
+"g": "line",
+"pts": [
+[
+591,
+842
+],
+[
+591,
+860
+],
+[
+591,
+875
+],
+[
+592,
+892
+]
+]
+},
+"status": "idea",
+"stage": "y2",
+"notes": "Group plan: swale on contour between house and cabin to hold water coming down the slope and divert it from the boggy patch at the driveway; water-tolerant plants on its edge, a privacy screen under about 2 m on the berm. Needs deeper observation first. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff18": {
+"kind": "screen",
+"name": "Privacy trees along the driveway",
+"geom": {
+"g": "line",
+"pts": [
+[
+598,
+834
+],
+[
+607,
+839
+],
+[
+616,
+845
+]
+]
+},
+"status": "proposed",
+"stage": "now",
+"notes": "Group plan: privacy trees between the driveway and the house and cabin. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff19": {
+"kind": "foodforest",
+"name": "Food forest (orchard expansion)",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+530,
+876
+],
+[
+561,
+878
+],
+[
+556,
+905
+],
+[
+530,
+905
+]
+]
+},
+"status": "idea",
+"stage": "y2",
+"notes": "Group plan: expand and integrate the orchard into a diverse food forest with understorey, shrub, ground and root layers. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff20": {
+"kind": "guild",
+"name": "Lemon guild",
+"geom": {
+"g": "point",
+"pts": [
+[
+550,
+845
+]
+]
+},
+"status": "proposed",
+"stage": "now",
+"notes": "Group plan: sub-canopy guild under the lemon: comfrey on the drip line, dandelion, yarrow, white clover, nasturtium, borage, alyssum. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff21": {
+"kind": "zone0",
+"name": "Zone 0 \u00b7 house",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+566,
+855
+],
+[
+584,
+855
+],
+[
+584,
+872
+],
+[
+566,
+872
+]
+]
+},
+"status": "built",
+"stage": "existing",
+"notes": "Group zone sketch. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff22": {
+"kind": "zone1",
+"name": "Zone 1 \u00b7 house, shed and cabin surrounds",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+562,
+838
+],
+[
+604,
+838
+],
+[
+606,
+880
+],
+[
+586,
+886
+],
+[
+562,
+880
+]
+]
+},
+"status": "proposed",
+"stage": "now",
+"notes": "Group zone sketch: daily-use area around the house, shed and cabin. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff23": {
+"kind": "zone2",
+"name": "Zone 2 \u00b7 orchard",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+532,
+826
+],
+[
+562,
+826
+],
+[
+566,
+878
+],
+[
+532,
+878
+]
+]
+},
+"status": "proposed",
+"stage": "now",
+"notes": "Group zone sketch: orchard west of the house. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff24": {
+"kind": "zone2",
+"name": "Zone 2 \u00b7 south lawn and food forest",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+530,
+880
+],
+[
+606,
+884
+],
+[
+606,
+915
+],
+[
+530,
+915
+]
+]
+},
+"status": "idea",
+"stage": "y2",
+"notes": "Group zone sketch: open ground south of the house for food forest expansion. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff25": {
+"kind": "zone3",
+"name": "Zone 3 \u00b7 east slope and lower west slope",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+606,
+826
+],
+[
+631,
+820
+],
+[
+640,
+885
+],
+[
+608,
+890
+]
+]
+},
+"status": "idea",
+"stage": "y2",
+"notes": "Group zone sketch: outer areas. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff26": {
+"kind": "sunW",
+"name": "Winter sun",
+"geom": {
+"g": "sun",
+"cx": 574,
+"cy": 863,
+"r": 90
+},
+"status": "built",
+"stage": "existing",
+"notes": "Group sector analysis. The map draws the correct bearings for this latitude (sunrise about 63\u00b0, sunset about 297\u00b0).",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff27": {
+"kind": "sunS",
+"name": "Summer sun",
+"geom": {
+"g": "sun",
+"cx": 574,
+"cy": 863,
+"r": 90
+},
+"status": "built",
+"stage": "existing",
+"notes": "Group sector analysis. The map draws the correct bearings (sunrise about 117\u00b0, sunset about 243\u00b0).",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff28": {
+"kind": "wind",
+"name": "Prevailing winds (S\u2013SE\u2013E)",
+"geom": {
+"g": "sector",
+"cx": 574,
+"cy": 863,
+"r": 80,
+"a0": 100,
+"a1": 200
+},
+"status": "built",
+"stage": "existing",
+"notes": "Group sector analysis: prevailing winds from the south to east; the brief also records easterlies in summer. Validate against Bureau wind roses and observation.",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff29": {
+"kind": "wind",
+"name": "Spring winds (N)",
+"geom": {
+"g": "sector",
+"cx": 574,
+"cy": 863,
+"r": 70,
+"a0": 330,
+"a1": 30
+},
+"status": "built",
+"stage": "existing",
+"notes": "Group sector analysis: northerly winds in spring (and autumn and winter in the brief).",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff30": {
+"kind": "view",
+"name": "View (south-west, to the ranges)",
+"geom": {
+"g": "sector",
+"cx": 574,
+"cy": 863,
+"r": 100,
+"a0": 195,
+"a1": 235
+},
+"status": "built",
+"stage": "existing",
+"notes": "Group sector analysis: the view.",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+},
+"ff31": {
+"kind": "view",
+"name": "Privacy (north-north-east)",
+"geom": {
+"g": "sector",
+"cx": 574,
+"cy": 863,
+"r": 60,
+"a0": 15,
+"a1": 60
+},
+"status": "built",
+"stage": "existing",
+"notes": "Group sector analysis: privacy toward the north-north-east.",
+"source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+"createdBy": null,
+"createdAt": "2026-10-23T10:00:00.000Z",
+"updatedAt": "2026-10-23T10:00:00.000Z"
+}
+}

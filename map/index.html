@@ -361,12 +361,16 @@ const SITES=[
  {id:'nimbin',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW',ready:true},
  {id:'willow-vale',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW',ready:true},
 {id:'willow-vale-team',name:'Willow Vale · team draft (trial)',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct) mapped onto the same data',base:'sites/willow-vale/',ready:true},
+{id:'nimbin-group',name:'Firefly Farm · group draft (trial)',group:'Group 1',area:'Nimbin, NSW · the group plan (23 Oct) as drawn, whole property',base:'sites/nimbin/',ready:true},
+{id:'nimbin-combined',name:'Firefly Farm · combined design (trial)',group:'Group 1',area:'Nimbin, NSW · group plan plus review suggestions, whole property',base:'sites/nimbin/',ready:true},
+{id:'nimbin-house-group',name:'Firefly Farm · house area · group draft (trial)',group:'Group 1',area:'Nimbin, NSW · the group plan, house-area boundary',base:'sites/nimbin/',data:'nimbin-group',lot:[528,816,631,816,631,888,528,888],ready:true},
+{id:'nimbin-house-combined',name:'Firefly Farm · house area · combined (trial)',group:'Group 1',area:'Nimbin, NSW · group plan plus suggestions, house-area boundary',base:'sites/nimbin/',data:'nimbin-combined',lot:[528,816,631,816,631,888,528,888],ready:true},
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'Trial',area:'Kin Kin, Qld',ready:true},
  {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
  {id:'regenify',name:'Regenify',group:'Trial',area:'Location to come',status:'Location to come'}];
 const SITEID=(()=>{let h='';try{h=(location.hash.match(/site=([\w-]+)/)||[])[1]||''}catch(e){}const s=SITES.find(x=>x.id===h&&x.ready);return s?s.id:'bright-tree'})();
 const SITEDEF=SITES.find(x=>x.id===SITEID);const SB=SITEDEF.base??('sites/'+SITEID+'/');
-const C=n=>SITEID==='bright-tree'?n:SITEID+'_'+n; // shared-data names: Bright Tree keeps its original ones
+const DATAID=SITEDEF.data||SITEID;const C=n=>DATAID==='bright-tree'?n:DATAID+'_'+n;const CS=n=>SITEID==='bright-tree'?n:SITEID+'_'+n; // shared-data names: Bright Tree keeps its original ones
 const LSK=k=>SITEID==='bright-tree'?k:k.replace(/^bt\./,'bt.'+SITEID+'.');
 function switchSite(id){try{location.hash=id==='bright-tree'?'':'site='+id}catch(e){}location.reload()}
 function lsGet(k,d){try{const v=localStorage.getItem(LSK(k));return v==null?d:JSON.parse(v)}catch(e){return d}}
@@ -443,6 +447,7 @@ async function boot(){renderSiteSel();
   resize(); fitLot(); draw();
   const imgs=['aerial.jpg','relief.jpg','hillshade.jpg','slope.png','aspect.png','cold.png','sun_winter.png','sun_equinox.png','sun_summer.png','fire.png'];
   try{T=await (await fetch(SB+'terrain.json')).json()}catch(e){$('#loading').textContent='Terrain data did not load. Reload the page to try again.';return}
+  if(SITEDEF.lot)T.lot=SITEDEF.lot.slice();
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
   if(SITEDEF.niche){imgs.push('niche.png');try{NICHE=await (await fetch(SB+'niche.json')).json()}catch(e){NICHE=null}}
   if(SITEDEF.canopy){imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
@@ -919,7 +924,7 @@ async function connect(){
   if(T)renderLayers();
   if(db)keepLive('suggest',(ok,bad)=>db.collection(C('suggest')).onSnapshot(sn=>{ok();SUG.clear();for(const d of sn.docs){const v=d.data();if(v)SUG.set(d.id,v)}renderTools();draw()},bad));
   if(db)keepLive('tasks',(ok,bad)=>db.collection(C('tasks')).onSnapshot(sn=>{ok();tasks.clear();for(const d of sn.docs){const v=d.data();if(v)tasks.set(d.id,v)}renderPlan();if(selected)renderFeatures(true);if(T)renderSite()},bad));
-  if(db)keepLive('lot',(ok,bad)=>db.doc(C('meta')+'/lot').onSnapshot(sn=>{ok();if(sn.exists){lotDoc=sn.data();if(lotDoc&&Array.isArray(lotDoc.pts)&&lotDoc.pts.length>=6)applyLot(lotDoc.pts)}},bad));
+  if(db)keepLive('lot',(ok,bad)=>db.doc(CS('meta')+'/lot').onSnapshot(sn=>{ok();if(sn.exists){lotDoc=sn.data();if(lotDoc&&Array.isArray(lotDoc.pts)&&lotDoc.pts.length>=6)applyLot(lotDoc.pts)}},bad));
   if(db)keepLive('notebook',(ok,bad)=>db.collection(C('notebook')).onSnapshot(sn=>{ok();notes.clear();for(const d of sn.docs){const v=d.data();if(v&&v.text)notes.set(d.id,v)}renderNotes()},bad));
   else{const ln=lsGet('bt.notes',{});for(const [k,v] of Object.entries(ln))notes.set(k,v)}
   if(db)keepLive('czones',(ok,bad)=>db.doc(C('settings')+'/zones').onSnapshot(sn=>{ok();applyCZ(sn.exists?(sn.data()||{}).list:[])},bad));
@@ -2110,7 +2115,7 @@ function boundBar(b){const a=polyArea(mt.pts);
   $('#bSave').onclick=()=>saveLot(mt.pts);$('#mtClose').onclick=()=>{endMT()};
   if($('#bReset'))$('#bReset').onclick=()=>{mt.pts=flat(T.lot0).map(r1);mt.dirty=true;renderMTBar();draw()}}
 async function saveLot(pts){const body={pts:pts.flat().map(v=>+(+v).toFixed(1)),ok:true,by:myId||null,at:new Date().toISOString(),area:Math.round(polyArea(pts))};endMT();
-  if(live){try{await db.doc(C('meta')+'/lot').set(body);toast('Boundary saved for everyone')}catch(e){toast('Boundary did not save.');return}}else{lsSet('bt.lot',body);toast('Boundary saved in this browser')}
+  if(live){try{await db.doc(CS('meta')+'/lot').set(body);toast('Boundary saved for everyone')}catch(e){toast('Boundary did not save.');return}}else{lsSet('bt.lot',body);toast('Boundary saved in this browser')}
   lotDoc=body;applyLot(body.pts)}
 function applyLot(arr){if(!T)return;if(!T.lot0)T.lot0=T.lot.slice();const same=arr.length===T.lot.length&&arr.every((v,i)=>Math.abs(v-T.lot[i])<.05);T.lot=arr.slice();
   if(!same){buildPaths();recomputeLot()}renderSite();draw()}
