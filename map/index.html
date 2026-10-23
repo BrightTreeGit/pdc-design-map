@@ -2334,19 +2334,25 @@ function isHid(id){return hid().has(id)}
 function setHid(id,h){const s=hid();h?s.add(id):s.delete(id);lsSet('hide',[...s]);draw()}
 function fHidden(f){if(!hid().size)return false;let id=FID.get(f);if(id===undefined){fidMap();id=FID.get(f)}return id!==undefined&&HIDE.has(id)}
 const WATER_KINDS=['pond','damwall','rockpool'];
+function pondML(f){const m=/([0-9]+(?:\.[0-9]+)?)\s*ML/i.exec(f.notes||'');if(m)return {ml:+m[1],est:false};if(f.kind==='pond'&&f.geom.g==='polygon'){return {ml:polyArea(f.geom.pts)*1.2/1000,est:true}}if(f.kind==='rockpool'&&f.geom.g==='polygon')return {ml:polyArea(f.geom.pts)*0.8/1000,est:true};return null}
+function damTotHTML(){let n=0,ml=0,est=false,ha=0;
+ for(const [i,f] of features){if(!['pond','rockpool'].includes(f.kind)||isHid(i))continue;const v=pondML(f);if(!v)continue;n++;ml+=v.ml;est=est||v.est}
+ if(PROS)for(const p of PROS.items){if(p.kind!=='pond'||isHid('pros:'+p.id))continue;n++;ml+=p.ml;ha+=p.catchHa||0}
+ if(!n)return '<p class="hint">Tick dams above to add up their storage.</p>';
+ return `<div class="row" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,#2d8fd5 12%,transparent)"><span><b>${n} selected: about ${ml<10?ml.toFixed(1):Math.round(ml)} ML</b> (${Math.round(ml*1000).toLocaleString()} m³, ${(Math.round(ml*1e3)*1000).toLocaleString()} L)${ha?` · ${ha.toFixed(1)} ha of catchment above the prospects (may overlap where ponds sit in a chain)`:''}${est?' · drawn ponds without a volume are estimated at 1.2 m average depth':''}</span></div>`}
 function damsHTML(){const mine=[...features.entries()].filter(([i,f])=>WATER_KINDS.includes(f.kind)).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
  const pr=PROS?PROS.items.filter(p=>p.kind==='pond'):[];
  if(!mine.length&&!pr.length)return '<p class="hint">No dams or ponds drawn yet. Draw one with Water → Pond / dam, or switch on the computed prospects.</p>';
  const row=(key,name,sw,extra)=>`<div class="row"><label><input type="checkbox" data-hid="${key}" ${isHid(key)?'':'checked'}><i class="swatch" style="background:${sw}"></i>${esc(name)}${extra||''}</label><button class="btn" data-hz="${key}" style="padding:2px 8px">Zoom</button></div>`;
  return (mine.length?'<div class="sub2">Drawn in the design</div>'+mine.map(([i,f])=>row(i,f.name||KINDS[f.kind].label,KINDS[f.kind].color,f.kind==='pond'?` <span class="pill">${fmtArea(polyArea(f.geom.pts))}</span>`:'')).join(''):'')+
   (pr.length?'<div class="sub2">Computed pond sites (prospects)</div>'+pr.map(p=>row('pros:'+p.id,p.label,'#2d8fd5','')).join('')+(layers.pros?'':'<p class="hint">Prospects are switched off: tick “Prospects” under Water, contours & labels to see them.</p>'):'')+
-  `<div class="seg" style="margin-top:6px"><button class="btn" id="damAll">Show all</button><button class="btn" id="damNone">Hide all</button></div><p class="hint">Untick a dam to hide it and leave it out of the water totals, to compare options. This only changes your own view, not what others see.</p>`}
+  `<div id="damTot">${damTotHTML()}</div>`+`<div class="seg" style="margin-top:6px"><button class="btn" id="damAll">Show all</button><button class="btn" id="damNone">Hide all</button></div><p class="hint">Untick a dam to hide it and leave it out of the totals, to compare options. This only changes your own view, not what others see.</p>`}
 function wireDams(el){const box=el.querySelector('#damSec');if(!box)return;
- box.querySelectorAll('[data-hid]').forEach(c=>c.onchange=()=>{setHid(c.dataset.hid,!c.checked);renderFeatures()});
+ const tot=()=>{const t=box.querySelector('#damTot');if(t)t.innerHTML=damTotHTML()};box.querySelectorAll('[data-hid]').forEach(c=>c.onchange=()=>{setHid(c.dataset.hid,!c.checked);renderFeatures();tot()});
  box.querySelectorAll('[data-hz]').forEach(b=>b.onclick=()=>{const k=b.dataset.hz;let pts;if(k.startsWith('pros:')){const p=PROS.items.find(q=>'pros:'+q.id===k);pts=p.poly||[p.at];if(!layers.pros)setLayer('pros',true)}else{const f=features.get(k);if(!f)return;pts=f.geom.pts||[[f.geom.cx,f.geom.cy]]}
    if(isHid(k)){setHid(k,false);const c=box.querySelector(`[data-hid="${k}"]`);if(c)c.checked=true}
    const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);fitBox(Math.min(...xs)-40,Math.min(...ys)-40,Math.max(...xs)+40,Math.max(...ys)+40);draw()});
- const all=h=>{box.querySelectorAll('[data-hid]').forEach(c=>{c.checked=!h;const s=hid();h?s.add(c.dataset.hid):s.delete(c.dataset.hid)});lsSet('hide',[...hid()]);draw();renderFeatures()};
+ const all=h=>{box.querySelectorAll('[data-hid]').forEach(c=>{c.checked=!h;const s=hid();h?s.add(c.dataset.hid):s.delete(c.dataset.hid)});lsSet('hide',[...hid()]);draw();renderFeatures();tot()};
  const da=box.querySelector('#damAll'),dn=box.querySelector('#damNone');if(da)da.onclick=()=>all(false);if(dn)dn.onclick=()=>all(true)}
 /* privacy zones: a landholder can blank out part of the map. Photos (government aerial, history, uploads, drone), terrain
    shading and overlays are covered inside the zone for everyone and in prints, 3D and exports; map items inside are hidden too. */

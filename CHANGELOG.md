@@ -9,6 +9,7 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 | Version | Saved | Commit |
 |---|---|---|
+| v89 | 23 Oct 2026 21:50 | see commit history |
 | v88 | 23 Oct 2026 21:45 | see commit history |
 | v87 | 23 Oct 2026 21:35 | see commit history |
 | v86 | 23 Oct 2026 07:20 | see commit history |
@@ -42,6 +43,10 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
 ---
+
+## v89 · 23 Oct 2026 21:50
+### Added
+- Layers → Dams and ponds shows a running total for the ticked dams: how many, total storage in ML, m³ and litres, and the catchment above the computed pond sites. Untick dams to compare options. Drawn ponds use the volume in their notes (from the dam calculator) or an estimate at 1.2 m average depth.
 
 ## v88 · 23 Oct 2026 21:45
 ### Changed
