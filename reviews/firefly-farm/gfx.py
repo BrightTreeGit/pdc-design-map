@@ -158,9 +158,9 @@ ax=f.add_axes([0.08,0.14,0.86,0.66]);ax.fill_between(dd,zz,80,color='#e6e2d6');a
 def mark(dist,lab,dy=12):
     k=np.argmin(abs(dd-dist));ax.plot(dd[k],zz[k],'o',color=ACC,ms=7);ax.text(dd[k],zz[k]+dy,lab+f'\n~{zz[k]:.0f} m',ha='center',fontsize=10)
 mark(16,'Creek');mark(160,'House');mark(415,'Lower forested\nslope',14);mark(760,'Bench',14);mark(1000,'');mark(dd[-1]-5,'Eastern tip',14)
-ax.axvspan(0,230,color=ACC,alpha=0.06);ax.text(115,395,'House parcel and\nhouse bench',ha='center',fontsize=10,color=ACC)
+ax.axvspan(0,230,color=ACC,alpha=0.06);ax.text(115,370,'House parcel and\nhouse bench',ha='center',fontsize=10,color=ACC)
 ax.text(700,395,'Main block: steep forest climbing east (Zone 4 then Zone 5)',ha='center',fontsize=10,color=MUT)
-ax.set_xlabel('Distance from the creek along the profile line (m)');ax.set_ylabel('Height (m)');ax.set_ylim(80,440);ax.set_xlim(0,dd[-1]+10);ax.grid(color='#eee')
+ax.text(0,428,'◀ WEST (creek, low)',fontsize=12,weight='bold',color=INK,va='top');ax.text(dd[-1]-90,428,'EAST (far corner, high) ▶',fontsize=12,weight='bold',color=INK,ha='right',va='top');ax.set_xlabel('Distance east from the creek along the profile line (m)');ax.set_ylabel('Height (m)');ax.set_ylim(80,440);ax.set_xlim(0,dd[-1]+10);ax.grid(color='#eee')
 src(f,'Map data: NSW 5 m elevation');pp.savefig(f);plt.close(f)
 # 9 water
 roofE=0.85;house=300;shed=160
