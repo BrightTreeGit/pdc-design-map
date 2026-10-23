@@ -3,9 +3,9 @@
 fetch_elvis.py: download the 1 m LiDAR elevation (DEM) tiles for a block from ELVIS (Geoscience Australia's
 Elevation Information System), using the window saved by fetch_qld_site.py / fetch_nsw_site.py.
 
-  py fetch_elvis.py --folder Annwn          (reads Annwn\Site data\window.json)
+  py fetch_elvis.py --folder Annwn          (reads Annwn/Site data/window.json)
 
-Saves to <folder>\Lidar-survey data\ELVIS\ : every downloadable 1 m DEM tile touching the 2 km window
+Saves to <folder>/Lidar-survey data/ELVIS/ : every downloadable 1 m DEM tile touching the 2 km window
 (newest survey first, older surveys too, for change mapping), plus elvis_index.json listing everything on offer.
 If ELVIS only offers the data by order, it opens the ELVIS website with the area ready to draw.
 """
