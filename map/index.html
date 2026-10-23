@@ -392,7 +392,7 @@ const xy2ll=(x,y)=>PJ.toLL(x+E0,N0-y);
 let T=null, EXTRA=null, PROS=null; const IMG={};
 let dem2=null, dem1=null, sunGrid={};
 const view={cx:960,cy:960,s:1};
-const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,labels:true,flabels:true,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
+const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,sectors:false,labels:true,flabels:true,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
 const features=new Map(); // id -> data
 let selected=null, tool=null, draft=null, gradePen=lsGet('bt.gradePen',{on:false,grade:0,dir:'down'});
 let db=null, userCap=null, myId=null, downloads=null, live=false, assets=null;
@@ -842,7 +842,8 @@ const r1=w=>[+w[0].toFixed(1),+w[1].toFixed(1)];
 const SNAP=Object.assign({on:false,step:.5},lsGet('bt.snap',{}));
 const snapW=w=>[Math.round(w[0]/SNAP.step)*SNAP.step,Math.round(w[1]/SNAP.step)*SNAP.step];
 const PLANT_KINDS=['tree','fruittree','nativetree','shrub','guild'];
-function startTool(kind){recentKinds=[kind,...recentKinds.filter(k=>k!==kind)].slice(0,5);lsSet('bt.recentKinds',recentKinds);tool=kind;selected=null;const k=KINDS[kind];draft={kind,pts:[],pen:!!(k.geom==='line'&&gradePen.on&&k.grade!==undefined)};if(draft.pen&&k.grade!==undefined&&gradePen.kind!==kind){gradePen.grade=k.grade;gradePen.kind=kind}cv.classList.add('drawing');updateDrawbar();renderDraw();draw()}
+const SECTOR_KINDS=new Set(['sunW','sunS','fire','wind','view','coldair']);
+function startTool(kind){if(SECTOR_KINDS.has(kind)&&!layers.sectors){layers.sectors=true;lsSet('bt.layers',layers)}recentKinds=[kind,...recentKinds.filter(k=>k!==kind)].slice(0,5);lsSet('bt.recentKinds',recentKinds);tool=kind;selected=null;const k=KINDS[kind];draft={kind,pts:[],pen:!!(k.geom==='line'&&gradePen.on&&k.grade!==undefined)};if(draft.pen&&k.grade!==undefined&&gradePen.kind!==kind){gradePen.grade=k.grade;gradePen.kind=kind}cv.classList.add('drawing');updateDrawbar();renderDraw();draw()}
 function cancelDraft(){draft=null;tool=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;renderDraw();draw()}
 function undoPoint(){if(!draft)return;draft.pts.pop();draft.preview=[];updateDrawbar();draw()}
 function finishDraft(){if(!draft)return;const k=KINDS[draft.kind];if(draft.preview&&draft.preview.length&&draft.pen){draft.pts.push(...draft.preview)}
@@ -1292,7 +1293,7 @@ function wireShadow(el){const upd=()=>{lsSet('bt.sh',SH);const s=computeShadow()
   el.querySelectorAll('#shDay button').forEach(b=>b.onclick=()=>{SH.doy=+b.dataset.v;d.value=SH.doy;el.querySelectorAll('#shDay button').forEach(x=>x.setAttribute('aria-pressed',x===b));upd()});
   el.querySelector('#shPlay').onclick=e=>{if(shTimer){clearInterval(shTimer);shTimer=null;e.target.textContent='Play the day';return}e.target.textContent='Pause';shTimer=setInterval(()=>{SH.t+=0.25;if(SH.t>19.5)SH.t=5;t.value=SH.t;upd();if(layers.overlay!=='shadow'){clearInterval(shTimer);shTimer=null}},250)}}
 /* ---------------- typical SE Queensland wind sectors ---------------- */
-async function addWindSectors(){let c=null;for(const f of features.values()){if(f.kind==='building'&&f.geom.g==='polygon'){c=centroid(f);break}}if(!c){const lp=flat(T.lot);c=[lp.reduce((s,q)=>s+q[0],0)/lp.length,lp.reduce((s,q)=>s+q[1],0)/lp.length]}
+async function addWindSectors(){if(!layers.sectors){layers.sectors=true;lsSet('bt.layers',layers)}let c=null;for(const f of features.values()){if(f.kind==='building'&&f.geom.g==='polygon'){c=centroid(f);break}}if(!c){const lp=flat(T.lot);c=[lp.reduce((s,q)=>s+q[0],0)/lp.length,lp.reduce((s,q)=>s+q[1],0)/lp.length]}
   const W=[['wind','Cold winter winds (W–SW, Jun–Aug)',225,280,'Cold, drying winds in winter; shelter Zone 1 and frost-tender plants on this side.'],['fire','Hot dry fire winds (NW–W, Aug–Nov)',280,325,'Hot, dry winds of late winter and spring bring the worst fire weather. Keep this side moist and low in fuel.'],['wind','Summer sea breezes (NE–E)',40,100,'Afternoon sea breezes in the warm months: good for cooling and ventilation.'],['wind','Prevailing south-east winds',120,165,'The common south-easterly flow for much of the year, often bringing showers.'],['wind','Summer storms (S–W)',190,260,'Severe summer storms often arrive from the south-west to west: hail, strong gusts, falling branches.']];
   for(const [kind,name,a0,a1,note] of W){draft={kind,pts:[]};await commit({g:'sector',cx:+c[0].toFixed(1),cy:+c[1].toFixed(1),r:120,a0,a1});await saveFields(selected,{name,notes:note+' Typical for South East Queensland; check against what you see on site.'})}
   toast('Added five typical wind sectors');renderFeatures();draw()}
@@ -2301,7 +2302,7 @@ function sheetOpen(){const p=$('#panel');if(isPhone()&&p.classList.contains('min
     let st=h<vh*.28?'peek':h<vh*.7?'half':'full';if(fast)st=dy>0?(h0>vh*.7?'half':'peek'):(h0<vh*.28?'half':'full');setSheet(st)};
   hs.forEach(h=>{if(!h)return;h.addEventListener('pointerdown',down);h.addEventListener('pointermove',move);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up)});
   addEventListener('resize',()=>{if(isPhone()&&p.dataset.sheet)setSheet(p.dataset.sheet);sheetVis()})})();
-function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);if(k==='lot'&&$('#zLot'))$('#zLot').style.opacity=v?1:.45;draw()}
+function setLayer(k,v){layers[k]=v;lsSet('bt.layers',layers);if(k==='lot'&&$('#zLot'))$('#zLot').style.opacity=v?1:.45;if(k==='sectors'){if(!v&&selected&&features.get(selected)&&SECTOR_KINDS.has(features.get(selected).kind))selected=null;renderFeatures()}draw()}
 const OVERLAYS=[
  {grp:'Light & climate',items:[['shadow','Shade at a time'],['aspect','Aspect'],['sun_winter','Winter sun'],['sun_equinox','Equinox sun'],['sun_summer','Summer sun'],['cold','Cold air / frost']]},
  {grp:'Land & risk',items:[['slope','Slope'],['fire','Fire run'],['change_2008','Ground change since 2008'],['change_2014','Ground change since 2014']]}];
@@ -2312,7 +2313,7 @@ function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="$
 function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   const sc=m.slopeClasses.map(([lo,hi,c])=>`<span><i class="swatch" style="background:rgba(${c[0]},${c[1]},${c[2]},.85)"></i>${hi?lo+'–'+hi:'>'+lo}%</span>`).join('');
   const ac=Object.entries(m.aspectColors).map(([n,c])=>`<span><i class="swatch" style="background:rgb(${c})"></i>${n}</span>`).join('');
-  const lines=[['lot','Property boundary','#14898f'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],...(PROS?[['pros','Prospects: ponds, pads, tank (computed)','#a14e07']]:[]),['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['labels','All labels','#777'],['flabels','Names on structures & features','#575757'],['zlabels','Names on zones','#7d5aa6'],['zcol','Colour zone names to match the zone','#d6453d']];
+  const lines=[['lot','Property boundary','#14898f'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],...(PROS?[['pros','Prospects: ponds, pads, tank (computed)','#a14e07']]:[]),['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['sectors','Sector map (sun, wind, fire, views)','#e0a400'],['labels','All labels','#777'],['flabels','Names on structures & features','#575757'],['zlabels','Names on zones','#7d5aa6'],['zcol','Colour zone names to match the zone','#d6453d']];
   el.innerHTML=
    sec('base','Base map',`${segHTML('baseSeg',[['none','None'],['relief','Relief'],['hillshade','Hillshade']].concat(IMG.aerial?[['aerial','Aerial']]:[]),layers.base)}
     <div class="row"><label for="baseop">Strength <span id="baseopv" class="pill">${Math.round(layers.baseOp*100)}%</span></label><input type="range" id="baseop" min="0" max="1" step="0.05" value="${layers.baseOp}"></div>
@@ -2472,7 +2473,7 @@ let PRIVMAP=null;
 async function buildPrivMap(){if(PRIVMAP||!SITEDEF.canopy)return;const cg=await loadCG();if(!cg)return;const n=cg.w;const c=document.createElement('canvas');c.width=n;c.height=n;const g=c.getContext('2d');const im=g.createImageData(n,n);
   for(let k=0;k<n*n;k++){const t=cg.h[k]>5;im.data[k*4]=t?200:233;im.data[k*4+1]=t?222:230;im.data[k*4+2]=t?190:220;im.data[k*4+3]=255}g.putImageData(im,0,0);
   const b=document.createElement('canvas');b.width=n;b.height=n;const bg=b.getContext('2d');try{bg.filter='blur(3px)'}catch(e){}bg.drawImage(c,0,0);PRIVMAP=b;draw()}
-function vis(f){if(fHidden(f)||privHidden(f))return false;if(!layers.stage||layers.stage==='all')return true;return stageIdx(f.stage||defStage(f.kind))<=stageIdx(layers.stage)}
+function vis(f){if(fHidden(f)||privHidden(f))return false;if(!layers.sectors&&SECTOR_KINDS.has(f.kind))return false;if(!layers.stage||layers.stage==='all')return true;return stageIdx(f.stage||defStage(f.kind))<=stageIdx(layers.stage)}
 const visList=()=>[...features.values()].filter(vis);
 // Plant library: starting values for the Sunshine Coast hinterland; check local references before planting.
 const SPECIES={
