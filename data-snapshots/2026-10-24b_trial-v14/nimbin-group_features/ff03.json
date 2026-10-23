@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        590,
+        860
+      ],
+      [
+        600,
+        860
+      ],
+      [
+        600,
+        871
+      ],
+      [
+        590,
+        871
+      ]
+    ]
+  },
+  "kind": "cabin",
+  "name": "Cabin (family member)",
+  "notes": "Existing cabin, occupied by a family member and two children. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

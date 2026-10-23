@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        560,
+        834
+      ]
+    ]
+  },
+  "kind": "hives",
+  "name": "Native stingless bee hive",
+  "notes": "Suggested: Tetragonula hive at the orchard edge, morning sun and afternoon shade. Honey bees need NSW DPI registration.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

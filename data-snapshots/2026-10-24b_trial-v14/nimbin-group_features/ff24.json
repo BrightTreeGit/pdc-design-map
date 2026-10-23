@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        530,
+        880
+      ],
+      [
+        606,
+        884
+      ],
+      [
+        606,
+        915
+      ],
+      [
+        530,
+        915
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · south lawn and food forest",
+  "notes": "Group zone sketch: open ground south of the house for food forest expansion. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

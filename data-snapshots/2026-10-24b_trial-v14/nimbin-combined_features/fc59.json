@@ -1,0 +1,48 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        436,
+        936
+      ],
+      [
+        436,
+        878
+      ],
+      [
+        464,
+        864
+      ],
+      [
+        495,
+        862
+      ],
+      [
+        528,
+        862
+      ],
+      [
+        528,
+        910
+      ],
+      [
+        505,
+        930
+      ],
+      [
+        470,
+        940
+      ]
+    ]
+  },
+  "kind": "zone3",
+  "name": "Zone 3 · creek flats and lower west slope",
+  "notes": "Suggested: flood-prone flats and the lower slope: pasture for a few sheep, flood-tolerant trees, a possible pond site out of flood reach. Cold air settles here: no frost-tender trees.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y5",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

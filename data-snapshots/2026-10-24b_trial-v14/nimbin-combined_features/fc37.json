@@ -1,0 +1,28 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        605,
+        856
+      ],
+      [
+        600,
+        874
+      ],
+      [
+        588,
+        879
+      ]
+    ]
+  },
+  "kind": "pipe",
+  "name": "Garden tank to vegetable beds",
+  "notes": "Suggested: 25 mm poly from the garden tank to the beds and the chicken waterer.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

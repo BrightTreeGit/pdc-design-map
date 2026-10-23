@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        577,
+        874
+      ],
+      [
+        589,
+        874
+      ],
+      [
+        589,
+        883
+      ],
+      [
+        577,
+        883
+      ]
+    ]
+  },
+  "kind": "raisedbed",
+  "name": "Raised or wicking beds over the clay",
+  "notes": "Suggested: start with 3–4 beds (about 30–50 m²) on raised or wicking beds over the clay, after a soil test that includes arsenic and organochlorines (old banana land).",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

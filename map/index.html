@@ -366,7 +366,7 @@ const SITES=[
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'Trial',area:'Kin Kin, Qld',ready:true,history:true},
  {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
  {id:'regenify',name:'Regenify',group:'Trial',area:'Location to come',status:'Location to come'}];
-const SITEID=(()=>{let h='';try{h=(location.hash.match(/site=([\w-]+)/)||[])[1]||''}catch(e){}const s=SITES.find(x=>x.id===h&&x.ready);return s?s.id:'bright-tree'})();
+const SITEID=(()=>{let h='';try{h=(location.hash.match(/site=([\w-]+)/)||[])[1]||''}catch(e){}h=({'nimbin-combined':'nimbin-group','nimbin-house-group':'nimbin-group','nimbin-house-combined':'nimbin-group'})[h]||h;const s=SITES.find(x=>x.id===h&&x.ready);return s?s.id:'bright-tree'})();
 const SITEDEF=SITES.find(x=>x.id===SITEID);const SB=SITEDEF.base??('sites/'+SITEID+'/');
 const DATAID=SITEDEF.data||SITEID;const C=n=>DATAID==='bright-tree'?n:DATAID+'_'+n;const CS=n=>SITEID==='bright-tree'?n:SITEID+'_'+n; // shared-data names: Bright Tree keeps its original ones
 const LSK=k=>SITEID==='bright-tree'?k:k.replace(/^bt\./,'bt.'+SITEID+'.');
@@ -1255,7 +1255,7 @@ function routeBar(b){const r=mt.res;b.innerHTML=`<span class="what">Track route<
   $('#rtG').onchange=e=>{RT.grade=Math.max(3,Math.min(25,+e.target.value||10));lsSet('bt.rtGrade',RT.grade);rerun()};
   $('#rtIn').onchange=e=>{RT.inLot=e.target.checked;lsSet('bt.rtInLot',RT.inLot);rerun()};
   $('#rtW').onchange=e=>{RT.width=Math.max(1,Math.min(8,+e.target.value||4));lsSet('bt.rtWidth',RT.width);if(mt.res&&!mt.res.err)mt.res=routeStats(mt.res.pts);renderMTBar()};
-  const save=async kind=>{const r=mt.res;endMT();draft={kind,pts:[]};await commit({g:'line',pts:r.pts});await saveFields(selected,{notes:`Route at up to ${RT.grade}%: ${Math.round(r.L)} m, steepest ${r.maxg.toFixed(0)}%. Roughly ${Math.round(r.vol)} m³ of cut and fill for a ${RT.width} m bench. Computed from the 2022 LiDAR; walk it before machines go in.`});toast('Saved the route to the design')};
+  const save=async kind=>{const r=mt.res;endMT();draft={kind,pts:[]};await commit({g:'line',pts:r.pts});await saveFields(selected,{notes:`Route at up to ${RT.grade}%: ${Math.round(r.L)} m, steepest ${r.maxg.toFixed(0)}%. Roughly ${Math.round(r.vol)} m³ of cut and fill for a ${RT.width} m bench. Computed from the ${esc(((T.meta.site&&T.meta.site.source)||"terrain data").split(",")[0])}; walk it before machines go in.`});toast('Saved the route to the design')};
   if($('#rtTrack'))$('#rtTrack').onclick=()=>save('track');if($('#rtRoad'))$('#rtRoad').onclick=()=>save('road');
   if($('#rtNew'))$('#rtNew').onclick=()=>{mt.pts=[];mt.res=null;renderMTBar();draw()};$('#mtClose').onclick=()=>{endMT();renderTools()}}
 function drawRoute(px){const r=mt.res;if(r&&!r.err){const p=new Path2D();r.pts.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=7*px;ctx.stroke(p);ctx.strokeStyle='#8a5a2b';ctx.lineWidth=4*px;ctx.stroke(p)}

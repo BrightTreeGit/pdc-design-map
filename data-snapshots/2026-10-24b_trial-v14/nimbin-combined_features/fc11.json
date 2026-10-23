@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        534,
+        830
+      ],
+      [
+        562,
+        830
+      ],
+      [
+        565,
+        852
+      ],
+      [
+        561,
+        876
+      ],
+      [
+        538,
+        873
+      ],
+      [
+        533,
+        850
+      ]
+    ]
+  },
+  "kind": "foodforest",
+  "name": "Existing orchard (citrus and mango)",
+  "notes": "Existing citrus and mango orchard: lemon, bush lemon, pink grapefruit, Valencia orange, quince, jaboticaba. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

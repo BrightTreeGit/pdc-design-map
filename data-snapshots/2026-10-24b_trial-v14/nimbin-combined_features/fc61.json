@@ -1,0 +1,56 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        790,
+        873
+      ],
+      [
+        871,
+        866
+      ],
+      [
+        953,
+        805
+      ],
+      [
+        1083,
+        733
+      ],
+      [
+        1212,
+        750
+      ],
+      [
+        1243,
+        774
+      ],
+      [
+        1329,
+        795
+      ],
+      [
+        1334,
+        842
+      ],
+      [
+        1611,
+        1269
+      ],
+      [
+        760,
+        1127
+      ]
+    ]
+  },
+  "kind": "zone5",
+  "name": "Zone 5 · upper bush (habitat and corridor)",
+  "notes": "Suggested: steep forest (over a third of the property is steeper than 50%). Habitat, corridor, Land for Wildlife; possible conservation agreement.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

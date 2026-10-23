@@ -1,0 +1,48 @@
+{
+  "createdAt": "2026-10-24T06:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        574,
+        837.5
+      ],
+      [
+        588,
+        837.5
+      ],
+      [
+        587,
+        842
+      ],
+      [
+        589.5,
+        848
+      ],
+      [
+        589.5,
+        872
+      ],
+      [
+        586.5,
+        872
+      ],
+      [
+        586,
+        852
+      ],
+      [
+        578,
+        842
+      ]
+    ]
+  },
+  "kind": "paving",
+  "name": "Work yard and path, shed to house",
+  "notes": "Hard-wearing gravel yard below the shed, narrowing into the path to the house's east side: the daily route for firewood, tools and harvest, kept dry underfoot. (From Brett's hand sketch of the house area; positions are indicative, so drag to fit what's on the ground.)",
+  "source": "Brett's house-area sketch and render (24 Oct 2026)",
+  "stage": "y1",
+  "status": "idea",
+  "updatedAt": "2026-10-24T06:30:00.000Z"
+}

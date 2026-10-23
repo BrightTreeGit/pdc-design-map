@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        574,
+        896
+      ],
+      [
+        586,
+        896
+      ],
+      [
+        586,
+        906
+      ],
+      [
+        574,
+        906
+      ]
+    ]
+  },
+  "kind": "raingarden",
+  "name": "Rain garden / overflow basin",
+  "notes": "Suggested: mulched basin with water-tolerant plants (Lomandra, native ginger, bananas at its edge) that takes the swale and tank overflows.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "y2",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

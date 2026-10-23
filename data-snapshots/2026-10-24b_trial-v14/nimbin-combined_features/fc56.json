@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "a0": 250,
+    "a1": 330,
+    "cx": 574,
+    "cy": 863,
+    "g": "sector",
+    "r": 110
+  },
+  "kind": "fire",
+  "name": "Fire approach (W–NW, upslope from the creek)",
+  "notes": "Suggested sector: hot dry westerlies in late winter–spring, and fire runs fastest upslope from the creek.",
+  "source": "Review suggestion (Firefly Farm design review, 23 Oct 2026)",
+  "stage": "existing",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}
