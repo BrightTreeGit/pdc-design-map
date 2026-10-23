@@ -356,7 +356,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('act');t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600)}
 /* ---------------- PDC sites: one map page, one data space per site ---------------- */
 const SITES=[
- {id:'nimbin-group',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW · the group plan, house-area sketch and tracks to the upper pads',base:'sites/nimbin/',ready:true},
+ {id:'nimbin-group',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW · the group plan, house-area sketch and tracks to the upper pads',base:'sites/nimbin/',ready:true,prosKinds:['pond','tank']},
  {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true,history:true},
  {id:'bright-tree',name:'Bright Tree',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true,niche:true},
  {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true},
@@ -457,6 +457,7 @@ async function boot(){renderSiteSel();
   const d1=T.meta.dem1; dem1={x0:d1.x0,y0:d1.y0,w:d1.w,h:d1.h,a:new Int16Array(await inflate(d1.b64))};
   for(const k of ['winter','equinox','summer']) sunGrid[k]=new Uint8Array(await inflate(T.meta['sunh_'+k]));
   try{const pr=await fetch(SB+'prospects.json');PROS=pr.ok?await pr.json():null}catch(e){PROS=null}
+  if(PROS&&SITEDEF.prosKinds)PROS.items=PROS.items.filter(p=>SITEDEF.prosKinds.includes(p.kind)); // a site can show only some computed prospects
   try{const ex=await (await fetch(SB+'extra.json')).json();EXTRA={change:ex.change,d8:new Uint8Array(await inflate(ex.d8)),coldGrid:new Uint8Array(await inflate(ex.cold))}}catch(e){EXTRA=null}
   await pImgs; $('#loading').hidden=true;if(IMG.aerial&&!lsGet('bt.aerialAuto',false)){layers.base='aerial';lsSet('bt.layers',layers);lsSet('bt.aerialAuto',true)}if(layers.overlay==='shadow')computeShadow();
   renderLayers(); renderDraw(); renderFeatures(); renderPlan(); renderTools(); renderSite(); draw();
@@ -1822,7 +1823,7 @@ function maskOutline(mask,cells){const N=1000;const segs=new Map();
   return ringDP(chaikin(best,true,2),1.2).map(r1)}
 async function saveDam(){const r=mt.res,pts=mt.pts.slice();const H=mt.H;const old=mt.replace;endMT();const t=DAMTYPES[r.tk];
   if(old){const w=features.get(old);const ids=[old];if(w)for(const [i,f] of features)if(f.kind==='pond'&&f.notes&&f.notes===w.notes)ids.push(i);await removeMany(ids)}
-  const note=`${t.label}, ${H} m high (crest ${r.crest.toFixed(1)} m), full at ${r.fsl.toFixed(1)} m: about ${r.vol<1000?Math.round(r.vol)+' m³ ('+(r.vol/1000).toFixed(2)+' ML)':(r.vol/1000).toFixed(1)+' ML'} over ${fmtArea(r.area)}, ${r.maxD.toFixed(1)} m deep at the wall. Catchment ${r.catchHa.toFixed(1)} ha. ${damBuildText(r).replace(/<[^>]+>/g,'')} (${t.crest} m crest, ${t.bat}:1 sides). Computed from the 2022 LiDAR; check on site and with council and state water rules before building.`;
+  const note=`${t.label}, ${H} m high (crest ${r.crest.toFixed(1)} m), full at ${r.fsl.toFixed(1)} m: about ${r.vol<1000?Math.round(r.vol)+' m³ ('+(r.vol/1000).toFixed(2)+' ML)':(r.vol/1000).toFixed(1)+' ML'} over ${fmtArea(r.area)}, ${r.maxD.toFixed(1)} m deep at the wall. Catchment ${r.catchHa.toFixed(1)} ha. ${damBuildText(r).replace(/<[^>]+>/g,'')} (${t.crest} m crest, ${t.bat}:1 sides). Computed from the ${esc(((T.meta.site&&T.meta.site.source)||'terrain data').split(',')[0])}; check on site and with council and state water rules before building.`;
   if(r.outline){draft={kind:'pond',pts:[]};await commit({g:'polygon',pts:r.outline});const pid=selected;await saveFields(pid,{name:`${t.label} · ${H} m`,notes:note,status:'idea'})}
   draft={kind:'damwall',pts:[]};await commit({g:'line',pts});await saveFields(selected,{name:`${t.label} wall · ${H} m`,notes:note});renderTools();toast(old?'Resized: the old one was replaced':'Saved the pond and its wall to the design')}
 /* reopen a wall (drawn or a computed prospect) in the dam calculator to try other heights and types */
