@@ -1,0 +1,132 @@
+{
+ "house_200": {
+  "met": 1.0,
+  "short_days_per_yr": 0.0,
+  "longest_short": 0,
+  "longest_end": "None",
+  "dry_years": [],
+  "low2019": 18156.160000000007
+ },
+ "house_300": {
+  "met": 1.0,
+  "short_days_per_yr": 0.0,
+  "longest_short": 0,
+  "longest_end": "None",
+  "dry_years": [],
+  "low2019": 9937.210000000006
+ },
+ "house_400": {
+  "met": 0.987469390170425,
+  "short_days_per_yr": 5.741935483870968,
+  "longest_short": 18,
+  "longest_end": "2020-01-16",
+  "dry_years": [
+   2001,
+   2004,
+   2005,
+   2006,
+   2012,
+   2013,
+   2017,
+   2018,
+   2019,
+   2020,
+   2023,
+   2024,
+   2026
+  ],
+  "low2019": 0.0
+ },
+ "garden_20": {
+  "met": 1.0,
+  "short_days_per_yr": 0.0,
+  "longest_short": 0,
+  "longest_end": "None",
+  "dry_years": [],
+  "low2019": 1752.2999999999995
+ },
+ "garden_40": {
+  "met": 0.9814008093080182,
+  "short_days_per_yr": 1.3225806451612903,
+  "longest_short": 14,
+  "longest_end": "2020-01-06",
+  "dry_years": [
+   2001,
+   2002,
+   2019,
+   2020
+  ],
+  "low2019": 0.0
+ },
+ "garden_80": {
+  "met": 0.8070988618902502,
+  "short_days_per_yr": 14.096774193548388,
+  "longest_short": 40,
+  "longest_end": "2020-01-06",
+  "dry_years": [
+   1996,
+   1997,
+   1998,
+   1999,
+   2001,
+   2002,
+   2003,
+   2005,
+   2006,
+   2007,
+   2009,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ],
+  "low2019": 0.0
+ },
+ "combined_40": {
+  "met": 0.9989772109377381,
+  "short_days_per_yr": 0.3548387096774194,
+  "longest_short": 9,
+  "longest_end": "2020-01-16",
+  "dry_years": [
+   2020
+  ],
+  "low2019": 1678.810000000013
+ },
+ "combined_80": {
+  "met": 0.990412356002754,
+  "short_days_per_yr": 2.903225806451613,
+  "longest_short": 29,
+  "longest_end": "2020-01-16",
+  "dry_years": [
+   2001,
+   2002,
+   2006,
+   2012,
+   2013,
+   2018,
+   2019,
+   2020,
+   2026
+  ],
+  "low2019": 0.0
+ },
+ "all_linked": {
+  "met": 1.0,
+  "short_days_per_yr": 0.0,
+  "longest_short": 0,
+  "longest_end": "None",
+  "dry_years": [],
+  "low2019": 8005.9199999999955
+ }
+}

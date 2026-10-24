@@ -1,0 +1,2265 @@
+{
+"ap01": {
+"kind": "building",
+"name": "Home",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). 173 m\u00b2 roof, all to the 30,000 L tank. Built to BAL 29. Completed Sept 2024.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1000.8,
+993.8
+],
+[
+1018.6,
+996.2
+],
+[
+1015.8,
+1006.9
+],
+[
+999.3,
+1004.9
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)",
+"roof": true
+},
+"ap02": {
+"kind": "solar",
+"name": "Solar 24 kW with battery",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Surplus sold to the grid.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1001.3,
+995.8
+],
+[
+1007.8,
+996.7
+],
+[
+1007.2,
+1000.1
+],
+[
+1000.8,
+999.3
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap03": {
+"kind": "shed",
+"name": "Garage",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Roof 36 m\u00b2: half to the 30,000 L tank, half to the 5,000 L tank.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+986.2,
+987.4
+],
+[
+992.3,
+988.3
+],
+[
+992.0,
+992.7
+],
+[
+986.0,
+991.9
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)",
+"roof": true
+},
+"ap04": {
+"kind": "carport",
+"name": "Carport",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Roof to the 5,000 L tank.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+986.0,
+991.9
+],
+[
+992.0,
+992.7
+],
+[
+991.7,
+995.3
+],
+[
+985.9,
+994.5
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)",
+"roof": true
+},
+"ap05": {
+"kind": "driveway",
+"name": "Driveway",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+967.9,
+984.3
+],
+[
+986.2,
+987.2
+],
+[
+985.9,
+994.5
+],
+[
+979.4,
+993.4
+],
+[
+974.9,
+989.6
+],
+[
+968.6,
+986.8
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap06": {
+"kind": "tank",
+"name": "Water tank 30,000 L",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Fed by the house roof (173 m\u00b2) and half the garage (18 m\u00b2), 191 m\u00b2 in all. Electric pump supplies the house. Overflow runs to the street gutter. Leaf guards on every gutter.",
+"geom": {
+"g": "point",
+"pts": [
+[
+995.8,
+991.3
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)",
+"vol": 30000
+},
+"ap07": {
+"kind": "tank",
+"name": "Slimline tank 5,000 L",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Fed by the carport and half the garage (36 m\u00b2). Tap only, for the watering can; not on the pump.",
+"geom": {
+"g": "point",
+"pts": [
+[
+992.9,
+991.1
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)",
+"vol": 5000
+},
+"ap08": {
+"kind": "structure",
+"name": "Septic (pump-out)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Pump-out line runs to the boundary on the side street.",
+"geom": {
+"g": "point",
+"pts": [
+[
+994.0,
+994.3
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap09": {
+"kind": "structure",
+"name": "Septic tank",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "point",
+"pts": [
+[
+996.1,
+994.6
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap10": {
+"kind": "zone1",
+"name": "Zone 1 \u00b7 Raised vegie beds",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Lettuce, tomatoes, silverbeet, beetroot, cauliflower, brussels sprouts, celery, chilli, cucumbers, potatoes.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1005.1,
+990.7
+],
+[
+1013.9,
+992.0
+],
+[
+1013.2,
+995.4
+],
+[
+1004.5,
+994.3
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap11": {
+"kind": "raisedbed",
+"name": "Raised bed 1",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1006.1,
+991.4
+],
+[
+1007.6,
+991.6
+],
+[
+1007.1,
+994.3
+],
+[
+1005.6,
+994.1
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap12": {
+"kind": "raisedbed",
+"name": "Raised bed 2",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1008.1,
+991.7
+],
+[
+1009.6,
+991.9
+],
+[
+1009.1,
+994.5
+],
+[
+1007.6,
+994.3
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap13": {
+"kind": "raisedbed",
+"name": "Raised bed 3",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1010.2,
+992.0
+],
+[
+1011.6,
+992.2
+],
+[
+1011.1,
+994.8
+],
+[
+1009.6,
+994.6
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap14": {
+"kind": "raisedbed",
+"name": "Raised bed 4",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1012.2,
+992.3
+],
+[
+1013.7,
+992.5
+],
+[
+1013.1,
+995.1
+],
+[
+1011.6,
+994.9
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap15": {
+"kind": "zone1",
+"name": "Zone 1 \u00b7 Herbs",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1004.8,
+1005.7
+],
+[
+1010.6,
+1006.4
+],
+[
+1010.3,
+1007.8
+],
+[
+1004.5,
+1007.1
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap16": {
+"kind": "herbs",
+"name": "Herb bed",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Mint, basil, dill, parsley, ginger.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1004.9,
+1005.8
+],
+[
+1010.5,
+1006.5
+],
+[
+1010.2,
+1007.7
+],
+[
+1004.6,
+1007.0
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap17": {
+"kind": "path",
+"name": "Path (south of house)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "line",
+"pts": [
+[
+999.3,
+1004.8
+],
+[
+1016.1,
+1006.9
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap18": {
+"kind": "steps",
+"name": "Steps (west)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "line",
+"pts": [
+[
+999.3,
+997.8
+],
+[
+1000.1,
+997.9
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap19": {
+"kind": "steps",
+"name": "Steps (east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "line",
+"pts": [
+[
+1017.4,
+1001.3
+],
+[
+1018.1,
+1001.4
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq01": {
+"kind": "path",
+"name": "Path (tank to house)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "line",
+"pts": [
+[
+993.1,
+995.7
+],
+[
+1000.0,
+997.4
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap20": {
+"kind": "bed",
+"name": "Rock garden",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Small to medium rocks (answer 12).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1025.8,
+1000.3
+],
+[
+1028.3,
+1000.7
+],
+[
+1027.5,
+1003.0
+],
+[
+1025.0,
+1002.7
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap21": {
+"kind": "fruittree",
+"name": "Plum",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Planted.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1015.0,
+994.4
+]
+],
+"r": 2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap22": {
+"kind": "fruittree",
+"name": "Plum",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Planted.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1018.8,
+994.9
+]
+],
+"r": 2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap23": {
+"kind": "fruittree",
+"name": "Dwarf mulberry",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Planted.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1022.7,
+995.6
+]
+],
+"r": 2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap24": {
+"kind": "fruittree",
+"name": "Mandarin",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Planted.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1021.5,
+999.8
+]
+],
+"r": 2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap25": {
+"kind": "fruittree",
+"name": "Orange",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Planted.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1020.2,
+1004.5
+]
+],
+"r": 2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap26": {
+"kind": "fruittree",
+"name": "Yuzu",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Planted.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1022.3,
+1008.5
+]
+],
+"r": 2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap27": {
+"kind": "fruittree",
+"name": "Cumquat",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Planted.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1024.1,
+1007.1
+]
+],
+"r": 2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap28": {
+"kind": "fruittree",
+"name": "Lemon myrtle",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Planted.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1020.9,
+1007.5
+]
+],
+"r": 2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap29": {
+"kind": "shrub",
+"name": "Planted native (red on the plan)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Name to confirm with Ange.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1018.8,
+1007.6
+]
+],
+"r": 1.2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap30": {
+"kind": "shrub",
+"name": "Leucadendron",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "point",
+"pts": [
+[
+1029.8,
+1002.5
+]
+],
+"r": 1
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap31": {
+"kind": "shrub",
+"name": "Banksia \u2018Bird Song\u2019",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "point",
+"pts": [
+[
+1030.6,
+1001.0
+]
+],
+"r": 1
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap34": {
+"kind": "nativetree",
+"name": "19 \u00b7 Grey ironbark (E. paniculata)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+979.4,
+993.5
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap35": {
+"kind": "nativetree",
+"name": "20 \u00b7 Grey ironbark (E. paniculata)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+969.3,
+995.0
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap36": {
+"kind": "nativetree",
+"name": "21 \u00b7 White mahogany (E. acmenoides)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+969.0,
+993.5
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap37": {
+"kind": "nativetree",
+"name": "22 \u00b7 Tallowwood (E. microcorys)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+967.1,
+998.6
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap38": {
+"kind": "nativetree",
+"name": "23 \u00b7 Grey ironbark (E. paniculata)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+971.2,
+998.7
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap39": {
+"kind": "nativetree",
+"name": "24 \u00b7 Tallowwood (E. microcorys)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+973.4,
+1000.1
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap40": {
+"kind": "nativetree",
+"name": "25 \u00b7 Grey ironbark (E. paniculata)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+977.0,
+998.0
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap41": {
+"kind": "nativetree",
+"name": "26 \u00b7 Grey ironbark (E. paniculata)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+985.5,
+1001.9
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap43": {
+"kind": "nativetree",
+"name": "27 \u00b7 Grey gum (E. punctata)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+989.2,
+1002.2
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap50": {
+"kind": "nativetree",
+"name": "Gum cluster 7 (south-east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing gums at the south-east corner, by the side street.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1017.1,
+1011.8
+]
+],
+"r": 3
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap42": {
+"kind": "nativetree",
+"name": "Gum (south of house)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing tree, numbered as on the plan.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1014.2,
+1008.2
+]
+],
+"r": 4
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap44": {
+"kind": "nativetree",
+"name": "Gum cluster 1 (south-east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing gums at the south-east corner, by the side street.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1024.7,
+1008.8
+]
+],
+"r": 3
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap45": {
+"kind": "nativetree",
+"name": "Gum cluster 2 (south-east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing gums at the south-east corner, by the side street.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1024.4,
+1010.2
+]
+],
+"r": 3
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap46": {
+"kind": "nativetree",
+"name": "Gum cluster 3 (south-east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing gums at the south-east corner, by the side street.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1022.6,
+1010.0
+]
+],
+"r": 3
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap47": {
+"kind": "nativetree",
+"name": "Gum cluster 4 (south-east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing gums at the south-east corner, by the side street.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1020.1,
+1010.0
+]
+],
+"r": 3
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap48": {
+"kind": "nativetree",
+"name": "Gum cluster 5 (south-east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing gums at the south-east corner, by the side street.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1018.0,
+1010.6
+]
+],
+"r": 3
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap49": {
+"kind": "nativetree",
+"name": "Gum cluster 6 (south-east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing gums at the south-east corner, by the side street.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1015.3,
+1010.4
+]
+],
+"r": 3
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap51": {
+"kind": "shrub",
+"name": "Small gum 1 (east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Young native, east garden.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1026.1,
+999.1
+]
+],
+"r": 1.2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap52": {
+"kind": "shrub",
+"name": "Small gum 2 (east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Young native, east garden.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1028.0,
+1003.8
+]
+],
+"r": 1.2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap53": {
+"kind": "shrub",
+"name": "Small gum 3 (east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Young native, east garden.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1026.8,
+1005.5
+]
+],
+"r": 1.2
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap54": {
+"kind": "shrub",
+"name": "Flowering native 1",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+973.7,
+990.0
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap55": {
+"kind": "shrub",
+"name": "Flowering native 2",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+975.6,
+990.5
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap56": {
+"kind": "shrub",
+"name": "Flowering native 3",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+976.6,
+992.0
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap57": {
+"kind": "shrub",
+"name": "Flowering native 4",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+981.3,
+995.3
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap58": {
+"kind": "shrub",
+"name": "Flowering native 5",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+983.2,
+995.2
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap59": {
+"kind": "shrub",
+"name": "Flowering native 6",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+986.4,
+1000.8
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap60": {
+"kind": "shrub",
+"name": "Flowering native 7",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+990.0,
+1001.5
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap61": {
+"kind": "shrub",
+"name": "Flowering native 8",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+972.5,
+1002.6
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap62": {
+"kind": "shrub",
+"name": "Flowering native 9",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+976.4,
+1003.3
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap63": {
+"kind": "shrub",
+"name": "Flowering native 10",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+981.2,
+1003.9
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap64": {
+"kind": "shrub",
+"name": "Flowering native 11",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+985.7,
+1004.8
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap65": {
+"kind": "shrub",
+"name": "Flowering native 12",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Natives only on the verge and the west end (answer 33).",
+"geom": {
+"g": "point",
+"pts": [
+[
+989.5,
+1005.8
+]
+],
+"r": 0.9
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"ap66": {
+"kind": "shrub",
+"name": "Succulents (by the septic)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "point",
+"pts": [
+[
+994.9,
+994.6
+]
+],
+"r": 1
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq02": {
+"kind": "zone2",
+"name": "Zone 2 \u00b7 Fruit trees (north-east)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Plums, dwarf mulberry, mandarin, orange; greywater from the laundry arrives here by hose.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1014.2,
+992.0
+],
+[
+1025.7,
+993.9
+],
+[
+1021.8,
+1006.7
+],
+[
+1016.3,
+1006.0
+],
+[
+1018.8,
+996.2
+],
+[
+1013.4,
+995.5
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq03": {
+"kind": "zone2",
+"name": "Zone 2 \u00b7 South strip (guild planting planned)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Herb bed, spiral herb garden and the banana guild (plan items 2 and 3).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+999.0,
+1004.8
+],
+[
+1016.0,
+1006.9
+],
+[
+1014.9,
+1011.5
+],
+[
+998.4,
+1009.5
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq04": {
+"kind": "zone3",
+"name": "Zone 3 \u00b7 West (gums and flowering natives)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing ironbarks, tallowwoods and the grey gum with flowering natives under them. Ange wants guild planting in the south-west part of this zone.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+967.5,
+987.1
+],
+[
+992.1,
+990.9
+],
+[
+991.7,
+995.6
+],
+[
+1000.1,
+997.2
+],
+[
+999.0,
+1004.7
+],
+[
+996.0,
+1004.8
+],
+[
+990.8,
+1006.9
+],
+[
+977.9,
+1006.4
+],
+[
+969.8,
+1005.9
+],
+[
+967.1,
+1000.3
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq05": {
+"kind": "zone3",
+"name": "Zone 3 \u00b7 East (rock garden, banksia)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1025.7,
+993.9
+],
+[
+1028.9,
+994.5
+],
+[
+1031.6,
+1000.4
+],
+[
+1027.3,
+1007.4
+],
+[
+1021.8,
+1006.7
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq06": {
+"kind": "zone4",
+"name": "Zone 4 \u00b7 South-west gum pocket",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Trees 20\u201324.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+966.8,
+992.8
+],
+[
+972.3,
+993.5
+],
+[
+974.7,
+998.8
+],
+[
+974.7,
+1001.2
+],
+[
+969.0,
+1000.5
+],
+[
+966.9,
+997.4
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq07": {
+"kind": "zone4",
+"name": "Zone 4 \u00b7 South-east gum cluster",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+1016.2,
+1006.4
+],
+[
+1026.6,
+1007.7
+],
+[
+1024.3,
+1012.5
+],
+[
+1014.9,
+1011.5
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq08": {
+"kind": "lawn",
+"name": "Lawn square (keep)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Ange: keep the square of lawn on the west side of the house (answer 35).",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+993.0,
+996.5
+],
+[
+1000.0,
+997.9
+],
+[
+999.0,
+1004.6
+],
+[
+992.3,
+1003.8
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq09": {
+"kind": "swale",
+"name": "Swale drain and berm (south verge)",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Existing drain along the side-street verge. Plan item 4: block the ends so it holds water.",
+"geom": {
+"g": "line",
+"pts": [
+[
+998.4,
+1009.5
+],
+[
+1014.8,
+1011.6
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq10": {
+"kind": "pipe",
+"name": "Laundry greywater hose",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Laundry water diverted to the east garden by hose (ag pipe on the plan).",
+"geom": {
+"g": "line",
+"pts": [
+[
+1016.3,
+1006.0
+],
+[
+1025.6,
+1004.9
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq11": {
+"kind": "pipe",
+"name": "Tank overflow to the street gutter",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Overflow is taken to the gutter on the front street (answer 16).",
+"geom": {
+"g": "line",
+"pts": [
+[
+993.1,
+989.4
+],
+[
+979.4,
+986.6
+],
+[
+967.9,
+984.1
+],
+[
+964.4,
+977.0
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq12": {
+"kind": "sewer",
+"name": "Septic pump-out line",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Pump-out pipe from the septic tank to the boundary on the side street (answer 19). Keep trees 2 m+ away.",
+"geom": {
+"g": "line",
+"pts": [
+[
+993.9,
+994.8
+],
+[
+991.7,
+995.6
+],
+[
+997.7,
+1006.8
+],
+[
+998.0,
+1009.5
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq13": {
+"kind": "compost",
+"name": "Compost bins",
+"status": "built",
+"stage": "existing",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Kitchen scraps, garden biomass and dog poo, with cardboard and leaves. Position approximate (not on the plan).",
+"geom": {
+"g": "point",
+"pts": [
+[
+999.3,
+991.0
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq14": {
+"kind": "herbspiral",
+"name": "Spiral herb garden (plan item 2)",
+"status": "idea",
+"stage": "now",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Drawn as a spiral south of the house.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1002.7,
+1006.6
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq15": {
+"kind": "guild",
+"name": "Banana guild (plan item 3)",
+"status": "idea",
+"stage": "now",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Banana, comfrey, nasturtium and sweet potato in Zone 2.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1008.7,
+1009.0
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq16": {
+"kind": "guild",
+"name": "Guild under the gums (south-west Zone 3)",
+"status": "idea",
+"stage": "y2",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Ange would like guild planting here: dry, shaded clay under grey ironbark and tallowwood. See the report for species.",
+"geom": {
+"g": "point",
+"pts": [
+[
+977.8,
+1001.2
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq17": {
+"kind": "soak",
+"name": "Verge break 1 (plan item 1)",
+"status": "idea",
+"stage": "now",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Break in the verge edge so road runoff soaks into the lot instead of running past.",
+"geom": {
+"g": "point",
+"pts": [
+[
+978.1,
+1002.6
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq18": {
+"kind": "soak",
+"name": "Verge break 2 (plan item 1)",
+"status": "idea",
+"stage": "now",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Break in the verge edge so road runoff soaks into the lot instead of running past.",
+"geom": {
+"g": "point",
+"pts": [
+[
+987.9,
+1004.7
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq19": {
+"kind": "soak",
+"name": "Verge break 3 (plan item 1)",
+"status": "idea",
+"stage": "now",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Break in the verge edge so road runoff soaks into the lot instead of running past.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1027.5,
+1009.6
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq20": {
+"kind": "soak",
+"name": "Verge break 4 (plan item 1)",
+"status": "idea",
+"stage": "now",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Break in the verge edge so road runoff soaks into the lot instead of running past.",
+"geom": {
+"g": "point",
+"pts": [
+[
+1030.4,
+1006.8
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq21": {
+"kind": "gathering",
+"name": "Fire pit (between trees 25 and 26)",
+"status": "idea",
+"stage": "now",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Circular fire pit (answers 10 and 32). Check the clearance to the gums and the BAL 29 rules before building.",
+"geom": {
+"g": "point",
+"pts": [
+[
+981.5,
+1000.2
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq22": {
+"kind": "structure",
+"name": "Stone oven (idea)",
+"status": "idea",
+"stage": "y2",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Wanted (answer 10); location to be chosen, shown near the lawn for now.",
+"geom": {
+"g": "point",
+"pts": [
+[
+995.2,
+1003.3
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq23": {
+"kind": "pond",
+"name": "Water pond (idea)",
+"status": "idea",
+"stage": "y2",
+"notes": "From Ange's updated plan, fitted to the boundary and the house (positions about \u00b11 m). Wanted (answer 10); location to be chosen. Shown at the low side of the lawn for now.",
+"geom": {
+"g": "polygon",
+"pts": [
+[
+994.4,
+1000.9
+],
+[
+996.5,
+1000.9
+],
+[
+996.8,
+1002.4
+],
+[
+994.7,
+1002.3
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's updated plan (24 Oct 2026)"
+},
+"bq24": {
+"kind": "fire",
+"name": "Fire risk (west to north-west)",
+"status": "agreed",
+"stage": "existing",
+"notes": "From Ange's sector map: fire risk either side of the afternoon summer sun, west to north-west. The block is Bush Fire Prone Land (vegetation buffer) and the house is built to BAL 29.",
+"geom": {
+"g": "sector",
+"cx": 1008.6,
+"cy": 1000.6,
+"r": 70,
+"a0": 245,
+"a1": 330
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's sector sketch (24 Oct 2026)"
+},
+"bq25": {
+"kind": "wind",
+"name": "Cool and cold wind (south to south-east)",
+"status": "agreed",
+"stage": "existing",
+"notes": "From Ange's sector map: the cool and cold winds come from the south to south-east (answer 22). A screen or hedge on that side shelters the vegie beds and the herb strip.",
+"geom": {
+"g": "sector",
+"cx": 1008.6,
+"cy": 1000.6,
+"r": 70,
+"a0": 130,
+"a1": 185
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's sector sketch (24 Oct 2026)"
+},
+"bq26": {
+"kind": "view",
+"name": "Desirable view (north-east)",
+"status": "agreed",
+"stage": "existing",
+"notes": "From Ange's sector map: the view worth keeping open is to the north-east.",
+"geom": {
+"g": "sector",
+"cx": 1008.6,
+"cy": 1000.6,
+"r": 70,
+"a0": 30,
+"a1": 75
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's sector sketch (24 Oct 2026)"
+},
+"bq27": {
+"kind": "sunS",
+"name": "Summer sun",
+"status": "agreed",
+"stage": "existing",
+"notes": "From Ange's sector map: summer sun arcs from the east-south-east in the morning to the west-north-west in the afternoon; the computed arc is shown.",
+"geom": {
+"g": "sun",
+"cx": 1008.6,
+"cy": 1000.6,
+"r": 70
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's sector sketch (24 Oct 2026)"
+},
+"bq28": {
+"kind": "flow",
+"name": "Water flow, west to east (north side)",
+"status": "agreed",
+"stage": "existing",
+"notes": "From Ange's sector map: surface water runs from the front street end eastward along the block, toward the side street.",
+"geom": {
+"g": "line",
+"pts": [
+[
+969.5,
+991.6
+],
+[
+999.1,
+996.6
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's sector sketch (24 Oct 2026)"
+},
+"bq29": {
+"kind": "flow",
+"name": "Water flow, west to east (south side)",
+"status": "agreed",
+"stage": "existing",
+"notes": "From Ange's sector map: surface water runs from the front street end eastward along the block, toward the side street.",
+"geom": {
+"g": "line",
+"pts": [
+[
+970.1,
+1002.5
+],
+[
+1023.7,
+1010.9
+]
+]
+},
+"createdBy": null,
+"createdAt": "2026-10-24T08:00:00.000Z",
+"updatedAt": "2026-10-24T08:00:00.000Z",
+"source": "Ange's sector sketch (24 Oct 2026)"
+}
+}
