@@ -46,7 +46,8 @@ SITES = {
 }
 SILO = "https://www.longpaddock.qld.gov.au/cgi-bin/silo/DataDrillDataset.php"
 RE = "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Biota/VegetationManagement/MapServer"
-ALA = "https://api.ala.org.au/occurrences/occurrences/search"
+# The Atlas's public occurrence service (no key needed). api.ala.org.au answered 503 for days in Oct 2026, so it is now the fallback.
+ALA_HOSTS = ["https://biocache-ws.ala.org.au/ws/occurrences/search", "https://api.ala.org.au/occurrences/occurrences/search"]
 QLD_ELEV = "https://spatial-img.information.qld.gov.au/arcgis/rest/services/Elevation"
 
 
@@ -118,16 +119,37 @@ def regional_ecosystems(out, E0, N0, zone):
 
 
 def ala(out, lat, lon):
+    """Species seen within about 1 km. Two questions per site: (1) every species name with its record count (facets, so nothing is
+    missed when there are thousands of records), and (2) a page of records for common names, groups, conservation status and dates."""
     if (out / "ala_species.json").exists(): print("  Atlas of Living Australia: already have it"); return
     print("  Atlas of Living Australia records within about 1 km")
-    j = get(ALA, {"q": "*:*", "lat": lat, "lon": lon, "radius": 1.0, "pageSize": 500, "fl": "scientificName,vernacularName,eventDate,decimalLatitude,decimalLongitude,speciesGroup,stateConservation,dataResourceName"}, "ALA")
-    if not j or "occurrences" not in j: return
-    occ = j["occurrences"]; by = {}
-    for o in occ:
-        k = o.get("scientificName") or "?"; e = by.setdefault(k, {"common": o.get("vernacularName"), "group": o.get("speciesGroup"), "n": 0, "last": "", "status": o.get("stateConservation")})
-        e["n"] += 1; e["last"] = max(e["last"], (o.get("eventDate") or "")[:10])
-    (out / "ala_species.json").write_text(json.dumps({"source": "Atlas of Living Australia occurrence records within 1 km (CC BY / CC0, see each record)", "fetched": time.strftime("%Y-%m-%d"), "total": j.get("totalRecords"), "species": by}, indent=0))
-    print(f"    {j.get('totalRecords')} records, {len(by)} species")
+    area = {"q": "*:*", "lat": round(lat, 5), "lon": round(lon, 5), "radius": 1.0}
+    counts = recs = None; used = None
+    for url in ALA_HOSTS:
+        counts = get(url, dict(area, pageSize=0, facets="species,species_group", flimit=-1), "ALA species counts", tries=(0, 10))
+        if counts and "totalRecords" in counts:
+            used = url
+            recs = get(url, dict(area, pageSize=1000, sort="eventDate", dir="desc",
+                                 fl="scientificName,vernacularName,eventDate,speciesGroup,stateConservation,countryConservation,dataResourceName,species"), "ALA records", tries=(0, 10))
+            break
+    if not used: print("    the Atlas did not answer on either address; try again another day"); return
+    by = {}
+    for f in counts.get("facetResults", []):
+        if f.get("fieldName") == "species":
+            for r in f.get("fieldResult", []):
+                name = r.get("label") or r.get("fq", "").split(":", 1)[-1].strip('"')
+                if name and name not in ("Not supplied",): by[name] = {"common": None, "group": None, "n": r.get("count", 0), "last": "", "status": None}
+    groups = {r.get("label"): r.get("count") for f in counts.get("facetResults", []) if f.get("fieldName") == "species_group" for r in f.get("fieldResult", [])}
+    for o in (recs or {}).get("occurrences", []):
+        k = o.get("species") or o.get("scientificName") or "?"
+        e = by.setdefault(k, {"common": None, "group": None, "n": 0, "last": "", "status": None})
+        e["common"] = e["common"] or o.get("vernacularName"); g = o.get("speciesGroup"); e["group"] = e["group"] or (g[0] if isinstance(g, list) and g else g)
+        e["status"] = e["status"] or o.get("stateConservation") or o.get("countryConservation")
+        e["last"] = max(e["last"], (o.get("eventDate") and time.strftime("%Y-%m-%d", time.gmtime(o["eventDate"] / 1000)) if isinstance(o.get("eventDate"), (int, float)) else str(o.get("eventDate") or ""))[:10])
+        if not by.get(k, {}).get("n"): e["n"] += 1
+    (out / "ala_species.json").write_text(json.dumps({"source": "Atlas of Living Australia occurrence records within 1 km (CC BY / CC0, see each record); " + used.split("/")[2],
+                                                     "fetched": time.strftime("%Y-%m-%d"), "total": counts.get("totalRecords"), "groups": groups, "species": by}, indent=0))
+    print(f"    {counts.get('totalRecords')} records, {len(by)} species ({used.split('/')[2]})")
     time.sleep(2)
 
 
