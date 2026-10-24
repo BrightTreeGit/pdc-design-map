@@ -118,38 +118,81 @@ def regional_ecosystems(out, E0, N0, zone):
     time.sleep(2)
 
 
+# Most specific group first: a bird is also in "Animals", so the first match in this order wins.
+ALA_GROUP_ORDER = ["Birds", "Mammals", "Reptiles", "Amphibians", "Fishes", "Insects", "Arachnids", "Crustaceans", "Molluscs", "Arthropods",
+                   "Fungi", "Ferns And Allies", "Conifers", "Mosses", "Monocots", "Dicots", "Flowering plants", "Algae", "Plants", "Animals"]
+
+
+def _facet(j, field):
+    for f in (j or {}).get("facetResults", []):
+        if f.get("fieldName") == field: return f.get("fieldResult", [])
+    return []
+
+
+def _fname(r):
+    return r.get("label") or r.get("fq", "").split(":", 1)[-1].strip('"')
+
+
 def ala(out, lat, lon):
-    """Species seen within about 1 km. Two questions per site: (1) every species name with its record count (facets, so nothing is
-    missed when there are thousands of records), and (2) a page of records for common names, groups, conservation status and dates."""
-    if (out / "ala_species.json").exists(): print("  Atlas of Living Australia: already have it"); return
+    """Species seen within about 1 km, built only from small "facet" questions (counts by name), which the Atlas answers reliably:
+    (1) every species with its record count, (2) which species are in each group (birds, mammals, frogs...), (3) which carry a
+    state or national conservation listing. A small page of records then adds common names when the Atlas allows it."""
+    f = out / "ala_species.json"
+    if f.exists():
+        try: old = json.loads(f.read_text())
+        except Exception: old = {}
+        if any((v or {}).get("group") for v in old.get("species", {}).values()): print("  Atlas of Living Australia: already have it"); return
+        print("  Atlas of Living Australia: the saved list has no groups yet; asking again")
     print("  Atlas of Living Australia records within about 1 km")
     area = {"q": "*:*", "lat": round(lat, 5), "lon": round(lon, 5), "radius": 1.0}
-    counts = recs = None; used = None
+    counts = None; used = None
     for url in ALA_HOSTS:
         counts = get(url, dict(area, pageSize=0, facets="species,species_group", flimit=-1), "ALA species counts", tries=(0, 10))
-        if counts and "totalRecords" in counts:
-            used = url
-            recs = get(url, dict(area, pageSize=1000, sort="eventDate", dir="desc",
-                                 fl="scientificName,vernacularName,eventDate,speciesGroup,stateConservation,countryConservation,dataResourceName,species"), "ALA records", tries=(0, 10))
-            break
+        if counts and "totalRecords" in counts: used = url; break
     if not used: print("    the Atlas did not answer on either address; try again another day"); return
     by = {}
-    for f in counts.get("facetResults", []):
-        if f.get("fieldName") == "species":
-            for r in f.get("fieldResult", []):
-                name = r.get("label") or r.get("fq", "").split(":", 1)[-1].strip('"')
-                if name and name not in ("Not supplied",): by[name] = {"common": None, "group": None, "n": r.get("count", 0), "last": "", "status": None}
-    groups = {r.get("label"): r.get("count") for f in counts.get("facetResults", []) if f.get("fieldName") == "species_group" for r in f.get("fieldResult", [])}
+    for r in _facet(counts, "species"):
+        name = _fname(r)
+        if name and name != "Not supplied": by[name] = {"common": None, "group": None, "n": r.get("count", 0), "last": "", "status": None}
+    groups = {_fname(r): r.get("count") for r in _facet(counts, "species_group")}
+    # (2) group of each species: one small question per group, most specific first
+    for g in [g for g in ALA_GROUP_ORDER if g in groups] + [g for g in groups if g not in ALA_GROUP_ORDER]:
+        time.sleep(1)
+        j = get(used, dict(area, pageSize=0, fq=f'species_group:"{g}"', facets="species", flimit=-1), f"ALA {g}", tries=(0, 8))
+        for r in _facet(j, "species"):
+            e = by.get(_fname(r))
+            if e is not None and not e["group"]: e["group"] = g
+    # (3) conservation listings: which labels occur here, then which species carry each
+    listed = 0; any_labels = False
+    for field in ("state_conservation", "country_conservation", "stateConservation", "countryConservation"):
+        if any_labels and field[0].islower() and "_" not in field: break   # the snake_case names worked; skip the camelCase spellings
+        time.sleep(1)
+        j = get(used, dict(area, pageSize=0, facets=field, flimit=-1), f"ALA {field}", tries=(0,))
+        labels = [_fname(r) for r in _facet(j, field) if _fname(r) and _fname(r).lower() not in ("not supplied", "")]
+        for lab in labels:
+            time.sleep(1)
+            k = get(used, dict(area, pageSize=0, fq=f'{field}:"{lab}"', facets="species", flimit=-1), f"ALA {lab}", tries=(0,))
+            for r in _facet(k, "species"):
+                e = by.get(_fname(r))
+                if e is not None:
+                    tag = ("Qld/NSW " if "state" in field.lower() else "National ") + lab
+                    if not e["status"]: e["status"] = tag; listed += 1
+                    elif tag not in e["status"]: e["status"] += "; " + tag
+        any_labels = any_labels or bool(labels)
+    # (4) best effort: common names and last-seen dates from a small page of records
+    time.sleep(1)
+    recs = get(used, dict(area, pageSize=200, fl="species,scientificName,vernacularName,speciesGroup,eventDate"), "ALA records (common names)", tries=(0,))
     for o in (recs or {}).get("occurrences", []):
-        k = o.get("species") or o.get("scientificName") or "?"
-        e = by.setdefault(k, {"common": None, "group": None, "n": 0, "last": "", "status": None})
-        e["common"] = e["common"] or o.get("vernacularName"); g = o.get("speciesGroup"); e["group"] = e["group"] or (g[0] if isinstance(g, list) and g else g)
-        e["status"] = e["status"] or o.get("stateConservation") or o.get("countryConservation")
-        e["last"] = max(e["last"], (o.get("eventDate") and time.strftime("%Y-%m-%d", time.gmtime(o["eventDate"] / 1000)) if isinstance(o.get("eventDate"), (int, float)) else str(o.get("eventDate") or ""))[:10])
-        if not by.get(k, {}).get("n"): e["n"] += 1
-    (out / "ala_species.json").write_text(json.dumps({"source": "Atlas of Living Australia occurrence records within 1 km (CC BY / CC0, see each record); " + used.split("/")[2],
-                                                     "fetched": time.strftime("%Y-%m-%d"), "total": counts.get("totalRecords"), "groups": groups, "species": by}, indent=0))
-    print(f"    {counts.get('totalRecords')} records, {len(by)} species ({used.split('/')[2]})")
+        e = by.get(o.get("species") or o.get("scientificName") or "")
+        if e is None: continue
+        e["common"] = e["common"] or o.get("vernacularName")
+        d = o.get("eventDate")
+        d = time.strftime("%Y-%m-%d", time.gmtime(d / 1000)) if isinstance(d, (int, float)) else str(d or "")[:10]
+        e["last"] = max(e["last"], d)
+    f.write_text(json.dumps({"source": "Atlas of Living Australia occurrence records within 1 km (CC BY / CC0, see each record); " + used.split("/")[2],
+                             "fetched": time.strftime("%Y-%m-%d"), "total": counts.get("totalRecords"), "groups": groups, "species": by}, indent=0))
+    ng = sum(1 for v in by.values() if v["group"]); nc = sum(1 for v in by.values() if v["common"])
+    print(f"    {counts.get('totalRecords')} records, {len(by)} species, {ng} grouped, {listed} with a conservation listing, {nc} with common names")
     time.sleep(2)
 
 
@@ -303,7 +346,11 @@ def slga_point(attr, lon, lat):
 
 
 def soil_grid(out, E0, N0, zone):
-    if (out / "soil_grid.json").exists(): print("  Soil grid: already have it"); return
+    if (out / "soil_grid.json").exists():
+        try: old = json.loads((out / "soil_grid.json").read_text())
+        except Exception: old = {}
+        if all(k in old.get("centre", {}) for k in ("CLY", "PHC", "AWC")): print("  Soil grid: already have it"); return
+        print("  Soil grid: the saved file is missing some soil properties (a request failed last time); asking again")
     print("  Soil and Landscape Grid of Australia (clay, sand, silt, pH, carbon, water capacity, density, depth)")
     clon, clat = mga2ll(E0 + 1000, N0 - 1000, zone)
     centre = {}

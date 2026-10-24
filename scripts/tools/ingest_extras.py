@@ -112,14 +112,27 @@ def ecosystems(src, dst):
     print(f'  ecosystems: {len(polys)} polygons, {len(cat)} types, {os.path.getsize(dst)//1024} kB' + (f'  MISSING from REDD table: {sorted(missing)}' if missing else ''))
 
 
-def species(src, dst):
-    j = json.load(open(src)); by = {}
+STATE = {'bright-tree': 'Q', 'bellbunya': 'Q', 'noosa-forest-retreat': 'Q', 'annwn': 'Q', 'willow-vale': 'N', 'nimbin': 'N', 'nac': 'N'}
+
+
+def species(src, dst, site=''):
+    """Group the Atlas species list for the map. Where the Atlas left groups, common names or listings empty, fill them from
+    species_lookup.py (common local species, genus groups, known Qld/NSW/national listings, pests). Exact locations are never kept."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from species_lookup import enrich
+    j = json.load(open(src)); by = {}; listed = []; pests = []
     for name, e in j.get('species', {}).items():
-        g = e.get('group') or 'Other'
-        by.setdefault(g, []).append({'sci': name, 'common': e.get('common'), 'n': e.get('n', 0), 'last': e.get('last', ''), 'status': e.get('status')})
-    for g in by: by[g].sort(key=lambda s: -s['n'])
-    json.dump({'source': j.get('source', 'Atlas of Living Australia'), 'fetched': j.get('fetched'), 'total': j.get('total'), 'groups': by}, open(dst, 'w'), separators=(',', ':'))
-    print(f'  species: {sum(len(v) for v in by.values())} species in {len(by)} groups')
+        e = enrich(name, dict(e), STATE.get(site, 'Q'))
+        g = e.get('group') or 'Not grouped yet'
+        row = {'sci': name, 'common': e.get('common'), 'n': e.get('n', 0), 'last': e.get('last', ''), 'status': e.get('status')}
+        by.setdefault(g, []).append(row)
+        if row['status']: listed.append(row)
+        if e.get('pest'): pests.append(row)
+    for g in by: by[g].sort(key=lambda r: -r['n'])
+    listed.sort(key=lambda r: -r['n']); pests.sort(key=lambda r: -r['n'])
+    json.dump({'source': j.get('source', 'Atlas of Living Australia'), 'fetched': j.get('fetched'), 'total': j.get('total'),
+               'groupRecords': j.get('groups', {}), 'groups': by, 'listed': listed, 'pests': pests}, open(dst, 'w'), separators=(',', ':'))
+    print(f'  species: {sum(len(v) for v in by.values())} species in {len(by)} groups, {len(listed)} listed, {len(pests)} pests')
 
 
 def clip_feats(feats, tol=1.0):
@@ -171,7 +184,7 @@ def main():
             shutil.copy(s / 'rain_daily.json', mdir / 'rain_daily.json'); os.chmod(mdir / 'rain_daily.json', 0o644)
             r = json.load(open(s / 'rain_daily.json')); print(f"  rain: {r['start']} to {r['end']}")
         if (s / 'regional_ecosystems.json').exists(): ecosystems(s / 'regional_ecosystems.json', mdir / 'ecosystems.json')
-        if (s / 'ala_species.json').exists(): species(s / 'ala_species.json', mdir / 'species.json')
+        if (s / 'ala_species.json').exists(): species(s / 'ala_species.json', mdir / 'species.json', site)
         if (s / 'soil_grid.json').exists(): soils(s / 'soil_grid.json', mdir / 'soils.json')
         for plain in ('ifd.json', 'silo_full.json', 'silo_long.json', 'outlook.json'):
             if (s / plain).exists():
