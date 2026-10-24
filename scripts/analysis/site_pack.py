@@ -34,6 +34,28 @@ def dec(v):
     return v, a
 
 
+def tank_test(DL, lat, roof=200.0, store=20000.0, house=300.0, garden=0.0):
+    """The design map's tank simulation (tkSim in index.html), day by day over the SILO record.
+    Rain tops the tank up from the roof (85% collected); the house draws its daily use; a 25 mm soil store is
+    watered only when it runs down. Returns the share of demand met, the share of days with water in the tank,
+    the longest empty run and when it ended, and the annual rain totals."""
+    import datetime
+    E = [6.0, 5.3, 4.6, 3.6, 2.8, 2.4, 2.6, 3.5, 4.6, 5.4, 5.9, 6.3] if lat > -29.5 else [5.3, 4.6, 3.8, 2.8, 2.0, 1.6, 1.8, 2.5, 3.4, 4.3, 4.8, 5.4]   # mm/day ETo: SE Qld, or NSW coast
+    d0 = datetime.date.fromisoformat(DL['start']); r = DL['rain10']
+    s, soil, sup, dem = store, 25.0, 0.0, 0.0; annual = {}; days_with = 0; run = 0; longest = 0; longest_when = ''
+    for i, r10 in enumerate(r):
+        dt = d0 + datetime.timedelta(days=i); rain = r10 / 10; m = dt.month - 1
+        s = min(store, s + rain * roof * .85)
+        et = E[m] * .6; soil = min(25.0, soil + rain) - et; need = -soil if soil < 0 else 0.0; soil = max(soil, 0.0)
+        want = need * garden + house; take = min(s, want); s -= take; sup += take; dem += want
+        annual[dt.year] = annual.get(dt.year, 0.0) + rain
+        if s > 1: days_with += 1; run = 0
+        else:
+            run += 1
+            if run > longest: longest, longest_when = run, dt.strftime('%b %Y')
+    return dict(share=sup / dem if dem else 1.0, days_with=days_with / len(r), longest=longest, longest_when=longest_when, annual=annual, roof=roof, store=store, house=house)
+
+
 def kinds():
     s = open(os.path.join(ROOT, 'index.html')).read()
     out = {}
@@ -151,6 +173,34 @@ def main(site, fdir, out):
         ax.set_yticks([]); [ax.spines[s_].set_visible(False) for s_ in ('top', 'right', 'left')]
         save(fig)
 
+    # 4b 30-year rain test (SILO daily rain, when the site has it)
+    dpath = os.path.join(sb, 'rain_daily.json')
+    if os.path.exists(dpath):
+        DL = json.load(open(dpath)); res = tank_test(DL, S['lat'])
+        yrs = sorted(res['annual']); tot = [res['annual'][y] for y in yrs]; mean_a = float(np.mean(tot))
+        full = [y for y in yrs if y < int(DL['end'][:4])]; tot_f = [res['annual'][y] for y in full]
+        fig = page('Thirty years of rain, day by day', f"Rain that actually fell at the property each year since {yrs[0]}, and what it would have meant for a typical house tank.",
+                   f"SILO gridded daily rainfall at the property, {DL['start'][:4]}–{DL['end'][:4]}, Queensland Government, CC BY 4.0.")
+        ax = fig.add_axes([.07, .36, .58, .46])
+        driest = sorted(full, key=lambda y: res['annual'][y])[:3]
+        ax.bar(full, tot_f, color=[ '#d9534f' if y in driest else GREY for y in full], width=.72)
+        ax.axhline(mean_a, color=ACC, lw=1.6); ax.text(full[-1] + 1.1, mean_a, f'average\n{mean_a:,.0f} mm', color=ACC, fontsize=9, va='center')
+        for y in driest: ax.text(y, res['annual'][y] + max(tot_f) * .015, f'{y}\n{res["annual"][y]:,.0f}', ha='center', fontsize=8, color='#a33')
+        ax.set_ylabel('mm in the year', color=SUB); [ax.spines[s_].set_visible(False) for s_ in ('top', 'right')]; ax.set_xlim(full[0] - .8, full[-1] + 5); ax.set_xticks([y for y in full if y % 5 == 0])
+        ax.text(.01, .97, 'The three driest years are in red', transform=ax.transAxes, fontsize=9, color='#a33', va='top')
+        # tank panel
+        px0 = .70; fig.patches.append(FancyBboxPatch((px0, .36), .26, .46, boxstyle='round,pad=0.005,rounding_size=0.015', transform=fig.transFigure, fc='#f3f2ee', ec='none'))
+        fig.text(px0 + .015, .78, 'A typical house tank, run through every day', fontsize=10.5, weight='bold', va='top')
+        fig.text(px0 + .015, .72, f"{res['share']*100:.0f}%", fontsize=26, weight='bold', color=INK, va='top'); fig.text(px0 + .015, .655, 'of the household water came from the tank', fontsize=9, color=SUB, va='top')
+        fig.text(px0 + .015, .60, f"{res['days_with']*100:.0f}%", fontsize=26, weight='bold', color=INK, va='top'); fig.text(px0 + .015, .535, 'of days the tank had water in it', fontsize=9, color=SUB, va='top')
+        fig.text(px0 + .015, .48, f"{res['longest']} days", fontsize=26, weight='bold', color='#a33' if res['longest'] > 30 else INK, va='top')
+        fig.text(px0 + .015, .415, f"longest run empty, ending {res['longest_when']}" if res['longest'] else 'the tank never ran dry', fontsize=9, color=SUB, va='top')
+        fig.text(px0 + .015, .375, textwrap.fill(f"Assumes a {res['roof']:.0f} m² roof, {res['store']/1000:.0f},000 L of storage, {res['house']:.0f} L a day in the house and 85% of roof rain collected.", 44), fontsize=7.8, color=SUB, va='top')
+        fig.text(.07, .27, textwrap.fill(f"How to read it: the chart is the real record, not an average. A design that only works in an average year fails in {driest[0]}. "
+                 f"The tank panel runs the same arithmetic the design map uses: each day's rain tops the tank up from the roof, the house draws its daily use, and a small garden store (25 mm of soil moisture) is watered only when it runs down. "
+                 f"Bigger storage or a bigger roof moves the numbers; the map's Tools tab lets you try your own.", 170), fontsize=9.4, color=INK, linespacing=1.5, va='top')
+        save(fig)
+
     # 5 slope share
     labs = ['Under 10%', '10–18%', '18–25%', '25–33%', '33–50%', 'Over 50%']; uses = ['tracks, beds, buildings', 'contour beds, orchards', 'terraces, tree crops', 'tree crops on contour', 'forest, light grazing', 'keep in forest']
     vals = [c[2] * 100 for c in sl]
@@ -214,6 +264,54 @@ def main(site, fdir, out):
         ax.barh([textwrap.shorten(c['label'], 48) for c in cl], [c['lotShare'] * 100 for c in cl], color=[tuple(x / 255 for x in c['rgba'][:3]) for c in cl]); ax.invert_yaxis()
         for i, c in enumerate(cl): ax.text(c['lotShare'] * 100 + .8, i, f"{c['lotShare']*100:.0f}% · {c['lotHa']:.1f} ha", va='center', fontsize=10)
         ax.set_xticks([]); ax.set_xlim(0, max(c['lotShare'] for c in cl) * 140); [ax.spines[s_].set_visible(False) for s_ in ('top', 'right', 'bottom')]
+        save(fig)
+
+    # 9b natural vegetation types (Queensland regional ecosystems)
+    epath = os.path.join(sb, 'ecosystems.json')
+    if os.path.exists(epath):
+        ECO = json.load(open(epath)); cat = ECO['cat']
+        COL = {'Endangered': '#c62828', 'Of concern': '#ef8c1e', 'Least concern': '#3c9650', 'water': '#4682c8', 'plantation': '#82724a'}
+        def status(lab):
+            c = lab.split('/')[0].strip()
+            return c if c in COL else (cat.get(c, {}).get('vm') or '')
+        fig = page('What grows here naturally', 'Regional ecosystems around the property: the vegetation each patch carries when left alone, coloured by Vegetation Management Act status.',
+                   'Source: Qld Herbarium regional ecosystem mapping (VM Act labels), CC BY 4.0, 24 Oct 2026; descriptions and status: REDD v13.1. Mapped ~1:100,000, so edges can be 50 m or more out.')
+        ax = fig.add_axes([.04, .07, .55, .8])
+        ax.imshow(hs, extent=(0, 2000, 2000, 0), cmap='gray', alpha=.5)
+        area_by = {}
+        for p in ECO['polys']:
+            st = status(p['re']); c = COL.get(st)
+            for r in p['rings']:
+                ax.add_patch(Polygon(r, closed=True, fc=c if c else 'none', ec='#3a4a3a', lw=.45, alpha=.42 if c else 1))
+            a_ = max(abs(np.dot(np.array(r)[:, 0], np.roll(np.array(r)[:, 1], 1)) - np.dot(np.array(r)[:, 1], np.roll(np.array(r)[:, 0], 1))) / 2 for r in p['rings'])
+            area_by[p['re']] = area_by.get(p['re'], 0) + a_
+            if c and a_ > 12000:
+                r = max(p['rings'], key=len); rr = np.array(r); cx, cy = rr.mean(0)
+                if MPath(rr).contains_point((cx, cy)) and 0 < cx < 2000 and 0 < cy < 2000 and p['re'] not in COL: ax.text(cx, cy, p['re'].split('/')[0], fontsize=6.2, ha='center', va='center', color='#102010', clip_on=True)
+        ax.add_patch(Polygon(lot, closed=True, fill=False, ec='#c2185b', lw=1.7, ls=(0, (6, 3)), zorder=6))
+        ax.set_xlim(0, 2000); ax.set_ylim(2000, 0); ax.set_aspect('equal'); ax.set_xticks([]); ax.set_yticks([])
+        for s_ in ax.spines.values(): s_.set_visible(False)
+        ax.plot([80, 580], [1930, 1930], color='#222', lw=2.2); ax.text(330, 1890, '500 m', ha='center', fontsize=8)
+        ax.annotate('N', xy=(1900, 100), xytext=(1900, 260), ha='center', fontsize=10, weight='bold', arrowprops=dict(arrowstyle='-|>', color='#222'))
+        lg = fig.add_axes([.61, .07, .36, .8]); lg.axis('off')
+        yy_ = 1.0
+        for st, c in COL.items():
+            if any(status(p['re']) == st for p in ECO['polys']):
+                lg.add_patch(FancyBboxPatch((0, yy_ - .018), .05, .018, boxstyle='round,pad=0.002', fc=c, ec='none', alpha=.75, transform=lg.transAxes))
+                lg.text(.07, yy_ - .009, {'water': 'Water', 'plantation': 'Plantation'}.get(st, st + ' (VM Act status)'), fontsize=8.2, va='center', transform=lg.transAxes); yy_ -= .032
+        lg.add_patch(FancyBboxPatch((0, yy_ - .018), .05, .018, boxstyle='round,pad=0.002', fc='white', ec='#777', lw=.6, transform=lg.transAxes))
+        lg.text(.07, yy_ - .009, 'Non-remnant: cleared, built on, or young regrowth', fontsize=8.2, va='center', transform=lg.transAxes); yy_ -= .05
+        lg.text(0, yy_, 'Types within the 2 km square, largest first', fontsize=9.5, weight='bold', va='top', transform=lg.transAxes); yy_ -= .035
+        for lab in sorted(area_by, key=lambda k: -area_by[k]):
+            if lab in COL or lab == 'non-rem': continue
+            parts = []
+            for c_ in lab.split('/'):
+                c_ = c_.strip(); e = cat.get(c_)
+                parts.append(f"{c_}: {e['d']} ({e['vm']})" if e else c_)
+            s_ = textwrap.fill(' / '.join(parts) + ('   [a mix, in order of area]' if '/' in lab else ''), 66)
+            nl = s_.count('\n') + 1
+            if yy_ - nl * .0235 < 0: break
+            lg.text(0, yy_, s_, fontsize=7.4, va='top', transform=lg.transAxes, color=INK, linespacing=1.3); yy_ -= nl * .0235 + .012
         save(fig)
 
     # 10 inventory

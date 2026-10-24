@@ -7,6 +7,11 @@ For every site folder found:
   rain_daily.json          -> map/sites/<id>/rain_daily.json  (Bright Tree: map/rain_daily.json)   30-year daily rain for the tank test
   regional_ecosystems.json -> map/sites/<id>/ecosystems.json  simplified polygons + the RE catalogue (description, VM Act status, biodiversity status)
   ala_species.json         -> map/sites/<id>/species.json     (when present) species seen within 1 km, grouped
+  soil_grid.json           -> map/sites/<id>/soils.json       soil numbers by depth at the centre and on the 5 x 5 grid (Soil and Landscape Grid)
+  ifd.json                 -> map/sites/<id>/ifd.json         design rainfall table (BoM, ARR 2019), copied as is
+  silo_full.json           -> map/sites/<id>/silo_full.json   daily rain, temperatures, radiation, evaporation and ETo, copied as is
+  geology.json             -> map/sites/<id>/geology.json     surface geology polygons, clipped to the map square and simplified
+  hazard.json              -> map/sites/<id>/hazard.json      bushfire hazard and regulated-vegetation polygons, clipped and simplified
 
 The RE catalogue below is copied from the Queensland Government Regional Ecosystem Description Database (REDD, version 13.1,
 apps.des.qld.gov.au/regional-ecosystems) on 24 Oct 2026. Add a line when a new site brings a new code (the script lists any it lacks).
@@ -116,6 +121,45 @@ def species(src, dst):
     print(f'  species: {sum(len(v) for v in by.values())} species in {len(by)} groups')
 
 
+def clip_feats(feats, tol=1.0):
+    """Clip a list of {attrs, rings} features to the map square and simplify them, like the ecosystems layer."""
+    out = []
+    for f in feats:
+        rings = []
+        for r in f.get('rings', []):
+            r = clip_rect(r)
+            if len(r) >= 4: r = dp(r, tol)
+            if len(r) >= 4: rings.append([[round(p[0], 1), round(p[1], 1)] for p in r])
+        if rings: out.append({'attrs': f.get('attrs', {}), 'rings': rings})
+    return out
+
+
+def soils(src, dst):
+    j = json.load(open(src))
+    out = {'source': j['source'], 'fetched': j.get('fetched'), 'attrs': j['attrs'], 'depths_cm': j['depths_cm'], 'centre': j['centre'], 'grid_step_m': j.get('grid_step_m', 400), 'grid': j['grid']}
+    json.dump(out, open(dst, 'w'), separators=(',', ':'))
+    c = j['centre']; top = {k: v.get('0-5') for k, v in c.items() if isinstance(v, dict) and '0-5' in v}
+    print(f"  soils: {len(c)} attributes at the centre (topsoil: {top}), {len(j['grid'])} grid points")
+
+
+def geology(src, dst):
+    j = json.load(open(src)); feats = clip_feats(j.get('features', []))
+    json.dump({'source': j['source'], 'layer': j.get('layer'), 'fetched': j.get('fetched'), 'features': feats}, open(dst, 'w'), separators=(',', ':'))
+    units = {}
+    for f in feats:
+        k = next((str(v) for kk, v in f['attrs'].items() if 'name' in kk.lower() or 'unit' in kk.lower()), '?'); units[k] = units.get(k, 0) + 1
+    print(f"  geology: {len(feats)} polygons, {len(units)} rock units, {os.path.getsize(dst)//1024} kB")
+
+
+def hazard(src, dst):
+    j = json.load(open(src)); layers = []
+    for l in j.get('layers', []):
+        feats = clip_feats(l.get('features', []))
+        layers.append({'kind': l['kind'], 'name': l.get('name'), 'source': l['source'], 'features': feats})
+    json.dump({'fetched': j.get('fetched'), 'layers': layers}, open(dst, 'w'), separators=(',', ':'))
+    print('  hazard: ' + ', '.join(f"{l['kind']} {len(l['features'])} polygons" for l in layers) + f", {os.path.getsize(dst)//1024} kB")
+
+
 def main():
     root = Path(sys.argv[1])
     for site, mdir in MAPDIR.items():
@@ -127,6 +171,12 @@ def main():
             r = json.load(open(s / 'rain_daily.json')); print(f"  rain: {r['start']} to {r['end']}")
         if (s / 'regional_ecosystems.json').exists(): ecosystems(s / 'regional_ecosystems.json', mdir / 'ecosystems.json')
         if (s / 'ala_species.json').exists(): species(s / 'ala_species.json', mdir / 'species.json')
+        if (s / 'soil_grid.json').exists(): soils(s / 'soil_grid.json', mdir / 'soils.json')
+        for plain in ('ifd.json', 'silo_full.json'):
+            if (s / plain).exists():
+                shutil.copy(s / plain, mdir / plain); os.chmod(mdir / plain, 0o644); print(f'  {plain}: copied')
+        if (s / 'geology.json').exists(): geology(s / 'geology.json', mdir / 'geology.json')
+        if (s / 'hazard.json').exists(): hazard(s / 'hazard.json', mdir / 'hazard.json')
 
 
 if __name__ == '__main__':

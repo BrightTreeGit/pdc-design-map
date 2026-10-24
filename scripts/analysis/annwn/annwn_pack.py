@@ -6,6 +6,7 @@ from matplotlib.patches import FancyBboxPatch, Rectangle, Circle, Wedge, Polygon
 from scipy.ndimage import gaussian_filter
 D = '/tmp/claude-0/-home-claude/683a26ba-af7b-52db-b3e7-8ba1d74ca58c/scratchpad/'
 OUT = '/home/claude/annwn-out/Annwn design graphics.pdf'
+G = json.load(open(D + 'bron/ground.json'))
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 10})
 GREY, ACC, INK, SUB = '#b8b8b2', '#2f6fb3', '#222', '#666'
 A4 = (11.69, 8.27)
@@ -39,8 +40,8 @@ dry3 = sum(mean[6:9]) / sum(mean) * 100
 
 # 1 at a glance
 fig = page('Annwn at a glance', 'Capalaba, Redlands Qld · a first look at the water, climate and planting behind Bronwen\'s garden',
-           'Sources: Queensland cadastre; SILO daily climate 1995–2025; Bronwen\'s sketch.')
-tiles = [('770 m²', 'level corner block'), (f'{np.mean(list(ann.values())):,.0f} mm', 'rain in an average year'), ('Jul–Sep', f'the dry stretch: {dry3:.0f}% of the rain'),
+           'Sources: Queensland cadastre; 1 m Queensland Government LiDAR; SILO daily climate 1995–2025; Bronwen\'s sketch.')
+tiles = [('770 m²', f'corner block, {G["zmax"]-G["zmin"]:.1f} m fall to the back corner'), (f'{np.mean(list(ann.values())):,.0f} mm', 'rain in an average year'), ('Jul–Sep', f'the dry stretch: {dry3:.0f}% of the rain'),
          (f'{best} days', 'longest dry spell in 30 years'), ('5,000 L', 'tanks now (3,000 L + 2,000 L)'), ('10,000 L', 'recommended: add one slimline'),
          ('0 frosts', f'in 30 years; coldest {min(low):.1f} °C'), ('2.5 m', 'tree height kept for picking from the ground')]
 for i, (big, small) in enumerate(tiles):
@@ -54,16 +55,28 @@ fig.text(.06, .1, '• One more 5,000 L tank, linked to the two you have, covers
                    '• Small trees, waist-high beds and drip on a timer keep the garden easy to run for the next 20 years.', fontsize=10.5, color=INK, linespacing=1.6)
 pdf.savefig(fig); plt.close(fig)
 
-# 2 sewer plan
-fig = page('Planting distances from the sewer', 'Colour bands show what can grow where, assuming the sewer follows the dashed line on Bronwen\'s sketch. Two possible new tank spots and the shed trellis are marked.',
+# 2 ground
+fig = page('How the ground falls', f'A gentle 2–3% fall from the house pad ({G["zmax"]:.1f} m) east and north to the back corner ({G["zmin"]:.1f} m); the front yard drains to the street.',
+           'Queensland Government LiDAR DEM, 1 m (state elevation service, Oct 2026; survey year to confirm). Contours at 0.25 m; check falls with a level before digging.')
+ax = fig.add_axes([.02, .06, .55, .82]); ax.imshow(plt.imread(D + 'bron/annwn-ground-plan.png')); ax.axis('off')
+fig.text(.6, .83, 'What it means', fontsize=12, weight='bold')
+fig.text(.6, .79, textwrap.fill('Tanks: the new slimline should sit on the high side, by the house (spot B, about 0.35 m higher than spot A by the shed), so gravity helps the drip lines and the overflow has somewhere to go.', 44) + '\n\n' +
+         textwrap.fill('Overflow and rain garden: everything in the back yard runs to the north-east corner, so that is where a mulch basin or rain garden belongs, kept 2 m or more off the sewer line.', 44) + '\n\n' +
+         textwrap.fill('Sewer: the assumed line along the back fence runs with the fall to the low corner, which is where a sewer would normally go, so the sketch is plausible. Confirm it before planting trees.', 44) + '\n\n' +
+         textwrap.fill('Beds: with under 1 m of fall across the back yard, beds can run level without terracing; a few centimetres of fall toward the basin is all the drainage they need.', 44),
+         fontsize=9.5, va='top', color=INK, linespacing=1.45)
+pdf.savefig(fig); plt.close(fig)
+
+# 3 sewer plan
+fig = page('Planting distances from the sewer', 'Colour bands show what can grow where, assuming the sewer follows the dashed line on Bronwen\'s sketch (it runs with the fall to the low back corner). Two possible new tank spots and the shed trellis are marked.',
            'Confirm the real sewer line with Redland City Council\'s property plan and a Before You Dig enquiry before planting trees.')
-ax = fig.add_axes([.2, .06, .6, .82]); ax.imshow(plt.imread('/home/claude/annwn-out/annwn-sewer-plan.png')); ax.axis('off')
+ax = fig.add_axes([.2, .06, .6, .82]); ax.imshow(plt.imread(D + 'bron/annwn-sewer-plan.png')); ax.axis('off')
 pdf.savefig(fig); plt.close(fig)
 
 # 3 tanks
 fig = page('One more tank lifts the garden to 90% tank water', 'Share of a 120 m² garden\'s watering met from the tanks, from a day-by-day run through 30 years of real rainfall.',
            'House roof about 165 m². Rough cost for the new tank, base, pump and drip timer: $2,500–4,000. A sound second-hand tank can halve it.')
-ax = fig.add_axes([.12, .08, .76, .8]); ax.imshow(plt.imread('/home/claude/annwn-out/annwn-tank-chart.png')); ax.axis('off')
+ax = fig.add_axes([.12, .08, .76, .8]); ax.imshow(plt.imread(D + 'bron/annwn-tank-chart.png')); ax.axis('off')
 pdf.savefig(fig); plt.close(fig)
 
 # 4 rain
@@ -126,7 +139,7 @@ for i, (h, items, c) in enumerate(cols):
 pdf.savefig(fig); plt.close(fig)
 
 # 8 easy care
-fig = page('Easy to run for the next 20 years', 'Choices that keep the garden manageable at 67 and at 87.', 'Ideas drawn from the PDC urban permaculture session and the report.')
+fig = page('Easy to run for the next 20 years', 'Choices that keep the garden manageable for the next twenty years.', 'Ideas drawn from the PDC urban permaculture session and the report.')
 ax = fig.add_axes([.06, .1, .88, .74]); ax.axis('off')
 items = [('Trees kept under 2.5 m', 'Pick and prune from the ground. No ladders, and small enough to net.'), ('Waist-high wicking beds', 'No bending; watered from below every week or two.'),
          ('Drip on a timer from the tanks', 'No hoses or cans to carry; a pump switches to mains if the tanks run dry.'), ('Wide, level paths', '1.0–1.2 m of crusher dust or pavers, wide enough for a cart.'),
@@ -140,7 +153,7 @@ pdf.savefig(fig); plt.close(fig)
 # 9 principles
 P = [('Observe & interact', 'A season noting ponding, hot sun and possum paths before planting trees.'), ('Use small & slow solutions', 'One tank, one guild, one bed at a time, done well.'),
      ('Catch & store energy', 'Linked tanks, mulch basins, deep mulch; pump on the solar.'), ('Design from patterns to details', 'Zones and sectors first, plant choice last.'),
-     ('Creatively use & respond to change', 'Designed for Bronwen at 67 and at 87.'), ('Obtain a yield', 'Fruit she loves, herbs, greens, and shade on the shed.'),
+     ('Creatively use & respond to change', 'Designed to stay easy as the years go by.'), ('Obtain a yield', 'Fruit she loves, herbs, greens, and shade on the shed.'),
      ('Produce no waste', 'Scraps to worms or compost; prunings as mulch.'), ('Use & value renewable resources', 'Chop-and-drop pigeon pea and comfrey; free arborist chip.'),
      ('Use edges & value the marginal', 'Shed walls for vines; street edges for a low native screen.'), ('Integrate rather than segregate', 'Shed roof catches water, walls hold vines, vines shade the shed.'),
      ('Use & value diversity', 'Many species in small numbers: a harvest most months.'), ('Apply self-regulation & accept feedback', 'Start with two or three guilds; expand what thrives.')]
