@@ -1987,6 +1987,7 @@ function tankHTML(){const R=roofArea(),Tk=tankStore();const roof=+TK.roof||Math.
    <dl class="facts"><dt>Needs met from the tanks</dt><dd><b>${Math.round(r.share*100)}%</b>${r.daily?` · ${Math.round(r.short)} days a year short`:` · ${r.short} months a year short`}</dd>${r.daily?`<dt>Years with a dry day</dt><dd>${r.dryYears} of ${r.years}</dd>`:''}${r.dry?`<dt>Driest year (${r.dry.y}, ${Math.round(r.dry.rain)} mm)</dt><dd>${Math.round(r.dry.share*100)}% met</dd>`:''}<dt>Roof yield</dt><dd>about ${Math.round(roof*.85*(RAIN.mean||[]).reduce((a,b)=>a+b,0)/1000).toLocaleString()} kL in an average year</dd></dl>
    <table class="mini"><tr><th>Storage</th><th>Met</th><th>${r.daily?'Days short / yr':'Months short'}</th></tr>${rows.map(([v,x])=>`<tr><td>${v.toLocaleString()} L</td><td>${Math.round(x.share*100)}%</td><td>${Math.round(x.short)}</td></tr>`).join('')}</table>
    <p class="hint">${rec?`About ${rec[0].toLocaleString()} L reaches 90%.`:'Even triple storage stays under 90%: add roof area or reduce garden watering.'} Roof and tank start from what is drawn on the map${R.a?'':' (none drawn yet, so 150 m² is assumed)'}. 85% of roof rain is counted; garden need uses a soil-moisture balance${r.daily?(r.eto?' with SILO FAO56 daily evapotranspiration':' with a monthly evapotranspiration table'):''}. A guide, not a guarantee.</p>
+   ${worstHTML(roof,tank,+TK.house,+TK.garden)}
    ${forwardHTML(roof,tank,+TK.house,+TK.garden)}
    ${SITEDEF.small?`<div class="sub2">Rain garden size</div><p class="hint">A 50 mm storm on ${roof} m² of roof is about ${Math.round(roof*50).toLocaleString()} L of overflow. A mulched basin 200 mm deep needs about ${Math.round(roof*50/1000/0.2)} m² to hold it while it soaks in (more on clay, less on sand).</p>`:''}`}
 function wireTank(el){const b=(id,k)=>{const x=el.querySelector('#'+id);if(x)x.onchange=()=>{TK[k]=+x.value||0;lsSet('bt.tk',TK);const box=el.querySelector('#tankBox');if(box){box.innerHTML=tankHTML();wireTank(el)}}};b('tkRoof','roof');b('tkTank','tank');b('tkHouse','house');b('tkGarden','garden');b('tkLevel','level')}
@@ -2191,6 +2192,69 @@ function hazHTML(){if(!HAZ)return '';return hazLegend('fire')+hazLegend('veg')+`
 function hazSiteHTML(){if(!HAZ)return '';const out=[];for(const k of ['fire','veg']){const Ls=hazLayers(k);if(!Ls.length)continue;const sh=lotShareBy(Ls.flatMap(l=>l.features),p=>p.cls,'');
   out.push(`<dt>${k==='fire'?'Bushfire hazard':'Vegetation category'}</dt><dd>${sh.map(([c,f])=>`${c?esc(k==='veg'?'Category '+c:c):'not in a mapped class'} ${(f*100).toFixed(0)}%`).join(' · ')||'none mapped on the lot'}</dd>`)}
   return out.length?`<h2>Rules and hazards</h2><dl class="facts">${out.join('')}</dl><p class="hint">Shares of the lot inside each mapped class. The Layers tab explains what each class means and where it comes from.</p>`:''}
+/* ---- 137 years of climate: SILO's full daily record (silo_long.json), loaded only when the Site or Tools tab opens.
+   Same arithmetic as scripts/analysis/climate_long.py so the map and the graphics pack agree. ---- */
+let LONG=null,LS=null,longP=null;
+const LWIN=[[1889,1918],[1919,1948],[1949,1978],[1979,2008],[1996,2025]];
+function ensureLong(){if(longP)return longP;longP=fetch(SB+'silo_long.json').then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.rain10)return;LONG=j;try{LS=longStats(j)}catch(e){LS=null;console.warn('long record',e)}
+  const s=$('#tab-site');if(s&&!s.hidden&&T)renderSite();const box=document.querySelector('#tab-tools #tankBox');if(box){box.innerHTML=tankHTML();wireTank($('#tab-tools'))}}).catch(()=>{LONG=null});return longP}
+function lncdf(x){const t=1/(1+.2316419*x),d=.3989423*Math.exp(-x*x/2);return 1-d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))))}
+function mannKendall(v){const n=v.length;let S=0;for(let i=0;i<n-1;i++)for(let k=i+1;k<n;k++){const d=v[k]-v[i];S+=d>0?1:d<0?-1:0}
+  const c={};v.forEach(x=>c[x]=(c[x]||0)+1);let tc=0;for(const q of Object.values(c))if(q>1)tc+=q*(q-1)*(2*q+5);
+  const vs=(n*(n-1)*(2*n+5)-tc)/18,z=S>0?(S-1)/Math.sqrt(vs):S<0?(S+1)/Math.sqrt(vs):0,p=2*(1-lncdf(Math.abs(z)));
+  const sl=[];for(let i=0;i<n-1;i++)for(let k=i+1;k<n;k++)sl.push((v[k]-v[i])/(k-i));sl.sort((a,b)=>a-b);const m=sl.length;
+  return {S,z,p,sen:m%2?sl[(m-1)/2]:(sl[m/2-1]+sl[m/2])/2,n}}
+function longStats(j){const d0=dOf(j.start),R=j.rain10,X=j.tmax10,N=j.tmin10,yr={};let cur=0,best={n:0,end:null};
+  for(let i=0;i<R.length;i++){const dt=new Date(d0.getTime()+i*DAY),y=dt.getUTCFullYear();const Y=yr[y]=yr[y]||{rain:0,miss:0,days:0,hot:0,frost:0,tdays:0,run:0,maxrun:0,i0:i,i1:i};Y.days++;Y.i1=i;
+    const r=R[i];if(r<0)Y.miss++;else Y.rain+=r/10;
+    if(r>=0&&r<20){cur++;Y.run++;if(Y.run>Y.maxrun)Y.maxrun=Y.run;if(cur>best.n)best={n:cur,end:dt}}else{cur=0;Y.run=0}
+    if(y>=1957&&X[i]>-900&&N[i]>-900){Y.tdays++;if(X[i]>350)Y.hot++;if(N[i]<20)Y.frost++}}
+  const full=Object.keys(yr).map(Number).sort((a,b)=>a-b).filter(y=>yr[y].days>=365&&yr[y].miss<10);const rain={};full.forEach(y=>rain[y]=yr[y].rain);
+  const mean=full.reduce((a,y)=>a+rain[y],0)/full.length;
+  const win=LWIN.map(([a,b])=>{const w=full.filter(y=>y>=a&&y<=b).map(y=>rain[y]);return w.length?{a,b,mean:w.reduce((s,v)=>s+v,0)/w.length}:null}).filter(Boolean);
+  const order=full.slice().sort((a,b)=>rain[a]-rain[b]);const ty=full.filter(y=>y>=1957&&yr[y].tdays>=360);
+  let worst=null;for(const y of full)if(rain[y+1]!=null&&rain[y+2]!=null){const s=rain[y]+rain[y+1]+rain[y+2];if(!worst||s<worst.rain)worst={y0:y,rain:s,i0:yr[y].i0,i1:yr[y+2].i1}}
+  const s95=full.filter(y=>y>=1995);const d95=s95.reduce((a,y)=>rain[y]<rain[a]?y:a,s95[0]);
+  const ser=(ys,f)=>{const o={};ys.forEach(y=>o[y]=f(y));return o};
+  const hot=ser(ty,y=>yr[y].hot),frost=ser(ty,y=>yr[y].frost),maxrun=ser(full,y=>yr[y].maxrun);
+  return {years:full,rain,mean,win,driest:order.slice(0,5),wettest:order.slice().reverse().slice(0,5),longest:best.n,longestEnd:best.end,ty,hot,frost,maxrun,worst,d95,d95rank:order.indexOf(d95)+1,
+    mk:{rain:mannKendall(full.map(y=>Math.round(rain[y]))),run:mannKendall(full.map(y=>yr[y].maxrun)),hot:mannKendall(ty.map(y=>yr[y].hot)),frost:mannKendall(ty.map(y=>yr[y].frost))}}}
+const lord=n=>n+((n%100>=10&&n%100<=20)?'th':({1:'st',2:'nd',3:'rd'}[n%10]||'th'));
+const lpf=p=>p<.01?'p < 0.01':`p = ${p.toFixed(2)}`;
+function longTrend(label,r,unit,dec,series){if(r.p>.1)return `${label}: no clear trend since ${r.n>100?1889:1957} (${lpf(r.p)}).`;const word=r.p<.05?'clear':'weak',d=r.z>0?'rising':'falling',v=Math.abs(r.sen*10);
+  if(+v.toFixed(dec)===0&&series){const ys=Object.keys(series).map(Number).sort((a,b)=>a-b),a=ys.slice(0,15),b=ys.slice(-15),m=g=>g.reduce((s,y)=>s+series[y],0)/g.length;
+    return `${label}: a ${word} ${d} trend, from ${m(a).toFixed(1)} a year in ${a[0]}–${String(a[a.length-1]).slice(2)} to ${m(b).toFixed(1)} in ${b[0]}–${String(b[b.length-1]).slice(2)} (${lpf(r.p)}).`}
+  return `${label}: a ${word} ${d} trend, about ${v.toFixed(dec)} ${unit} per decade (${lpf(r.p)}).`}
+function longFindings(s){const o=[],w=s.win,rk=w.map((x,i)=>i).sort((a,b)=>w[a].mean-w[b].mean),f=v=>Math.round(v).toLocaleString();
+  if(w.length===5&&rk.slice(0,2).sort().join()==='3,4')o.push('The last two 30-year windows are the driest of the five.');
+  const last=w[w.length-1],pct=(last.mean/s.mean-1)*100;o.push(`The latest 30 years (${last.a}–${last.b}) averaged ${f(last.mean)} mm, ${Math.abs(pct).toFixed(0)}% ${pct<0?'below':'above'} the ${s.years.length}-year mean of ${f(s.mean)} mm.`);
+  const dm=s.driest[0];o.push(s.d95rank===1?`${s.d95}, the driest year since 1995 (${f(s.rain[s.d95])} mm), is also the driest on record.`:`${s.d95}, the driest year since 1995 (${f(s.rain[s.d95])} mm), is only the ${lord(s.d95rank)} driest since ${s.years[0]}; the driest was ${dm} (${f(s.rain[dm])} mm).`);
+  if(s.longestEnd)o.push(`The longest run of days with under 2 mm was ${s.longest} days, ending ${s.longestEnd.getUTCDate()} ${MON[s.longestEnd.getUTCMonth()]} ${s.longestEnd.getUTCFullYear()}.`);
+  if(s.ty.length){const m=(a,b,k)=>{const v=s.ty.filter(y=>y>=a&&y<=b).map(y=>s[k][y]);return v.length?v.reduce((x,y)=>x+y,0)/v.length:0};
+    o.push(`Days over 35 °C averaged ${m(1957,1986,'hot').toFixed(1)} a year in 1957–86 and ${m(1996,2025,'hot').toFixed(1)} in 1996–2025; nights under 2 °C ${m(1957,1986,'frost').toFixed(1)} and ${m(1996,2025,'frost').toFixed(1)}.`)}
+  if(s.worst)o.push(`The driest three years in a row were ${s.worst.y0}–${s.worst.y0+2}, ${f(s.worst.rain)} mm in total.`);return o}
+function longTrends(s){const k=s.mk;return [longTrend('Annual rain',k.rain,'mm',0,s.rain),longTrend('Longest dry spell each year',k.run,'days',1,s.maxrun),longTrend('Days over 35 °C',k.hot,'days',1,s.hot),longTrend('Nights under 2 °C',k.frost,'nights',1,s.frost)]}
+function longSVG(s){const W=320,H=118,P=4,ys=s.years,n=ys.length,bw=(W-2*P)/n,mx=Math.max(...ys.map(y=>s.rain[y]))*1.18,sy=v=>H-14-(v/mx)*(H-24),x=y=>P+(y-ys[0])*bw;
+  const dr=new Set(s.driest),we=new Set(s.wettest);let g=ys.map(y=>`<rect x="${x(y).toFixed(1)}" y="${sy(s.rain[y]).toFixed(1)}" width="${Math.max(bw-.4,.6).toFixed(2)}" height="${(H-14-sy(s.rain[y])).toFixed(1)}" fill="${dr.has(y)?'#d9534f':we.has(y)?'#2f6fb3':'#b8b8b2'}"><title>${y}: ${Math.round(s.rain[y])} mm</title></rect>`).join('');
+  g+=s.win.map(w=>`<line x1="${x(w.a)}" x2="${x(w.b)+bw}" y1="${sy(w.mean)}" y2="${sy(w.mean)}" stroke="var(--ink,#222)" stroke-width="1.6"/><text x="${(x(w.a)+x(w.b))/2}" y="${sy(w.mean)-2}" font-size="7" text-anchor="middle" fill="var(--ink,#222)">${Math.round(w.mean)}</text>`).join('');
+  g+=[...s.driest.map(y=>[y,'#a33']),...s.wettest.map(y=>[y,'#2f6fb3'])].map(([y,c])=>`<text x="${x(y)+bw/2}" y="${sy(s.rain[y])-1}" font-size="6" fill="${c}" text-anchor="start" transform="rotate(-90 ${x(y)+bw/2} ${sy(s.rain[y])-1})">${y}</text>`).join('');
+  g+=[1900,1925,1950,1975,2000,2025].filter(y=>y>=ys[0]&&y<=ys[n-1]).map(y=>`<text x="${x(y)}" y="${H-3}" font-size="7" fill="#888" text-anchor="middle">${y}</text>`).join('');
+  let h='';if(s.ty.length){const H2=46,mh=Math.max(1,...s.ty.map(y=>Math.max(s.hot[y],s.frost[y]))),mid=H2/2,k=(H2/2-3)/mh;
+    h=`<svg viewBox="0 0 ${W} ${H2}" width="100%" role="img" aria-label="Hot days and frost nights per year since 1957">${s.ty.map(y=>`<rect x="${x(y)}" y="${mid-s.hot[y]*k}" width="${Math.max(bw-.4,.6)}" height="${s.hot[y]*k}" fill="#d9534f"><title>${y}: ${s.hot[y]} days over 35 °C</title></rect><rect x="${x(y)}" y="${mid}" width="${Math.max(bw-.4,.6)}" height="${s.frost[y]*k}" fill="#5b8fd6"><title>${y}: ${s.frost[y]} nights under 2 °C</title></rect>`).join('')}<line x1="${x(1957)}" x2="${W-P}" y1="${mid}" y2="${mid}" stroke="#999" stroke-width=".5"/></svg>`}
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Annual rainfall since ${ys[0]}">${g}</svg>${h}`}
+function longHTML(){if(!LS)return LONG===null&&longP?'<p class="hint">Loading the 137-year record…</p>':'';const s=LS;
+  return `<h2>${s.years.length} years of rain</h2>${longSVG(s)}<p class="hint">Grey bars: each complete year since ${s.years[0]}; black steps: the mean of each 30-year window; red the five driest years, blue the five wettest. Small strip: days over 35 °C (red, up) and nights under 2 °C (blue, down) since 1957.</p>
+   <ul class="hint" style="margin:4px 0 6px 16px;padding:0">${longFindings(s).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+   <p class="hint"><b>Trends</b> (Mann–Kendall test, Sen's slope): ${longTrends(s).map(esc).join(' ')}</p>
+   <p class="hint">Source: SILO gridded daily climate at the property, ${LONG.start.slice(0,4)}–${LONG.end.slice(0,4)} (Queensland Government, CC BY 4.0). Rain before about 1910 and temperatures before 1957 are interpolated from sparse stations, so read them as indicative. Tools → tank calculator runs your tanks through the driest three years on record.</p>`}
+/* the map's daily tank model through the driest three consecutive years on record (monthly ETo table; SILO ETo only exists from 1995) */
+function tkWorst(roof,store,house,garden){if(!LS||!LS.worst)return null;const w=LS.worst,R=LONG.rain10,d0=dOf(LONG.start),E=ETO_M();let s=store,soil=25,dry=0,min=store,sup=0,dem=0;
+  for(let i=w.i0;i<=w.i1;i++){const m=new Date(d0.getTime()+i*DAY).getUTCMonth(),rain=Math.max(0,R[i])/10;s=Math.min(store,s+rain*roof*.85);soil=Math.min(25,soil+rain)-E[m]*.6;const need=soil<0?-soil:0;soil=Math.max(soil,0);
+    const want=need*garden+house;if(want>0){const take=Math.min(s,want);s-=take;sup+=take;dem+=want;if(take<want-1e-6)dry++}min=Math.min(min,s)}
+  return {dry,min,share:dem?sup/dem:1,label:`${w.y0}–${w.y0+2}`,rain:w.rain}}
+function worstHTML(roof,tank,house,garden){const r=tkWorst(roof,tank,house,garden);if(!r)return '';
+  return `<dl class="facts"><dt>Worst 3 years on record (${r.label}, ${Math.round(r.rain).toLocaleString()} mm)</dt><dd>${r.dry?`<b>ran short on ${r.dry} days</b>`:'<b>never ran dry</b>'} · ${Math.round(r.share*100)}% met · lowest ${Math.round(r.min/Math.max(tank,1)*100)}% full</dd></dl>
+   <p class="hint">The same tank run through the driest three calendar years in a row since ${LS.years[0]} (SILO; monthly evapotranspiration). Size storage for this run of years, not the average one.</p>`}
 function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&mt.type==='dam'&&mt.res&&!mt.res.err?mt.res:null;
   const rain=dr?dr.catchHa*RAIN.mean.reduce((a,b)=>a+b,0)/100:0;
   el.innerHTML=
@@ -2699,7 +2763,7 @@ function renderNotes(){const el=$('#tab-notes');if(!el||el.hidden&&!renderNotes.
   el.querySelectorAll('[data-nbdel]').forEach(b=>b.onclick=()=>delNote(b.dataset.nbdel));
   el.querySelectorAll('[data-nbrep]').forEach(b=>b.onclick=()=>{const id=b.dataset.nbrep;const box=el.querySelector(`[data-nbbox="${id}"]`);box.innerHTML=`<div class="field"><textarea id="nbR_${id}" placeholder="Your reply"></textarea></div><button class="btn primary">Post reply</button>`;const ta=box.querySelector('textarea');ta.focus();
     box.querySelector('button').onclick=()=>{const t=ta.value.trim();if(!t)return;nbName=who.value.trim()||nbName;const n=notes.get(id);saveNote(id,{...n,replies:[...(n.replies||[]),{text:t,who:nbName||'Someone',at:new Date().toISOString()}]})}})}
-function showTab(t){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));for(const id of ['layers','draw','feat','plan','notes','tools','site'])$('#tab-'+id).hidden=id!==t;sheetOpen();lsSet('bt.tab',t);if(t==='tools')renderTools();if(t==='notes')renderNotes()}
+function showTab(t){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));for(const id of ['layers','draw','feat','plan','notes','tools','site'])$('#tab-'+id).hidden=id!==t;sheetOpen();lsSet('bt.tab',t);if(t==='site'||t==='tools')ensureLong();if(t==='tools')renderTools();if(t==='notes')renderNotes()}
 document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{if(sheetTap)return;if(b.getAttribute('aria-selected')==='true'&&isPhone()){setSheet($('#panel').classList.contains('min')?'half':'peek');return}showTab(b.dataset.tab);setTimeout(resize,0)});
 /* ---------------- phone bottom sheet: drag the handle or tab bar; snaps to peek, half or full ---------------- */
 const isPhone=()=>matchMedia('(max-width:760px)').matches;let sheetTap=false;
@@ -3122,6 +3186,7 @@ function renderSite(){const el=$('#tab-site');const m=T.meta;const lot=T.catch[0
    <h2>Sun (terrain only)</h2><dl class="facts"><dt>Winter, 21 Jun</dt><dd>${m.sun_winter_lotmean.toFixed(1)} h average</dd><dt>Equinox</dt><dd>${m.sun_equinox_lotmean.toFixed(1)} h</dd><dt>Summer, 21 Dec</dt><dd>${m.sun_summer_lotmean.toFixed(1)} h</dd></dl>
    ${soilSiteHTML()}${geoSiteHTML()}${ecoSiteHTML()}${hazSiteHTML()}
    <h2>Climate</h2>${(()=>{const A=analogues();return A?`<p class="hint"><b>Season ahead:</b> after ${Math.round(A.now.r)} mm in the last 90 days, the middle of the 10 most similar past years brought ${Math.round(A.median.f)} mm over ${A.nextLabel} (30-year mean ${Math.round(A.normF)} mm; driest analogue ${Math.round(A.dry.f)} mm). Details and a tank forward-run under Tools → Season ahead.</p>`:''})()}${climateSVG()}<p class="hint">${RAIN.station}, ${RAIN.period}. Bars are average monthly rain (darker: the typical, median month). ${MON[wet]} is the wettest month and ${MON[dry]} the driest. The coldest month's mean minimum is ${coldM} °C at the station, and cold air pools in valley floors, so frost comes earlier and harder there on still, clear nights.</p>
+   ${longHTML()}
    <h2>Sources and accuracy</h2><p class="hint">${IMG.aerial?`Aerial base: ${SITE.state==='NSW'?'NSW Spatial Services imagery':'Queensland Government “Latest State Program” imagery'} (CC BY 4.0), fetched for the map’s 2 km square so it lines up without alignment. `:''}Elevation: ${esc(SITE.source||('LiDAR '+SITE.main+', '+SITE.res+' bare-earth DEM (ELVIS)'))}, GDA2020 / MGA zone ${ZONE}. ${esc(SITE.boundaryNote||'Lot boundary is approximate: check it against the title plan and fix it under Set-up above.')} Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.${ECO?' Vegetation types: '+esc(ECO.source)+'.':''}</p>`;
   wireSetup(el);wireSecs(el);
   el.querySelectorAll('.kpl button').forEach(b=>b.onclick=()=>{const k=T.kp[+b.dataset.i];view.cx=k.x;view.cy=k.y;view.s=Math.max(view.s,2.5);layers.kp=true;draw()})}

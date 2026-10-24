@@ -201,6 +201,13 @@ def main(site, fdir, out):
                  f"Bigger storage or a bigger roof moves the numbers; the map's Tools tab lets you try your own.", 170), fontsize=9.4, color=INK, linespacing=1.5, va='top')
         save(fig)
 
+    # 4c 137-year record (SILO 1889 to now), when the site has silo_long.json
+    lpath = os.path.join(sb, 'silo_long.json')
+    if os.path.exists(lpath):
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import climate_long
+        climate_long.draw_page(page, json.load(open(lpath)), S['lat'], save)
+
     # 5 slope share
     labs = ['Under 10%', '10–18%', '18–25%', '25–33%', '33–50%', 'Over 50%']; uses = ['tracks, beds, buildings', 'contour beds, orchards', 'terraces, tree crops', 'tree crops on contour', 'forest, light grazing', 'keep in forest']
     vals = [c[2] * 100 for c in sl]
