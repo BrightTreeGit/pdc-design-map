@@ -347,6 +347,25 @@ def _ifd_csv(text):
     return {"columns": rows[head], "rows": [r for r in rows[head + 1:] if len(r) == len(rows[head])]}
 
 
+def _ifd_html(html):
+    """If the Bureau sent its normal results page, the depth table is an HTML <table>: rows are durations, columns are
+    annual exceedance probabilities (63.2%, 50%, 20%, 10%, 5%, 2%, 1%). Returns {columns, rows} or None (e.g. a bot-check page)."""
+    import re
+    if not re.search(r"(?i)annual exceedance|AEP|exceedance probability", html): return None
+    best = None
+    for tb in re.findall(r"(?is)<table.*?</table>", html):
+        rows = []
+        for tr in re.findall(r"(?is)<tr.*?</tr>", tb):
+            cells = [re.sub(r"<[^>]+>|&nbsp;", " ", c).strip() for c in re.findall(r"(?is)<t[hd][^>]*>(.*?)</t[hd]>", tr)]
+            cells = [" ".join(c.split()) for c in cells]
+            if any(cells): rows.append(cells)
+        nums = sum(1 for r in rows for c in r if re.fullmatch(r"\d+(\.\d+)?", c))
+        if rows and (best is None or nums > best[0]): best = (nums, rows)
+    if not best or best[0] < 20: return None
+    rows = best[1]
+    return {"source": "Bureau of Meteorology 2016 design rainfall depths (ARR 2019), read from the results page", "columns": rows[0], "rows": rows[1:]}
+
+
 def ifd(out, lat, lon):
     """Design rainfall depths (mm) for standard durations and annual exceedance probabilities, ARR 2019 (BoM, CC BY 4.0).
     The Bureau sometimes refuses automated requests: if nothing is saved, open the same page in a browser, choose "JSON" under output,
@@ -369,7 +388,11 @@ def ifd(out, lat, lon):
                 if r.ok and fmt == "csv" and not body.lower().startswith(("<!doctype", "<html")):
                     j = _ifd_csv(r.text)
                     if j: break
-                print(f"    IFD ({fmt}): status {r.status_code}, {'came back as a web page, not data' if r.ok else 'refused'}")
+                if r.ok and body.lower().startswith(("<!doctype", "<html")):
+                    (out / f"ifd_page_{fmt}.html").write_text(r.text, encoding="utf-8")   # keep it: it may be the real results page with the table inside
+                    t = _ifd_html(r.text)
+                    if t: j = t; print("    IFD: read the rainfall table out of the web page"); break
+                print(f"    IFD ({fmt}): status {r.status_code}, {'came back as a web page, not data (saved as ifd_page_' + fmt + '.html for Claude to look at)' if r.ok else 'refused'}")
             except Exception as e: print(f"    IFD: {e}")
         if j is not None: break
     if j is None:
