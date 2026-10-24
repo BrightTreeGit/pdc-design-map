@@ -314,6 +314,132 @@ def main(site, fdir, out):
             lg.text(0, yy_, s_, fontsize=7.4, va='top', transform=lg.transAxes, color=INK, linespacing=1.3); yy_ -= nl * .0235 + .012
         save(fig)
 
+    # 9c rock, rules and hazards (geology; bushfire hazard class; regulated vegetation categories)
+    gpath = os.path.join(sb, 'geology.json'); hpath = os.path.join(sb, 'hazard.json')
+    GEO = json.load(open(gpath)) if os.path.exists(gpath) else None
+    HAZ = json.load(open(hpath)) if os.path.exists(hpath) else None
+    if GEO or HAZ:
+        def attr(a, keys):
+            for k in a:
+                kl = k.lower()
+                if any(x in kl for x in keys) and a[k] not in (None, ''): return str(a[k])
+            return ''
+        def ring_area(r):
+            rr = np.array(r); return abs(np.dot(rr[:, 0], np.roll(rr[:, 1], 1)) - np.dot(rr[:, 1], np.roll(rr[:, 0], 1))) / 2
+        # lot share by sampling a 24 x 24 grid of points inside the lot (even-odd across a polygon's rings)
+        lx0, ly0 = lot.min(0); lx1, ly1 = lot.max(0)
+        gx, gy = np.meshgrid(lx0 + (np.arange(24) + .5) / 24 * (lx1 - lx0), ly0 + (np.arange(24) + .5) / 24 * (ly1 - ly0))
+        pts = np.c_[gx.ravel(), gy.ravel()]; pts = pts[MPath(lot).contains_points(pts)]
+        def lot_share(feats, keyf, default):
+            hit = np.full(len(pts), None, dtype=object)
+            for f in feats:
+                inside = np.zeros(len(pts), bool)
+                for r in f['rings']:
+                    if len(r) >= 3: inside ^= MPath(np.array(r)).contains_points(pts)
+                for i in np.where(inside & (hit == None))[0]: hit[i] = keyf(f)
+            out = {}
+            for h_ in hit: out[h_ if h_ is not None else default] = out.get(h_ if h_ is not None else default, 0) + 1
+            return {k: v / max(1, len(pts)) for k, v in sorted(out.items(), key=lambda t: -t[1])}
+        FIRE = [(re.compile(r'buffer|low|category\s*3\b|\b3\b|potential', re.I), '#f0c83c', 'Buffer or lower class: within reach of a fire from the higher-class land next door (100 m buffer in NSW and Sunshine Coast mapping). Keep gutters and the house surrounds clear; embers travel.'),
+                (re.compile(r'very\s*high|\bhigh\b|category\s*1\b|\b1\b', re.I), '#c81e28', 'Highest class: forest fuel. New buildings need a bushfire attack level (BAL) assessment to AS 3959; keep an asset-protection zone and plan the fire-season routine around it.'),
+                (re.compile(r'medium|category\s*2\b|\b2\b', re.I), '#eb781e', 'Middle class: grassland, woodland or near forest. Building rules still apply; design for ember attack, water for firefighting and a cleared, irrigated zone around the house.')]
+        RVM = {'A': ('#1e6432', 'Category A: land under a compliance notice, offset or restoration agreement. No clearing.'),
+               'B': ('#3c9650', 'Category B: remnant vegetation. Clearing needs an accepted development code or a permit; exemptions exist for fences, firebreaks and tracks within limits.'),
+               'C': ('#96c878', 'Category C: high-value regrowth. Clearing follows the regrowth code; most routine property work is allowed under it.'),
+               'R': ('#508cdc', 'Category R: regrowth within 50 m of a watercourse in a reef catchment. Clearing follows the reef code.'),
+               'X': (None, 'Category X: no clearing restriction under the Vegetation Management Act (council and other laws may still apply).')}
+        def fire_style(cls):
+            for rx, c, m_ in FIRE:
+                if rx.search(cls): return c, m_
+            return '#a0a0a0', ''
+        def fire_cls(a):
+            c = attr(a, ['d_category', 'class', 'category', 'bushfire']) or '?'
+            return f'Bush fire prone land, vegetation category {c}' if c.strip().isdigit() else c
+        def rvm_cls(a): return (attr(a, ['rvm_cat', 'category']) or 'X').strip().upper()[:1]
+        GPAL = ['#c9a27e', '#9fb4c7', '#d3c27a', '#b7a3c9', '#a9c3a0', '#e0a68a', '#c6c6c6', '#d9b8a0', '#9ec9c9', '#cbb59c']
+        def gunit(a): return attr(a, ['unit_name', 'ru_name', 'name', 'unit', 'formation']) or attr(a, ['symbol', 'code']) or 'Unnamed unit'
+        def glith(a): return attr(a, ['lith', 'description', 'desc', 'rock'])
+        def gage(a): return attr(a, ['age_range', 'age', 'period', 'era'])
+        def gsym(a): return attr(a, ['map_symbol', 'letter_symbol', 'symbol', 'code'])
+        src_bits = []
+        if GEO: src_bits.append(GEO.get('source', 'state geology mapping') + (f" (downloaded {GEO['fetched']})" if GEO.get('fetched') else ''))
+        if HAZ:
+            for l in HAZ['layers']: src_bits.append(l.get('source', l.get('name', '')) + (f" (downloaded {HAZ['fetched']})" if HAZ.get('fetched') else ''))
+        fig = page('Rock, rules and hazards', 'What the land is made of, and the official maps that set the clearing and building rules for it.',
+                   textwrap.fill('Sources: ' + '; '.join(src_bits) + '. Geology is mapped at 1:100,000 and the hazard maps at council-overlay scale, so boundaries can be 50 m or more out: check on the ground.', 150))
+        # left: geology
+        ax = fig.add_axes([.04, .37, .46, .48]); fig.text(.06, .86, 'Underlying rock', fontsize=11, weight='bold', color=INK)
+        ax.imshow(hs, extent=(0, 2000, 2000, 0), cmap='gray', alpha=.5)
+        units = {}; gshare = {}
+        if GEO:
+            for f in GEO['features']:
+                u = gunit(f['attrs'])
+                if u not in units: units[u] = dict(col=GPAL[len(units) % len(GPAL)], lith=glith(f['attrs']), age=gage(f['attrs']), sym=gsym(f['attrs']), area=0)
+                for r in f['rings']:
+                    if len(r) >= 3: ax.add_patch(Polygon(r, closed=True, fc=units[u]['col'], ec='#5a4030', lw=.5, alpha=.5))
+                a_ = max((ring_area(r) for r in f['rings']), default=0); units[u]['area'] += a_
+                if a_ > 15000:
+                    rr = np.array(max(f['rings'], key=len)); cx, cy = rr.mean(0)
+                    if MPath(rr).contains_point((cx, cy)) and 0 < cx < 2000 and 0 < cy < 2000: ax.text(cx, cy, units[u]['sym'] or u[:14], fontsize=6.5, ha='center', va='center', color='#2a1a10', clip_on=True)
+            gshare = lot_share(GEO['features'], lambda f: gunit(f['attrs']), 'Not mapped')
+        else:
+            ax.text(1000, 1000, 'Geology mapping not yet downloaded for this site', ha='center', va='center', fontsize=9, color=SUB, bbox=dict(fc='white', ec='none', alpha=.8))
+        ax.add_patch(Polygon(lot, closed=True, fill=False, ec='#c2185b', lw=1.7, ls=(0, (6, 3)), zorder=6))
+        ax.set_xlim(0, 2000); ax.set_ylim(2000, 0); ax.set_aspect('equal'); ax.set_xticks([]); ax.set_yticks([])
+        for s_ in ax.spines.values(): s_.set_visible(False)
+        ax.plot([80, 580], [1930, 1930], color='#222', lw=2.2); ax.text(330, 1890, '500 m', ha='center', fontsize=8)
+        lg = fig.add_axes([.04, .105, .46, .27]); lg.axis('off'); yy_ = 1.0
+        for u, d in sorted(units.items(), key=lambda t: -t[1]['area'])[:5]:
+            shr = gshare.get(u); tag = f" · {shr*100:.0f}% of the lot" if shr else ''
+            s_ = textwrap.fill(f"{u}{tag}: {d['lith']}" + (f" ({d['age'].title() if d['age'].isupper() else d['age']})" if d['age'] else ''), 100)
+            nl = s_.count('\n') + 1
+            if yy_ - nl * .075 < 0: break
+            lg.add_patch(FancyBboxPatch((0, yy_ - .07), .035, .06, boxstyle='round,pad=0.002', fc=d['col'], ec='#5a4030', lw=.4, alpha=.8, transform=lg.transAxes))
+            lg.text(.05, yy_, s_, fontsize=6.6, va='top', transform=lg.transAxes, color=INK, linespacing=1.25); yy_ -= nl * .075 + .03
+        # right: bushfire class and regulated vegetation
+        ax2 = fig.add_axes([.52, .37, .46, .48]); fig.text(.54, .86, 'Bushfire hazard class and vegetation-clearing categories', fontsize=11, weight='bold', color=INK)
+        ax2.imshow(hs, extent=(0, 2000, 2000, 0), cmap='gray', alpha=.45)
+        fshare = {}; vshare = {}; fire_present = {}; veg_present = set()
+        if HAZ:
+            for l in HAZ['layers']:
+                if l['kind'] == 'regulated_vegetation':
+                    for f in l['features']:
+                        c = rvm_cls(f['attrs']); col, _ = RVM.get(c, RVM['X']); veg_present.add(c)
+                        for r in f['rings']:
+                            if len(r) >= 3: ax2.add_patch(Polygon(r, closed=True, fc=col if col else 'none', ec='#1e4a2a', lw=.5, alpha=.45 if col else .6, hatch=None))
+                    vshare = lot_share(l['features'], lambda f: rvm_cls(f['attrs']), 'X')
+                else:
+                    for f in l['features']:
+                        cls = fire_cls(f['attrs']); col, _ = fire_style(cls); fire_present[cls] = col
+                        for r in f['rings']:
+                            if len(r) >= 3: ax2.add_patch(Polygon(r, closed=True, fc=col, ec='none', alpha=.38))
+                    fshare = lot_share(l['features'], lambda f: fire_cls(f['attrs']), 'Not mapped')
+        else:
+            ax2.text(1000, 1000, 'Hazard mapping not yet downloaded for this site', ha='center', va='center', fontsize=9, color=SUB, bbox=dict(fc='white', ec='none', alpha=.8))
+        ax2.add_patch(Polygon(lot, closed=True, fill=False, ec='#c2185b', lw=1.7, ls=(0, (6, 3)), zorder=6))
+        ax2.set_xlim(0, 2000); ax2.set_ylim(2000, 0); ax2.set_aspect('equal'); ax2.set_xticks([]); ax2.set_yticks([])
+        for s_ in ax2.spines.values(): s_.set_visible(False)
+        ax2.annotate('N', xy=(1900, 100), xytext=(1900, 260), ha='center', fontsize=10, weight='bold', arrowprops=dict(arrowstyle='-|>', color='#222'))
+        lg2 = fig.add_axes([.52, .105, .46, .27]); lg2.axis('off'); yy_ = 1.0
+        rows = []
+        for cls, col in sorted(fire_present.items(), key=lambda t: -fshare.get(t[0], 0)):
+            shr = fshare.get(cls, 0)
+            if shr < .005: continue
+            rows.append((col, f"{cls} · {shr*100:.0f}% of the lot: {fire_style(cls)[1]}"))
+        if HAZ and fire_present and fshare.get('Not mapped', 0) >= .5: rows.insert(0, (None, f"Bushfire hazard: {fshare['Not mapped']*100:.0f}% of the lot is outside any mapped hazard area (the classes on the map are the land around it)"))
+        if HAZ and fshare and not fire_present: rows.append(('#a0a0a0', 'Bushfire mapping present but no class names'))
+        for c in sorted(veg_present, key=lambda k: -vshare.get(k, 0)):
+            if vshare.get(c, 0) < .005: continue
+            rows.append((RVM.get(c, RVM['X'])[0], f"{RVM.get(c, RVM['X'])[1].split(':')[0]} · {vshare.get(c, 0)*100:.0f}% of the lot: {RVM.get(c, RVM['X'])[1].split(': ', 1)[1]}"))
+        if HAZ and not any(l['kind'] == 'regulated_vegetation' for l in HAZ['layers']) and S.get('state') == 'QLD': rows.append((None, 'Regulated vegetation map not downloaded for this site'))
+        if HAZ and not any(l['kind'] == 'bushfire' for l in HAZ['layers']): rows.append((None, 'No queryable bushfire hazard map covers this block (Queensland publishes the statewide map as a download only)'))
+        for col, s_ in rows[:7]:
+            s_ = textwrap.fill(s_, 100); nl = s_.count('\n') + 1
+            if yy_ - nl * .075 < 0: break
+            lg2.add_patch(FancyBboxPatch((0, yy_ - .07), .035, .06, boxstyle='round,pad=0.002', fc=col if col else 'white', ec='#555' if col else '#777', lw=.4, alpha=.8, transform=lg2.transAxes))
+            lg2.text(.05, yy_, s_, fontsize=6.4, va='top', transform=lg2.transAxes, color=INK, linespacing=1.25); yy_ -= nl * .075 + .03
+        save(fig)
+
     # 10 inventory
     groups = {}
     for f in F:

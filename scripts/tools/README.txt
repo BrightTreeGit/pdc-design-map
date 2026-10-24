@@ -14,7 +14,8 @@ Keeping one copy of each script here means a fix reaches every site at once.
   Get site extras (rain, ecosystems, species).bat   30-year daily rain (all sites), Queensland regional ecosystems,
                                                 Atlas of Living Australia species within 1 km -> Site extras
                                                 (safe to run again: it only fetches what is missing, e.g. ALA after a 503)
+  Get seasonal outlook (run monthly).bat        SOI and ENSO drivers, the Bureau's seasonal outlook text, 10-day forecast at each block -> Site extras
 
 When a run finishes, tell Claude "<site> site data is ready", "<site> photo history is ready",
-"services data is ready" or "site extras are ready", and the results go into the map.
+"services data is ready", "site extras are ready" or "seasonal outlook is ready", and the results go into the map.
 Master copies of every script are kept in the private GitHub archive (BrightTreeGit/pdc-design-map, scripts/tools/).

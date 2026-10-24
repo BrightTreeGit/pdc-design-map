@@ -404,7 +404,7 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 /* ---------------- data loading ---------------- */
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
-let CANOPY=null,NICHE=null,HYDRO=null,VEG=null,SERV=null,ECO=null,GEO=null,HAZ=null,SFULL=null;
+let CANOPY=null,NICHE=null,HYDRO=null,VEG=null,SERV=null,ECO=null,GEO=null,HAZ=null,SFULL=null,OUTLOOK=null;
 const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
 function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
@@ -455,6 +455,7 @@ async function boot(){renderSiteSel();
   if(SITEDEF.niche){imgs.push('niche.png');try{NICHE=await (await fetch(SB+'niche.json')).json()}catch(e){NICHE=null}}
   try{const dr=await fetch(SB+'rain_daily.json');DAILY=dr.ok?await dr.json():null}catch(e){DAILY=null}
   try{const sf=await fetch(SB+'silo_full.json');SFULL=sf.ok?await sf.json():null;if(SFULL&&!(SFULL.eto10||[]).some(v=>v>=0))SFULL=null}catch(e){SFULL=null}
+  try{const so=await fetch(SB+'outlook.json');OUTLOOK=so.ok?await so.json():null;if(OUTLOOK&&typeof OUTLOOK!=='object')OUTLOOK=null}catch(e){OUTLOOK=null}
   try{const gr=await fetch(SB+'geology.json');GEO=gr.ok?await gr.json():null;if(GEO)geoPrep()}catch(e){GEO=null}
   try{const hz=await fetch(SB+'hazard.json');HAZ=hz.ok?await hz.json():null;if(HAZ)hazPrep()}catch(e){HAZ=null}
   try{const sr=await fetch(SB+'services.json');SERV=sr.ok?await sr.json():null}catch(e){SERV=null}
@@ -1910,6 +1911,64 @@ function tkSim(roof,store,house,garden){if(DAILY){const r=DAILY.rain10,d0=new Da
     return {share:dem?sup/dem:1,short:short/years,dry,daily:true,years,dryYears,eto:!!eto}}
   const med=RAIN.median||RAIN.mean;let s=store,sup=0,dem=0,shortM=0;for(let k=0;k<24;k++){const m=k%12,rain=med[m],days=30.4;s=Math.min(store,s+rain*roof*.85);const g=Math.max(0,ETO_M()[m]*.6*days-rain*.8)*garden,want=g+house*days,take=Math.min(s,want);s-=take;if(k>=12){sup+=take;dem+=want;if(take<want-1)shortM++}}
   return {share:dem?sup/dem:1,short:shortM,daily:false}}
+
+/* ---- season ahead: analogue years from the SILO daily record, plus the BoM outlook when outlook.json is present ---- */
+const DAY=864e5;
+function dOf(iso){return new Date(iso+'T00:00:00Z')}
+function fmtD(d){return `${d.getUTCDate()} ${MON[d.getUTCMonth()]}`}
+function fmtDY(d){return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`}
+let _AN=null;
+/* Analogue years: the last 90 days of the record are compared with the same 90 days of every past year (rain total, rain days and ETo).
+   The 10 nearest years are the "analogues"; what followed them is the outlook. Plain, transparent, and it uses only the site's own record. */
+function analogues(){if(_AN)return _AN;if(!SFULL||!SFULL.rain10||SFULL.rain10.length<400*3)return false;
+  const R=SFULL.rain10,E=SFULL.eto10||[],d0=dOf(SFULL.start),n=R.length,end=new Date(d0.getTime()+(n-1)*DAY);
+  const win=(i0)=>{let r=0,rd=0,e=0,ne=0;for(let i=i0;i<i0+90;i++){if(i<0||i>=n)return null;const v=R[i];if(v>=0){r+=v/10;if(v>=10)rd++}const x=E[i];if(x!=null&&x>=0){e+=x/10;ne++}}return {r,rd,e:ne?e/ne:null}};
+  const now=win(n-90);if(!now)return false;
+  const yrs=[];for(let y=d0.getUTCFullYear();y<end.getUTCFullYear();y++){const t=Date.UTC(y,end.getUTCMonth(),end.getUTCDate());const i=Math.round((t-d0.getTime())/DAY);const w=win(i-89);if(!w||i+92>=n)continue;yrs.push({y,i,w})}
+  if(yrs.length<8)return false;
+  const rs=yrs.map(x=>x.w.r),mean=rs.reduce((a,b)=>a+b,0)/rs.length,sd=Math.sqrt(rs.reduce((a,b)=>a+(b-mean)**2,0)/rs.length)||1;
+  const es=yrs.map(x=>x.w.e).filter(v=>v!=null),em=es.length?es.reduce((a,b)=>a+b,0)/es.length:0,esd=es.length?Math.sqrt(es.reduce((a,b)=>a+(b-em)**2,0)/es.length)||1:1;
+  const enso=OUTLOOK&&OUTLOOK.enso_years&&OUTLOOK.enso?OUTLOOK.enso_years[OUTLOOK.enso]:null;   // optional list of past years in the same ENSO state
+  let pool=yrs;if(enso&&enso.length>=6){const ps=yrs.filter(x=>enso.includes(x.y));if(ps.length>=6)pool=ps}
+  for(const x of pool){let d=Math.abs(x.w.r-now.r)/sd+0.5*Math.abs(x.w.rd-now.rd)/10;if(now.e!=null&&x.w.e!=null)d+=0.5*Math.abs(x.w.e-now.e)/esd;x.d=d;
+    let f=0;for(let i=x.i+1;i<=x.i+92;i++){if(R[i]>=0)f+=R[i]/10}x.f=f}
+  const pick=pool.slice().sort((a,b)=>a.d-b.d).slice(0,10).sort((a,b)=>a.f-b.f);
+  // 30-year mean for the following 92 days
+  const allF=yrs.map(x=>{let f=0;for(let i=x.i+1;i<=x.i+92;i++){if(R[i]>=0)f+=R[i]/10}return f});const normF=allF.reduce((a,b)=>a+b,0)/allF.length;
+  const normNow=rs.reduce((a,b)=>a+b,0)/rs.length;
+  const q=k=>pick[Math.min(pick.length-1,Math.floor(k*(pick.length-1)))];
+  return _AN={end,now,normNow,pick,median:q(.5),dry:q(.2),wet:q(.8),normF,pool:pool.length,restricted:pool!==yrs,
+    nextLabel:`${MON[(end.getUTCMonth()+1)%12]}–${MON[(end.getUTCMonth()+3)%12]}`,lastLabel:`${fmtD(new Date(end.getTime()-89*DAY))} to ${fmtDY(end)}`}}
+function pct(v){return v==null?'–':Math.round(v)+'%'}
+function seasonHTML(){const A=analogues();const O=OUTLOOK||{};let out='';
+  if(OUTLOOK){const sh=[];if(O.rain_next1_pct_above_median!=null)sh.push(`<dt>Rain, next month</dt><dd>${pct(O.rain_next1_pct_above_median)} chance of above-median</dd>`);
+    if(O.rain_next3_pct_above_median!=null)sh.push(`<dt>Rain, next 3 months</dt><dd>${pct(O.rain_next3_pct_above_median)} chance of above-median</dd>`);
+    if(O.tmax_next3_pct_above_median!=null||O.tmin_next3_pct_above_median!=null)sh.push(`<dt>Temperature, next 3 months</dt><dd>${O.tmax_next3_pct_above_median!=null?pct(O.tmax_next3_pct_above_median)+' chance of warmer days':''}${O.tmin_next3_pct_above_median!=null?(O.tmax_next3_pct_above_median!=null?', ':'')+pct(O.tmin_next3_pct_above_median)+' warmer nights':''}</dd>`);
+    const drv=[O.enso?`ENSO: ${esc(String(O.enso))}`:'',O.iod?`Indian Ocean Dipole: ${esc(String(O.iod))}`:'',O.soi_phase?`SOI phase: ${esc(String(O.soi_phase))}`:''].filter(Boolean).join(' · ');
+    out+=`<div class="sub2">Bureau outlook${O.issued?` · issued ${esc(String(O.issued))}`:''}</div>${sh.length?`<dl class="facts">${sh.join('')}</dl>`:'<p class="hint">No outlook numbers in the file yet.</p>'}${drv?`<p class="hint">${drv}</p>`:''}<p class="hint">Source: ${esc(O.source||'Bureau of Meteorology seasonal climate outlook')}. Odds, not a forecast of any particular day; skill is best in spring and summer.</p>`}
+  if(A){const dv=v=>`${Math.round(v)} mm`;const rel=v=>{const r=v/A.normF;return r<.75?'well below':r<.9?'below':r<=1.1?'about':r<=1.3?'above':'well above'};
+    out+=`<div class="sub2">What usually followed a start like this</div><p class="hint">The last 90 days (${A.lastLabel}) brought <b>${dv(A.now.r)}</b>, ${rel(A.now.r*A.normF/A.normNow)} the usual ${dv(A.normNow)} for that window. In the 10 past years whose same 90 days most resembled this one${A.restricted?' (same ENSO state)':''}, the following three months (${A.nextLabel}) brought:</p>
+     <dl class="facts"><dt>Dry end (driest third)</dt><dd>${dv(A.dry.f)} (${A.dry.y})</dd><dt>Middle</dt><dd><b>${dv(A.median.f)}</b> (${A.median.y}) · ${rel(A.median.f)} the 30-year mean of ${dv(A.normF)}</dd><dt>Wet end (wettest third)</dt><dd>${dv(A.wet.f)} (${A.wet.y})</dd></dl>
+     <p class="hint">Analogue years: ${A.pick.map(x=>x.y).sort().join(', ')}. Method: analogue years from SILO gridded daily rain and evapotranspiration at the property, ${SFULL.start.slice(0,4)}–${SFULL.end.slice(0,4)}. Plan for the driest third, hope for the middle.</p>`}
+  else out+=`<p class="hint">The analogue-year outlook appears when this site has its full SILO daily weather file.</p>`;
+  const S=O.short;if(S&&Array.isArray(S.days)&&S.days.length){const tot=S.days.reduce((a,d)=>a+(+d.rain_mm||0),0);
+    out+=`<div class="sub2">Next ${S.days.length} days</div><div style="display:flex;gap:3px;align-items:flex-end;height:46px">${S.days.map(d=>{const h=Math.min(40,Math.round((+d.rain_mm||0)*2));return `<div title="${esc(String(d.d||''))}: ${d.rain_mm??'–'} mm, ${d.tmin??'–'}–${d.tmax??'–'} °C" style="flex:1;text-align:center;font-size:9px"><div style="height:${h}px;background:#3b82c4;border-radius:2px 2px 0 0"></div>${String(d.d||'').slice(8,10)}</div>`}).join('')}</div><p class="hint">About ${Math.round(tot)} mm in total. Source: ${esc(S.source||'short-range forecast')}.</p>`}
+  return out}
+/* Tank forward run from today's level, through the median and driest analogue years' daily weather */
+function tkForward(roof,store,level,house,garden,yr){const R=SFULL.rain10,E=SFULL.eto10||[],d0=dOf(SFULL.start);const i0=yr.i+1;let s=level,soil=12;const E0=ETO_M();let below20=null,empty=null,rainTot=0;
+  for(let k=0;k<120;k++){const i=i0+k;if(i>=R.length)break;const dt=new Date(d0.getTime()+i*DAY);const rain=R[i]>=0?R[i]/10:0;rainTot+=rain;s=Math.min(store,s+rain*roof*.85);const ev=E[i]!=null&&E[i]>=0?E[i]/10:E0[dt.getUTCMonth()];const et=ev*.6;soil=Math.min(25,soil+rain)-et;const need=soil<0?-soil:0;soil=Math.max(soil,0);
+    const want=need*garden+house;s=Math.max(0,s-want);const when=new Date(analogues().end.getTime()+(k+1)*DAY);if(below20===null&&s<store*.2)below20=when;if(empty===null&&s<=0){empty=when;break}}
+  return {below20,empty,endLevel:s,rainTot}}
+function forwardHTML(roof,tank,house,garden){const A=analogues();if(!A)return '';const lvl=TK.level==null?80:+TK.level;const L=tank*lvl/100;
+  const med=tkForward(roof,tank,L,house,garden,A.median),dry=tkForward(roof,tank,L,house,garden,A.dry);
+  const line=(r,tag)=>`<dt>${tag}</dt><dd>${r.empty?`empty by <b>${fmtD(r.empty)}</b>`:r.below20?`down to 20% by <b>${fmtD(r.below20)}</b>, not empty within 120 days`:`stays above 20% for 120 days`} · about ${Math.round(r.rainTot)} mm of rain in that run</dd>`;
+  let rec;const horizon=new Date(A.end.getTime()+120*DAY);
+  if(dry.empty&&(dry.empty-A.end)/DAY<45)rec=`Act now: in a dry run the tank is empty within ${Math.round((dry.empty-A.end)/DAY)} days. Cut garden watering hard, check for leaks, and line up a top-up (dam pump or delivery).`;
+  else if(dry.empty)rec=`In a dry run the tank empties around ${fmtD(dry.empty)}: cut garden water by about a third from ${fmtD(new Date(dry.empty.getTime()-30*DAY))} and plan a top-up if ${MON[dry.empty.getUTCMonth()]} stays dry.`;
+  else if(dry.below20)rec=`Comfortable in the middle case; a dry run takes the tank to 20% by ${fmtD(dry.below20)}. Keep the garden on drip and watch the gauge from ${fmtD(new Date(dry.below20.getTime()-21*DAY))}.`;
+  else rec=`Comfortable through to ${fmtD(horizon)} even in the driest analogue year.`;
+  return `<div class="sub2">From today</div><div class="row"><div class="field" style="flex:1"><label for="tkLevel">Tank level now (%)</label><input id="tkLevel" type="number" min="0" max="100" step="5" value="${lvl}"></div><div class="field" style="flex:2"><label>&nbsp;</label><span class="hint">${Math.round(L).toLocaleString()} L in ${tank.toLocaleString()} L, run forward 120 days from ${fmtDY(A.end)}</span></div></div>
+   <dl class="facts">${line(med,`Middle analogue year (${A.median.y})`)}${line(dry,`Dry analogue year (${A.dry.y})`)}</dl><p class="hint"><b>${rec}</b></p><p class="hint">Same roof, house and garden figures as above; the garden starts half-dry. SILO gridded daily 1995–${SFULL.end.slice(0,4)}; method: analogue years (see Season ahead).</p>`}
 function tankHTML(){const R=roofArea(),Tk=tankStore();const roof=+TK.roof||Math.round(R.a)||150,tank=+TK.tank||Tk.l||5000;const r=tkSim(roof,tank,+TK.house,+TK.garden);
   const sizes=[...new Set([tank,tank+5000,tank+10000,tank*2,tank*3].map(v=>Math.round(v/500)*500))].slice(0,5);const rows=sizes.map(v=>[v,tkSim(roof,v,+TK.house,+TK.garden)]);
   const rec=rows.find(([v,x])=>x.share>=.9);
@@ -1919,8 +1978,9 @@ function tankHTML(){const R=roofArea(),Tk=tankStore();const roof=+TK.roof||Math.
    <dl class="facts"><dt>Needs met from the tanks</dt><dd><b>${Math.round(r.share*100)}%</b>${r.daily?` · ${Math.round(r.short)} days a year short`:` · ${r.short} months a year short`}</dd>${r.daily?`<dt>Years with a dry day</dt><dd>${r.dryYears} of ${r.years}</dd>`:''}${r.dry?`<dt>Driest year (${r.dry.y}, ${Math.round(r.dry.rain)} mm)</dt><dd>${Math.round(r.dry.share*100)}% met</dd>`:''}<dt>Roof yield</dt><dd>about ${Math.round(roof*.85*(RAIN.mean||[]).reduce((a,b)=>a+b,0)/1000).toLocaleString()} kL in an average year</dd></dl>
    <table class="mini"><tr><th>Storage</th><th>Met</th><th>${r.daily?'Days short / yr':'Months short'}</th></tr>${rows.map(([v,x])=>`<tr><td>${v.toLocaleString()} L</td><td>${Math.round(x.share*100)}%</td><td>${Math.round(x.short)}</td></tr>`).join('')}</table>
    <p class="hint">${rec?`About ${rec[0].toLocaleString()} L reaches 90%.`:'Even triple storage stays under 90%: add roof area or reduce garden watering.'} Roof and tank start from what is drawn on the map${R.a?'':' (none drawn yet, so 150 m² is assumed)'}. 85% of roof rain is counted; garden need uses a soil-moisture balance${r.daily?(r.eto?' with SILO FAO56 daily evapotranspiration':' with a monthly evapotranspiration table'):''}. A guide, not a guarantee.</p>
+   ${forwardHTML(roof,tank,+TK.house,+TK.garden)}
    ${SITEDEF.small?`<div class="sub2">Rain garden size</div><p class="hint">A 50 mm storm on ${roof} m² of roof is about ${Math.round(roof*50).toLocaleString()} L of overflow. A mulched basin 200 mm deep needs about ${Math.round(roof*50/1000/0.2)} m² to hold it while it soaks in (more on clay, less on sand).</p>`:''}`}
-function wireTank(el){const b=(id,k)=>{const x=el.querySelector('#'+id);if(x)x.onchange=()=>{TK[k]=+x.value||0;lsSet('bt.tk',TK);const box=el.querySelector('#tankBox');if(box){box.innerHTML=tankHTML();wireTank(el)}}};b('tkRoof','roof');b('tkTank','tank');b('tkHouse','house');b('tkGarden','garden')}
+function wireTank(el){const b=(id,k)=>{const x=el.querySelector('#'+id);if(x)x.onchange=()=>{TK[k]=+x.value||0;lsSet('bt.tk',TK);const box=el.querySelector('#tankBox');if(box){box.innerHTML=tankHTML();wireTank(el)}}};b('tkRoof','roof');b('tkTank','tank');b('tkHouse','house');b('tkGarden','garden');b('tkLevel','level')}
 
 {const rp0=renderPlan;renderPlan=function(){rp0();const el=$('#tab-plan');if(!el||(el.contains(document.activeElement)&&document.activeElement.matches('input:not([type=checkbox]),textarea,select')))return;const w=document.createElement('div');w.id='checksBox';w.innerHTML=checksHTML();el.prepend(w);wireChecks(w)}}
 function renderMTBar(){const b=$('#drawbar');if(!mt){b.hidden=true;return}b.hidden=false;
@@ -2125,6 +2185,7 @@ function hazSiteHTML(){if(!HAZ)return '';const out=[];for(const k of ['fire','ve
 function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&mt.type==='dam'&&mt.res&&!mt.res.err?mt.res:null;
   const rain=dr?dr.catchHa*RAIN.mean.reduce((a,b)=>a+b,0)/100:0;
   el.innerHTML=
+   sec('t-season','Season ahead (next 3 months)',seasonHTML(),true)+
    (SITEDEF.small?sec('t-small','Small block toolkit: tanks and rain garden',`<p class="hint">For suburban and small blocks: how far the roof and tanks go, how big a rain garden the overflow needs, and (in the Draw tab) sewer lines with root-distance bands. Dams, hydro and paddock tools are further down if you need them.</p><div id="tankBox">${tankHTML()}</div>`,true):'')+
    sec('t-section','Cross-section A–B',`<p class="hint">Click point A, then point B, to cut a side view through the land: ground shape, height, grade and the zones it crosses. Sections stay on the map (marked A–B, C–D…) and can go on the A3 sheet.</p><button class="btn primary" id="tSection">Draw a cross-section</button>${secOrder().map(([i,f])=>{const [a,b]=secLetters(i);const L=lineLen(f.geom.pts);return `<div class="row" style="margin-top:6px"><span style="flex:1"><b style="color:#c0392b">${a}–${b}</b> · ${Math.round(L)} m</span><button class="btn" data-secv="${i}">View profile</button></div>`}).join('')}`)+
    sec('t-ruler','Distance & area',`<p class="hint">Click points to measure a distance, then close it to get an area and perimeter. Shows map distance and the longer distance along the slope. Nothing is saved to the design.</p><button class="btn primary" id="tRuler">Measure distance or area</button>`)+
@@ -3051,7 +3112,7 @@ function renderSite(){const el=$('#tab-site');const m=T.meta;const lot=T.catch[0
    <div class="kpl">${T.kp.map((k,i)=>`<button data-i="${i}">KP ${i+1} · ${k.z} m · ${k.ha} ha above<br><small>gully falls ${k.above}% above, ${k.below}% below · ${k.inLot?'inside the lot':'upstream, outside the lot'}</small></button>`).join('')}</div>
    <h2>Sun (terrain only)</h2><dl class="facts"><dt>Winter, 21 Jun</dt><dd>${m.sun_winter_lotmean.toFixed(1)} h average</dd><dt>Equinox</dt><dd>${m.sun_equinox_lotmean.toFixed(1)} h</dd><dt>Summer, 21 Dec</dt><dd>${m.sun_summer_lotmean.toFixed(1)} h</dd></dl>
    ${soilSiteHTML()}${geoSiteHTML()}${ecoSiteHTML()}${hazSiteHTML()}
-   <h2>Climate</h2>${climateSVG()}<p class="hint">${RAIN.station}, ${RAIN.period}. Bars are average monthly rain (darker: the typical, median month). ${MON[wet]} is the wettest month and ${MON[dry]} the driest. The coldest month's mean minimum is ${coldM} °C at the station, and cold air pools in valley floors, so frost comes earlier and harder there on still, clear nights.</p>
+   <h2>Climate</h2>${(()=>{const A=analogues();return A?`<p class="hint"><b>Season ahead:</b> after ${Math.round(A.now.r)} mm in the last 90 days, the middle of the 10 most similar past years brought ${Math.round(A.median.f)} mm over ${A.nextLabel} (30-year mean ${Math.round(A.normF)} mm; driest analogue ${Math.round(A.dry.f)} mm). Details and a tank forward-run under Tools → Season ahead.</p>`:''})()}${climateSVG()}<p class="hint">${RAIN.station}, ${RAIN.period}. Bars are average monthly rain (darker: the typical, median month). ${MON[wet]} is the wettest month and ${MON[dry]} the driest. The coldest month's mean minimum is ${coldM} °C at the station, and cold air pools in valley floors, so frost comes earlier and harder there on still, clear nights.</p>
    <h2>Sources and accuracy</h2><p class="hint">${IMG.aerial?`Aerial base: ${SITE.state==='NSW'?'NSW Spatial Services imagery':'Queensland Government “Latest State Program” imagery'} (CC BY 4.0), fetched for the map’s 2 km square so it lines up without alignment. `:''}Elevation: ${esc(SITE.source||('LiDAR '+SITE.main+', '+SITE.res+' bare-earth DEM (ELVIS)'))}, GDA2020 / MGA zone ${ZONE}. ${esc(SITE.boundaryNote||'Lot boundary is approximate: check it against the title plan and fix it under Set-up above.')} Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.${ECO?' Vegetation types: '+esc(ECO.source)+'.':''}</p>`;
   wireSetup(el);wireSecs(el);
   el.querySelectorAll('.kpl button').forEach(b=>b.onclick=()=>{const k=T.kp[+b.dataset.i];view.cx=k.x;view.cy=k.y;view.s=Math.max(view.s,2.5);layers.kp=true;draw()})}
