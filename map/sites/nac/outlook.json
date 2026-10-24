@@ -1,0 +1,184 @@
+{
+ "site": "nac",
+ "lat": -32.67477,
+ "lon": 152.04486,
+ "state": "NSW",
+ "fetched": "2026-10-24T13:06+10:00",
+ "drivers": {
+  "soi_latest_month": "2026-09",
+  "soi": -20.6,
+  "soi_phase": "consistently negative",
+  "nino34_anomaly_c": 2.56,
+  "enso_state_from_oni": "El Nino range (+0.5 C or more)",
+  "bom_driver_update_issued": "2026-10-13",
+  "bom_driver_update_status": "ok",
+  "bom_driver_update_url": "https://www.bom.gov.au/climate/enso/",
+  "details": "Site extras/_drivers/drivers.json"
+ },
+ "bom_outlook": {
+  "source": "Bureau of Meteorology long-range forecast (ACCESS-S), written summary",
+  "url": "https://www.bom.gov.au/climate/ahead/outlooks/",
+  "status": "ok",
+  "note": null,
+  "issued": "2026-10-22",
+  "headline": "Rainfall and temperature long-range forecasts",
+  "rainfall_verdict": "Above average rainfall likely for large parts of Australia, below average in parts of the far north and south-east",
+  "rainfall_for_state": [
+   "November to January rainfall is likely (60% to greater than 80% chance) to be above average across most of southern and central Western Australia extending into southern parts of the Northern Territory, most of South Australia, southern Queensland and north-eastern New South Wales.",
+   "The wet signal is more pronounced in the west earlier in the season but strengthens in the east during December.",
+   "There is an increased chance of unusually low rainfall 1 (40 to 60% chance) for parts of central and south-eastern Tasmania and north-western coastlines of Western Australia. .",
+   "There is some variation in the likelihood of above average rainfall across the east between models."
+  ],
+  "temperature_verdict": "Above average temperatures likely across Australia",
+  "temperature_for_state": [
+   "There is an increased likelihood (over 50% chance) of unusually high maximum temperatures 2 across much of Australia, with the highest chances (over 70%) across eastern parts of New South Wales and Victoria, eastern Tasmania, south-west Western Australia and Queensland's far north."
+  ],
+  "point": {
+   "issued": null,
+   "rain_next_month_pct_above_median": null,
+   "rain_next_3_months_pct_above_median": null,
+   "tmax_next_3_months_pct_above_median": null,
+   "tmin_next_3_months_pct_above_median": null,
+   "entered_by_hand": true
+  },
+  "point_how_to": "Open https://www.bom.gov.au/climate/outlooks/#/rainfall/median, click the property on the map, and type the four 'chance of above median' percentages and the issue date into 'point' above (a number like 65 means 65%). They stay until the Bureau's next issue."
+ },
+ "short_range": {
+  "source": "Open-Meteo (ECMWF/BoM blend), issued 2026-10-24T13:06+10:00",
+  "issued": "2026-10-24T13:06+10:00",
+  "url": "https://api.open-meteo.com/v1/forecast",
+  "grid_point": [
+   -32.653778,
+   152.01219
+  ],
+  "days": [
+   {
+    "date": "2026-10-24",
+    "rain_mm": 2.0,
+    "tmax_c": 29.9,
+    "tmin_c": 14.9
+   },
+   {
+    "date": "2026-10-25",
+    "rain_mm": 6.7,
+    "tmax_c": 32.0,
+    "tmin_c": 16.9
+   },
+   {
+    "date": "2026-10-26",
+    "rain_mm": 5.6,
+    "tmax_c": 21.3,
+    "tmin_c": 17.0
+   },
+   {
+    "date": "2026-10-27",
+    "rain_mm": 2.6,
+    "tmax_c": 22.4,
+    "tmin_c": 13.0
+   },
+   {
+    "date": "2026-10-28",
+    "rain_mm": 0.0,
+    "tmax_c": 25.7,
+    "tmin_c": 13.0
+   },
+   {
+    "date": "2026-10-29",
+    "rain_mm": 0.0,
+    "tmax_c": 23.8,
+    "tmin_c": 12.1
+   },
+   {
+    "date": "2026-10-30",
+    "rain_mm": 0.3,
+    "tmax_c": 27.3,
+    "tmin_c": 11.4
+   },
+   {
+    "date": "2026-10-31",
+    "rain_mm": 19.6,
+    "tmax_c": 28.0,
+    "tmin_c": 16.7
+   },
+   {
+    "date": "2026-11-01",
+    "rain_mm": 13.4,
+    "tmax_c": 21.9,
+    "tmin_c": 12.7
+   },
+   {
+    "date": "2026-11-02",
+    "rain_mm": 5.1,
+    "tmax_c": 21.0,
+    "tmin_c": 12.5
+   }
+  ],
+  "total_rain_mm_10_days": 55.3,
+  "total_rain_mm_7_days": 17.2,
+  "status": "ok"
+ },
+ "bom_precis": {
+  "source": "Bureau of Meteorology 7-day forecast for Bulahdelah (IDN11060), issued 2026-10-24T09:45:16+11:00",
+  "issued": "2026-10-24T09:45:16+11:00",
+  "town": "Bulahdelah",
+  "days": [
+   {
+    "date": "2026-10-24",
+    "precis": "Cloud clearing.",
+    "tmin_c": null,
+    "tmax_c": "28",
+    "rain_range_mm": null,
+    "chance_of_rain": "20%"
+   },
+   {
+    "date": "2026-10-25",
+    "precis": "Showers developing.",
+    "tmin_c": "17",
+    "tmax_c": "30",
+    "rain_range_mm": "0 to 8 mm",
+    "chance_of_rain": "80%"
+   },
+   {
+    "date": "2026-10-26",
+    "precis": "Possible morning storm. Showers.",
+    "tmin_c": "17",
+    "tmax_c": "25",
+    "rain_range_mm": "1 to 10 mm",
+    "chance_of_rain": "90%"
+   },
+   {
+    "date": "2026-10-27",
+    "precis": "Shower or two.",
+    "tmin_c": "14",
+    "tmax_c": "23",
+    "rain_range_mm": "0 to 4 mm",
+    "chance_of_rain": "70%"
+   },
+   {
+    "date": "2026-10-28",
+    "precis": "Mostly sunny.",
+    "tmin_c": "12",
+    "tmax_c": "25",
+    "rain_range_mm": null,
+    "chance_of_rain": "20%"
+   },
+   {
+    "date": "2026-10-29",
+    "precis": "Mostly sunny.",
+    "tmin_c": "11",
+    "tmax_c": "26",
+    "rain_range_mm": null,
+    "chance_of_rain": "10%"
+   },
+   {
+    "date": "2026-10-30",
+    "precis": "Partly cloudy.",
+    "tmin_c": "14",
+    "tmax_c": "25",
+    "rain_range_mm": "0 to 1 mm",
+    "chance_of_rain": "30%"
+   }
+  ],
+  "status": "ok"
+ }
+}

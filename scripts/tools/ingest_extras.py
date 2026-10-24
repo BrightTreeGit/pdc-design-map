@@ -173,7 +173,7 @@ def main():
         if (s / 'regional_ecosystems.json').exists(): ecosystems(s / 'regional_ecosystems.json', mdir / 'ecosystems.json')
         if (s / 'ala_species.json').exists(): species(s / 'ala_species.json', mdir / 'species.json')
         if (s / 'soil_grid.json').exists(): soils(s / 'soil_grid.json', mdir / 'soils.json')
-        for plain in ('ifd.json', 'silo_full.json', 'silo_long.json'):
+        for plain in ('ifd.json', 'silo_full.json', 'silo_long.json', 'outlook.json'):
             if (s / plain).exists():
                 shutil.copy(s / plain, mdir / plain); os.chmod(mdir / plain, 0o644); print(f'  {plain}: copied')
         if (s / 'geology.json').exists(): geology(s / 'geology.json', mdir / 'geology.json')

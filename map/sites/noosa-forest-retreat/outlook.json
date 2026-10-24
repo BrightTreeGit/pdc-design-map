@@ -1,0 +1,183 @@
+{
+ "site": "noosa-forest-retreat",
+ "lat": -26.25641,
+ "lon": 152.84421,
+ "state": "QLD",
+ "fetched": "2026-10-24T13:06+10:00",
+ "drivers": {
+  "soi_latest_month": "2026-09",
+  "soi": -20.6,
+  "soi_phase": "consistently negative",
+  "nino34_anomaly_c": 2.56,
+  "enso_state_from_oni": "El Nino range (+0.5 C or more)",
+  "bom_driver_update_issued": "2026-10-13",
+  "bom_driver_update_status": "ok",
+  "bom_driver_update_url": "https://www.bom.gov.au/climate/enso/",
+  "details": "Site extras/_drivers/drivers.json"
+ },
+ "bom_outlook": {
+  "source": "Bureau of Meteorology long-range forecast (ACCESS-S), written summary",
+  "url": "https://www.bom.gov.au/climate/ahead/outlooks/",
+  "status": "ok",
+  "note": null,
+  "issued": "2026-10-22",
+  "headline": "Rainfall and temperature long-range forecasts",
+  "rainfall_verdict": "Above average rainfall likely for large parts of Australia, below average in parts of the far north and south-east",
+  "rainfall_for_state": [
+   "November to January rainfall is likely (60% to greater than 80% chance) to be above average across most of southern and central Western Australia extending into southern parts of the Northern Territory, most of South Australia, southern Queensland and north-eastern New South Wales.",
+   "The wet signal is more pronounced in the west earlier in the season but strengthens in the east during December.",
+   "There is some variation in the likelihood of above average rainfall across the east between models."
+  ],
+  "temperature_verdict": "Above average temperatures likely across Australia",
+  "temperature_for_state": [
+   "There is an increased likelihood (over 50% chance) of unusually high maximum temperatures 2 across much of Australia, with the highest chances (over 70%) across eastern parts of New South Wales and Victoria, eastern Tasmania, south-west Western Australia and Queensland's far north."
+  ],
+  "point": {
+   "issued": null,
+   "rain_next_month_pct_above_median": null,
+   "rain_next_3_months_pct_above_median": null,
+   "tmax_next_3_months_pct_above_median": null,
+   "tmin_next_3_months_pct_above_median": null,
+   "entered_by_hand": true
+  },
+  "point_how_to": "Open https://www.bom.gov.au/climate/outlooks/#/rainfall/median, click the property on the map, and type the four 'chance of above median' percentages and the issue date into 'point' above (a number like 65 means 65%). They stay until the Bureau's next issue."
+ },
+ "short_range": {
+  "source": "Open-Meteo (ECMWF/BoM blend), issued 2026-10-24T13:06+10:00",
+  "issued": "2026-10-24T13:06+10:00",
+  "url": "https://api.open-meteo.com/v1/forecast",
+  "grid_point": [
+   -26.25659,
+   152.83206
+  ],
+  "days": [
+   {
+    "date": "2026-10-24",
+    "rain_mm": 38.6,
+    "tmax_c": 21.8,
+    "tmin_c": 17.1
+   },
+   {
+    "date": "2026-10-25",
+    "rain_mm": 34.3,
+    "tmax_c": 24.1,
+    "tmin_c": 18.6
+   },
+   {
+    "date": "2026-10-26",
+    "rain_mm": 0.2,
+    "tmax_c": 30.3,
+    "tmin_c": 20.6
+   },
+   {
+    "date": "2026-10-27",
+    "rain_mm": 1.4,
+    "tmax_c": 28.1,
+    "tmin_c": 18.8
+   },
+   {
+    "date": "2026-10-28",
+    "rain_mm": 39.7,
+    "tmax_c": 28.7,
+    "tmin_c": 19.2
+   },
+   {
+    "date": "2026-10-29",
+    "rain_mm": 2.0,
+    "tmax_c": 25.0,
+    "tmin_c": 17.2
+   },
+   {
+    "date": "2026-10-30",
+    "rain_mm": 0.0,
+    "tmax_c": 24.0,
+    "tmin_c": 15.9
+   },
+   {
+    "date": "2026-10-31",
+    "rain_mm": 2.4,
+    "tmax_c": 26.5,
+    "tmin_c": 15.8
+   },
+   {
+    "date": "2026-11-01",
+    "rain_mm": 0.0,
+    "tmax_c": 30.6,
+    "tmin_c": 17.5
+   },
+   {
+    "date": "2026-11-02",
+    "rain_mm": 1.8,
+    "tmax_c": 24.6,
+    "tmin_c": 16.9
+   }
+  ],
+  "total_rain_mm_10_days": 120.4,
+  "total_rain_mm_7_days": 116.2,
+  "status": "ok"
+ },
+ "bom_precis": {
+  "source": "Bureau of Meteorology 7-day forecast for Noosa Heads (IDQ11295), issued 2026-10-24T08:45:39+10:00",
+  "issued": "2026-10-24T08:45:39+10:00",
+  "town": "Noosa Heads",
+  "days": [
+   {
+    "date": "2026-10-24",
+    "precis": "Rain.",
+    "tmin_c": null,
+    "tmax_c": "23",
+    "rain_range_mm": null,
+    "chance_of_rain": "95%"
+   },
+   {
+    "date": "2026-10-25",
+    "precis": "Showers. Possible storm.",
+    "tmin_c": "20",
+    "tmax_c": "25",
+    "rain_range_mm": "1 to 15 mm",
+    "chance_of_rain": "90%"
+   },
+   {
+    "date": "2026-10-26",
+    "precis": "Shower or two. Possible storm.",
+    "tmin_c": "21",
+    "tmax_c": "30",
+    "rain_range_mm": "0 to 7 mm",
+    "chance_of_rain": "70%"
+   },
+   {
+    "date": "2026-10-27",
+    "precis": "Showers. Possible late storm.",
+    "tmin_c": "21",
+    "tmax_c": "27",
+    "rain_range_mm": "0 to 3 mm",
+    "chance_of_rain": "50%"
+   },
+   {
+    "date": "2026-10-28",
+    "precis": "Shower or two.",
+    "tmin_c": "19",
+    "tmax_c": "25",
+    "rain_range_mm": "0 to 7 mm",
+    "chance_of_rain": "50%"
+   },
+   {
+    "date": "2026-10-29",
+    "precis": "Cloudy.",
+    "tmin_c": "18",
+    "tmax_c": "24",
+    "rain_range_mm": "0 to 1 mm",
+    "chance_of_rain": "30%"
+   },
+   {
+    "date": "2026-10-30",
+    "precis": "Partly cloudy.",
+    "tmin_c": "19",
+    "tmax_c": "24",
+    "rain_range_mm": "0 to 1 mm",
+    "chance_of_rain": "30%"
+   }
+  ],
+  "status": "ok"
+ }
+}

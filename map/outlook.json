@@ -1,0 +1,183 @@
+{
+ "site": "bright-tree",
+ "lat": -26.7434,
+ "lon": 152.92886,
+ "state": "QLD",
+ "fetched": "2026-10-24T13:06+10:00",
+ "drivers": {
+  "soi_latest_month": "2026-09",
+  "soi": -20.6,
+  "soi_phase": "consistently negative",
+  "nino34_anomaly_c": 2.56,
+  "enso_state_from_oni": "El Nino range (+0.5 C or more)",
+  "bom_driver_update_issued": "2026-10-13",
+  "bom_driver_update_status": "ok",
+  "bom_driver_update_url": "https://www.bom.gov.au/climate/enso/",
+  "details": "Site extras/_drivers/drivers.json"
+ },
+ "bom_outlook": {
+  "source": "Bureau of Meteorology long-range forecast (ACCESS-S), written summary",
+  "url": "https://www.bom.gov.au/climate/ahead/outlooks/",
+  "status": "ok",
+  "note": null,
+  "issued": "2026-10-22",
+  "headline": "Rainfall and temperature long-range forecasts",
+  "rainfall_verdict": "Above average rainfall likely for large parts of Australia, below average in parts of the far north and south-east",
+  "rainfall_for_state": [
+   "November to January rainfall is likely (60% to greater than 80% chance) to be above average across most of southern and central Western Australia extending into southern parts of the Northern Territory, most of South Australia, southern Queensland and north-eastern New South Wales.",
+   "The wet signal is more pronounced in the west earlier in the season but strengthens in the east during December.",
+   "There is some variation in the likelihood of above average rainfall across the east between models."
+  ],
+  "temperature_verdict": "Above average temperatures likely across Australia",
+  "temperature_for_state": [
+   "There is an increased likelihood (over 50% chance) of unusually high maximum temperatures 2 across much of Australia, with the highest chances (over 70%) across eastern parts of New South Wales and Victoria, eastern Tasmania, south-west Western Australia and Queensland's far north."
+  ],
+  "point": {
+   "issued": null,
+   "rain_next_month_pct_above_median": null,
+   "rain_next_3_months_pct_above_median": null,
+   "tmax_next_3_months_pct_above_median": null,
+   "tmin_next_3_months_pct_above_median": null,
+   "entered_by_hand": true
+  },
+  "point_how_to": "Open https://www.bom.gov.au/climate/outlooks/#/rainfall/median, click the property on the map, and type the four 'chance of above median' percentages and the issue date into 'point' above (a number like 65 means 65%). They stay until the Bureau's next issue."
+ },
+ "short_range": {
+  "source": "Open-Meteo (ECMWF/BoM blend), issued 2026-10-24T13:06+10:00",
+  "issued": "2026-10-24T13:06+10:00",
+  "url": "https://api.open-meteo.com/v1/forecast",
+  "grid_point": [
+   -26.748682,
+   152.92035
+  ],
+  "days": [
+   {
+    "date": "2026-10-24",
+    "rain_mm": 24.4,
+    "tmax_c": 23.8,
+    "tmin_c": 16.9
+   },
+   {
+    "date": "2026-10-25",
+    "rain_mm": 29.7,
+    "tmax_c": 22.9,
+    "tmin_c": 18.3
+   },
+   {
+    "date": "2026-10-26",
+    "rain_mm": 1.0,
+    "tmax_c": 31.3,
+    "tmin_c": 20.4
+   },
+   {
+    "date": "2026-10-27",
+    "rain_mm": 2.0,
+    "tmax_c": 29.0,
+    "tmin_c": 18.7
+   },
+   {
+    "date": "2026-10-28",
+    "rain_mm": 54.5,
+    "tmax_c": 28.6,
+    "tmin_c": 18.1
+   },
+   {
+    "date": "2026-10-29",
+    "rain_mm": 4.9,
+    "tmax_c": 24.8,
+    "tmin_c": 15.2
+   },
+   {
+    "date": "2026-10-30",
+    "rain_mm": 0.0,
+    "tmax_c": 22.5,
+    "tmin_c": 14.7
+   },
+   {
+    "date": "2026-10-31",
+    "rain_mm": 0.0,
+    "tmax_c": 25.8,
+    "tmin_c": 16.7
+   },
+   {
+    "date": "2026-11-01",
+    "rain_mm": 0.0,
+    "tmax_c": 29.7,
+    "tmin_c": 16.4
+   },
+   {
+    "date": "2026-11-02",
+    "rain_mm": 4.3,
+    "tmax_c": 22.9,
+    "tmin_c": 15.5
+   }
+  ],
+  "total_rain_mm_10_days": 120.8,
+  "total_rain_mm_7_days": 116.5,
+  "status": "ok"
+ },
+ "bom_precis": {
+  "source": "Bureau of Meteorology 7-day forecast for Maleny (IDQ11295), issued 2026-10-24T08:45:39+10:00",
+  "issued": "2026-10-24T08:45:39+10:00",
+  "town": "Maleny",
+  "days": [
+   {
+    "date": "2026-10-24",
+    "precis": "Rain.",
+    "tmin_c": null,
+    "tmax_c": "21",
+    "rain_range_mm": null,
+    "chance_of_rain": "95%"
+   },
+   {
+    "date": "2026-10-25",
+    "precis": "Showers. Possible storm.",
+    "tmin_c": "17",
+    "tmax_c": "22",
+    "rain_range_mm": "10 to 25 mm",
+    "chance_of_rain": "95%"
+   },
+   {
+    "date": "2026-10-26",
+    "precis": "Showers. Storm developing.",
+    "tmin_c": "19",
+    "tmax_c": "29",
+    "rain_range_mm": "0 to 8 mm",
+    "chance_of_rain": "80%"
+   },
+   {
+    "date": "2026-10-27",
+    "precis": "Showers. Possible late storm.",
+    "tmin_c": "17",
+    "tmax_c": "27",
+    "rain_range_mm": "0 to 3 mm",
+    "chance_of_rain": "50%"
+   },
+   {
+    "date": "2026-10-28",
+    "precis": "Possible shower.",
+    "tmin_c": "16",
+    "tmax_c": "25",
+    "rain_range_mm": "0 to 5 mm",
+    "chance_of_rain": "40%"
+   },
+   {
+    "date": "2026-10-29",
+    "precis": "Cloudy.",
+    "tmin_c": "15",
+    "tmax_c": "23",
+    "rain_range_mm": "0 to 1 mm",
+    "chance_of_rain": "30%"
+   },
+   {
+    "date": "2026-10-30",
+    "precis": "Partly cloudy.",
+    "tmin_c": "15",
+    "tmax_c": "23",
+    "rain_range_mm": "0 to 1 mm",
+    "chance_of_rain": "30%"
+   }
+  ],
+  "status": "ok"
+ }
+}
