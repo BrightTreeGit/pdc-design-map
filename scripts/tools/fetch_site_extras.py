@@ -263,8 +263,15 @@ def slga_point(attr, lon, lat):
     out = {}
     if j and not j.get("results") and not _slga_diag.get(attr):
         _slga_diag[attr] = True; print(f"    soil grid {attr}: empty reply {json.dumps(j)[:160]}")
+    shown = _slga_diag.get("sample")
     for r in (j or {}).get("results", []):
-        name = r.get("layerName", ""); v = r.get("attributes", {}).get("Pixel Value")
+        name = r.get("layerName", ""); at = r.get("attributes", {}) or {}
+        v = at.get("Pixel Value")
+        if v is None:   # some services name it differently ("Pixel value", "Stretch.Pixel Value", or just the value)
+            for k2, v2 in at.items():
+                if "pixel" in k2.lower() or "value" in k2.lower(): v = v2; break
+        if v is None and not shown:
+            _slga_diag["sample"] = shown = True; print(f"    soil grid {attr}: a reply came back but no value field was recognised; sample: {json.dumps(r)[:200]}")
         if v in (None, "NoData", "", "null"): continue
         if "_EV_" not in name.upper() and re.search(r"_(05|95)_", name): continue   # skip the 5th / 95th percentile layers
         m = re.search(r"(\d{3})_(\d{3})", name); depth = f"{int(m.group(1))}-{int(m.group(2))}" if m else "all"
@@ -584,7 +591,6 @@ def main():
         silo_long(out, lat, lon)
         geology(out, state, E0, N0, zone)
         hazard(out, state, E0, N0, zone)
-    probe_qld_elevation()
     print('\nDone. Tell Claude: "site extras are ready".')
 
 
