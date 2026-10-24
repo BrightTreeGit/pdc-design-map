@@ -221,7 +221,8 @@ SLGA_ATTRS = {"CLY": ("Clay", "%"), "SND": ("Sand", "%"), "SLT": ("Silt", "%"), 
 SLGA_SERVICES = {a: [f"{a}_ACLEP_AU_TRN_N", f"{a}_ACLEP_AU_NAT_C", f"{a}_ACLEP_AU_NAT_C_V1"] for a in SLGA_ATTRS}
 SLGA_SERVICES["DER"] = ["DER_ACLEP_AU_NAT_C"]
 GRID_ATTRS = ("CLY", "AWC", "SOC")   # sampled on the 5 x 5 grid as well as the centre (the rest: centre only, to keep requests down)
-_slga_cache = {}   # attr -> (identify url, "all:1,5,9,...") once a working service has been found, so later points reuse it
+_slga_cache = {}
+_slga_diag = {}   # attr -> True once an empty reply has been printed, so the log shows it once not 25 times
 
 
 def slga_service(attr):
@@ -246,10 +247,22 @@ def slga_point(attr, lon, lat):
     svc = slga_service(attr)
     if not svc: return {}
     url, layers = svc
-    j = get(url, {"geometry": f"{lon},{lat}", "geometryType": "esriGeometryPoint", "sr": 4326, "layers": layers,
-                  "tolerance": 1, "mapExtent": f"{lon - 0.01},{lat - 0.01},{lon + 0.01},{lat + 0.01}", "imageDisplay": "100,100,96", "returnGeometry": "false", "f": "json"},
-            f"soil grid {attr}", tries=(0, 6))
+    base = {"geometryType": "esriGeometryPoint", "sr": 4326, "tolerance": 2, "mapExtent": f"{lon - 0.01},{lat - 0.01},{lon + 0.01},{lat + 0.01}",
+            "imageDisplay": "400,400,96", "returnGeometry": "false", "f": "json"}
+    # Three shapes of the same question, because ArcGIS servers differ in what they accept for a raster identify
+    attempts = [dict(base, geometry=f"{lon},{lat}", layers=layers),
+                dict(base, geometry=json.dumps({"x": lon, "y": lat, "spatialReference": {"wkid": 4326}}), layers="all"),
+                dict(base, geometry=f"{lon},{lat}", layers="visible", tolerance=5)]
+    j = None
+    for k, params in enumerate(attempts):
+        j = get(url, params, f"soil grid {attr}", tries=(0,) if k < 2 else (0, 6))
+        if j and j.get("error"):
+            print(f"    soil grid {attr}: server said {str(j['error'].get('message', j['error']))[:120]}"); j = None; continue
+        if j and j.get("results"): break
+        if j is not None and k == 0: print(f"    soil grid {attr}: identify returned no results with layer list {layers}; trying other request shapes")
     out = {}
+    if j and not j.get("results") and not _slga_diag.get(attr):
+        _slga_diag[attr] = True; print(f"    soil grid {attr}: empty reply {json.dumps(j)[:160]}")
     for r in (j or {}).get("results", []):
         name = r.get("layerName", ""); v = r.get("attributes", {}).get("Pixel Value")
         if v in (None, "NoData", "", "null"): continue
@@ -385,6 +398,27 @@ QLD_GEO_LAYERS = [(15, "Detailed Surface geology"), (17, "Detailed Solid geology
 _GEO_LINE_WORDS = (r"boundar", r"extent", r"fault", r"structure", r"line", r"point", r"site", r"fold", r"dyke", r"marker", r"lineament", r"joint", r"trend", r"feature", r"label", r"annotation")
 
 
+def silo_long(out, lat, lon):
+    """The whole SILO record, 1889 to now: daily rain, max and min temperature. For the climate-trend and worst-drought tests.
+    Before about 1910 the gauge network was thin and temperatures before 1957 are interpolated from far away: use those years as indicative."""
+    if (out / "silo_long.json").exists(): print("  SILO 1889 to now: already have it"); return
+    print("  SILO daily rain and temperature 1889 to now (the full record, for climate trends and the worst historic droughts)")
+    j = get(SILO, {"lat": round(lat, 4), "lon": round(lon, 4), "start": "18890101", "finish": time.strftime("%Y%m%d"), "format": "json", "comment": "RXN", "username": EMAIL}, "SILO long", tries=(0, 20, 60))
+    if not j or "data" not in j: print("    no SILO data"); return
+    d = j["data"]
+    def col(code):
+        o = []
+        for e in d:
+            v = next((x["value"] for x in e["variables"] if x["variable_code"] == code), None)
+            o.append(-999 if v is None else round(v * 10))
+        return o
+    (out / "silo_long.json").write_text(json.dumps({"source": "SILO gridded daily climate at the property, 1889 to now (Queensland Government, CC BY 4.0); pre-1910 rain and pre-1957 temperature are interpolated from sparse stations",
+                                                   "start": d[0]["date"], "end": d[-1]["date"], "units": "tenths (mm, degC); -999 = missing",
+                                                   "rain10": col("daily_rain"), "tmax10": col("max_temp"), "tmin10": col("min_temp")}, separators=(",", ":")))
+    print(f"    saved {len(d)} days, {d[0]['date']} to {d[-1]['date']}")
+    time.sleep(3)
+
+
 def _has_unit_names(feats):
     return any(any(("name" in k.lower() or "unit" in k.lower() or "lith" in k.lower()) and v not in (None, "", " ") for k, v in f.get("attrs", {}).items()) for f in feats or [])
 
@@ -486,7 +520,7 @@ def hazard(out, state, E0, N0, zone):
     if state == "QLD":
         got = False
         # 1. a statewide service, if one has appeared
-        urls = find_services(QLD_GIS, ["PlanningCadastre", "Boundaries", "Environment", "Society"], r"bushfire|planningpolicy|hazard") + find_services(QFES_GIS, ["Redi", "Foundation"], r"bushfire|bpa|prone")
+        urls = find_services(QLD_GIS, ["PlanningCadastre", "Boundaries", "Environment", "Society"], r"bushfire|planningpolicy|hazard")   # (QFES's own server is tiles-only and its certificate has expired, so it is not scanned)
         for u in urls:
             for lid, lname in find_layers(u, r"bushfire", exclude=(r"label", r"line", r"tile", r"building")):
                 feats = arcgis_polys(u, lid, E0, N0, zone, bf_keys, f"bushfire hazard ({lname})")
@@ -547,6 +581,7 @@ def main():
         soil_grid(out, E0, N0, zone)
         ifd(out, lat, lon)
         silo_full(out, lat, lon)
+        silo_long(out, lat, lon)
         geology(out, state, E0, N0, zone)
         hazard(out, state, E0, N0, zone)
     probe_qld_elevation()

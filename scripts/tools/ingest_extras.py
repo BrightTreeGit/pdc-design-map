@@ -10,6 +10,7 @@ For every site folder found:
   soil_grid.json           -> map/sites/<id>/soils.json       soil numbers by depth at the centre and on the 5 x 5 grid (Soil and Landscape Grid)
   ifd.json                 -> map/sites/<id>/ifd.json         design rainfall table (BoM, ARR 2019), copied as is
   silo_full.json           -> map/sites/<id>/silo_full.json   daily rain, temperatures, radiation, evaporation and ETo, copied as is
+  silo_long.json           -> map/sites/<id>/silo_long.json   daily rain and temperature 1889 to now, copied as is (climate trends)
   geology.json             -> map/sites/<id>/geology.json     surface geology polygons, clipped to the map square and simplified
   hazard.json              -> map/sites/<id>/hazard.json      bushfire hazard and regulated-vegetation polygons, clipped and simplified
 
@@ -172,7 +173,7 @@ def main():
         if (s / 'regional_ecosystems.json').exists(): ecosystems(s / 'regional_ecosystems.json', mdir / 'ecosystems.json')
         if (s / 'ala_species.json').exists(): species(s / 'ala_species.json', mdir / 'species.json')
         if (s / 'soil_grid.json').exists(): soils(s / 'soil_grid.json', mdir / 'soils.json')
-        for plain in ('ifd.json', 'silo_full.json'):
+        for plain in ('ifd.json', 'silo_full.json', 'silo_long.json'):
             if (s / plain).exists():
                 shutil.copy(s / plain, mdir / plain); os.chmod(mdir / plain, 0o644); print(f'  {plain}: copied')
         if (s / 'geology.json').exists(): geology(s / 'geology.json', mdir / 'geology.json')
