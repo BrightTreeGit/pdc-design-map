@@ -150,6 +150,12 @@ def main():
         data = get(url + "/exportImage", {"bbox": bbox, "bboxSR": win["epsg"], "imageSR": win["epsg"], "size": f"{n},{n}", "format": "tiff", "pixelType": "F32", "noDataInterpretation": "esriNoDataMatchAny", "interpolation": "RSP_BilinearInterpolation", "f": "image"}, f"elevation {name}", binary=True)
         if data and len(data) > 50000:
             (out / f"dem_{name}.tif").write_bytes(data); print(f"  saved dem_{name}.tif ({px:g} m model, {len(data)//1024} kB)"); got = True
+            # which survey the mosaic used here: the footprint record under the block centre (name, dates) -> dem_info.json
+            info = get(url + "/query", {"geometry": f"{E0 + SIZE / 2},{N0 - SIZE / 2}", "geometryType": "esriGeometryPoint", "inSR": win["epsg"], "outFields": "*", "returnGeometry": "false", "f": "json"}, "survey details")
+            if info and info.get("features"):
+                (out / "dem_info.json").write_text(json.dumps({"service": name, "footprints": [f.get("attributes", {}) for f in info["features"]]}, indent=1, default=str))
+                for f in info["features"]:
+                    at = f.get("attributes", {}); print("  survey: " + ", ".join(f"{k}={v}" for k, v in at.items() if any(t in k.lower() for t in ("name", "date", "year", "project", "source", "resolution"))))
             if px <= 2: break
     if not got:
         print("  No elevation came back (the state image server may be down). Run this again later, or download 1 m LiDAR from ELVIS.")

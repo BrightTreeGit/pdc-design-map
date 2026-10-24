@@ -365,7 +365,7 @@ const SITES=[
  {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true},
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'PDC host',area:'Kin Kin, Qld',ready:true,history:true},
  {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
- {id:'annwn',name:'Annwn',group:'Small block',area:'Capalaba, Qld · level ground placeholder until the LiDAR is in',ready:true,small:true},
+ {id:'annwn',name:'Annwn',group:'Small block',area:'Capalaba, Qld · 770 m² suburban block',ready:true,small:true},
  {id:'regenify',name:'Regenify',group:'Extra',area:'Location to come',status:'Location to come'}];
 /* one entry per property: older ids (other versions, the auto-data comparison) open the one kept */
 const SITE_ALIAS={'nimbin':'nimbin-group','nimbin-combined':'nimbin-group','nimbin-house-group':'nimbin-group','nimbin-house-combined':'nimbin-group','willow-vale':'willow-vale-team','bright-tree-gemini':'bright-tree'};
@@ -393,7 +393,7 @@ const xy2ll=(x,y)=>PJ.toLL(x+E0,N0-y);
 let T=null, EXTRA=null, PROS=null; const IMG={};
 let dem2=null, dem1=null, sunGrid={};
 const view={cx:960,cy:960,s:1};
-const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,svc:true,sewerBands:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
+const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,svc:true,eco:false,sewerBands:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
 if(!lsGet('bt.namesOnHover',false)){layers.flabels=false;lsSet('bt.layers',layers);lsSet('bt.namesOnHover',true)}
 const features=new Map(); // id -> data
 let selected=null, tool=null, draft=null, gradePen=lsGet('bt.gradePen',{on:false,grade:0,dir:'down'});
@@ -404,7 +404,7 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 /* ---------------- data loading ---------------- */
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
-let CANOPY=null,NICHE=null,HYDRO=null,VEG=null,SERV=null;
+let CANOPY=null,NICHE=null,HYDRO=null,VEG=null,SERV=null,ECO=null;
 const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
 function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
@@ -435,7 +435,7 @@ function applySite(){const ms=T&&T.meta&&T.meta.site;
   if(ms){SITE=Object.assign({name:'Our block',subtitle:'',state:'',council:'',lfw:false,years:[],changeYears:[],boundaryNote:'',source:'',soilNote:''},ms)}
   if(T){E0=T.E0;N0=T.N0}if(ms){LAT=ms.lat;LON=ms.lon;ZONE=ms.zone;if(ms.rain)RAIN=ms.rain;else{RAIN=Object.assign({},RAIN,{placeholder:true,station:RAIN.station+' (placeholder until your nearest station is added)'})}}
   document.title=SITE.name+' Design Map';$('#siteName').textContent=SITE.name+' Design Map';
-  $('#siteSub').textContent=[SITE.subtitle,(/^PLACEHOLDER/.test(SITE.source||'')?'level placeholder, LiDAR to come':(/NSW 5 m/.test(SITE.source||'')?'NSW elevation, ':'LiDAR '+SITE.main+', ')+SITE.res)].filter(Boolean).join(' · ');
+  $('#siteSub').textContent=[SITE.subtitle,(/^PLACEHOLDER/.test(SITE.source||'')?'level placeholder, LiDAR to come':(/NSW 5 m/.test(SITE.source||'')?'NSW elevation, '+SITE.res:/survey year to confirm/.test(SITE.source||'')?'LiDAR '+SITE.res+' (state service)':'LiDAR '+SITE.main+', '+SITE.res))].filter(Boolean).join(' · ');
   cv.setAttribute('aria-label','Terrain and design map of '+SITE.name);
   const R3n=SITE.state==='NSW'?'Weed in NSW: under the Biosecurity Act 2015 every landholder has a general biosecurity duty to prevent, eliminate or minimise its risk; check NSW WeedWise for what your region requires.':SITE.state==='QLD'||!SITE.state?R3:'Declared or environmental weed in many parts of Australia: check your state weed list.';
   const LOCn=SITE.council==='Sunshine Coast'?LOC:SITE.council?`Check ${SITE.council} Council's local weed list; control it and don't plant it.`:'Check your council\'s local weed list; control it and don\'t plant it.';
@@ -455,6 +455,7 @@ async function boot(){renderSiteSel();
   if(SITEDEF.niche){imgs.push('niche.png');try{NICHE=await (await fetch(SB+'niche.json')).json()}catch(e){NICHE=null}}
   try{const dr=await fetch(SB+'rain_daily.json');DAILY=dr.ok?await dr.json():null}catch(e){DAILY=null}
   try{const sr=await fetch(SB+'services.json');SERV=sr.ok?await sr.json():null}catch(e){SERV=null}
+  try{const er=await fetch(SB+'ecosystems.json');ECO=er.ok?await er.json():null;if(ECO)ecoPrep()}catch(e){ECO=null}
   if(SITEDEF.canopy){try{const vr=await fetch(SB+'veg.json');VEG=vr.ok?await vr.json():null;if(VEG)imgs.push('veg.png')}catch(e){VEG=null}imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
   if(SITEDEF.history){try{PH.data=await (await fetch(SB+'history/history.json')).json();PH.i=PH.data.runs.length-1}catch(e){PH.data=null}}
   const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],SB+f)));
@@ -549,6 +550,7 @@ function render(){
   if(layers.overlay==='canopy_h'&&CANOPY){ctx.save();const risk=treeRisk();for(const [x,y,h] of CANOPY.trees){if(h<40)continue;const tpz=tpzR(h);
     if(view.s>1.2){ctx.beginPath();ctx.arc(x,y,tpz,0,7);ctx.setLineDash([3*px,3*px]);ctx.lineWidth=1.2*px;ctx.strokeStyle='rgba(150,40,140,.7)';ctx.stroke();ctx.setLineDash([])}
     const hit=risk.has(x+','+y);const r=Math.max(2.2*px,Math.min(5*px,1.6));ctx.beginPath();ctx.arc(x,y,r+1.2*px,0,7);ctx.fillStyle=hit?'#ffd23f':'rgba(255,255,255,.9)';ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=hit?'#c0392b':'#96288c';ctx.fill()}ctx.restore()}
+  if(ECO&&layers.eco)drawEco(px);
   if(SERV&&layers.svc)drawServ(px);
   if(layers.design&&layers.sewerBands!==false)drawSewerBands(px);
   if(layers.design)drawFeatures(px);
@@ -2035,6 +2037,33 @@ function servHTML(){if(!SERV)return '';const P=SERV.power||{};const n=(P.lines||
   return `<div class="row"><label><input type="checkbox" data-k="svc" ${layers.svc?'checked':''}><i class="swatch" style="background:#f9a825"></i>Power network (${n} line sections${P.poles?`, ${P.poles.length} poles`:''})</label></div>
    <div class="legend">${Object.entries(SV_STYLE).filter(([k])=>v.includes(k)).map(([k,[c]])=>`<span><i class="swatch" style="background:${c}"></i>${k==='LV'?'Low voltage (street)':k}</span>`).join('')}<span><i class="swatch" style="background:#6d4c41"></i>Pole</span><span><i class="swatch" style="background:#2e7d32"></i>Pillar</span></div>
    <p class="hint">Solid = overhead, dashed = underground. Source: ${esc(SERV.source||'state open data')}. Indicative only: lines inside the block (house connections) are not included. Always get a free Before You Dig Australia enquiry before digging.</p>`}
+
+/* ---- regional ecosystems (Queensland Herbarium mapping): the natural vegetation type of each patch of land ---- */
+const ECO_COL={'Endangered':[198,40,60],'Of concern':[230,140,30],'Least concern':[60,150,80],water:[70,130,200],plantation:[130,110,70]};
+function ecoStatus(lab){const c=lab.split('/')[0].trim();if(c in ECO_COL)return c;const e=ECO.cat[c];return e?e.vm:''}
+function ecoPrep(){for(const p of ECO.polys){p.path=new Path2D();let best=null;for(const r of p.rings){r.forEach((q,i)=>i?p.path.lineTo(q[0],q[1]):p.path.moveTo(q[0],q[1]));p.path.closePath();const a=polyArea(r);if(!best||a>best.a)best={a,r}}
+  p.st=ecoStatus(p.re);p.area=best.a;const r=best.r;let cx=r.reduce((s,q)=>s+q[0],0)/r.length,cy=r.reduce((s,q)=>s+q[1],0)/r.length;
+  if(!inPoly([cx,cy],r)){const m=r[Math.floor(r.length/2)];cx=(cx+m[0])/2;cy=(cy+m[1])/2;if(!inPoly([cx,cy],r)){cx=m[0];cy=m[1]}}p.lab=[cx,cy]}}
+function ecoFill(st,a){const c=ECO_COL[st];return c?`rgba(${c[0]},${c[1]},${c[2]},${a})`:null}
+function drawEco(px){ctx.save();const a=0.3*layers.ovOp/0.7;
+  for(const p of ECO.polys){const f=ecoFill(p.st,Math.min(a,.5));if(f){ctx.fillStyle=f;ctx.fill(p.path,'evenodd')}ctx.lineWidth=.9*px;ctx.strokeStyle='rgba(40,70,40,.55)';ctx.stroke(p.path)}
+  if(view.s>0.45){ctx.font=`600 ${Math.max(9,11*px)}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.fillStyle='#1d3b22';
+    for(const p of ECO.polys){if(p.st===''&&p.re!=='water'&&p.re!=='plantation')continue;if(p.area<(view.s>1.5?300:3000))continue;ctx.strokeText(p.re,p.lab[0],p.lab[1]);ctx.fillText(p.re,p.lab[0],p.lab[1])}}
+  ctx.restore()}
+function ecoLotShare(){const lc=flat(T.lot);const xs=lc.map(q=>q[0]),ys=lc.map(q=>q[1]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);const n=24,sh={};let tot=0;
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){const pt=[x0+(i+.5)/n*(x1-x0),y0+(j+.5)/n*(y1-y0)];if(!inPoly(pt,lc))continue;tot++;let hit='non-rem';
+    for(const p of ECO.polys){let c=0;for(const r of p.rings)if(inPoly(pt,r))c++;if(c%2){hit=p.re;break}}sh[hit]=(sh[hit]||0)+1}
+  return Object.entries(sh).map(([re,k])=>[re,k/Math.max(1,tot)]).sort((a,b)=>b[1]-a[1])}
+function ecoDesc(lab){return lab.split('/').map(c=>{c=c.trim();const e=ECO.cat[c];return e?`<b>${esc(c)}</b> ${esc(e.d)}${e.vm?` <i>(${esc(e.vm)})</i>`:''}`:esc(c)}).join(' / ')}
+function ecoLegendHTML(){const present=[...new Set(ECO.polys.map(p=>p.re))].sort((a,b)=>(ECO.polys.filter(p=>p.re===b).reduce((s,p)=>s+p.area,0))-(ECO.polys.filter(p=>p.re===a).reduce((s,p)=>s+p.area,0)));
+  return `<div class="legend">${Object.entries(ECO_COL).filter(([k])=>ECO.polys.some(p=>p.st===k)).map(([k,c])=>`<span><i class="swatch" style="background:rgba(${c[0]},${c[1]},${c[2]},.55)"></i>${k==='water'?'Water':k==='plantation'?'Plantation':k+' (VM Act)'}</span>`).join('')}<span><i class="swatch" style="background:#fff;border:1px solid #777"></i>Non-remnant (cleared or regrowth)</span></div>
+   <details class="mini"><summary>Types within 1 km (${present.filter(r=>ECO.cat[r.split('/')[0].trim()]&&ECO.cat[r.split('/')[0].trim()].vm).length})</summary><div class="hint" style="line-height:1.45">${present.filter(r=>!(r in ECO_COL)&&r!=='non-rem').map(r=>`<div style="margin:3px 0">${ecoDesc(r)}${/\//.test(r)?' <small>(a mix; listed in order of area)</small>':''}</div>`).join('')}</div></details>`}
+function ecoHTML(){if(!ECO)return '';
+  return `<div class="row"><label><input type="checkbox" data-k="eco" ${layers.eco?'checked':''}><i class="swatch" style="background:rgba(60,150,80,.6)"></i>Regional ecosystems (natural vegetation types)</label></div>${ecoLegendHTML()}
+   <p class="hint">Each patch is the vegetation that grows there naturally, mapped by the Queensland Herbarium; the colour is its status under the Vegetation Management Act. Use it to choose local native species, to see which patches are protected remnant (clearing rules apply) and where a planting joins up habitat. Source: ${esc(ECO.source)}. ${esc(ECO.catalogue)}.</p>`}
+function ecoSiteHTML(){if(!ECO)return '';const sh=ecoLotShare();const rem=sh.filter(([r])=>r!=='non-rem'&&!(r in ECO_COL));
+  return `<h2>Natural vegetation type</h2><dl class="facts">${sh.filter(([r,f])=>f>=0.005).map(([r,f])=>`<dt>${(f*100).toFixed(0)}% of the lot</dt><dd>${r==='non-rem'?'Non-remnant: cleared, built on, or regrowth not yet mapped as remnant':r in ECO_COL?esc(r):ecoDesc(r)}</dd>`).join('')}</dl>
+   <p class="hint">${rem.length?'Part of the block is mapped remnant vegetation: clearing it needs council or state approval, and it is the best guide to which local natives belong here.':'The block is mapped as non-remnant, so the surrounding patches (turn on the Regional ecosystems layer) are the guide to what grew here before clearing and which local natives to plant.'} Mapping is at about 1:100,000 scale, so patch edges can be 50 m or more out; check on the ground.</p>`}
 function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&mt.type==='dam'&&mt.res&&!mt.res.err?mt.res:null;
   const rain=dr?dr.catchHa*RAIN.mean.reduce((a,b)=>a+b,0)/100:0;
   el.innerHTML=
@@ -2586,6 +2615,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
     <div class="row"><label for="ovop">Overlay strength</label><input type="range" id="ovop" min="0.2" max="1" step="0.05" value="${layers.ovOp}"></div>
     <div id="ovLegend" class="hint"></div>`)+
    sec('svcs','Services (power, sewer)',`${servHTML()}<div class="row"><label><input type="checkbox" data-k="sewerBands" ${layers.sewerBands!==false?'checked':''}><i class="swatch" style="background:#e88c82"></i>Root-distance bands around drawn sewer lines (2 m and 5 m)</label></div><p class="hint">Draw the sewer or house drain from the council plan with Draw → Water → Sewer. Trees then show their distance from it.</p>`,!!SERV)+
+   (ECO?sec('eco','Native vegetation (regional ecosystems)',ecoHTML(),false):'')+
    sec('lines','Water, contours & labels',lines.map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join(''))+
    (PROS?sec('pros','Prospects (computed sites)',`<p class="hint">Screening sites found by scanning the terrain: where small pond walls store the most water for the least earth, where level building pads need the least cut and fill with good winter sun, the highest tank site, and the few flat spots. A starting point for a site walk, not a design.</p>`+prosHTML()):'')+
    `<p class="hint">Terrain from the ${SITE.main} LiDAR survey (bare earth, ${SITE.res}). Sun hours count terrain shading only, not trees.</p>`;
@@ -2960,9 +2990,9 @@ function renderSite(){const el=$('#tab-site');const m=T.meta;const lot=T.catch[0
    <h2>Keypoint candidates</h2><p class="hint">Where a gully’s fall flattens sharply, the classic spot to slow and store water. Computed from the LiDAR; check each on the ground.</p>
    <div class="kpl">${T.kp.map((k,i)=>`<button data-i="${i}">KP ${i+1} · ${k.z} m · ${k.ha} ha above<br><small>gully falls ${k.above}% above, ${k.below}% below · ${k.inLot?'inside the lot':'upstream, outside the lot'}</small></button>`).join('')}</div>
    <h2>Sun (terrain only)</h2><dl class="facts"><dt>Winter, 21 Jun</dt><dd>${m.sun_winter_lotmean.toFixed(1)} h average</dd><dt>Equinox</dt><dd>${m.sun_equinox_lotmean.toFixed(1)} h</dd><dt>Summer, 21 Dec</dt><dd>${m.sun_summer_lotmean.toFixed(1)} h</dd></dl>
-   ${soilSiteHTML()}
+   ${soilSiteHTML()}${ecoSiteHTML()}
    <h2>Climate</h2>${climateSVG()}<p class="hint">${RAIN.station}, ${RAIN.period}. Bars are average monthly rain (darker: the typical, median month). ${MON[wet]} is the wettest month and ${MON[dry]} the driest. The coldest month's mean minimum is ${coldM} °C at the station, and cold air pools in valley floors, so frost comes earlier and harder there on still, clear nights.</p>
-   <h2>Sources and accuracy</h2><p class="hint">${IMG.aerial?`Aerial base: ${SITE.state==='NSW'?'NSW Spatial Services imagery':'Queensland Government “Latest State Program” imagery'} (CC BY 4.0), fetched for the map’s 2 km square so it lines up without alignment. `:''}Elevation: ${esc(SITE.source||('LiDAR '+SITE.main+', '+SITE.res+' bare-earth DEM (ELVIS)'))}, GDA2020 / MGA zone ${ZONE}. ${esc(SITE.boundaryNote||'Lot boundary is approximate: check it against the title plan and fix it under Set-up above.')} Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.</p>`;
+   <h2>Sources and accuracy</h2><p class="hint">${IMG.aerial?`Aerial base: ${SITE.state==='NSW'?'NSW Spatial Services imagery':'Queensland Government “Latest State Program” imagery'} (CC BY 4.0), fetched for the map’s 2 km square so it lines up without alignment. `:''}Elevation: ${esc(SITE.source||('LiDAR '+SITE.main+', '+SITE.res+' bare-earth DEM (ELVIS)'))}, GDA2020 / MGA zone ${ZONE}. ${esc(SITE.boundaryNote||'Lot boundary is approximate: check it against the title plan and fix it under Set-up above.')} Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.${ECO?' Vegetation types: '+esc(ECO.source)+'.':''}</p>`;
   wireSetup(el);wireSecs(el);
   el.querySelectorAll('.kpl button').forEach(b=>b.onclick=()=>{const k=T.kp[+b.dataset.i];view.cx=k.x;view.cy=k.y;view.s=Math.max(view.s,2.5);layers.kp=true;draw()})}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='govAer'){setLayer('base',e.target.checked?'aerial':'relief');renderLayers()}});
