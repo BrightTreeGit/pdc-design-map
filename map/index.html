@@ -393,7 +393,7 @@ const xy2ll=(x,y)=>PJ.toLL(x+E0,N0-y);
 let T=null, EXTRA=null, PROS=null; const IMG={};
 let dem2=null, dem1=null, sunGrid={};
 const view={cx:960,cy:960,s:1};
-const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,svc:true,eco:false,sewerBands:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
+const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,svc:true,eco:false,geo:false,hazFire:false,hazVeg:false,sewerBands:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
 if(!lsGet('bt.namesOnHover',false)){layers.flabels=false;lsSet('bt.layers',layers);lsSet('bt.namesOnHover',true)}
 const features=new Map(); // id -> data
 let selected=null, tool=null, draft=null, gradePen=lsGet('bt.gradePen',{on:false,grade:0,dir:'down'});
@@ -404,7 +404,7 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 /* ---------------- data loading ---------------- */
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
-let CANOPY=null,NICHE=null,HYDRO=null,VEG=null,SERV=null,ECO=null;
+let CANOPY=null,NICHE=null,HYDRO=null,VEG=null,SERV=null,ECO=null,GEO=null,HAZ=null,SFULL=null;
 const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
 function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
@@ -454,6 +454,9 @@ async function boot(){renderSiteSel();
   try{const hy=await fetch(SB+'hydro.json');HYDRO=hy.ok?await hy.json():null}catch(e){HYDRO=null}
   if(SITEDEF.niche){imgs.push('niche.png');try{NICHE=await (await fetch(SB+'niche.json')).json()}catch(e){NICHE=null}}
   try{const dr=await fetch(SB+'rain_daily.json');DAILY=dr.ok?await dr.json():null}catch(e){DAILY=null}
+  try{const sf=await fetch(SB+'silo_full.json');SFULL=sf.ok?await sf.json():null;if(SFULL&&!(SFULL.eto10||[]).some(v=>v>=0))SFULL=null}catch(e){SFULL=null}
+  try{const gr=await fetch(SB+'geology.json');GEO=gr.ok?await gr.json():null;if(GEO)geoPrep()}catch(e){GEO=null}
+  try{const hz=await fetch(SB+'hazard.json');HAZ=hz.ok?await hz.json():null;if(HAZ)hazPrep()}catch(e){HAZ=null}
   try{const sr=await fetch(SB+'services.json');SERV=sr.ok?await sr.json():null}catch(e){SERV=null}
   try{const er=await fetch(SB+'ecosystems.json');ECO=er.ok?await er.json():null;if(ECO)ecoPrep()}catch(e){ECO=null}
   if(SITEDEF.canopy){try{const vr=await fetch(SB+'veg.json');VEG=vr.ok?await vr.json():null;if(VEG)imgs.push('veg.png')}catch(e){VEG=null}imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
@@ -550,7 +553,9 @@ function render(){
   if(layers.overlay==='canopy_h'&&CANOPY){ctx.save();const risk=treeRisk();for(const [x,y,h] of CANOPY.trees){if(h<40)continue;const tpz=tpzR(h);
     if(view.s>1.2){ctx.beginPath();ctx.arc(x,y,tpz,0,7);ctx.setLineDash([3*px,3*px]);ctx.lineWidth=1.2*px;ctx.strokeStyle='rgba(150,40,140,.7)';ctx.stroke();ctx.setLineDash([])}
     const hit=risk.has(x+','+y);const r=Math.max(2.2*px,Math.min(5*px,1.6));ctx.beginPath();ctx.arc(x,y,r+1.2*px,0,7);ctx.fillStyle=hit?'#ffd23f':'rgba(255,255,255,.9)';ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=hit?'#c0392b':'#96288c';ctx.fill()}ctx.restore()}
+  if(GEO&&layers.geo)drawGeo(px);
   if(ECO&&layers.eco)drawEco(px);
+  if(HAZ&&(layers.hazFire||layers.hazVeg))drawHaz(px);
   if(SERV&&layers.svc)drawServ(px);
   if(layers.design&&layers.sewerBands!==false)drawSewerBands(px);
   if(layers.design)drawFeatures(px);
@@ -1895,11 +1900,14 @@ function wireChecks(el){const save=(id,doc)=>saveBrief(id,{...doc,who:nbName||'S
 /* ---------------- tank calculator: day by day through 30 years of real rain where daily data exists, monthly estimate otherwise ---------------- */
 let DAILY=null;const TK=Object.assign({roof:0,tank:0,house:0,garden:50},lsGet('bt.tk',{}));
 const ETO_M=()=>LAT>-29.5?[6.0,5.3,4.6,3.6,2.8,2.4,2.6,3.5,4.6,5.4,5.9,6.3]:[5.3,4.6,3.8,2.8,2.0,1.6,1.8,2.5,3.4,4.3,4.8,5.4]; // mm/day: SE Qld, or NSW coast
-function tkSim(roof,store,house,garden){if(DAILY){const r=DAILY.rain10,d0=new Date(DAILY.start+'T00:00:00Z');let s=store,soil=25,sup=0,dem=0,short=0,yr={};const E=ETO_M();
-    for(let i=0;i<r.length;i++){const dt=new Date(d0.getTime()+i*864e5),m=dt.getUTCMonth(),y=dt.getUTCFullYear(),rain=r[i]/10;s=Math.min(store,s+rain*roof*.85);const et=E[m]*.6;soil=Math.min(25,soil+rain)-et;const need=soil<0?-soil:0;soil=Math.max(soil,0);
-      const want=need*garden+house;const Y=yr[y]=yr[y]||[0,0,0];Y[2]+=rain;if(want>0){const take=Math.min(s,want);s-=take;sup+=take;dem+=want;if(take<want-1e-6)short++;Y[0]+=take;Y[1]+=want}}
+/* daily FAO56 reference ETo from SILO when the full weather file is loaded; aligned to the rain series by date */
+function etoDaily(){if(!SFULL||!DAILY)return null;const off=Math.round((new Date(DAILY.start+'T00:00:00Z')-new Date(SFULL.start+'T00:00:00Z'))/864e5);const e=SFULL.eto10;return i=>{const v=e[i+off];return v==null||v<0?-1:v/10}}
+function tkSim(roof,store,house,garden){if(DAILY){const r=DAILY.rain10,d0=new Date(DAILY.start+'T00:00:00Z');let s=store,soil=25,sup=0,dem=0,short=0,yr={};const E=ETO_M();const eto=etoDaily();
+    for(let i=0;i<r.length;i++){const dt=new Date(d0.getTime()+i*864e5),m=dt.getUTCMonth(),y=dt.getUTCFullYear(),rain=r[i]/10;s=Math.min(store,s+rain*roof*.85);const ev=eto?eto(i):-1;const et=(ev>=0?ev:E[m])*.6;soil=Math.min(25,soil+rain)-et;const need=soil<0?-soil:0;soil=Math.max(soil,0);
+      const want=need*garden+house;const Y=yr[y]=yr[y]||[0,0,0,0];Y[2]+=rain;if(want>0){const take=Math.min(s,want);s-=take;sup+=take;dem+=want;if(take<want-1e-6){short++;Y[3]++}Y[0]+=take;Y[1]+=want}}
     const years=Object.keys(yr).length||1;let dry=null;for(const [y,v] of Object.entries(yr))if(!dry||v[2]<dry.rain)dry={y,rain:v[2],share:v[1]?v[0]/v[1]:1};
-    return {share:dem?sup/dem:1,short:short/years,dry,daily:true}}
+    const dryYears=Object.values(yr).filter(v=>v[3]>0).length;
+    return {share:dem?sup/dem:1,short:short/years,dry,daily:true,years,dryYears,eto:!!eto}}
   const med=RAIN.median||RAIN.mean;let s=store,sup=0,dem=0,shortM=0;for(let k=0;k<24;k++){const m=k%12,rain=med[m],days=30.4;s=Math.min(store,s+rain*roof*.85);const g=Math.max(0,ETO_M()[m]*.6*days-rain*.8)*garden,want=g+house*days,take=Math.min(s,want);s-=take;if(k>=12){sup+=take;dem+=want;if(take<want-1)shortM++}}
   return {share:dem?sup/dem:1,short:shortM,daily:false}}
 function tankHTML(){const R=roofArea(),Tk=tankStore();const roof=+TK.roof||Math.round(R.a)||150,tank=+TK.tank||Tk.l||5000;const r=tkSim(roof,tank,+TK.house,+TK.garden);
@@ -1908,9 +1916,9 @@ function tankHTML(){const R=roofArea(),Tk=tankStore();const roof=+TK.roof||Math.
   return `<p class="hint">How far your tanks go: ${DAILY?'run day by day through 30 years of real rainfall at the property':'a monthly estimate from typical-year rainfall (a 30-year daily test appears when daily rain data is added for this site)'}.</p>
    <div class="row"><div class="field" style="flex:1"><label for="tkRoof">Roof (m²)</label><input id="tkRoof" type="number" min="0" value="${roof}"></div><div class="field" style="flex:1"><label for="tkTank">Tanks (L)</label><input id="tkTank" type="number" min="0" step="500" value="${tank}"></div></div>
    <div class="row"><div class="field" style="flex:1"><label for="tkHouse">House use (L/day)</label><input id="tkHouse" type="number" min="0" step="25" value="${+TK.house}"></div><div class="field" style="flex:1"><label for="tkGarden">Watered garden (m²)</label><input id="tkGarden" type="number" min="0" step="10" value="${+TK.garden}"></div></div>
-   <dl class="facts"><dt>Needs met from the tanks</dt><dd><b>${Math.round(r.share*100)}%</b>${r.daily?` · ${Math.round(r.short)} days a year short`:` · ${r.short} months a year short`}</dd>${r.dry?`<dt>Driest year (${r.dry.y}, ${Math.round(r.dry.rain)} mm)</dt><dd>${Math.round(r.dry.share*100)}% met</dd>`:''}<dt>Roof yield</dt><dd>about ${Math.round(roof*.85*(RAIN.mean||[]).reduce((a,b)=>a+b,0)/1000).toLocaleString()} kL in an average year</dd></dl>
+   <dl class="facts"><dt>Needs met from the tanks</dt><dd><b>${Math.round(r.share*100)}%</b>${r.daily?` · ${Math.round(r.short)} days a year short`:` · ${r.short} months a year short`}</dd>${r.daily?`<dt>Years with a dry day</dt><dd>${r.dryYears} of ${r.years}</dd>`:''}${r.dry?`<dt>Driest year (${r.dry.y}, ${Math.round(r.dry.rain)} mm)</dt><dd>${Math.round(r.dry.share*100)}% met</dd>`:''}<dt>Roof yield</dt><dd>about ${Math.round(roof*.85*(RAIN.mean||[]).reduce((a,b)=>a+b,0)/1000).toLocaleString()} kL in an average year</dd></dl>
    <table class="mini"><tr><th>Storage</th><th>Met</th><th>${r.daily?'Days short / yr':'Months short'}</th></tr>${rows.map(([v,x])=>`<tr><td>${v.toLocaleString()} L</td><td>${Math.round(x.share*100)}%</td><td>${Math.round(x.short)}</td></tr>`).join('')}</table>
-   <p class="hint">${rec?`About ${rec[0].toLocaleString()} L reaches 90%.`:'Even triple storage stays under 90%: add roof area or reduce garden watering.'} Roof and tank start from what is drawn on the map${R.a?'':' (none drawn yet, so 150 m² is assumed)'}. 85% of roof rain is counted; garden need uses a soil-moisture balance. A guide, not a guarantee.</p>
+   <p class="hint">${rec?`About ${rec[0].toLocaleString()} L reaches 90%.`:'Even triple storage stays under 90%: add roof area or reduce garden watering.'} Roof and tank start from what is drawn on the map${R.a?'':' (none drawn yet, so 150 m² is assumed)'}. 85% of roof rain is counted; garden need uses a soil-moisture balance${r.daily?(r.eto?' with SILO FAO56 daily evapotranspiration':' with a monthly evapotranspiration table'):''}. A guide, not a guarantee.</p>
    ${SITEDEF.small?`<div class="sub2">Rain garden size</div><p class="hint">A 50 mm storm on ${roof} m² of roof is about ${Math.round(roof*50).toLocaleString()} L of overflow. A mulched basin 200 mm deep needs about ${Math.round(roof*50/1000/0.2)} m² to hold it while it soaks in (more on clay, less on sand).</p>`:''}`}
 function wireTank(el){const b=(id,k)=>{const x=el.querySelector('#'+id);if(x)x.onchange=()=>{TK[k]=+x.value||0;lsSet('bt.tk',TK);const box=el.querySelector('#tankBox');if(box){box.innerHTML=tankHTML();wireTank(el)}}};b('tkRoof','roof');b('tkTank','tank');b('tkHouse','house');b('tkGarden','garden')}
 
@@ -2064,6 +2072,56 @@ function ecoHTML(){if(!ECO)return '';
 function ecoSiteHTML(){if(!ECO)return '';const sh=ecoLotShare();const rem=sh.filter(([r])=>r!=='non-rem'&&!(r in ECO_COL));
   return `<h2>Natural vegetation type</h2><dl class="facts">${sh.filter(([r,f])=>f>=0.005).map(([r,f])=>`<dt>${(f*100).toFixed(0)}% of the lot</dt><dd>${r==='non-rem'?'Non-remnant: cleared, built on, or regrowth not yet mapped as remnant':r in ECO_COL?esc(r):ecoDesc(r)}</dd>`).join('')}</dl>
    <p class="hint">${rem.length?'Part of the block is mapped remnant vegetation: clearing it needs council or state approval, and it is the best guide to which local natives belong here.':'The block is mapped as non-remnant, so the surrounding patches (turn on the Regional ecosystems layer) are the guide to what grew here before clearing and which local natives to plant.'} Mapping is at about 1:100,000 scale, so patch edges can be 50 m or more out; check on the ground.</p>`}
+
+/* ---- shared helpers for polygon overlays loaded from <site>/geology.json and hazard.json ---- */
+function polyPrep(p){p.path=new Path2D();let best=null;for(const r of p.rings){r.forEach((q,i)=>i?p.path.lineTo(q[0],q[1]):p.path.moveTo(q[0],q[1]));p.path.closePath();const a=polyArea(r);if(!best||a>best.a)best={a,r}}
+  p.area=best?best.a:0;const r=best?best.r:[[0,0]];let cx=r.reduce((s,q)=>s+q[0],0)/r.length,cy=r.reduce((s,q)=>s+q[1],0)/r.length;
+  if(!inPoly([cx,cy],r)){const m=r[Math.floor(r.length/2)];cx=(cx+m[0])/2;cy=(cy+m[1])/2;if(!inPoly([cx,cy],r)){cx=m[0];cy=m[1]}}p.lab=[cx,cy]}
+function lotShareBy(polys,keyFn,none){const lc=flat(T.lot);const xs=lc.map(q=>q[0]),ys=lc.map(q=>q[1]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);const n=24,sh={};let tot=0;
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){const pt=[x0+(i+.5)/n*(x1-x0),y0+(j+.5)/n*(y1-y0)];if(!inPoly(pt,lc))continue;tot++;let hit=none;
+    for(const p of polys){let c=0;for(const r of p.rings)if(inPoly(pt,r))c++;if(c%2){hit=keyFn(p);break}}sh[hit]=(sh[hit]||0)+1}
+  return Object.entries(sh).map(([k,v])=>[k,v/Math.max(1,tot)]).filter(([k,f])=>f>=0.005).sort((a,b)=>b[1]-a[1])}
+function polyLabels(polys,px,textFn){if(view.s<=0.45)return;ctx.font=`600 ${Math.max(9,11*px)}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.fillStyle='#222';
+  for(const p of polys){const t=textFn(p);if(!t||p.area<(view.s>1.5?300:3000))continue;ctx.strokeText(t,p.lab[0],p.lab[1]);ctx.fillText(t,p.lab[0],p.lab[1])}}
+/* ---- geology: the rock under each patch (Geological Survey mapping) ---- */
+const GEO_PAL=[[176,112,80],[120,140,90],[150,120,160],[200,160,80],[100,150,170],[190,120,120],[140,160,120],[170,140,100],[120,120,170],[200,140,60]];
+function geoAttr(a,keys){for(const k of Object.keys(a)){const kl=k.toLowerCase();if(keys.some(x=>kl.includes(x))&&a[k]!=null&&String(a[k]).trim()!=='')return String(a[k])}return ''}
+function geoUnit(p){const a=p.attrs||{};return geoAttr(a,['unit_name','name','unit','strat','formation'])||geoAttr(a,['symbol','code'])||'Unnamed unit'}
+function geoLith(p){return geoAttr(p.attrs||{},['lith','desc','rock'])}
+function geoAge(p){return geoAttr(p.attrs||{},['age','period','era'])}
+function geoPrep(){const names=[...new Set(GEO.features.map(geoUnit))];GEO.units={};names.forEach((n,i)=>{let h=0;for(const ch of n)h=(h*31+ch.charCodeAt(0))>>>0;GEO.units[n]={col:GEO_PAL[(h+i)%GEO_PAL.length],lith:'',age:''}});
+  for(const p of GEO.features){polyPrep(p);p.unit=geoUnit(p);const u=GEO.units[p.unit];if(!u.lith)u.lith=geoLith(p);if(!u.age)u.age=geoAge(p);u.area=(u.area||0)+p.area}}
+function drawGeo(px){ctx.save();const a=0.35*layers.ovOp/0.7;for(const p of GEO.features){const c=GEO.units[p.unit].col;ctx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${Math.min(a,.55)})`;ctx.fill(p.path,'evenodd');ctx.lineWidth=.9*px;ctx.strokeStyle='rgba(60,40,30,.55)';ctx.stroke(p.path)}
+  polyLabels(GEO.features,px,p=>geoAttr(p.attrs||{},['symbol','code'])||p.unit.slice(0,18));ctx.restore()}
+function geoHTML(){if(!GEO)return '';const us=Object.entries(GEO.units).sort((a,b)=>(b[1].area||0)-(a[1].area||0));
+  return `<div class="row"><label><input type="checkbox" data-k="geo" ${layers.geo?'checked':''}><i class="swatch" style="background:rgba(176,112,80,.7)"></i>Underlying rock (${us.length} unit${us.length===1?'':'s'} within 1 km)</label></div>
+   <div class="hint" style="line-height:1.45">${us.map(([n,u])=>`<div style="margin:3px 0"><i class="swatch" style="display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:middle;background:rgba(${u.col[0]},${u.col[1]},${u.col[2]},.7)"></i><b>${esc(n)}</b>${u.lith?': '+esc(u.lith):''}${u.age?` <i>(${esc(u.age)})</i>`:''}</div>`).join('')}</div>
+   <p class="hint">The rock under the soil sets what the soil is made of: basalt and alluvium weather to richer, heavier soils; sandstone and granite to sandier, poorer ones; the boundary between two units is where springs and seeps often appear. Source: ${esc(GEO.source||'state geological survey')}. Mapped at about 1:100,000, so boundaries can be 50 m or more out.</p>`}
+function geoSiteHTML(){if(!GEO)return '';const sh=lotShareBy(GEO.features,p=>p.unit,'Not mapped');
+  return `<h2>Underlying rock</h2><dl class="facts">${sh.map(([n,f])=>{const u=GEO.units[n];return `<dt>${(f*100).toFixed(0)}% of the lot</dt><dd><b>${esc(n)}</b>${u&&u.lith?': '+esc(u.lith):''}${u&&u.age?` <i>(${esc(u.age)})</i>`:''}</dd>`}).join('')}</dl>`}
+/* ---- rules and hazards: bushfire hazard class and regulated vegetation categories ---- */
+const HAZ_FIRE=[[/very\s*high|category\s*1\b|\b1\b/i,[200,30,40],'Highest class: forest fuel. New buildings need a bushfire attack level (BAL) assessment to AS 3959; keep an asset-protection zone and plan the fire-season routine around it.'],
+  [/high|medium|category\s*2\b|\b2\b/i,[235,120,30],'Middle class: grassland, woodland or near forest. Building rules still apply; design for ember attack, water for firefighting and a cleared, irrigated zone around the house.'],
+  [/low|buffer|category\s*3\b|\b3\b|potential/i,[240,200,60],'Lower class or buffer: within reach of a fire from the higher-class land next door. Keep gutters and the house surrounds clear; embers travel.']];
+const HAZ_VEG={A:[[30,100,50],'Category A: land under a compliance notice, offset or restoration agreement. No clearing.'],B:[[60,150,80],'Category B: remnant vegetation. Clearing needs an accepted development code or a permit; exemptions exist for fences, firebreaks and tracks within limits.'],
+  C:[[150,200,120],'Category C: high-value regrowth. Clearing follows the regrowth code; most routine property work is allowed under it.'],R:[[80,140,220],'Category R: regrowth within 50 m of a watercourse in a reef catchment. Clearing follows the reef code.'],X:[null,'Category X: no clearing restriction under the Vegetation Management Act (council and other laws may still apply).']};
+function hazClass(l,p){const a=p.attrs||{};if(l.kind==='regulated_vegetation'){const c=String(a.rvm_cat||a.Category||a.category||'').trim().toUpperCase();return c||'X'}
+  const t=String(a.d_Category||a.Category||a.category||a.BUSHFIRE||a.class||a.CLASS||Object.values(a).find(v=>typeof v==='string')||'').trim();return t||'?'}
+function hazStyle(l,cls){if(l.kind==='regulated_vegetation'){const v=HAZ_VEG[cls]||HAZ_VEG.X;return {col:v[0],meaning:v[1]}}for(const [re,col,m] of HAZ_FIRE)if(re.test(cls))return {col,meaning:m};return {col:[160,160,160],meaning:''}}
+function hazPrep(){for(const l of HAZ.layers)for(const p of l.features){polyPrep(p);p.cls=hazClass(l,p)}}
+function hazLayers(k){return HAZ.layers.filter(l=>(l.kind==='regulated_vegetation')===(k==='veg'))}
+function drawHaz(px){ctx.save();const a=0.35*layers.ovOp/0.7;for(const k of ['fire','veg']){if(!(k==='fire'?layers.hazFire:layers.hazVeg))continue;
+  for(const l of hazLayers(k))for(const p of l.features){const st=hazStyle(l,p.cls);if(st.col){ctx.fillStyle=`rgba(${st.col[0]},${st.col[1]},${st.col[2]},${Math.min(a,.5)})`;ctx.fill(p.path,'evenodd')}ctx.lineWidth=.9*px;ctx.strokeStyle='rgba(60,40,40,.5)';ctx.stroke(p.path)}
+  for(const l of hazLayers(k))polyLabels(l.features,px,p=>l.kind==='regulated_vegetation'?'Cat '+p.cls:p.cls.replace(/vegetation\s*/i,'').slice(0,16))}ctx.restore()}
+function hazLegend(k){const Ls=hazLayers(k);if(!Ls.length)return '';const seen=new Map();for(const l of Ls)for(const p of l.features){if(!seen.has(p.cls))seen.set(p.cls,{st:hazStyle(l,p.cls),area:0});seen.get(p.cls).area+=p.area}
+  const share=lotShareBy(Ls.flatMap(l=>l.features),p=>p.cls,'');const lotOf=Object.fromEntries(share);
+  return `<div class="row"><label><input type="checkbox" data-k="${k==='fire'?'hazFire':'hazVeg'}" ${(k==='fire'?layers.hazFire:layers.hazVeg)?'checked':''}><i class="swatch" style="background:${k==='fire'?'rgba(235,120,30,.7)':'rgba(60,150,80,.7)'}"></i>${k==='fire'?'Bushfire hazard class':'Regulated vegetation categories'}</label></div>
+   <div class="hint" style="line-height:1.45">${[...seen.entries()].sort((a,b)=>b[1].area-a[1].area).map(([c,v])=>`<div style="margin:3px 0"><i class="swatch" style="display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:middle;background:${v.st.col?`rgba(${v.st.col[0]},${v.st.col[1]},${v.st.col[2]},.7)`:'#fff'};border:1px solid #999"></i><b>${esc(k==='veg'?'Category '+c:c)}</b>${lotOf[c]?` · ${(lotOf[c]*100).toFixed(0)}% of the lot`:''}${v.st.meaning?`<br><span style="opacity:.85">${esc(v.st.meaning)}</span>`:''}</div>`).join('')}${lotOf['']?`<div style="margin:3px 0"><i class="swatch" style="display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:middle;background:#fff;border:1px solid #999"></i>Not in any mapped class · ${(lotOf['']*100).toFixed(0)}% of the lot</div>`:''}</div>
+   <p class="hint">Source: ${[...new Set(Ls.map(l=>l.source))].map(esc).join('; ')}${HAZ.fetched?`, downloaded ${esc(HAZ.fetched)}`:''}.</p>`}
+function hazHTML(){if(!HAZ)return '';return hazLegend('fire')+hazLegend('veg')+`<p class="hint">These are the official maps the rules hang off, not a risk rating of your design: check the current map on the state portal before relying on a class, and read them with the terrain fire run and the canopy fuel layers.</p>`}
+function hazSiteHTML(){if(!HAZ)return '';const out=[];for(const k of ['fire','veg']){const Ls=hazLayers(k);if(!Ls.length)continue;const sh=lotShareBy(Ls.flatMap(l=>l.features),p=>p.cls,'');
+  out.push(`<dt>${k==='fire'?'Bushfire hazard':'Vegetation category'}</dt><dd>${sh.map(([c,f])=>`${c?esc(k==='veg'?'Category '+c:c):'not in a mapped class'} ${(f*100).toFixed(0)}%`).join(' · ')||'none mapped on the lot'}</dd>`)}
+  return out.length?`<h2>Rules and hazards</h2><dl class="facts">${out.join('')}</dl><p class="hint">Shares of the lot inside each mapped class. The Layers tab explains what each class means and where it comes from.</p>`:''}
 function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&mt.type==='dam'&&mt.res&&!mt.res.err?mt.res:null;
   const rain=dr?dr.catchHa*RAIN.mean.reduce((a,b)=>a+b,0)/100:0;
   el.innerHTML=
@@ -2616,6 +2674,8 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
     <div id="ovLegend" class="hint"></div>`)+
    sec('svcs','Services (power, sewer)',`${servHTML()}<div class="row"><label><input type="checkbox" data-k="sewerBands" ${layers.sewerBands!==false?'checked':''}><i class="swatch" style="background:#e88c82"></i>Root-distance bands around drawn sewer lines (2 m and 5 m)</label></div><p class="hint">Draw the sewer or house drain from the council plan with Draw → Water → Sewer. Trees then show their distance from it.</p>`,!!SERV)+
    (ECO?sec('eco','Native vegetation (regional ecosystems)',ecoHTML(),false):'')+
+   (GEO?sec('geo','Underlying rock (geology)',geoHTML(),false):'')+
+   (HAZ?sec('haz','Rules and hazards',hazHTML(),false):'')+
    sec('lines','Water, contours & labels',lines.map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join(''))+
    (PROS?sec('pros','Prospects (computed sites)',`<p class="hint">Screening sites found by scanning the terrain: where small pond walls store the most water for the least earth, where level building pads need the least cut and fill with good winter sun, the highest tank site, and the few flat spots. A starting point for a site walk, not a design.</p>`+prosHTML()):'')+
    `<p class="hint">Terrain from the ${SITE.main} LiDAR survey (bare earth, ${SITE.res}). Sun hours count terrain shading only, not trees.</p>`;
@@ -2990,7 +3050,7 @@ function renderSite(){const el=$('#tab-site');const m=T.meta;const lot=T.catch[0
    <h2>Keypoint candidates</h2><p class="hint">Where a gully’s fall flattens sharply, the classic spot to slow and store water. Computed from the LiDAR; check each on the ground.</p>
    <div class="kpl">${T.kp.map((k,i)=>`<button data-i="${i}">KP ${i+1} · ${k.z} m · ${k.ha} ha above<br><small>gully falls ${k.above}% above, ${k.below}% below · ${k.inLot?'inside the lot':'upstream, outside the lot'}</small></button>`).join('')}</div>
    <h2>Sun (terrain only)</h2><dl class="facts"><dt>Winter, 21 Jun</dt><dd>${m.sun_winter_lotmean.toFixed(1)} h average</dd><dt>Equinox</dt><dd>${m.sun_equinox_lotmean.toFixed(1)} h</dd><dt>Summer, 21 Dec</dt><dd>${m.sun_summer_lotmean.toFixed(1)} h</dd></dl>
-   ${soilSiteHTML()}${ecoSiteHTML()}
+   ${soilSiteHTML()}${geoSiteHTML()}${ecoSiteHTML()}${hazSiteHTML()}
    <h2>Climate</h2>${climateSVG()}<p class="hint">${RAIN.station}, ${RAIN.period}. Bars are average monthly rain (darker: the typical, median month). ${MON[wet]} is the wettest month and ${MON[dry]} the driest. The coldest month's mean minimum is ${coldM} °C at the station, and cold air pools in valley floors, so frost comes earlier and harder there on still, clear nights.</p>
    <h2>Sources and accuracy</h2><p class="hint">${IMG.aerial?`Aerial base: ${SITE.state==='NSW'?'NSW Spatial Services imagery':'Queensland Government “Latest State Program” imagery'} (CC BY 4.0), fetched for the map’s 2 km square so it lines up without alignment. `:''}Elevation: ${esc(SITE.source||('LiDAR '+SITE.main+', '+SITE.res+' bare-earth DEM (ELVIS)'))}, GDA2020 / MGA zone ${ZONE}. ${esc(SITE.boundaryNote||'Lot boundary is approximate: check it against the title plan and fix it under Set-up above.')} Catchments and flow lines are computed paths: culverts, road table drains and pipes are not in the LiDAR, so road runoff may go elsewhere than shown. Elevation range on the boundary ${Math.min(...lotZ).toFixed(0)}–${Math.max(...lotZ).toFixed(0)} m.${ECO?' Vegetation types: '+esc(ECO.source)+'.':''}</p>`;
   wireSetup(el);wireSecs(el);
