@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-25T07:16:45.476Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        911.6,
+        946.6
+      ],
+      [
+        914.1,
+        945.3
+      ],
+      [
+        916.3,
+        947.3
+      ],
+      [
+        914.1,
+        948.9
+      ],
+      [
+        911.8,
+        946.5
+      ],
+      [
+        911.8,
+        946.5
+      ]
+    ]
+  },
+  "kind": "building",
+  "name": "Wood Fired Sauna",
+  "notes": "Wood-fired sauna: the heat and water engine for the Tropical Spa Guild.\nThermal battery: stone walls and brick paving store the stove's heat and release it at night; schedule winter firings on forecast frost nights.\nWater: the 4 × 4 m mini-roof sheds about 16 L per mm of rain into the beds below; mister and plunge runoff drains into the guild's damp pocket.\nLoops: dry Blackbutt sawmill scraps fuel the stove; ash goes to the compost (with Ice Cream Bean leaves) before the beds; fresh cuts become mushroom logs; spent logs become hügel and compost.\nFire safety: keep a cleared, low-fuel ring around the sauna and woodpile, a spark arrestor on the flue, an extinguisher and hose at hand; no firing on total fire ban days.\nThe pad slopes down to the west; the mister is on the south side.",
+  "source": "map",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-25T07:16:58.448Z"
+}

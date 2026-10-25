@@ -1,0 +1,44 @@
+{
+  "createdAt": "2026-10-20T02:25:29.583Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        883,
+        953
+      ],
+      [
+        886.2,
+        949.4
+      ],
+      [
+        876.3,
+        942.6
+      ],
+      [
+        873.6,
+        947
+      ],
+      [
+        883.4,
+        952.8
+      ],
+      [
+        883.8,
+        952.8
+      ],
+      [
+        883.8,
+        952.8
+      ]
+    ]
+  },
+  "kind": "zone3",
+  "name": "Solar array · fenced low cover",
+  "notes": "Solar array area (fenced, phase 1). One panel sheet of about 4 × 11 m on poles, about 1 m off the ground, facing north-north-east, over a flat bench swale cut between the post rows. A secure fence with a locked gate goes around it (AS/NZS 5033 restricted access; confirm details with the installer).\nLow cover only: nothing taller than about 40 cm inside the fence, so no plant shades the panels or competes for vertical space. No climbers on the fence beside the panels.\nReflect light up to the bifacial panels: white pebble or recycled-glass mulch under and around them, with low silver-leaved and white-flowering plants: yellow buttons (Chrysocephalum apiculatum), pigface (Carpobrotus glaucescens), creeping boobialla (Myoporum parvifolium, white form), native daisy (Brachyscome). Dwarf lomandra in diamond patterns on the fence-line banks against erosion. These are bee flowers too, and low fuel.\nWater: a gutter on the low edge feeds a collector swale that falls 0.5–1% north-west into the fruit forest swale rows (check the levels on site), or runs to a tank.\nThe broadacre seed rows move out to the W/NW expansion and the trail.",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T05:00:30.064Z"
+}

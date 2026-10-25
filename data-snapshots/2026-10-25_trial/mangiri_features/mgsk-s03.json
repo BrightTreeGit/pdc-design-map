@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-25T06:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        1178.7,
+        1042.7
+      ],
+      [
+        1187.9,
+        1047.6
+      ],
+      [
+        1207.7,
+        1055.9
+      ],
+      [
+        1221.3,
+        1059.5
+      ]
+    ]
+  },
+  "kind": "swale",
+  "name": "NE swale 3",
+  "notes": "From Mully's sketch, 25 Oct 2026 – approximate. Drawn as a blue water line; check it runs on contour on site.",
+  "source": "Mully's zone sketch (25 Oct 2026), fitted to the NSW 2014 aerial",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:00:00.000Z"
+}

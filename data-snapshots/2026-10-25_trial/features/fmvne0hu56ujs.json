@@ -1,0 +1,44 @@
+{
+  "createdAt": "2026-10-25T05:28:42.318Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1035.7,
+        1089.2
+      ],
+      [
+        1035.7,
+        1117.9
+      ],
+      [
+        1064.9,
+        1115.7
+      ],
+      [
+        1063.1,
+        1087.9
+      ],
+      [
+        1036.6,
+        1090.5
+      ],
+      [
+        1036.6,
+        1090.5
+      ],
+      [
+        1036.6,
+        1090.5
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · Orchard SE · goat-safe nut and fruit trial",
+  "notes": "South-east dryland orchard with goats (phase 2–3). Good sandy soil now under molasses grass: goats browse it down from May 2027, then trees go in – a mixed goat and fruit-forest (silvopasture) trial.\nGoat-safe trees that don't need watering once established (plant Dec–Mar on the rain, a few buckets in the first two dry springs): macadamia (local native – the best fit; no treated water or phosphorus fertiliser), pecan (steadier here than walnut), carob (pods are good goat feed), Burdekin plum (hardy Qld native), mulberry (also goat fodder), sandpaper fig and native olive; feijoa as a hardy small tree.\nNo avocados here: their leaves, bark and fruit are toxic to goats, so avocados move to W2 (below the runoff basins) and sunny gaps in W3. Also keep out stone fruit (wilted Prunus leaves are poisonous to goats), oleander and lantana.\nTree guards: sturdy mesh cages about 1.5–1.8 m tall and wide enough that goats can't reach in or stand on them (goats browse up to about 2 m and strip bark); keep cages on until trunks are thick and crowns are above reach.\nGraze in short rotations, then rest, so goats clear grass without ringbarking; add fodder edges (pigeon pea, mulberry). Water from Tank 4 (goats + fire).\nPlan: Bright Tree planting calendar and phasing (Oct 2026).",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T05:29:13.994Z"
+}

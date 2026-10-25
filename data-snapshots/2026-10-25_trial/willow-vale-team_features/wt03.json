@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-22T00:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1109,
+        1032
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "Tank (proposed, west)",
+  "notes": "Team: roof water + storage, gravity irrigation, verify levels. Claude: this north-west corner is the highest point of the orchard (about 365 m), the best tank site. (Positions are indicative, traced from the team's bubble plan onto the aerial; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026)",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-22T00:30:00.000Z"
+}

@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-18T12:20:49.624Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        904.9,
+        947.3
+      ],
+      [
+        910.8,
+        952.4
+      ],
+      [
+        906.8,
+        957
+      ],
+      [
+        900.9,
+        951.8
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Zone 1 · Daily - Greens and kitchen garden",
+  "notes": "What it is: the everyday picking garden, about 47 m² on the slope just south of the house (towards the barbecue). Salad and cooking greens you grab daily – kept closest to the kitchen.\nWater: roof rainwater or creek water from the 20,000 L tank, by drip at soil level (area A). Never laundry or treated water on leafy greens. Budget about 1,200 L/week in the dry spring.\nLayout: 3–4 short beds about 1.2 m wide, cut level across the slope with timber or log edges; mulched paths between; a trellis on the uphill side.\nMix now to Feb (hot, wet): Ceylon spinach on the trellis; Okinawa and Brazilian spinach and sweet potato leaves from cuttings; Egyptian spinach; amaranth; Timor lettuce; Vietnamese mint in a pot. Lettuce only under 30–50% shade cloth.\nMix Mar–Aug (main season): lettuce, rocket, mizuna, mustard (sow every 2–3 weeks); bok choy, kailaan; kale, silverbeet; spring onion, coriander, parsley.\nAll year at the edges: garlic chives, Timor lettuce, a comfrey plant at the downhill corner for mulch and compost.\nTips: net brassicas in Feb–Mar (caterpillar peak); top up compost each change of season.\nFrom the water-source plan (18 Oct) and kitchen-garden notes – adjust on site.",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:27:46.098Z"
+}

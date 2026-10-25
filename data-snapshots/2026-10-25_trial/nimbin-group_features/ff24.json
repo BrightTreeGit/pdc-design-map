@@ -1,0 +1,56 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        558,
+        898
+      ],
+      [
+        564,
+        884
+      ],
+      [
+        574,
+        891
+      ],
+      [
+        590,
+        891
+      ],
+      [
+        602,
+        884
+      ],
+      [
+        614,
+        894
+      ],
+      [
+        618,
+        925
+      ],
+      [
+        590,
+        935
+      ],
+      [
+        560,
+        930
+      ],
+      [
+        548,
+        912
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · south slope below the house",
+  "notes": "Open ground running down the slope south of the house: food forest expansion, the mobile coop and chicken rotation (orange hatching on Brett's sketch). Redrawn from the sketch on 24 Oct; drag the corners to fit.",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

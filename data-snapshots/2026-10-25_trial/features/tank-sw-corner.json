@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-25T09:40:00.000Z",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        725,
+        1192
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "Tank 5 · SW corner",
+  "notes": "South-west corner tank, about 147 m: the highest point of the lot, on the fire side. Size: 5–10 kL.\nFilled by a tee off Tank 1. It sits about 12 m above Tank 1 and above what the Bunyip can reach (82 m lift from the creek at about 54 m), so a small solar booster pump at Tank 1 lifts the last stretch.\nJobs: fire reserve with a 50 mm outlet and Storz fitting at the far corner of the west and south firebreaks; gravity-feeds the SW goat zone troughs and the W2 south-west pocket.\nDrag it to the exact spot on site.",
+  "source": "map",
+  "stage": "next",
+  "status": "idea",
+  "updatedAt": "2026-10-25T09:40:00.000Z"
+}

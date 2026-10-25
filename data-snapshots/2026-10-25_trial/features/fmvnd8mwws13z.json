@@ -1,0 +1,52 @@
+{
+  "createdAt": "2026-10-25T05:07:02.528Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        870.2,
+        945.5
+      ],
+      [
+        877,
+        955
+      ],
+      [
+        869,
+        951
+      ],
+      [
+        857,
+        939
+      ],
+      [
+        849,
+        933
+      ],
+      [
+        841,
+        921
+      ],
+      [
+        833,
+        905
+      ],
+      [
+        823,
+        897
+      ],
+      [
+        821.1,
+        892.9
+      ]
+    ]
+  },
+  "kind": "track",
+  "name": "Track (≤10%) 5",
+  "notes": "Route at up to 10%: 97 m, steepest 20%. Roughly 25 m³ of cut and fill for a 2 m bench. Computed from the Sunshine Coast 2022 LiDAR; walk it before machines go in.",
+  "source": "map",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-25T05:07:03.000Z"
+}

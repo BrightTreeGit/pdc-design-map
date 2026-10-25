@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T21:17:34.212Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        980.5,
+        949.3
+      ]
+    ]
+  },
+  "kind": "structure",
+  "name": "Bunyip PA-13",
+  "notes": "Bunyip PA-13: 3.4 m fall, 82 m lift to the tank, about 637 L a day in the driest month and 10,556 L in the wettest (1,507 kL a year). Drive pipe 30 m, delivery 210 m of 25 mm poly. Computed from the map; measure dry-season creek flow and check water rules first.",
+  "source": "map",
+  "stage": "y1",
+  "status": "idea",
+  "updatedAt": "2026-10-23T21:17:34.612Z"
+}

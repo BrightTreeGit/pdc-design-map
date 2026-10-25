@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1012.2,
+        992.3
+      ],
+      [
+        1013.7,
+        992.5
+      ],
+      [
+        1013.1,
+        995.1
+      ],
+      [
+        1011.6,
+        994.9
+      ]
+    ]
+  },
+  "kind": "raisedbed",
+  "name": "Raised bed 4",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m).",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

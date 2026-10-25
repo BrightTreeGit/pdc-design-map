@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-25T06:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "a0": 112.5,
+    "a1": 157.5,
+    "cx": 1219.4,
+    "cy": 1254.4,
+    "g": "sector",
+    "r": 110
+  },
+  "kind": "wind",
+  "name": "Prevailing winds (SE)",
+  "notes": "From Mully's sketch, 25 Oct 2026 – approximate. Mully wrote: \"SE – NW Prevailing Winds\" (wind from the south-east blowing to the north-west).",
+  "source": "Mully's zone sketch (25 Oct 2026), fitted to the NSW 2014 aerial",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:00:00.000Z"
+}

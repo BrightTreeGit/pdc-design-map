@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T21:18:22.174Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1116.6,
+        930.2
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "Tank 2",
+  "notes": "64m head vs bunyip pump when tank 1 is full  on west edge, can fill this tank then fill souther end tank 3\nSize: 5–10 kL, added with the Bunyip lines. Bunyip line 4 (dotted, later).",
+  "source": "map",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-23T21:20:12.000Z"
+}

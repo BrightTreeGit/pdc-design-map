@@ -1,0 +1,36 @@
+{
+  "createdAt": "2026-10-25T04:52:34.971Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        870.8,
+        946.3
+      ],
+      [
+        875,
+        938.6
+      ],
+      [
+        865.1,
+        922.8
+      ],
+      [
+        853.6,
+        935.1
+      ],
+      [
+        870.6,
+        946.5
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · Orchard",
+  "notes": "Hairpin fruit forest (phase 1, now to end of Nov 2026). The irrigated core orchard above the house, with the three contour swale rows.\nWater: treated water by sub-surface drip under mulch (check the approved area), plus rain. Keep it off anything eaten from the ground.\nTrees: the mature 2–3 m trees – about 10 citrus, custard apple, white and black mulberry, moringa (keep moringa low, southern end, away from the solar panels).\nGuild under each citrus: comfrey, sweet potato as living mulch, pigeon pea as nurse (chop at 1.5 m), garlic chives.\nSolar array edge: pineapples and low ground cover inside the vine fence; nothing tall.\nLower edge above the 1.8 m drop: lomandra and pineapples only.\nPlan: Bright Tree planting calendar and phasing (Oct 2026).",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T05:03:16.603Z"
+}

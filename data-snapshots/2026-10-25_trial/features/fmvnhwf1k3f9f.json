@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-25T07:17:30.536Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        910.8,
+        953.1
+      ],
+      [
+        917.5,
+        947.7
+      ],
+      [
+        921.4,
+        952.3
+      ],
+      [
+        915.1,
+        957.1
+      ],
+      [
+        910.9,
+        953
+      ],
+      [
+        910.9,
+        953
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · tropical cacao guild",
+  "notes": "The Tropical Spa Guild: a cacao-led tree family that uses the sauna's warmth and the mister's humidity to push a micro-tropical pocket (Bright Tree is about 26.7° S, so cacao is marginal: protect it).\nCanopy (existing): the mature Ice Cream Bean gives 40–70% dappled shade, nitrogen and leaf litter. Don't plant more: it is on the weed watch-list, so pick up pods and pull seedlings.\nMid layer: 1–2 cacao behind the stone walls in the lowest, dampest pockets, each on a slight mound over a hügelkultur base of punky Blackbutt scraps; coffee on the slightly higher, drier edge (pick cherries clean so birds don't spread it).\nClimber: vanilla at the base of the mature trunks.\nHerb carpet where the mister runoff collects: cardamom, gotu kola, Vietnamese mint, turmeric (galangal and ginger go to a sunnier hillside bed instead).\nPlanting: dust root balls with a commercial AM inoculant plus a trowel of soil from under healthy trees; cap beds with 10–15 cm coarse wood chip.\nFeeding: sauna ash composted with Ice Cream Bean leaves first, never raw on the beds.\nCold: the pad slopes west and cold air drains west – don't dam it; fire the sauna on forecast frost nights (Jun–Aug).\nPlant Sep–Nov; heavy work months March and September.\nSource: Spa Guild handoff notes and PDC session 04 updates (Oct 2026).",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T07:17:42.828Z"
+}

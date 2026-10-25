@@ -1,0 +1,48 @@
+{
+  "createdAt": "2026-10-23T19:29:34.671Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        999.6,
+        1136.1
+      ],
+      [
+        999.9,
+        1139.6
+      ],
+      [
+        998.1,
+        1140.4
+      ],
+      [
+        993.9,
+        1151.6
+      ],
+      [
+        990.4,
+        1153.9
+      ],
+      [
+        988,
+        1151.3
+      ],
+      [
+        990,
+        1149.3
+      ],
+      [
+        990.1,
+        1136.4
+      ]
+    ]
+  },
+  "kind": "pond",
+  "name": "Hand-built weir or small pond · 2 m",
+  "notes": "Hand-built weir or small pond, 2 m high (crest 85.9 m), full at 85.8 m: about 72 m³ (0.07 ML) over 120 m², 1.8 m deep at the wall. Catchment 5.6 ha. About 53 m³ of earth and rock: roughly 35 person-days by hand. (1 m crest, 2:1 sides). Computed from the 2022 LiDAR; check on site and with council and state water rules before building.",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-23T19:29:35.543Z"
+}

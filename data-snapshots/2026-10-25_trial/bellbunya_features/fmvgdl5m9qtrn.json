@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T07:42:23.409Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1183.4,
+        1193.7
+      ],
+      [
+        1269.4,
+        1211.7
+      ],
+      [
+        1257.6,
+        1268.1
+      ],
+      [
+        1171.6,
+        1250.1
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Dave's focus area",
+  "notes": "dave focus area , sector maping dave zammo\ndqueale72@gmail.com",
+  "source": "map",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-20T19:12:23.206Z"
+}

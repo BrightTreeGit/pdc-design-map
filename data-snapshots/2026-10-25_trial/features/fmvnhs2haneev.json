@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-25T07:14:07.630Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        905.3,
+        958.4
+      ],
+      [
+        910.6,
+        962.9
+      ],
+      [
+        913,
+        960.5
+      ],
+      [
+        907.2,
+        956.4
+      ],
+      [
+        905.7,
+        958.7
+      ],
+      [
+        905.7,
+        958.7
+      ]
+    ]
+  },
+  "kind": "bed",
+  "name": "Garden bed 1",
+  "notes": "Garden bed beside the sauna and cacao guild: the damp herb carpet bed, fed by mister and roof runoff.\nBuild: hügelkultur base of punky Blackbutt scraps, compost, then 10–15 cm coarse wood chip; optionally mix mushroom grain spawn into fresh chip for a mulch-bed crop.\nPlants: cardamom, turmeric, gotu kola, Vietnamese mint, Okinawa spinach, culantro; keep it low so the firewood path stays clear.\nPlant Sep–Nov; top up chip each autumn.",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T07:14:07.630Z"
+}

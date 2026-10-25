@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-25T06:45:25.619Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        885.8,
+        929.7
+      ],
+      [
+        888.3,
+        927.8
+      ],
+      [
+        883,
+        922.9
+      ],
+      [
+        879.9,
+        924.9
+      ],
+      [
+        884.8,
+        930.3
+      ],
+      [
+        884.8,
+        930.3
+      ]
+    ]
+  },
+  "kind": "nursery",
+  "name": "Plant nursery 1",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:46:09.780Z"
+}

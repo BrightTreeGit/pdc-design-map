@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1022.6,
+        1010
+      ]
+    ],
+    "r": 3
+  },
+  "kind": "nativetree",
+  "name": "Gum cluster 3 (south-east)",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Existing gums at the south-east corner, by the side street.",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

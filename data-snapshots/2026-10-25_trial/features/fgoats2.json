@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-10-19T03:10:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1082.4,
+        1147.8
+      ],
+      [
+        1000,
+        1157.6
+      ],
+      [
+        1024.1,
+        1052.6
+      ],
+      [
+        1090.2,
+        1070.8
+      ]
+    ]
+  },
+  "kind": "goatzone",
+  "name": "Goat zone 2 (south-east)",
+  "notes": "Matching goat zone in the south-east corner, about the same size as the south-west one (about 0.5 ha). Rotate the goats between the two so each rests. Drag the corners to the real fence line.",
+  "pq": "fair",
+  "source": "claude",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-25T05:15:40.636Z"
+}

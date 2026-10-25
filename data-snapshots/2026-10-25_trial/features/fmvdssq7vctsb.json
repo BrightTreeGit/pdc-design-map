@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-18T12:24:52.411Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        902.1,
+        927.6
+      ],
+      [
+        915.4,
+        940.9
+      ],
+      [
+        909.3,
+        945.9
+      ],
+      [
+        897.3,
+        931.1
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Zone 1 · Daily - Raised beds below house",
+  "notes": "What it is: the main vegetable beds, about 150 m² on the slope below (north-east of) the house – raised beds for bulk vegetables, fruiting crops and roots, with the morning sun.\nWater: clean water only (roof or creek tank by drip, area A) – these are food crops eaten fresh, so no laundry or treated water here. Budget about 3,750 L/week in the dry spring (2,500 L per 100 m²); add a small tank or header feed if the 20,000 L tank is far.\nLayout: 4–6 raised beds 1.2 m wide across the slope (log, sleeper or corrugated sides), 0.6 m mulched paths; rotate crop families bed by bed each season.\nMix Aug–Nov (now): cherry tomato, capsicum, chilli, eggplant, basil (get them in before the wet); cucumber and watermelon by Nov; snake beans and cowpea.\nMix Dec–Feb (wet): sweet potato, snake beans, amaranth, Ceylon spinach – hardy crops that cope with heavy rain; leave one bed under green manure.\nMix Mar–Aug (main season): carrot, beetroot, radish, peas and snow peas, garlic, kale, silverbeet, broccoli, bok choy.\nBed ends and edges: pigeon pea for windbreak and chop-and-drop, marigold and basil for pests, a comfrey patch for mulch.\nTips: compost and mulch thickly (sandy soil); keep taro, kang kong and cape gooseberry in their own contained bed if grown at all.\nFrom the water-source plan (18 Oct) – adjust on site.",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:48:01.816Z"
+}
