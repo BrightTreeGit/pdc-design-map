@@ -68,6 +68,52 @@ def ll2mga(lon, lat, zone=56):
     Y = eta + sum(_al[j] * math.cos(2*(j+1)*xi) * math.sinh(2*(j+1)*eta) for j in range(3))
     return 500000 + _k0 * _A * Y, 10000000 + _k0 * _A * X
 
+
+# ---- Plus Codes (Open Location Code, open standard) and free geocoding, so a Google-style address or a Plus Code works
+_OLC = "23456789CFGHJMPQRVWX"
+def _olc_encode(lat, lng):
+    lat += 90; lng += 180; s = ""; r = 20.0
+    for _ in range(5):
+        dl = int(lat // r); dg = int(lng // r); s += _OLC[dl] + _OLC[dg]; lat -= dl * r; lng -= dg * r; r /= 20
+    return s
+def _olc_decode(code):
+    c = code.replace("+", "").upper(); lat = lng = 0.0; r = 20.0
+    for i in range(0, 10, 2):
+        lat += _OLC.index(c[i]) * r; lng += _OLC.index(c[i + 1]) * r; r /= 20
+    r *= 20
+    return lat - 90 + r / 2, lng - 180 + r / 2
+
+def geocode(text):
+    """Free address lookup (OpenStreetMap Nominatim; no key; one request). Returns (lat, lon, label) or None."""
+    j = None
+    try:
+        r = requests.get("https://nominatim.openstreetmap.org/search", params={"q": text, "format": "json", "limit": 1, "countrycodes": "au"},
+                         headers={"User-Agent": "PDC-Design-Map/1.0 (permaculture course; brighttreewellness@gmail.com)"}, timeout=60)
+        j = r.json() if r.ok else None
+    except Exception as e:
+        print(f"  address lookup failed: {e}")
+    time.sleep(1.1)
+    if j: return float(j[0]["lat"]), float(j[0]["lon"]), j[0].get("display_name", "")
+    return None
+
+def pluscode_to_latlon(text):
+    """'HW9Q+JM Mongarlowe' (short code + place) or '4RPFHW9Q+JM' (full code)."""
+    parts = text.strip().split(None, 1); code = parts[0].upper()
+    if len(code.replace("+", "")) >= 10: return _olc_decode(code)
+    if len(parts) < 2: sys.exit("A short Plus Code needs the place after it, e.g. 'HW9Q+JM Mongarlowe NSW'")
+    ref = geocode(parts[1] + ", Australia")
+    if not ref: sys.exit(f"Couldn't find the place '{parts[1]}' to complete the Plus Code; use the full code or --pin")
+    short = code.replace("+", "")
+    full = _olc_encode(ref[0], ref[1])[:10 - len(short)] + short
+    lat, lng = _olc_decode(full)
+    # pick the neighbouring 1-degree cell if that brings the point nearer the place (the standard 'recover nearest' rule)
+    best = (abs(lat - ref[0]) + abs(lng - ref[1]), lat, lng)
+    for dla in (-1, 0, 1):
+        for dlo in (-1, 0, 1):
+            c = (abs(lat + dla - ref[0]) + abs(lng + dlo - ref[1]), lat + dla, lng + dlo)
+            if c[0] < best[0]: best = c
+    return best[1], best[2]
+
 def find_property(a):
     """Exact address first; if the register spells the road or locality differently, retry with looser matches
     (number + road, then road + locality, then road alone) and say which one matched."""
@@ -90,6 +136,11 @@ def find_property(a):
                     print("  several properties on that road; rerun with --pin lat,lon of a point inside the block")
                 return feats
             print(f"  no match for '{pat.strip('%')}'")
+        g = geocode(a.address + ", NSW, Australia")
+        if g:
+            print(f"  the register has no match, but the address lookup found it at {g[0]:.6f},{g[1]:.6f} ({g[2][:80]}); using the property at that point")
+            a.pin = f"{g[0]},{g[1]}"
+            return _find_property_where(None, a)
         return []
     return _find_property_where(None, a)
 
@@ -212,6 +263,7 @@ def main():
     ap.add_argument("--propid", help="NSW property id")
     ap.add_argument("--lotdp", help="one or more Lot/DP ids, e.g. '1//DP123456,2//DP123456'")
     ap.add_argument("--pin", help="lat,lon of a point inside the property")
+    ap.add_argument("--pluscode", help="Google Plus Code of a point inside the property, e.g. 'HW9Q+JM Mongarlowe NSW'")
     ap.add_argument("--rain-only", action="store_true", help="only (re)fetch the SILO rainfall, using the saved window.json")
     ap.add_argument("--catchment-only", action="store_true", help="only fetch the wide 10 m elevation for the full catchment")
     ap.add_argument("--inset-only", action="store_true", help="only fetch the close-up aerial of the property (small blocks)")
@@ -238,6 +290,8 @@ def main():
         else:
             print("  SILO did not answer; try again in a few minutes")
         return
+    if a.pluscode:
+        lat, lon = pluscode_to_latlon(a.pluscode); a.pin = f"{lat:.6f},{lon:.6f}"; print(f"  Plus Code {a.pluscode} is {a.pin}")
     if not (a.address or a.propid or a.lotdp or a.pin):
         sys.exit("Give --address, --propid, --lotdp or --pin")
 
