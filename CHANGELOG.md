@@ -46,11 +46,38 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v40 | 25 Oct 2026 | trial/willow-vale-team | Green firebreak (area and strip); Mangiri opens on the whole lot |
 | Trial v39 | 25 Oct 2026 | trial/willow-vale-team | Draw, select, move and reshape in 3D; upright 3D labels |
 | Beta v2 | 25 Oct 2026 | beta/group-maps | Mangiri beta map (8th group) |
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Trial v40 (25 Oct 2026)
+**Added**
+- Green firebreak, two new Zones tools (in Essentials): **Green firebreak** (an area: teal fill, solid teal edge, label
+  in m²) and **Green firebreak strip** (draw a line; it shows as a filled band 10 m wide, changeable from 5 to 20 m in
+  the feature's panel, centred or to the left or right of the line, with its area = length × width). Both work in 2D
+  and 3D, save, undo, list in Features and print on the A3 sheet (the strip in the legend with its area, the area in
+  the Zones panel).
+- A "Planting layers" panel when either tool is picked or one is opened (edge 0–3 m, middle 3–7 m, outer 7–10 m,
+  beyond 10 m, rules of thumb, and the clearing-rules check); the same text goes into a new firebreak's notes.
+  Source line: Banana Shire Council 'Plants and fires'; Permaculture Australia 'Designing your garden for fire
+  resilience' (2020s); Bright Tree notes 2026.
+- Layers legend: a filled teal band with a solid edge is the green firebreak; the dashed line with no fill is the
+  property boundary.
+- Bright Tree: one draft "Perimeter green firebreak (draft)" strip, 10 m wide, just inside the whole boundary
+  (status idea), added to the trial map's drawings for Brett to adjust. About 800 m of the 1,357 m loop crosses ground
+  steeper than 50% (creek and cliff sides) in 34 separate stretches, too broken up to leave out neatly, so the full
+  loop is drawn and its notes say so.
+
+**Changed**
+- Mangiri: the whole 33 ha lot is now the focus, and the site opens fitted to it. The separate clearing outline is
+  gone; the two southern parts still show as thin dashed outlines.
+- Dragging the first or last point of a closed loop keeps the two ends joined.
+
+**Fixed**
+- A rare error while a site was still loading (the map tried to draw before the outlines were ready).
 
 ### Trial v39 (25 Oct 2026)
 **Added**

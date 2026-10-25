@@ -91,6 +91,17 @@ try:
         p.mouse.click(cx + 200, cy - 100); p.wait_for_timeout(500)
         tk = p.evaluate("(()=>{const f=[...features.values()].find(f=>f.kind==='tank');return f&&f.geom.pts[0]})()")
         check(tk is not None, f'a tank placed with one click: {tk}')
+        # a green firebreak strip (line drawn as a 10 m band): draw in 3D, then select it by clicking inside the band
+        if p.evaluate("!!KINDS.greenstrip"):
+            p.evaluate("pickSel(null);startTool('greenstrip')"); p.wait_for_timeout(100)
+            for dx, dy in [(-150, 120), (-20, 140), (110, 120)]:
+                p.mouse.move(cx + dx, cy + dy); p.mouse.click(cx + dx, cy + dy); p.wait_for_timeout(120)
+            p.keyboard.press('Enter'); p.wait_for_timeout(600)
+            st = p.evaluate("(()=>{const e=[...features].find(([i,f])=>f.kind==='greenstrip');return e&&{id:e[0],w:e[1].width,n:e[1].geom.pts.length,notes:(e[1].notes||'').startsWith('Planting layers')}})()")
+            check(st and st['w'] == 10 and st['n'] == 3 and st['notes'], f'firebreak strip drawn in 3D, 10 m wide, planting notes filled in: {st}')
+            inside = p.evaluate(f"""(()=>{{const f=features.get('{st['id']}');const b=stripOf(f);const r=bandRings(b)[0];const q=[(r[1][0]+r[r.length-2][0])/2*.6+f.geom.pts[1][0]*.4,(r[1][1]+r[r.length-2][1])/2*.6+f.geom.pts[1][1]*.4];const s=v3Scr(q[0],q[1]);const g=$('#gl').getBoundingClientRect();return [g.left+s[0],g.top+s[1]]}})()""")
+            p.evaluate("pickSel(null)"); p.mouse.click(*inside); p.wait_for_timeout(300)
+            check(p.evaluate(f"selected==='{st['id']}'"), 'clicking inside the band (off the centre line) selects the strip')
         # texture refresh timing
         ms = p.evaluate("(()=>{const t=performance.now();v3Texture(V3.box);return performance.now()-t})()")
         print(f'     painting the drape texture takes {ms:.0f} ms (done once when a drag starts and once when it ends)')
