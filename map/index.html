@@ -47,6 +47,7 @@ h2:first-child{margin-top:4px}
 .seg{display:flex;gap:4px;flex-wrap:wrap}
 .seg button,.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.cswrow{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}.csw{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer;color:#fff;font-size:13px;line-height:1;padding:0}.csw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn.danger{color:var(--warn)}
 .btn:focus-visible,.seg button:focus-visible,.tool:focus-visible,nav.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -269,6 +270,7 @@ const KINDS={
   path:{g:'Access',label:'Footpath',geom:'line',color:'#a8794a',dash:[3,3],checkGrade:15},
   building:{g:'Built',label:'Building',geom:'polygon',color:'#575757'},
   structure:{g:'Built',label:'Structure / asset',geom:'point',color:'#444',sym:'square'},teepee:{g:'Built',label:'Teepee / tipi',geom:'point',color:'#e0218a',sym:'tri',size:1.7},
+  marker:{g:'Built',label:'Custom building / marker',geom:'point',color:'#2b6cb0',sym:'square',size:1.4},
   foodforest:{g:'Plants',label:'Food forest / bed',geom:'polygon',color:'#5f9e2f'},
   guild:{g:'Plants',label:'Guild',geom:'point',color:'#3f8f3a',sym:'guild'},
   tree:{g:'Plants',label:'Tree',geom:'point',color:'#2e6b2a',sym:'tree'},
@@ -354,6 +356,12 @@ function stripOf(f){const k=KINDS[f.kind];if(!k||!k.band||!f.geom||f.geom.g!=='l
 function bandRings(b){return b.closed?[b.A,b.B]:[b.A.concat(b.B.slice().reverse())]}
 function inBand(w,b){return b.closed?inPoly(w,b.A)!==inPoly(w,b.B):inPoly(w,bandRings(b)[0])}
 const m2=a=>Math.round(a).toLocaleString()+' m²';
+/* optional per-feature colour (doc field "color", a hex string; absent = the type's own colour) */
+const FCOLORS=[['#e0218a','Bright pink'],['#f08c00','Orange'],['#f2c500','Yellow'],['#12a4a0','Teal'],['#7b3fc4','Purple'],['#d62828','Red'],['#1c64d8','Blue'],['#2f9e44','Green'],['#8a5a2b','Brown'],['#111111','Black']];
+function fCol(f){const k=KINDS[f.kind]||KINDS.note;return (f.color&&/^#[0-9a-f]{6}$/i.test(f.color))?f.color:k.color}
+function colorPickHTML(f){const k=KINDS[f.kind]||{};if(!f.geom||!['point','polygon'].includes(f.geom.g)||f.kind==='privacy')return '';const cur=f.color||'';
+  const sw=(c,l)=>`<button type="button" class="csw" data-col="${c}" aria-pressed="${cur===c}" title="${l}" aria-label="${l}" style="background:${c||k.color}">${c?'':'↺'}</button>`;
+  return `<details class="mini" ${f.color||f.kind==='marker'?'open':''}><summary>Colour${f.color?' · custom':''}</summary><div class="cswrow">${sw('','Type colour (default)')}${FCOLORS.map(([c,l])=>sw(c,l)).join('')}</div><p class="hint">Changes this one item on the map, in 3D, on the sheet and in the features list.</p></details>`}
 // the area line under a label
 function fSub(f,isZ,area,sc){const k=KINDS[f.kind]||{};const b=stripOf(f);if(b)return `${m2(b.area)} · ${+b.w.toFixed(1)} m wide`;if(f.geom.g!=='polygon')return '';if(!(isZ||area*sc*sc>2500))return '';return k.m2?m2(area):fmtArea(area)}
 /* custom zone types: made by the team (Designer level and up), shared per site */
@@ -422,6 +430,7 @@ let dem2=null, dem1=null, sunGrid={};
 const view={cx:960,cy:960,s:1};
 const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,focus:true,pros:true,design:true,svc:true,eco:false,geo:false,hazFire:false,hazVeg:false,sewerBands:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
 if(!lsGet('bt.namesOnHover',false)){layers.flabels=false;lsSet('bt.layers',layers);lsSet('bt.namesOnHover',true)}
+if(!lsGet('bt.smartLabels',false)){layers.flabels=true;lsSet('bt.layers',layers);lsSet('bt.smartLabels',true)} // trial v43: names show wherever there is room, so they are on by default again
 const features=new Map(); // id -> data
 let selected=null, tool=null, draft=null, gradePen=lsGet('bt.gradePen',{on:false,grade:0,dir:'down'});
 let db=null, userCap=null, myId=null, downloads=null, live=false, assets=null;
@@ -630,46 +639,103 @@ function interiorPoint(g){if(POLE.has(g))return POLE.get(g);const P=g.pts;let x0
 function darker(hex,k=.62){const n=parseInt(hex.slice(1),16);const c=[(n>>16)&255,(n>>8)&255,n&255].map(v=>Math.round(v*k));return `rgb(${c.join(',')})`}
 function drawSectionEnds(){for(const [id,f] of secOrder()){if(!vis(f)||f.geom.pts.length<2)continue;const [a,b]=secLetters(id);const P=f.geom.pts;
   [[P[0],a],[P[P.length-1],b]].forEach(([p,t])=>{const [x,y]=w2s(...p);ctx.fillStyle='#fff';ctx.strokeStyle='#c0392b';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,11,0,7);ctx.fill();ctx.stroke();ctx.font='700 12px "IBM Plex Sans",sans-serif';ctx.fillStyle='#c0392b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,x,y+.5)})}}
-function drawFeatureLabels(){const L=[];
-  for(const [id,f] of features){if(!vis(f))continue;const k=KINDS[f.kind]||KINDS.note;const isZ=k.g==='Zones';if(f.kind==='section'||(f.kind==='privacy'&&id!==selected))continue;if(isZ?!layers.zlabels:!(layers.flabels||id===selected||id===hoverId))continue;const g=f.geom;
-    let a,inner=0;if(g.g==='polygon'){const ip=interiorPoint(g);a=ip.p;inner=ip.r*view.s}else{a=centroid(f);if(!a)continue;if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}if(a1<a0)a1+=360;const m=((a0+a1)/2)*Math.PI/180;a=[g.cx+Math.sin(m)*g.r*.72,g.cy-Math.cos(m)*g.r*.72]}}
-    const [x,y]=w2s(...a);if(x<-200||y<-60||x>W+200||y>H+60)continue;
-    const area=g.g==='polygon'?polyArea(g.pts):0;const name=f.name||k.label;
-    if(!isZ&&id!==selected&&id!==hoverId&&((g.g==='polygon'&&Math.sqrt(area)*view.s<26)||(g.g==='point'&&view.s<1.1)||(g.g==='line'&&lineLen(g.pts)*view.s<60)))continue; // small things: name appears when zoomed in
-    const col=isZ&&layers.zcol!==false?darker(k.color):'#1d2621';
-    const sub=fSub(f,isZ,area,view.s);
-    L.push({id,f,isZ,x,y,inner,area,name,sub,col,acol:k.color,point:g.g==='point',poly:g.g==='polygon'?g.pts:null})}
-  // zones first (they are big and anchor the reading), then larger features
-  L.sort((p,q)=>(q.isZ-p.isZ)||(q.area-p.area));
-  const boxes=[];const hit=b=>boxes.some(o=>b.x0<o.x1&&b.x1>o.x0&&b.y0<o.y1&&b.y1>o.y0);
-  const sel=selected&&features.get(selected);
-  for(const l of L){ctx.font=`${l.isZ?600:500} ${l.isZ?12.5:11.5}px "IBM Plex Sans",sans-serif`;const w1=ctx.measureText(l.name).width;ctx.font='600 11px "IBM Plex Mono",monospace';const w2=l.sub?ctx.measureText(l.sub).width:0;
-    const bw=Math.max(w1,w2)+8,bh=l.sub?30:16;const oy=l.point?16:0;
-    const cands=[[0,oy]];for(const r of [22,34,48,64,84])for(let t=0;t<12;t++){const an=t*Math.PI/6+(r%2?Math.PI/12:0);cands.push([Math.cos(an)*r,Math.sin(an)*r*0.8+oy])}
-    let pos=null;for(const [dx,dy] of cands){const cx=l.x+dx,cy=l.y+dy;const b={x0:cx-bw/2,x1:cx+bw/2,y0:cy-bh/2,y1:cy+bh/2};if(hit(b))continue;
-      if(l.isZ&&l.poly&&!inPoly(s2w(cx,cy),l.poly))continue;pos={cx,cy,b,moved:Math.hypot(dx,dy-oy)>1};break}
-    if(!pos){if(l.isZ||(sel&&l.id===selected)){const b={x0:l.x-bw/2,x1:l.x+bw/2,y0:l.y+oy-bh/2,y1:l.y+oy+bh/2};pos={cx:l.x,cy:l.y+oy,b,moved:false}}else continue}
-    boxes.push(pos.b);
-    if(pos.moved){ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(l.x,l.y);ctx.lineTo(pos.cx,pos.cy);ctx.stroke();ctx.strokeStyle=l.isZ?l.col:'rgba(30,38,33,.85)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(l.x,l.y);ctx.lineTo(pos.cx,pos.cy);ctx.stroke();ctx.fillStyle=l.acol;ctx.beginPath();ctx.arc(l.x,l.y,2.6,0,7);ctx.fill();
-      // redraw the background behind the text so the leader does not run through it
-      ctx.fillStyle='rgba(255,255,255,.78)';ctx.beginPath();ctx.roundRect?ctx.roundRect(pos.b.x0,pos.b.y0,pos.b.x1-pos.b.x0,pos.b.y1-pos.b.y0,4):ctx.rect(pos.b.x0,pos.b.y0,pos.b.x1-pos.b.x0,pos.b.y1-pos.b.y0);ctx.fill()}
-    const ty=l.sub?pos.cy-7:pos.cy;haloText(l.name,pos.cx,ty,l.isZ?12.5:11.5,l.col,'IBM Plex Sans');
-    if(l.sub){ctx.font='600 11px "IBM Plex Mono",monospace';ctx.lineWidth=3.5;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.strokeText(l.sub,pos.cx,pos.cy+8);ctx.fillStyle=l.isZ?l.col:l.acol;ctx.fillText(l.sub,pos.cx,pos.cy+8)}}}
 function haloText(t,x,y,size=11,color='#3a2a14',font='IBM Plex Mono'){ctx.font=`500 ${size}px "${font}",monospace`;ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.strokeText(t,x,y);ctx.fillStyle=color;ctx.fillText(t,x,y)}
+/* ---------------- 2D label placement: a hierarchy, then no-overlap placement ----------------
+   Every label is measured and tried at a few spots near its feature; if every spot would sit on a label already drawn,
+   on a symbol, on the selected item's handles or off the map, it is skipped (it still shows on hover or when selected).
+   Labels are placed in this order: the selected item, the hovered item, then by class (rank), and within a class
+   the biggest area or longest line first. Tune the table: rank = order, size/weight = font,
+   minS = zoom (screen pixels per metre) before the class appears, fullS = below this zoom only short names are used. */
+const LABEL_CLASSES={
+  zone:    {rank:1,size:12.5,weight:600,minS:0.5, fullS:2.5}, // zones, goat zones, green firebreaks, W bands, privacy
+  built:   {rank:2,size:11.5,weight:600,minS:1.1, fullS:2.5}, // buildings, structures, teepee, tanks, sauna, guilds, ponds, rock pools
+  element: {rank:3,size:11,  weight:500,minS:3.2, fullS:0},   // beds, plantings, swales, tracks, paths, pipes, fences, notes
+  prospect:{rank:4,size:10.5,weight:500,minS:0.35,fullS:3.5}, // computed: building pads, ponds, header tank, flats, keypoints, catchment flows
+  contour: {rank:5,size:10,  weight:500,minS:0.45,fullS:0}};  // 5 m contour heights
+const LABEL_BUILT_KINDS=new Set(['guild','gathering','pond','rockpool','damwall','reedbed','hives','herbspiral','compost']);
+function labelClass(f){const k=KINDS[f.kind]||{};if(k.g==='Zones'||f.kind==='apz')return 'zone';if((k.g==='Built'&&k.geom!=='line')||LABEL_BUILT_KINDS.has(f.kind))return 'built';return 'element'}
+// "Zone 1 · Daily - Greens and kitchen garden" -> "Greens and kitchen garden"; "W2 · Upper gaps (draft) – north pocket" -> "W2 · north pocket"
+function labelShort(n){let s=String(n||'').replace(/\s*\((draft|idea|planned|existing)\)/gi,'').replace(/\s+/g,' ').trim();
+  const m=s.match(/^(.*?\S)\s+[-–—]\s+(.+)$/);if(m){const code=m[1].match(/^([A-Z]\d+)\s*·/);if(code)s=code[1]+' · '+m[2];else if(/^Zone \d/.test(m[1]))s=m[2]}
+  return s.charAt(0).toUpperCase()+s.slice(1)}
+function labelTiny(n){const m=String(n||'').match(/^(Zone \d|[A-Z]\d+\b)/);return m?m[1]:''}
+function labelTrunc(s,max=22){if(s.length<=max)return s;const c=s.slice(0,max).replace(/\s+\S*$/,'');return (c.length>6?c:s.slice(0,max-1))+'…'}
+function labelWrap(s){if(s.length<16||!s.includes(' '))return null;let best=-1;for(let i=0;i<s.length;i++)if(s[i]===' '&&(best<0||Math.abs(i-s.length/2)<Math.abs(best-s.length/2)))best=i;return best<0?null:[s.slice(0,best),s.slice(best+1)]}
+// the text variants to try, richest first: drop the area line before shortening the name
+function labelVariants(name,sub,full){const out=[],seen=new Set();const add=(lines,s)=>{if(!lines||!lines[0])return;const k=lines.join('\n')+'|'+(s||'');if(seen.has(k))return;seen.add(k);out.push({lines,sub:s||''})};
+  const sh=labelShort(name);const bases=full?[name,sh]:[labelTrunc(sh,26)];
+  for(const b of bases){if(sub){add([b],sub);add(labelWrap(b),sub)}add([b]);add(labelWrap(b))}
+  add([labelTrunc(sh)]);add([labelTiny(name)||labelTiny(sh)]);return out}
+function labelBoxOf(v,c){ctx.font=`${c.weight} ${c.size}px "IBM Plex Sans",sans-serif`;let w=0;for(const t of v.lines)w=Math.max(w,ctx.measureText(t).width);
+  if(v.sub){ctx.font='600 11px "IBM Plex Mono",monospace';w=Math.max(w,ctx.measureText(v.sub).width)}const lh=c.size+2;return {w:w+6,h:v.lines.length*lh+(v.sub?13:0)+3,lh}}
+function screenAt(P,fr){let L=0;for(let i=1;i<P.length;i++)L+=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);let t=L*fr;
+  for(let i=1;i<P.length;i++){const d=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);if(t<=d||i===P.length-1){const u=d?Math.min(1,t/d):0;return {p:[P[i-1][0]+(P[i][0]-P[i-1][0])*u,P[i-1][1]+(P[i][1]-P[i-1][1])*u],n:d?[-(P[i][1]-P[i-1][1])/d,(P[i][0]-P[i-1][0])/d]:[0,1]}}t-=d}return {p:P[0],n:[0,1]}}
+// screen boxes around the selected item's handles (corners, rotate, resize), so no label covers them
+function handleBoxes(){const out=[];const f=selected&&features.get(selected);if(!f||!f.geom)return out;const g=f.geom;const sq=(w,r)=>{const [x,y]=w2s(...w);out.push({x0:x-r,y0:y-r,x1:x+r,y1:y+r})};
+  if(g.pts&&g.g!=='point')for(const q of g.pts)sq(q,7);if(g.g==='point'&&g.pts)sq(g.pts[0],12);if(g.g==='sector'||g.g==='sun')sq([g.cx,g.cy],8);
+  const rp=rotPos(f);if(rp)sq(rp,11);const h=handlePos(f);if(h)sq(h,11);return out}
+// the buttons, readout and scale bar that float over the map: labels keep clear of them
+function uiBoxes(){if(window.__SHEETING||window.__v3tex)return [];const out=[{x0:W-140,y0:H-80,x1:W,y1:H}];const r0=cv.getBoundingClientRect();
+  for(const q of ['.zoom','#hud','#mapLegend','#drawbar']){const e=$(q);if(!e||e.hidden||!e.offsetParent)continue;const r=e.getBoundingClientRect();if(r.width&&r.height)out.push({x0:r.left-r0.left-4,y0:r.top-r0.top-4,x1:r.right-r0.left+4,y1:r.bottom-r0.top+4})}return out}
 function drawLabels(){
   if(mt&&mt.type==='fire')fireLabels();
   if(mt&&mt.type==='ruler'&&mt.pts.length>1){const p=mt.closed?mt.pts.concat([mt.pts[0]]):mt.pts;ctx.textAlign='center';ctx.textBaseline='middle';for(let i=1;i<p.length;i++){const m=[(p[i-1][0]+p[i][0])/2,(p[i-1][1]+p[i][1])/2];const [x,y]=w2s(...m);haloText(fmtLen(dist(p[i-1],p[i])),x,y,11,'#7a4a00')}
     if(mt.closed&&mt.pts.length>=3){let cx=0,cy=0;mt.pts.forEach(q=>{cx+=q[0];cy+=q[1]});const [x,y]=w2s(cx/mt.pts.length,cy/mt.pts.length);ctx.font='600 13px "IBM Plex Mono",monospace';const t=fmtArea(polyArea(mt.pts));ctx.lineWidth=3.5;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.strokeText(t,x,y);ctx.fillStyle='#7a4a00';ctx.fillText(t,x,y)}}
   ctx.textAlign='center';ctx.textBaseline='middle';
-  if(layers.c5&&view.s>0.45)for(const l of T.labels){const [x,y]=w2s(...l.a),[x2,y2]=w2s(...l.b);if(x<-20||y<-20||x>W+20||y>H+20)continue;let a=Math.atan2(y2-y,x2-x);if(a>Math.PI/2)a-=Math.PI;if(a<-Math.PI/2)a+=Math.PI;ctx.save();ctx.translate(x,y);ctx.rotate(a);haloText(l.z+'',0,0,10,'#5a3d1c');ctx.restore()}
-  if(layers.catch)for(const c of T.catch){if(!c.at)continue;const [x,y]=w2s(...c.at);haloText(`↓ ${c.ha} ha in`,x,y-12,11,'#0f4f96')}
-  if(layers.catch&&T.meta.outlet){const [x,y]=w2s(...T.meta.outlet.at);haloText(`${T.meta.outlet.ha} ha out ↑`,x,y+14,11,'#0f4f96')}
-  if(layers.pros&&PROS&&view.s>0.35)for(const p of PROS.items){if(isHid('pros:'+p.id))continue;let [x,y]=w2s(...p.at);const col=PRC[p.kind];let t=view.s>0.8?p.label:p.id;
-    if(p.kind==='pond'){t=view.s>0.8?`${p.id} ~${p.ml.toFixed(1)} ML`:p.id;ctx.textAlign='left';haloText(t,x+16,y+5,10.5,col,'IBM Plex Sans');ctx.textAlign='center';continue}
-    if(p.kind==='flat'){t=view.s>1.2?p.label:p.id;ctx.textAlign='right';haloText(t,x-14,y+12,10.5,col,'IBM Plex Sans');ctx.textAlign='center';continue}
-    haloText(t,x,y+(p.kind==='tank'?-16:-18),10.5,col,'IBM Plex Sans')}
-  if(layers.kp)for(const k of T.kp){const [x,y]=w2s(k.x,k.y);ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/4);ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.strokeRect(-6,-6,12,12);ctx.strokeStyle='#0b5c8f';ctx.lineWidth=1.6;ctx.setLineDash([3,2]);ctx.strokeRect(-6,-6,12,12);ctx.restore();ctx.setLineDash([]);if(view.s>0.6)haloText(`KP? ${k.z.toFixed(0)} m`,x,y-14,10.5,'#0b5c8f')}
-  if(layers.design&&view.s>0.5&&!window.__v3tex)drawFeatureLabels(); // 3D draws its own upright labels
+  const S=view.s,L=[],hb=handleBoxes(),obs=hb.concat(uiBoxes());const onScr=(x,y,m=60)=>x>-m&&y>-m&&x<W+m&&y<H+m;
+  const sym=(x,y,r)=>{if(onScr(x,y,10))obs.push({x0:x-r,y0:y-r,x1:x+r,y1:y+r})};
+  // ---- design features
+  if(layers.design&&!window.__v3tex){const PZ=privZones();
+    for(const [id,f] of features){if(!vis(f))continue;const k=KINDS[f.kind]||KINDS.note;const g=f.geom;if(!g||f.kind==='section'||(f.kind==='privacy'&&id!==selected))continue;
+      const cls=labelClass(f),C=LABEL_CLASSES[cls],isZ=cls==='zone',pri=id===selected?2:id===hoverId?1:0;
+      if(g.g==='point'&&g.pts){const [x,y]=w2s(...g.pts[0]);sym(x,y,(g.r?0:7)*(k.size||1)*(k.sym==='tri'?1.3:1)+2)}
+      if(!pri){if(isZ?!layers.zlabels:!layers.flabels)continue;if(S<C.minS)continue}
+      let a,inner=0;if(g.g==='polygon'){const ip=interiorPoint(g);a=ip.p;inner=ip.r*S}else{a=centroid(f);if(!a)continue;if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}if(a1<a0)a1+=360;const m=((a0+a1)/2)*Math.PI/180;a=[g.cx+Math.sin(m)*g.r*.72,g.cy-Math.cos(m)*g.r*.72]}}
+      const [x,y]=w2s(...a);const len=g.g==='line'?lineLen(g.pts):0;const area=g.g==='polygon'?polyArea(g.pts):0;
+      if(!pri&&!onScr(x,y,g.g==='line'?Math.max(200,len*S/2):200))continue;
+      if(!pri&&((g.g==='polygon'&&Math.sqrt(area)*S<(isZ?34:26))||(g.g==='line'&&len*S<60)))continue; // small things: the name appears when zoomed in
+      const col=f.color&&!isZ?darker(f.color,.8):isZ&&layers.zcol!==false?darker(f.color||k.color):'#1d2621';
+      const sub=fSub(f,isZ,area,S);const size=g.g==='polygon'?area:g.g==='line'?len*4:g.g==='point'?(g.r?Math.PI*g.r*g.r:30):g.r*g.r;
+      L.push({id,cls,pri,x,y,inner,size,name:f.name||k.label,sub,col,acol:f.color||k.color,geo:g.g,poly:g.g==='polygon'?g.pts:null,line:g.g==='line'?g.pts.map(q=>w2s(...q)):null,
+        rs:g.g==='point'?(g.r?Math.max(4,g.r*S):7*(k.size||1)*(k.sym==='tri'?1.3:1))+3:0,full:pri||(S>=C.fullS&&((f.name||k.label).length<=30||S>=C.fullS*3))})}} // long names stay short until zoomed well in
+  // ---- computed prospects, keypoints and catchment flows
+  const PZ=privZones();const hidPZ=w=>PZ.length&&PZ.some(z=>z.hideItems!==false&&inPoly(w,z.geom.pts));const PC=LABEL_CLASSES.prospect;
+  if(layers.pros&&PROS&&S>PC.minS)for(const p of PROS.items){if(isHid('pros:'+p.id)||!p.at||hidPZ(p.at))continue;const [x,y]=w2s(...p.at);if(!onScr(x,y))continue;const col=PRC[p.kind];
+    if(p.kind==='tank')sym(x,y,8);
+    const full=p.kind==='pond'?`${p.id} ~${p.ml.toFixed(1)} ML`:p.label;const fs=PC.fullS;
+    L.push({id:'pros:'+p.id,cls:'prospect',pri:0,x,y,size:(p.kind==='pad'?3e4:2e4)+(p.ml||0)*1e3,col,vars:S>fs?[full,p.id]:[p.id],pk:p.kind})}
+  if(layers.kp&&S>PC.minS)for(const k of T.kp){const [x,y]=w2s(k.x,k.y);if(!onScr(x,y))continue;sym(x,y,9);if(S>0.6)L.push({id:'kp',cls:'prospect',pri:0,x,y,size:1e4,col:'#0b5c8f',vars:[`KP? ${k.z.toFixed(0)} m`,'KP?'],pk:'kp'})}
+  if(layers.catch){for(const c of T.catch){if(!c.at)continue;const [x,y]=w2s(...c.at);if(onScr(x,y))L.push({id:'catch',cls:'prospect',pri:0,x,y,size:5e4+c.ha,col:'#0f4f96',vars:[`↓ ${c.ha} ha in`],pk:'in'})}
+    if(T.meta.outlet){const [x,y]=w2s(...T.meta.outlet.at);if(onScr(x,y))L.push({id:'catch',cls:'prospect',pri:0,x,y,size:6e4,col:'#0f4f96',vars:[`${T.meta.outlet.ha} ha out ↑`],pk:'out'})}}
+  L.sort((p,q)=>(q.pri-p.pri)||(LABEL_CLASSES[p.cls].rank-LABEL_CLASSES[q.cls].rank)||(q.size-p.size));
+  // ---- placement
+  const boxes=[];const clash=b=>b.x0<2||b.y0<2||b.x1>W-2||b.y1>H-2||boxes.some(o=>b.x0<o.x1&&b.x1>o.x0&&b.y0<o.y1&&b.y1>o.y0)||obs.some(o=>b.x0<o.x1&&b.x1>o.x0&&b.y0<o.y1&&b.y1>o.y0);
+  for(const l of L){const C=LABEL_CLASSES[l.cls];
+    const vars=l.vars?l.vars.map(t=>({lines:[t],sub:''})):labelVariants(l.name,l.sub,l.full);let pos=null,first=null;
+    for(const v of vars){const {w,h,lh}=labelBoxOf(v,C);const cands=[];
+      if(l.pk){const r=l.pk==='kp'?12:l.pk==='tank'?10:14;const d={pond:[r+w/2,5],flat:[-r-w/2,12],tank:[0,-16],pad:[0,-18],kp:[0,-14],in:[0,-12],out:[0,14]}[l.pk];cands.push(d,[0,-(r+h/2)],[0,r+h/2],[r+w/2,0],[-r-w/2,0])}
+      else if(l.geo==='point'){const r=l.rs;cands.push([0,r+h/2],[0,-r-h/2],[r+w/2,0],[-r-w/2,0],[r*.8+w/2,r*.8+h/2],[-r*.8-w/2,r*.8+h/2],[r*.8+w/2,-r*.8-h/2],[-r*.8-w/2,-r*.8-h/2]);
+        for(const R of [r+28,r+46])for(let t=0;t<8;t++){const an=t*Math.PI/4+Math.PI/8;cands.push([Math.cos(an)*(R+w/2),Math.sin(an)*(R+h/2)])}}
+      else if(l.line){for(const fr of [.5,.38,.62,.25,.75,.12,.88]){const s=screenAt(l.line,fr),o=h/2+4;cands.push([s.p[0]-l.x,s.p[1]-l.y],[s.p[0]+s.n[0]*o-l.x,s.p[1]+s.n[1]*o-l.y],[s.p[0]-s.n[0]*o-l.x,s.p[1]-s.n[1]*o-l.y])}}
+      else{cands.push([0,0]);for(const R of [12,24,38,56])for(let t=0;t<8;t++){const an=t*Math.PI/4+(R%24?Math.PI/8:0);cands.push([Math.cos(an)*R*1.3,Math.sin(an)*R])}
+        if(l.cls!=='zone')for(const R of [74,96])for(let t=0;t<8;t++){const an=t*Math.PI/4+Math.PI/8;cands.push([Math.cos(an)*R*1.3,Math.sin(an)*R])}}
+      for(const [dx,dy] of cands){const cx=l.x+dx,cy=l.y+dy;const b={x0:cx-w/2,x1:cx+w/2,y0:cy-h/2,y1:cy+h/2};if(!first)first={cx,cy,b,v,lh,dx,dy};if(clash(b))continue;
+        if(l.cls==='zone'&&l.poly&&!inPoly(s2w(cx,cy),l.poly))continue;pos={cx,cy,b,v,lh,dx,dy};break}
+      if(pos)break}
+    if(!pos){if(l.pri&&first)pos=first;else continue}   // the selected or hovered item always shows its name
+    boxes.push(Object.assign(pos.b,{t:pos.v.lines.join(' ')+(pos.v.sub?' / '+pos.v.sub:''),cls:l.cls,id:l.id}));
+    const moved=!l.line&&!l.pk&&l.geo!=='point'?Math.hypot(pos.dx,pos.dy)>20:l.geo==='point'&&Math.hypot(pos.dx,pos.dy)>l.rs+pos.b.y1-pos.b.y0+4;
+    if(moved){const ex=Math.max(pos.b.x0,Math.min(pos.b.x1,l.x)),ey=Math.max(pos.b.y0,Math.min(pos.b.y1,l.y));ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(l.x,l.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.strokeStyle=l.cls==='zone'?l.col:'rgba(30,38,33,.85)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(l.x,l.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.fillStyle=l.acol||l.col;ctx.beginPath();ctx.arc(l.x,l.y,2.6,0,7);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,.72)';ctx.beginPath();ctx.roundRect?ctx.roundRect(pos.b.x0,pos.b.y0,pos.b.x1-pos.b.x0,pos.b.y1-pos.b.y0,4):ctx.rect(pos.b.x0,pos.b.y0,pos.b.x1-pos.b.x0,pos.b.y1-pos.b.y0);ctx.fill()}
+    const n=pos.v.lines.length;let ty=pos.b.y0+2+pos.lh/2+.5;ctx.font=`${C.weight} ${C.size}px "IBM Plex Sans",sans-serif`;ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,.88)';ctx.lineJoin='round';
+    for(const t of pos.v.lines){ctx.strokeText(t,pos.cx,ty);ctx.fillStyle=l.col;ctx.fillText(t,pos.cx,ty);ty+=pos.lh}
+    if(pos.v.sub){ctx.font='600 11px "IBM Plex Mono",monospace';ctx.lineWidth=3.5;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.strokeText(pos.v.sub,pos.cx,ty+1);ctx.fillStyle=l.cls==='zone'?l.col:l.acol;ctx.fillText(pos.v.sub,pos.cx,ty+1)}}
+  // ---- 5 m contour heights last, rotated along the contour, only where nothing else sits
+  const CC=LABEL_CLASSES.contour;if(layers.c5&&S>CC.minS){ctx.font=`${CC.weight} ${CC.size}px "IBM Plex Mono",monospace`;
+    for(const l of T.labels){const [x,y]=w2s(...l.a),[x2,y2]=w2s(...l.b);if(x<-20||y<-20||x>W+20||y>H+20)continue;let a=Math.atan2(y2-y,x2-x);if(a>Math.PI/2)a-=Math.PI;if(a<-Math.PI/2)a+=Math.PI;
+      const t=l.z+'',w=ctx.measureText(t).width+4,h=CC.size+2,c=Math.abs(Math.cos(a)),s=Math.abs(Math.sin(a));const bw=w*c+h*s,bh=w*s+h*c;const b={x0:x-bw/2,x1:x+bw/2,y0:y-bh/2,y1:y+bh/2};if(clash(b))continue;
+      boxes.push(Object.assign(b,{t,cls:'contour',id:'c5'}));ctx.save();ctx.translate(x,y);ctx.rotate(a);haloText(t,0,0,CC.size,'#5a3d1c');ctx.restore()}}
+  window.__labelBoxes=boxes;window.__handleBoxes=hb;
   if(layers.design)drawSectionEnds();
 }
 function drawScale(){const target=110/view.s;const nice=[1,2,5,10,20,25,50,100,200,250,500,1000];let m=nice[0];for(const n of nice)if(n<=target)m=n;const L=m*view.s;
@@ -687,7 +753,7 @@ function handlePos(f){const g=f.geom;if(g.g==='polygon'||(g.g==='line'&&g.pts.le
 function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16},${n>>8&255},${n&255},${a})`}
 function wedge(cx,cy,r,a0,a1){const p=new Path2D();p.moveTo(cx,cy);const s=(a0-90)*Math.PI/180;let e=(a1-90)*Math.PI/180;if(e<=s)e+=2*Math.PI;p.arc(cx,cy,r,s,e);p.closePath();return p}
 function drawFeature(f,px,sel){
-  const k=KINDS[f.kind]||KINDS.note,g=f.geom,col=k.color;ctx.setLineDash([]);
+  const k=KINDS[f.kind]||KINDS.note,g=f.geom,col=fCol(f);ctx.setLineDash([]);
   if(g.g==='polygon'){const p=new Path2D();g.pts.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));p.closePath();
     ctx.fillStyle=hexA(col,k.fillA||(k.g==='Zones'?.18:.35));ctx.fill(p);ctx.lineWidth=(sel?3:k.solid?2.4:2)*px;ctx.strokeStyle=col;if((k.g==='Zones'&&!k.solid)||k.dash)ctx.setLineDash((k.dash||[7,4]).map(v=>v*px));ctx.stroke(p);ctx.setLineDash([])}
   else if(g.g==='line'&&stripOf(f)){const b=stripOf(f);const p=new Path2D();for(const r of bandRings(b)){r.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));p.closePath()}
@@ -797,7 +863,7 @@ cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pointers
   if(!tool&&selected){const sf=features.get(selected);if(sf&&sf.locked)return;const h=hitVertex(e.offsetX,e.offsetY);if(h){h.before=snapF(selected);vdrag=h;dragStart=null}}});
 cv.addEventListener('pointerleave',()=>{if(hoverId){hoverId=null;draw()}});
 cv.addEventListener('pointermove',e=>{const pt=[e.offsetX,e.offsetY];if(pointers.has(e.pointerId))pointers.set(e.pointerId,pt);
-  const w=s2w(...pt);hud(w);if(e.pointerType==='mouse'&&!e.buttons&&!draft&&!mt&&!layers.flabels){const h=hitFeature(w)||null;if(h!==hoverId){hoverId=h;draw()}}if(lpT&&dragStart&&Math.hypot(pt[0]-dragStart.x,pt[1]-dragStart.y)>6)clearTimeout(lpT);
+  const w=s2w(...pt);hud(w);if(e.pointerType==='mouse'&&!e.buttons&&!draft&&!mt){const h=hitFeature(w)||null;if(h!==hoverId){hoverId=h;draw()}}if(lpT&&dragStart&&Math.hypot(pt[0]-dragStart.x,pt[1]-dragStart.y)>6)clearTimeout(lpT);
   if(selBox){selBox.b=w;draw();return}
   if(grpDrag){moved=true;const dx=w[0]-grpDrag.w0[0],dy=w[1]-grpDrag.w0[1];for(const [id,o] of grpDrag.orig){const f=features.get(id);if(f)features.set(id,{...f,geom:shiftGeom(o.geom,dx,dy)})}$('#hud').innerHTML=`Moving <b>${grpDrag.orig.size}</b> items · ${Math.hypot(dx,dy).toFixed(1)} m`;draw();return}
   if(boxDrag){boxDrag.b=w;const dx=Math.abs(w[0]-boxDrag.a[0]),dy=Math.abs(w[1]-boxDrag.a[1]);$('#hud').innerHTML=`<b>${dx.toFixed(1)} × ${dy.toFixed(1)} m</b> · ${fmtArea(dx*dy)}`;draw();return}
@@ -2508,8 +2574,8 @@ const PANELS={
  change(g,x,y,w){const ch=EXTRA&&EXTRA.change;if(!ch)return 0;const ys=Object.keys(ch).sort();if(!ys.length)return 0;let h=shHead(g,x,y,w,'Ground change');
   for(const yy of ys){const c=ch[yy];shText(g,`Since ${yy}`,x,y+h+22,20,SC.ink,600);shText(g,`${c.lotLossHa} ha lowered · ${c.lotGainHa} ha raised`,x+w,y+h+22,19,SC.mute,400,'right');h+=31}
   h+=shWrap(g,'More than 1 m of change, after survey offsets. Mostly gully edges: leads to check on site.',x,y+h+8,w,17,SC.mute,22);return h+14},
- legend(g,x,y,w,ctx2){const vf=visList();const used={};vf.forEach(f=>{const k=f.kind;if((KINDS[k]||{}).g==='Zones'&&!(KINDS[k]||{}).band)return;used[k]=used[k]||{n:0,a:0};used[k].n++;if(f.geom.g==='polygon')used[k].a+=polyArea(f.geom.pts);else{const b=stripOf(f);if(b)used[k].a+=b.area}});
-  const lg=[[SC.teal,'Property boundary',''],['#1969c8','Flow lines',''],['#8a6a45','Contours','']];if(layers.pros&&PROS)lg.push(['#a14e07','Prospects (computed)','']);Object.keys(KINDS).filter(k=>used[k]).forEach(k=>lg.push([KINDS[k].color,KINDS[k].label,used[k].a?fmtHa(used[k].a):(used[k].n>1?'× '+used[k].n:'')]));
+ legend(g,x,y,w,ctx2){const vf=visList();const used={};vf.forEach(f=>{const kk=f.kind;if((KINDS[kk]||{}).g==='Zones'&&!(KINDS[kk]||{}).band)return;const k=f.color?kk+'|'+fCol(f):kk;used[k]=used[k]||{n:0,a:0,names:[]};used[k].n++;used[k].names.push(f.name||'');if(f.geom.g==='polygon')used[k].a+=polyArea(f.geom.pts);else{const b=stripOf(f);if(b)used[k].a+=b.area}});
+  const lg=[[SC.teal,'Property boundary',''],['#1969c8','Flow lines',''],['#8a6a45','Contours','']];if(layers.pros&&PROS)lg.push(['#a14e07','Prospects (computed)','']);Object.keys(KINDS).forEach(kk=>Object.keys(used).filter(k=>k===kk||k.startsWith(kk+'|')).forEach(k=>{const c=k.split('|')[1];const u=used[k];lg.push([c||KINDS[kk].color,c&&u.n===1&&u.names[0]?u.names[0]:KINDS[kk].label,u.a?fmtHa(u.a):(u.n>1?'× '+u.n:'')])}));
   let h=shHead(g,x,y,w,'Legend');const cols=lg.length>10?2:1;const cw=(w-(cols-1)*20)/cols;const rows=Math.ceil(lg.length/cols);
   lg.forEach(([c,l,v],i)=>{const cx=x+Math.floor(i/rows)*(cw+20),cy=y+h+(i%rows)*28;g.fillStyle=c;g.fillRect(cx,cy+4,18,18);g.font='400 18px "IBM Plex Sans",sans-serif';let t=l;while(g.measureText(t).width>cw-(v?110:30)&&t.length>4)t=t.slice(0,-2);if(t!==l)t+='…';shText(g,t,cx+26,cy+19,18,SC.ink);if(v)shText(g,v,cx+cw,cy+19,16,SC.mute,400,'right')});
   return h+rows*28+10}
@@ -2867,7 +2933,7 @@ function v3Overlay(){const c=$('#gl2');if(!c||!V3.on||!V3.cam||!V3.box)return;co
   if(c.width!==Math.round(w*dp)||c.height!==Math.round(h*dp)){c.width=Math.round(w*dp);c.height=Math.round(h*dp)}const g2=c.getContext('2d');g2.setTransform(dp,0,0,dp,0,0);g2.clearRect(0,0,w,h);
   if(!layers.design&&!draft){return}
   const skip=window.__v3skip;
-  const drawShape=(id,f,full,sel)=>{const k=KINDS[f.kind]||KINDS.note,col=k.color,gm=f.geom;const P=v3Proj(id,f);g2.setLineDash([]);g2.lineJoin='round';g2.lineCap='round';
+  const drawShape=(id,f,full,sel)=>{const k=KINDS[f.kind]||KINDS.note,col=fCol(f),gm=f.geom;const P=v3Proj(id,f);g2.setLineDash([]);g2.lineJoin='round';g2.lineCap='round';
     if(gm.g==='point'){const p=P[P.length===1?0:-1]||v3Scr(...gm.pts[0]);if(P.length>1){v3Path(g2,P,true);if(full){g2.fillStyle=hexA(col,.22);g2.fill()}g2.lineWidth=sel?2.5:1.5;g2.strokeStyle=col;g2.stroke()}
       const q=v3Scr(...gm.pts[0]);if(q&&full){g2.beginPath();g2.arc(q[0],q[1],7,0,7);g2.fillStyle=col;g2.fill();g2.lineWidth=2;g2.strokeStyle='#fff';g2.stroke()}return}
     const bnd=gm.g==='line'&&stripOf(f);v3Path(g2,P,gm.g!=='line'&&!bnd);
@@ -2908,7 +2974,7 @@ function v3Labels(g2,W3,H3){if(!layers.labels||!layers.design)return;const L=[];
     const area=g.g==='polygon'?polyArea(g.pts):0;const sc=V3.cam.h/2*V3.cam.f/p[2];
     if(!isZ&&id!==selected&&id!==hov&&((g.g==='polygon'&&Math.sqrt(area)*sc<22)||(g.g==='point'&&sc<.9)||(g.g==='line'&&lineLen(g.pts)*sc<50)))continue;
     if(id!==selected&&v3Hidden(p))continue;
-    L.push({id,isZ,p,area:area||(stripOf(f)||{}).area||0,name:f.name||k.label,sub:fSub(f,isZ,area,sc),col:isZ&&layers.zcol!==false?darker(k.color):'#1d2621',acol:k.color,pin:!isZ,near:p[2]})}
+    L.push({id,isZ,p,area:area||(stripOf(f)||{}).area||0,name:f.name||k.label,sub:fSub(f,isZ,area,sc),col:isZ&&layers.zcol!==false?darker(fCol(f)):'#1d2621',acol:fCol(f),pin:!isZ,near:p[2]})}
   L.sort((p,q)=>((q.id===selected)-(p.id===selected))||(q.isZ-p.isZ)||(q.area-p.area)||(p.near-q.near));
   const boxes=[];const hit=b=>boxes.some(o=>b.x0<o.x1&&b.x1>o.x0&&b.y0<o.y1&&b.y1>o.y0);g2.textAlign='center';g2.textBaseline='middle';
   for(const l of L){const fs=l.isZ?13.5:12.5;g2.font=`${l.isZ?600:500} ${fs}px "IBM Plex Sans",sans-serif`;const w1=g2.measureText(l.name).width;g2.font='600 11px "IBM Plex Mono",monospace';const w2=l.sub?g2.measureText(l.sub).width:0;
@@ -3014,7 +3080,7 @@ function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="$
 function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   const sc=m.slopeClasses.map(([lo,hi,c])=>`<span><i class="swatch" style="background:rgba(${c[0]},${c[1]},${c[2]},.85)"></i>${hi?lo+'–'+hi:'>'+lo}%</span>`).join('');
   const ac=Object.entries(m.aspectColors).map(([n,c])=>`<span><i class="swatch" style="background:rgb(${c})"></i>${n}</span>`).join('');
-  const lines=[['lot','Property boundary'+(SITE.boundarySrc?' · '+SITE.boundarySrc:''),'#14898f'],...(T.focus?[['focus','Focus area (traced from the '+(SITE.aerialSrc||'aerial photo')+')','#e8590c']]:[]),['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],...(PROS?[['pros','Prospects: ponds, pads, tank (computed)','#a14e07']]:[]),['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['sectors','Sector map (sun, wind, fire, views)','#e0a400'],['labels','All labels','#777'],['flabels','Names on structures & features (otherwise shown on hover, or a long press on a phone)','#575757'],['zlabels','Names on zones','#7d5aa6'],['zcol','Colour zone names to match the zone','#d6453d']];
+  const lines=[['lot','Property boundary'+(SITE.boundarySrc?' · '+SITE.boundarySrc:''),'#14898f'],...(T.focus?[['focus','Focus area (traced from the '+(SITE.aerialSrc||'aerial photo')+')','#e8590c']]:[]),['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],...(PROS?[['pros','Prospects: ponds, pads, tank (computed)','#a14e07']]:[]),['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['sectors','Sector map (sun, wind, fire, views)','#e0a400'],['labels','All labels','#777'],['flabels','Names on structures & features where there is room (the rest show on hover, or a long press on a phone)','#575757'],['zlabels','Names on zones','#7d5aa6'],['zcol','Colour zone names to match the zone','#d6453d']];
   el.innerHTML=
    sec('base','Base map',`${segHTML('baseSeg',[['none','None'],['relief','Relief'],['hillshade','Hillshade']].concat(IMG.aerial?[['aerial','Aerial']]:[]),layers.base)}
     <div class="row"><label for="baseop">Strength <span id="baseopv" class="pill">${Math.round(layers.baseOp*100)}%</span></label><input type="range" id="baseop" min="0" max="1" step="0.05" value="${layers.baseOp}"></div>
@@ -3325,6 +3391,7 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
     ${ROOF_KINDS.includes(f.kind)||(f.kind==='zone0'&&f.geom.g==='polygon'&&!z0HasRoof(f))?`<div class="row"><label><input type="checkbox" id="froof" ${roofOn(f)?'checked':''}> Roof collects to tanks (${fmtArea(polyArea(f.geom.pts))})${f.kind==='zone0'?' · Zone 0 counts as the house roof until a building is drawn inside it':''}</label></div>`:''}
     <div class="row"><div class="field" style="flex:1"><label for="fkind">Type</label><select id="fkind">${Object.entries(KINDS).filter(([kk,v])=>v.geom===k.geom).map(([kk,v])=>`<option value="${kk}" ${kk===f.kind?'selected':''}>${esc(v.g)} · ${esc(v.label)}</option>`).join('')}</select></div>
       <div class="field" style="flex:1"><label for="fstage">Stage</label><select id="fstage">${STAGES.map(([kk,l])=>`<option value="${kk}" ${(f.stage||defStage(f.kind))===kk?'selected':''}>${l}</option>`).join('')}</select></div></div>
+    ${colorPickHTML(f)}
     <div class="field"><label>Status</label><div class="seg" id="fstat">${STATUS.map(s=>`<button aria-pressed="${f.status===s}" data-v="${s}">${s}</button>`).join('')}</div></div>
     <div class="field"><label for="fnotes">Notes and reasons</label><textarea id="fnotes" placeholder="Why here? Species, sizes, who decided, what to check on site.">${esc(f.notes)}</textarea></div>
     ${featTasksHTML(selected)}${(()=>{const ns=[...notes.values()].filter(n=>n.about===selected);return `<h2>Notebook · ${ns.length}</h2>${ns.map(n=>`<p class="hint"><b>${esc(n.who||'')}</b>: ${esc(n.text)}</p>`).join('')}<button class="btn" id="fNote">Add a note about this</button>`})()}
@@ -3352,6 +3419,7 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
     if($('#flit'))$('#flit').onchange=e=>{saveFields(selected,{litres:Math.max(0,+e.target.value||0)});renderTools()};
     if($('#froof'))$('#froof').onchange=e=>{saveFields(selected,{roof:e.target.checked});renderTools()};
     if($('#fpriv'))$('#fpriv').onchange=e=>{saveFields(selected,{hideItems:e.target.checked});renderFeatures();draw()};
+    document.querySelectorAll('.cswrow .csw').forEach(b=>b.onclick=async()=>{await saveFields(selected,{color:b.dataset.col||null});renderFeatures();draw()});
     document.querySelectorAll('#fplook button').forEach(b=>b.onclick=()=>{saveFields(selected,{look:b.dataset.v});renderFeatures();draw()});
     document.querySelectorAll('#fpres button').forEach(b=>b.onclick=()=>{saveFields(selected,{res:+b.dataset.v});renderFeatures();draw()});
     $('#fkind').onchange=e=>{saveFields(selected,{kind:e.target.value});renderFeatures()};
@@ -3377,7 +3445,7 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
   const zoneRows=arr.filter(([i,f])=>(KINDS[f.kind]||{}).g==='Zones'&&f.geom.g==='polygon');
   const zt={};zoneRows.forEach(([i,f])=>{zt[f.kind]=(zt[f.kind]||0)+polyArea(f.geom.pts)});
   el.innerHTML=stageSel+(Object.keys(zt).length?`<h2>Zone areas</h2><dl class="facts">${Object.keys(zt).sort().map(z=>`<dt><i class="swatch" style="background:${KINDS[z].color};display:inline-block;vertical-align:-2px"></i> ${esc(KINDS[z].label)}</dt><dd>${fmtArea(zt[z])}</dd>`).join('')}</dl>`:'')+
-   DRAW_ORDER.filter(g=>groups[g]).map(g=>`<h2>${g} · ${groups[g].length}</h2><div class="flist">${groups[g].sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,f])=>`<button data-id="${id}" class="${vis(f)?'':'dim'}"><i class="swatch" style="background:${(KINDS[f.kind]||KINDS.note).color}"></i><span>${esc(f.name)}${isHid(id)?' <span class="pill">hidden</span>':''}</span><span class="meta">${f.geom.g==='polygon'?fmtArea(polyArea(f.geom.pts))+' · ':''}<span class="pill ${f.status}">${f.status}</span></span></button>`).join('')}</div>`).join('');
+   DRAW_ORDER.filter(g=>groups[g]).map(g=>`<h2>${g} · ${groups[g].length}</h2><div class="flist">${groups[g].sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,f])=>`<button data-id="${id}" class="${vis(f)?'':'dim'}"><i class="swatch" style="background:${fCol(f)}"></i><span>${esc(f.name)}${isHid(id)?' <span class="pill">hidden</span>':''}</span><span class="meta">${f.geom.g==='polygon'?fmtArea(polyArea(f.geom.pts))+' · ':''}<span class="pill ${f.status}">${f.status}</span></span></button>`).join('')}</div>`).join('');
   $('#stageF').onchange=e=>{setLayer('stage',e.target.value);renderFeatures()};
   const sf=$('#srcF');if(sf)sf.onchange=e=>{featSrc=e.target.value;renderFeatures()};const ss=$('#srcSel');if(ss)ss.onclick=()=>{multi.clear();arr.forEach(([id])=>multi.add(id));selected=null;renderFeatures();draw()};
   el.querySelectorAll('.flist button').forEach(b=>b.onclick=()=>{selected=b.dataset.id;zoomTo(features.get(selected));renderFeatures();draw()})}
@@ -3394,7 +3462,7 @@ function drawProfile(f){const c=$('#profile');const r=c.getBoundingClientRect();
 function geoOf(f){const g=f.geom,ll=q=>xy2ll(q[0],q[1]).map(v=>+v.toFixed(7));
   if(g.g==='point')return {type:'Point',coordinates:ll(g.pts[0])};if(g.g==='line')return {type:'LineString',coordinates:g.pts.map(ll)};if(g.g==='polygon')return {type:'Polygon',coordinates:[g.pts.concat([g.pts[0]]).map(ll)]};
   let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(KINDS[f.kind].decl);a0=b.set;a1=b.rise}if(a1<=a0)a1+=360;const ring=[[g.cx,g.cy]];for(let a=a0;a<=a1+.01;a+=5){const r=a*Math.PI/180;ring.push([g.cx+Math.sin(r)*g.r,g.cy-Math.cos(r)*g.r])}ring.push([g.cx,g.cy]);return {type:'Polygon',coordinates:[ring.map(ll)]}}
-async function exportFile(fmt){const feats=[...features.values()].filter(f=>!privHidden(f)).map(f=>({type:'Feature',properties:{name:f.name,type:(KINDS[f.kind]||{}).label,status:f.status,notes:f.notes},geometry:geoOf(f)}));
+async function exportFile(fmt){const feats=[...features.values()].filter(f=>!privHidden(f)).map(f=>({type:'Feature',properties:{name:f.name,type:(KINDS[f.kind]||{}).label,status:f.status,notes:f.notes,...(f.color?{color:f.color}:{})},geometry:geoOf(f)}));
   let data,name;if(fmt==='geojson'){data=JSON.stringify({type:'FeatureCollection',features:feats},null,1);name=slug()+'-design.geojson'}
   else{const coords=c=>c.map(p=>p.join(',')+',0').join(' ');const pm=f=>{const g=f.geometry;let geo=g.type==='Point'?`<Point><coordinates>${g.coordinates.join(',')},0</coordinates></Point>`:g.type==='LineString'?`<LineString><tessellate>1</tessellate><coordinates>${coords(g.coordinates)}</coordinates></LineString>`:`<Polygon><outerBoundaryIs><LinearRing><coordinates>${coords(g.coordinates[0])}</coordinates></LinearRing></outerBoundaryIs></Polygon>`;return `<Placemark><name>${esc(f.properties.name)}</name><description>${esc((f.properties.type||'')+' · '+f.properties.status+(f.properties.notes?' · '+f.properties.notes:''))}</description>${geo}</Placemark>`};
     data=`<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${esc(SITE.name)} design</name>${feats.map(pm).join('')}</Document></kml>`;name=slug()+'-design.kml'}
