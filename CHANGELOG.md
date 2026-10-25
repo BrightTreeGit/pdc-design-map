@@ -46,6 +46,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v44 | 25 Oct 2026 | trial/willow-vale-team | Bright Tree photo history (1953–2022) published with the trial map |
 | Trial v43 | 25 Oct 2026 | trial/willow-vale-team | Map names in order of importance, never overlapping; choosable colour per item; Custom building / marker type |
 | Trial v42 | 25 Oct 2026 | trial/willow-vale-team | New Teepee / tipi feature type: large bright-pink triangle so it stands out |
 | Trial v41 | 25 Oct 2026 | trial/willow-vale-team | Bright Tree: B4 pad becomes the treehouse spot; B6 pad (on the house) removed |
@@ -56,6 +57,10 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Trial v44 (25 Oct 2026)
+**Fixed**
+- Bright Tree's photo history slider was missing on the trial map because its 25 photos (1953–2022) and history.json had never been uploaded with the trial publishes. They are now published, so Layers → Aerial photos → Photo history (slider) appears for Bright Tree.
 
 ### Trial v43 (25 Oct 2026)
 **Changed**
