@@ -39,6 +39,34 @@ Each version is one commit on the `main` branch. Click a link to see the code ex
 
 The v77 row is the commit that added this index; later versions are listed in the commit history.
 
+## Trial and beta maps
+Experiments are published to the trial map (https://claude.ai/artifact/CCUp4A9sdGDGXoKdh4ocpL) from a trial branch, and the
+per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. They have their own numbers ("Trial v38",
+"Beta v2"), separate from the live map's v-numbers, and reach the live map only when Brett approves.
+
+| Version | Saved | Branch | What |
+|---|---|---|---|
+| Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
+| Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
+| Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Trial v38 (25 Oct 2026)
+**Added**
+- Mangiri (Mongarlowe, NSW) in the site picker: NSW 5 m elevation, contours, flow lines, catchments, slope and the
+  other terrain layers, SILO rain (1995–2025), and the 2014 NSW aerial stitched from the imagery server's map tiles.
+- A "Focus area" outline for sites that have one: Mangiri's follows the clearing round the driveway end and the
+  buildings, and the site opens zoomed to it. The other parts of a multi-part property show as a thin dashed outline.
+- Layer list says where the boundary and focus area come from (e.g. "NSW cadastre 2026", "NSW aerial 2014").
+
+**Fixed**
+- NSW sites built from the 5 m elevation no longer say "LiDAR survey" under the Layers tab, and the A3 sheet footer
+  no longer calls an NSW boundary the Queensland cadastre.
+
+**Changed**
+- Site extras tool: each geology request gives up after 60 seconds, and a site where the geology services have no
+  polygons (Willow Vale) is remembered as "checked, none there" so the run doesn't hang on it; `--refresh-geology`
+  asks again. Mangiri added to the extras, ingest and seasonal outlook tools.
+
 ---
 
 ## v86 (23 Oct 2026, 07:20)

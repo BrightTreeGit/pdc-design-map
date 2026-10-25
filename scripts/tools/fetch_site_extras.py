@@ -18,12 +18,15 @@ fetch_site_extras.py: three public data pulls for every design-map site, in one 
      Prone Land -> the official classes that set building, asset-protection and clearing rules
 
 Files are skipped when they already exist, except silo_full.json (re-fetched if it has no ETo column) and geology.json (re-fetched
-if it has no rock-unit names), which earlier versions of this script saved incomplete.
+if it has no rock-unit names), which earlier versions of this script saved incomplete. When the geology services have no polygons for
+a window (Willow Vale), a small "checked, none there" marker is saved instead so the next run skips it; --refresh-geology asks again.
+Each geology request gives up after 60 seconds, so a slow state server can't hold the whole run up.
 
 Also probes whether the Queensland elevation (LiDAR) server is back, so Annwn's real ground can be fetched.
 
   py fetch_site_extras.py              (all sites)
   py fetch_site_extras.py annwn nac    (some sites)
+  py fetch_site_extras.py willow-vale --refresh-geology   (ask the geology services again even where they had nothing last time)
 
 Saves to "<this folder>/../Site extras/<site>/". Gentle on the servers: a pause between requests, retries on failure.
 Nothing here is private: SILO is gridded climate, the ecosystems are mapped statewide, the species records are public sightings.
@@ -44,6 +47,7 @@ SITES = {
     "nimbin": (-28.5654, 153.25403, "NSW", 523889.0, 6841186.0, 56),
     "nac": (-32.67477, 152.04486, "NSW", 409432.0, 6385368.0, 56),
     "regenify": (-28.53412, 153.41612, "NSW", 539619.0, 6844643.0, 56),
+    "mangiri": (-35.44707, 149.94456, "NSW", 766045.0, 6074550.0, 55),
 }
 SILO = "https://www.longpaddock.qld.gov.au/cgi-bin/silo/DataDrillDataset.php"
 RE = "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Biota/VegetationManagement/MapServer"
@@ -52,11 +56,17 @@ ALA_HOSTS = ["https://biocache-ws.ala.org.au/ws/occurrences/search", "https://ap
 QLD_ELEV = "https://spatial-img.information.qld.gov.au/arcgis/rest/services/Elevation"
 
 
+# per-request limits; geology() tightens them while it runs (the NSW geology services can sit on a request for minutes)
+_REQ = {"timeout": 180, "tries": None}
+GEO_TIMEOUT = 60
+
+
 def get(url, params, what, tries=(0, 8, 30)):
+    if _REQ["tries"] is not None: tries = _REQ["tries"]
     for wait in tries:
         if wait: print(f"    retrying {what} in {wait} s"); time.sleep(wait)
         try:
-            r = requests.get(url, params=params, headers=H, timeout=180)
+            r = requests.get(url, params=params, headers=H, timeout=_REQ["timeout"])
             if r.status_code == 404 and "Service not found" in r.text:
                 print(f"    {what}: the state server says this service is offline"); return None
             if not r.ok: print(f"    {what}: status {r.status_code}"); continue
@@ -479,7 +489,7 @@ def silo_full(out, lat, lon):
 
 
 # NSW Seamless Geology (Geological Survey of NSW), two doors to the same data:
-#  1. ArcGIS, one MapServer per geological province for MGA zone 56 (all our NSW sites are in zone 56). Each has a polygon layer
+#  1. ArcGIS, one MapServer per geological province per MGA zone (NSW_SeamlessGeology_Zone<55|56>_<province>; Mangiri is in zone 55). Each has a polygon layer
 #     called RockUnits_<province>; the line and pattern layers are skipped. Listed youngest first so the surface unit comes first
 #     where provinces overlap: CSP Cenozoic sediments, CIP Cenozoic volcanics, MIP Mesozoic igneous, GAB Great Australian Basin,
 #     PTB Permian-Triassic basins, NEO New England Orogen, LAO Lachlan Orogen. (Service list checked 24 Oct 2026.)
@@ -523,14 +533,30 @@ def _has_unit_names(feats):
     return any(any(("name" in k.lower() or "unit" in k.lower() or "lith" in k.lower()) and v not in (None, "", " ") for k, v in f.get("attrs", {}).items()) for f in feats or [])
 
 
-def geology(out, state, E0, N0, zone):
+def geology(out, state, E0, N0, zone, refresh=False):
+    """Every request here gives up after GEO_TIMEOUT seconds and is tried twice at most. If the services answer with no polygons,
+    a marker {"empty": true, "checked": <date>} is saved so later runs skip the site; pass refresh=True (--refresh-geology) to ask again."""
     f = out / "geology.json"
     if f.exists():
         try: old = json.loads(f.read_text())
         except Exception: old = {}
-        if _has_unit_names(old.get("features")): print("  Geology: already have it"); return
-        print("  Geology: the saved file has no rock-unit names (it was the boundary lines); fetching again")
-    print("  Surface geology inside the 2 km window")
+        if old.get("empty") and not refresh:
+            print(f"  Geology: checked on {old.get('checked', '?')}, the services have no rock units here; skipping (--refresh-geology to ask again)"); return
+        if _has_unit_names(old.get("features")) and not refresh: print("  Geology: already have it"); return
+        if not old.get("empty") and not refresh: print("  Geology: the saved file has no rock-unit names (it was the boundary lines); fetching again")
+    print(f"  Surface geology inside the 2 km window (each request gives up after {GEO_TIMEOUT} s)")
+    saved = dict(_REQ); _REQ.update(timeout=GEO_TIMEOUT, tries=(0, 5))
+    try:
+        found = _geology(out, state, E0, N0, zone)
+    finally:
+        _REQ.update(saved)
+    if not found:
+        f.write_text(json.dumps({"empty": True, "checked": time.strftime("%Y-%m-%d"), "note": "no geology polygons came back for this 2 km window; run with --refresh-geology to ask again"}))
+        print("    saved a 'checked, none there' marker so the next run skips this site")
+
+
+def _geology(out, state, E0, N0, zone):
+    """Returns True when polygons were saved."""
     keep = ("name", "lith", "age", "rock", "desc", "unit", "period", "era", "symbol", "type")
     if state == "QLD":
         feats, used = None, None
@@ -547,7 +573,7 @@ def geology(out, state, E0, N0, zone):
                     if feats and _has_unit_names(feats): used = f"{u} layer {lid} ({lname})"; break
                     feats = None
                 if feats: break
-        if not feats: print("    no geology polygons with unit names came back; skipping"); return
+        if not feats: print("    no geology polygons with unit names came back; skipping"); return False
         src = "Detailed surface geology, Geological Survey of Queensland (State of Queensland), CC BY 4.0"
     else:
         keep = keep + ("litholog", "surface", "code", "strat", "formation", "group", "province")
@@ -568,18 +594,18 @@ def geology(out, state, E0, N0, zone):
             # Door 2: the GeoServer WFS. The feature type name is found from GetCapabilities, so a renamed layer only costs a message.
             print("    no polygons from the ArcGIS province services; trying the Seamless Geology WFS")
             try:
-                caps = requests.get(NSW_GEO_WFS, params={"service": "WFS", "acceptversions": "2.0.0", "request": "GetCapabilities"}, headers=H, timeout=120).text
-            except Exception as e: print(f"    NSW geology: {e}; skipping"); return
+                caps = requests.get(NSW_GEO_WFS, params={"service": "WFS", "acceptversions": "2.0.0", "request": "GetCapabilities"}, headers=H, timeout=GEO_TIMEOUT).text
+            except Exception as e: print(f"    NSW geology: {e}; skipping"); return False
             import re
             names = re.findall(r"<(?:wfs:)?Name>([^<]+)</(?:wfs:)?Name>", caps)
             cand = ([n for n in names if re.search(r"rock.?unit", n, re.I) and not re.search(r"fault|bndy|boundar|line|point|struct|pattern|label", n, re.I)]
                     or [n for n in names if re.search(r"geol|unit|poly|lith", n, re.I) and not re.search(r"fault|bndy|boundar|line|point|struct|pattern|label", n, re.I)])
             if not cand:
-                print("    NSW Seamless Geology layer not found in the WFS listing; feature types seen: " + ", ".join(names[:15]) + "; skipping"); return
+                print("    NSW Seamless Geology layer not found in the WFS listing; feature types seen: " + ", ".join(names[:15]) + "; skipping"); return False
             lon0, lat0 = mga2ll(E0, N0 - 2000, zone); lon1, lat1 = mga2ll(E0 + 2000, N0, zone)
             j = get(NSW_GEO_WFS, {"service": "WFS", "version": "2.0.0", "request": "GetFeature", "typeNames": cand[0], "outputFormat": "application/json",
                                   "srsName": f"EPSG:{7800 + zone}", "bbox": f"{lat0},{lon0},{lat1},{lon1},EPSG:4326", "count": 500}, "NSW geology")
-            if not j or "features" not in j: print("    no NSW geology polygons came back; skipping"); return
+            if not j or "features" not in j: print("    no NSW geology polygons came back; skipping"); return False
             for f in j["features"]:
                 g = f.get("geometry") or {}; a = f.get("properties", {})
                 polys = [g["coordinates"]] if g.get("type") == "Polygon" else g.get("coordinates", []) if g.get("type") == "MultiPolygon" else []
@@ -588,8 +614,10 @@ def geology(out, state, E0, N0, zone):
             used = f"{NSW_GEO_WFS} {cand[0]}"
         src = "NSW Seamless Geology, Geological Survey of NSW (State of New South Wales), CC BY 4.0"
     (out / "geology.json").write_text(json.dumps({"source": src, "layer": used, "fetched": time.strftime("%Y-%m-%d"), "features": feats}, separators=(",", ":")))
+    if not feats: print("    the geology service answered with no polygons for this window"); return False
     print(f"    saved {len(feats)} polygons from {used}")
     time.sleep(2)
+    return True
 
 
 # NSW Bush Fire Prone Land: (service, known layer id, layer name), tried in order. Both are NSW Planning servers (checked 24 Oct 2026):
@@ -669,7 +697,10 @@ def probe_qld_elevation():
 
 
 def main():
-    want = sys.argv[1:] or list(SITES)
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    unknown = flags - {"--refresh-geology"}
+    if unknown: sys.exit("unknown option " + ", ".join(sorted(unknown)) + " (the only option is --refresh-geology)")
+    want = [a for a in sys.argv[1:] if not a.startswith("--")] or list(SITES)
     root = Path(__file__).resolve().parents[1] / "Site extras"
     for site in want:
         lat, lon, state, E0, N0, zone = SITES[site]
@@ -682,7 +713,7 @@ def main():
         ifd(out, lat, lon)
         silo_full(out, lat, lon)
         silo_long(out, lat, lon)
-        geology(out, state, E0, N0, zone)
+        geology(out, state, E0, N0, zone, refresh="--refresh-geology" in flags)
         hazard(out, state, E0, N0, zone)
     print('\nDone. Tell Claude: "site extras are ready".')
 

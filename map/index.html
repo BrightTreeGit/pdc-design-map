@@ -366,7 +366,8 @@ const SITES=[
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'PDC host',area:'Kin Kin, Qld',ready:true,history:true},
  {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
  {id:'annwn',name:'Annwn',group:'Small block',area:'Capalaba, Qld · 770 m² suburban block',ready:true,small:true},
- {id:'regenify',name:'Regenify',group:'Extra',area:'Koonyum Range, NSW',ready:true,aerialDate:'22 Apr 2015, 10 cm'}];
+ {id:'regenify',name:'Regenify',group:'Extra',area:'Koonyum Range, NSW',ready:true,aerialDate:'22 Apr 2015, 10 cm'},
+ {id:'mangiri',name:'Mangiri',group:'Extra',area:'Mongarlowe, NSW',ready:true,aerialDate:'28 Jan 2014 (NSW aerial 2014, web-map tiles about 1 m per pixel)'}];
 /* one entry per property: older ids (other versions, the auto-data comparison) open the one kept */
 const SITE_ALIAS={'nimbin':'nimbin-group','nimbin-combined':'nimbin-group','nimbin-house-group':'nimbin-group','nimbin-house-combined':'nimbin-group','willow-vale':'willow-vale-team','bright-tree-gemini':'bright-tree'};
 const SITEID=(()=>{let h='';try{h=(location.hash.match(/site=([\w-]+)/)||[])[1]||''}catch(e){}h=SITE_ALIAS[h]||h;const s=SITES.find(x=>x.id===h&&x.ready);return s?s.id:'bright-tree'})();
@@ -393,7 +394,7 @@ const xy2ll=(x,y)=>PJ.toLL(x+E0,N0-y);
 let T=null, EXTRA=null, PROS=null; const IMG={};
 let dem2=null, dem1=null, sunGrid={};
 const view={cx:960,cy:960,s:1};
-const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,pros:true,design:true,svc:true,eco:false,geo:false,hazFire:false,hazVeg:false,sewerBands:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
+const layers=Object.assign({base:'relief',baseOp:1,overlay:'none',ovOp:0.7,c1:true,c5:true,streams:true,catch:true,kp:true,lot:true,focus:true,pros:true,design:true,svc:true,eco:false,geo:false,hazFire:false,hazVeg:false,sewerBands:true,sectors:false,labels:true,flabels:false,zlabels:true,zcol:true,stage:'all'},lsGet('bt.layers',{}));
 if(!lsGet('bt.namesOnHover',false)){layers.flabels=false;lsSet('bt.layers',layers);lsSet('bt.namesOnHover',true)}
 const features=new Map(); // id -> data
 let selected=null, tool=null, draft=null, gradePen=lsGet('bt.gradePen',{on:false,grade:0,dir:'down'});
@@ -465,7 +466,7 @@ async function boot(){renderSiteSel();
   if(SITEDEF.canopy){try{const vr=await fetch(SB+'veg.json');VEG=vr.ok?await vr.json():null;if(VEG)imgs.push('veg.png')}catch(e){VEG=null}imgs.push('canopy_h.png','canopy_change.png','productivity.png','understorey.png','fuel.png','light_winter.png','light_equinox.png');try{CANOPY=await (await fetch(SB+'canopy.json')).json()}catch(e){CANOPY=null}}
   if(SITEDEF.history){try{PH.data=await (await fetch(SB+'history/history.json')).json();PH.i=PH.data.runs.length-1}catch(e){PH.data=null}}
   const pImgs=Promise.all(imgs.concat(cy.map(y=>'change_'+y+'.png')).map(f=>loadImg(f.split('.')[0],SB+f)));
-  applySite(); buildPaths(); fitLot();
+  applySite(); buildPaths(); if(T.focus)fitFocus();else fitLot();
   dem2=new Int16Array(await inflate(T.meta.dem.b64));
   const d1=T.meta.dem1; dem1={x0:d1.x0,y0:d1.y0,w:d1.w,h:d1.h,a:new Int16Array(await inflate(d1.b64))};
   for(const k of ['winter','equinox','summer']) sunGrid[k]=new Uint8Array(await inflate(T.meta['sunh_'+k]));
@@ -510,6 +511,7 @@ function resize(){const r=cv.getBoundingClientRect();DPR=Math.min(2,window.devic
 const w2s=(x,y)=>[(x-view.cx)*view.s+W/2,(y-view.cy)*view.s+H/2];
 const s2w=(sx,sy)=>[(sx-W/2)/view.s+view.cx,(sy-H/2)/view.s+view.cy];
 function fitBox(x0,y0,x1,y1,pad=40){view.cx=(x0+x1)/2;view.cy=(y0+y1)/2;view.s=Math.min((W-pad*2)/(x1-x0),(H-pad*2)/(y1-y0));if(!isFinite(view.s)||view.s<=0)view.s=1}
+function fitFocus(){if(!T||!T.focus)return fitLot();const p=flat(T.focus);const xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);fitBox(Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys),40)}
 function fitLot(){if(!T){fitBox(700,850,1150,1220);return}const p=flat(T.lot);const xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);fitBox(Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys),50)}
 let raf=0; function draw(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
 const P={};
@@ -552,6 +554,8 @@ function render(){
   if(layers.streams){const wd=[.8,1.3,2.2,3.4],al=[.45,.65,.85,.95];for(let k=0;k<4;k++){ctx.strokeStyle=`rgba(25,105,200,${al[k]})`;ctx.lineWidth=wd[k]*px;ctx.lineCap='round';ctx.stroke(P.st[k])}}
   if(layers.pros&&PROS)drawPros(px);
   if(layers.lot){ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke(P.lot);ctx.lineWidth=1.6*px;ctx.strokeStyle='#14898f';ctx.setLineDash([10*px,4*px]);ctx.stroke(P.lot);ctx.setLineDash([])}
+  if(layers.lot&&T&&T.lotParts){for(const r of T.lotParts){const q=new Path2D();flat(r).forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();ctx.lineWidth=2*px;ctx.strokeStyle='rgba(255,255,255,.75)';ctx.stroke(q);ctx.lineWidth=1*px;ctx.strokeStyle='#14898f';ctx.setLineDash([4*px,4*px]);ctx.stroke(q);ctx.setLineDash([])}}
+  if(T&&T.focus&&layers.focus!==false){const q=new Path2D();const fp=flat(T.focus);fp.forEach(([x,y],i)=>i?q.lineTo(x,y):q.moveTo(x,y));q.closePath();ctx.lineWidth=3.2*px;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.stroke(q);ctx.lineWidth=1.8*px;ctx.strokeStyle='#e8590c';ctx.setLineDash([6*px,3*px]);ctx.stroke(q);ctx.setLineDash([]);const top=fp.reduce((m,v)=>v[1]<m[1]?v:m,fp[0]),tx=top[0]-30*px,ty=top[1];ctx.font=`600 ${12*px}px system-ui,sans-serif`;ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.strokeText('Focus area',tx+4*px,ty-4*px);ctx.fillStyle='#b8440a';ctx.fillText('Focus area',tx+4*px,ty-4*px)}
   if(layers.overlay==='niche'&&NICHE){ctx.save();const C={1:'#d9a21a',2:'#d9762a',3:'#4f9a3a',6:'#8a5bb5'};NICHE.near.forEach((b,i)=>{const r=Math.max(7*px,2.2);ctx.beginPath();ctx.arc(b.x,b.y,r,0,7);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=2*px;ctx.strokeStyle=C[b.cls]||'#333';ctx.stroke();ctx.fillStyle='#222';ctx.font=`600 ${10*px}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),b.x,b.y+.5*px)});ctx.restore();ctx.textAlign='left';ctx.textBaseline='alphabetic'}
   if(layers.overlay==='canopy_h'&&CANOPY){ctx.save();const risk=treeRisk();for(const [x,y,h] of CANOPY.trees){if(h<40)continue;const tpz=tpzR(h);
     if(view.s>1.2){ctx.beginPath();ctx.arc(x,y,tpz,0,7);ctx.setLineDash([3*px,3*px]);ctx.lineWidth=1.2*px;ctx.strokeStyle='rgba(150,40,140,.7)';ctx.stroke();ctx.setLineDash([])}
@@ -2571,7 +2575,7 @@ async function exportSheet(){const btn=$('#tSheet');btn.disabled=true;btn.textCo
       const px=area.x+col*(cw+gap);if(SO.theme!=='ink'){g.fillStyle=SC.panel;g.fillRect(px-14,cy-10,cw+28,hh+8)}
       fn(g,px,cy,cw);cy+=hh+26}
     // ---- footer
-    const fy=SH2-M-50;const fx=land?P0.x:M,fw=land?P0.w:SW-2*M;const bnote=/cadastre/i.test(SITE.boundaryNote||'')?'Boundary: Queensland surveyed cadastre (about ±1 m).':'Boundary approximate: check against the title plan.';
+    const fy=SH2-M-50;const fx=land?P0.x:M,fw=land?P0.w:SW-2*M;const bnote=/cadastre/i.test(SITE.boundaryNote||'')?(SITE.state==='NSW'?'Boundary: NSW cadastre (about ±1–2 m).':'Boundary: Queensland surveyed cadastre (about ±1 m).'):'Boundary approximate: check against the title plan.';
     const src=`Terrain: ${SITE.source||('LiDAR '+SITE.main+', '+SITE.res)}. ${bnote} Rain: ${RAIN.station}.${layers.base==='aerial'&&IMG.aerial?' Aerial: '+(SITE.state==='NSW'?'NSW Spatial Services':'State of Queensland')+(SITEDEF.aerialDate?', captured '+SITEDEF.aerialDate:'')+' (CC BY 4.0).':''} Concept design only: earthworks, dams and buildings need engineering and approvals.`;
     g.strokeStyle=SC.faint;g.lineWidth=2;g.beginPath();g.moveTo(fx,fy-14);g.lineTo(fx+fw,fy-14);g.stroke();shWrap(g,src,fx,fy+8,fw,15,SC.mute,20);
     skipped.forEach(k=>skippedAll.add(k));pages.push({sh,base,land});
@@ -2838,7 +2842,7 @@ function segHTML(id,opts,cur,cls=''){return `<div class="seg ${cls}" ${id?`id="$
 function renderLayers(){const el=$('#tab-layers');const m=T.meta;
   const sc=m.slopeClasses.map(([lo,hi,c])=>`<span><i class="swatch" style="background:rgba(${c[0]},${c[1]},${c[2]},.85)"></i>${hi?lo+'–'+hi:'>'+lo}%</span>`).join('');
   const ac=Object.entries(m.aspectColors).map(([n,c])=>`<span><i class="swatch" style="background:rgb(${c})"></i>${n}</span>`).join('');
-  const lines=[['lot','Property boundary','#14898f'],['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],...(PROS?[['pros','Prospects: ponds, pads, tank (computed)','#a14e07']]:[]),['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['sectors','Sector map (sun, wind, fire, views)','#e0a400'],['labels','All labels','#777'],['flabels','Names on structures & features (otherwise shown on hover, or a long press on a phone)','#575757'],['zlabels','Names on zones','#7d5aa6'],['zcol','Colour zone names to match the zone','#d6453d']];
+  const lines=[['lot','Property boundary'+(SITE.boundarySrc?' · '+SITE.boundarySrc:''),'#14898f'],...(T.focus?[['focus','Focus area (traced from the '+(SITE.aerialSrc||'aerial photo')+')','#e8590c']]:[]),['streams','Flow lines (where water runs)','#1969c8'],['catch','Catchments and inflows','#145aaa'],['kp','Keypoint candidates','#0b5c8f'],...(PROS?[['pros','Prospects: ponds, pads, tank (computed)','#a14e07']]:[]),['c1','1 m contours (zoomed in)','#8a6a45'],['c5','5 m contours','#5a3d1c'],['design','Design features','#1f6a57'],['sectors','Sector map (sun, wind, fire, views)','#e0a400'],['labels','All labels','#777'],['flabels','Names on structures & features (otherwise shown on hover, or a long press on a phone)','#575757'],['zlabels','Names on zones','#7d5aa6'],['zcol','Colour zone names to match the zone','#d6453d']];
   el.innerHTML=
    sec('base','Base map',`${segHTML('baseSeg',[['none','None'],['relief','Relief'],['hillshade','Hillshade']].concat(IMG.aerial?[['aerial','Aerial']]:[]),layers.base)}
     <div class="row"><label for="baseop">Strength <span id="baseopv" class="pill">${Math.round(layers.baseOp*100)}%</span></label><input type="range" id="baseop" min="0" max="1" step="0.05" value="${layers.baseOp}"></div>
@@ -2857,9 +2861,9 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    (ECO?sec('eco','Native vegetation (regional ecosystems)',ecoHTML(),false):'')+
    (GEO?sec('geo','Underlying rock (geology)',geoHTML(),false):'')+
    (HAZ?sec('haz','Rules and hazards',hazHTML(),false):'')+
-   sec('lines','Water, contours & labels',lines.map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join(''))+
+   sec('lines','Water, contours & labels',lines.map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join('')+(SITE.boundarySrc?`<p class="hint">Sources: boundary ${esc(SITE.boundarySrc)}; flow lines, catchments and contours computed from the ${esc(SITE.source||'elevation data')}${T.focus?`; focus area traced from the ${esc(SITE.aerialSrc||'aerial photo')}`:''}.</p>`:''))+
    (PROS?sec('pros','Prospects (computed sites)',`<p class="hint">Screening sites found by scanning the terrain: where small pond walls store the most water for the least earth, where level building pads need the least cut and fill with good winter sun, the highest tank site, and the few flat spots. A starting point for a site walk, not a design.</p>`+prosHTML()):'')+
-   `<p class="hint">Terrain from the ${SITE.main} LiDAR survey (bare earth, ${SITE.res}). Sun hours count terrain shading only, not trees.</p>`;
+   `<p class="hint">${/NSW 5 m/.test(SITE.source||'')?`Terrain: ${esc(SITE.source)}.`:`Terrain from the ${SITE.main} LiDAR survey (bare earth, ${SITE.res}).`} Sun hours count terrain shading only, not trees.</p>`;
   const ch=EXTRA&&EXTRA.change;
   const legends={slope:`<div class="legend">${sc}</div>Under 10% suits tracks and beds; 10–25% contour beds and terraces; 25–50% tree crops on contour with groundcover; over 50% keep in forest.`,
    aspect:`<div class="legend">${ac}</div>North-facing slopes are the warm, winter-sunny side in the southern hemisphere.`,

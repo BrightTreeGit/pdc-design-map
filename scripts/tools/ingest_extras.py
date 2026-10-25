@@ -22,7 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MAPDIR = {'bright-tree': ROOT / 'map', 'bellbunya': ROOT / 'map/sites/bellbunya', 'noosa-forest-retreat': ROOT / 'map/sites/noosa-forest-retreat',
-          'annwn': ROOT / 'map/sites/annwn', 'willow-vale': ROOT / 'map/sites/willow-vale', 'nimbin': ROOT / 'map/sites/nimbin', 'nac': ROOT / 'map/sites/nac', 'regenify': ROOT / 'map/sites/regenify'}
+          'annwn': ROOT / 'map/sites/annwn', 'willow-vale': ROOT / 'map/sites/willow-vale', 'nimbin': ROOT / 'map/sites/nimbin', 'nac': ROOT / 'map/sites/nac', 'regenify': ROOT / 'map/sites/regenify', 'mangiri': ROOT / 'map/sites/mangiri'}
 
 # code: (short description, VM Act status, biodiversity status)
 REDD = {
@@ -112,7 +112,7 @@ def ecosystems(src, dst):
     print(f'  ecosystems: {len(polys)} polygons, {len(cat)} types, {os.path.getsize(dst)//1024} kB' + (f'  MISSING from REDD table: {sorted(missing)}' if missing else ''))
 
 
-STATE = {'bright-tree': 'Q', 'bellbunya': 'Q', 'noosa-forest-retreat': 'Q', 'annwn': 'Q', 'willow-vale': 'N', 'nimbin': 'N', 'nac': 'N', 'regenify': 'N'}
+STATE = {'bright-tree': 'Q', 'bellbunya': 'Q', 'noosa-forest-retreat': 'Q', 'annwn': 'Q', 'willow-vale': 'N', 'nimbin': 'N', 'nac': 'N', 'regenify': 'N', 'mangiri': 'N'}
 
 
 def species(src, dst, site=''):
@@ -189,7 +189,9 @@ def main():
         for plain in ('ifd.json', 'silo_full.json', 'silo_long.json', 'outlook.json'):
             if (s / plain).exists():
                 shutil.copy(s / plain, mdir / plain); os.chmod(mdir / plain, 0o644); print(f'  {plain}: copied')
-        if (s / 'geology.json').exists(): geology(s / 'geology.json', mdir / 'geology.json')
+        if (s / 'geology.json').exists():
+            if json.load(open(s / 'geology.json')).get('empty'): print('  geology: checked, none for this window (marker only; nothing copied)')
+            else: geology(s / 'geology.json', mdir / 'geology.json')
         if (s / 'hazard.json').exists(): hazard(s / 'hazard.json', mdir / 'hazard.json')
 
 
