@@ -248,6 +248,8 @@ const KINDS={
   zone4:{g:'Zones',label:'Zone 4 · Managed bush',geom:'polygon',color:'#7cab3a'},
   zone5:{g:'Zones',label:'Zone 5 · Wild',geom:'polygon',color:'#2f7a46'},
   goatzone:{g:'Zones',label:'Goat zone (browse & paddock)',geom:'polygon',color:'#a0522d',dash:[8,3]},
+  greenbreak:{g:'Zones',label:'Green firebreak',geom:'polygon',color:'#1a9e8e',fillA:.35,solid:true,m2:true,fire:true},
+  greenstrip:{g:'Zones',label:'Green firebreak strip',geom:'line',color:'#1a9e8e',band:10,fire:true},
   sunW:{g:'Sectors',label:'Winter sun',geom:'sun',decl:23.44,color:'#e0a400'},
   sunS:{g:'Sectors',label:'Summer sun',geom:'sun',decl:-23.44,color:'#e2572b'},
   fire:{g:'Sectors',label:'Fire sector',geom:'sector',color:'#c0311f'},
@@ -330,6 +332,30 @@ const KINDS={
   customzone:{g:'Zones',label:'Other zone',geom:'polygon',color:'#5a7d9a',dash:[6,3]},
   privacy:{g:'Zones',label:'Privacy zone (low detail)',geom:'polygon',color:'#6b6f73',dash:[4,4]},
 };
+/* green firebreak (living fence / fire-wise garden): planting layers from the cleared edge outwards */
+const FIRE_LAYERS=[
+ ['Edge 0–3 m','next to the cleared break or trail, kept short and green','sweet potato, pigface (Carpobrotus glaucescens), warrigal greens, comfrey, aloe, crinum lily, clivia; a mown or slashed grass path'],
+ ['Middle 3–7 m','high-moisture, soft-stemmed','bananas, arrowroot / Queensland arrowroot (Canna edulis), taro, ginger, turmeric'],
+ ['Outer 7–10 m','low-oil evergreen and deciduous fruit, crowns lifted','brush cherry / lilly pilly (Syzygium australe), tuckeroo, foam bark, native gardenia, flame tree / kurrajong, mulberry (moderate: keep its litter cleared), fig, carob, feijoa, persimmon'],
+ ['Beyond 10 m','','sparse nut trees, not macadamia; keep eucalypts, paperbarks, tea trees and other oily species out of the strip']];
+const FIRE_RULES='Keep it moist (swale or irrigate), clear dead leaves and lift the lower branches, and leave gaps between crowns: no plant is fireproof when it is dry. Check the Queensland vegetation-clearing and firebreak rules before clearing anything (the Rules and hazards and vegetation layers show the categories).';
+const FIRE_SRC="Plant guidance: Banana Shire Council 'Plants and fires'; Permaculture Australia 'Designing your garden for fire resilience' (2020s); Bright Tree notes 2026";
+const FIRE_NOTES='Planting layers (from the cleared edge outwards):\n'+FIRE_LAYERS.map(([a,b,c])=>`- ${a}${b?' ('+b+')':''}: ${c}.`).join('\n')+'\nRules of thumb: '+FIRE_RULES+'\n'+FIRE_SRC+'.';
+KINDS.greenbreak.notes=FIRE_NOTES;KINDS.greenstrip.notes=FIRE_NOTES;
+function firePanelHTML(open){return `<details class="mini fbpanel" ${open?'open':''}><summary>Planting layers for a green firebreak</summary><dl class="facts" style="grid-template-columns:auto 1fr">${FIRE_LAYERS.map(([a,b,c])=>`<dt><b>${a}</b></dt><dd style="font-family:var(--f-body);font-size:12.5px">${b?'<i>'+esc(b)+'</i>: ':''}${esc(c)}</dd>`).join('')}</dl><p class="hint">${esc(FIRE_RULES)}</p><p class="hint"><span class="swatch" style="display:inline-block;vertical-align:-2px;background:rgba(26,158,142,.35);border:2px solid #1a9e8e"></span> Drawn as a filled teal band with a solid edge, so it can't be mistaken for the property boundary (a dashed blue-teal line with no fill).</p><p class="hint">${esc(FIRE_SRC)}.</p></details>`}
+/* a firebreak strip drawn as a line: a band of its width, centred or to one side (left/right as you walk the line as drawn) */
+function offsetLine(P,d,closed){const n=P.length,out=[];const nrm=(a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1;return [dy/l,-dx/l]};
+  for(let i=0;i<n;i++){const hasP=closed||i>0,hasN=closed||i<n-1;const n1=hasP?nrm(P[(i-1+n)%n],P[i]):null,n2=hasN?nrm(P[i],P[(i+1)%n]):null;let m=n1&&n2?[n1[0]+n2[0],n1[1]+n2[1]]:(n1||n2);const ml=Math.hypot(m[0],m[1]);
+    if(ml<1e-6)m=n1||n2;else m=[m[0]/ml,m[1]/ml];const ref=n1||n2;const k=Math.min(3,1/Math.max(.33,m[0]*ref[0]+m[1]*ref[1]));out.push([P[i][0]+m[0]*d*k,P[i][1]+m[1]*d*k])}return out}
+function stripOf(f){const k=KINDS[f.kind];if(!k||!k.band||!f.geom||f.geom.g!=='line'||!f.geom.pts||f.geom.pts.length<2)return null;
+  const w=Math.max(5,Math.min(20,+f.width||k.band)),side=f.side||'centre';const a=side==='left'?0:side==='right'?-w:-w/2,b=a+w;
+  let P=f.geom.pts;const closed=P.length>3&&dist(P[0],P[P.length-1])<1;if(closed)P=P.slice(0,-1);
+  return {w,side,closed,A:offsetLine(P,b,closed),B:offsetLine(P,a,closed),area:lineLen(f.geom.pts)*w}}
+function bandRings(b){return b.closed?[b.A,b.B]:[b.A.concat(b.B.slice().reverse())]}
+function inBand(w,b){return b.closed?inPoly(w,b.A)!==inPoly(w,b.B):inPoly(w,bandRings(b)[0])}
+const m2=a=>Math.round(a).toLocaleString()+' m²';
+// the area line under a label
+function fSub(f,isZ,area,sc){const k=KINDS[f.kind]||{};const b=stripOf(f);if(b)return `${m2(b.area)} · ${+b.w.toFixed(1)} m wide`;if(f.geom.g!=='polygon')return '';if(!(isZ||area*sc*sc>2500))return '';return k.m2?m2(area):fmtArea(area)}
 /* custom zone types: made by the team (Designer level and up), shared per site */
 let CZ=[];
 function applyCZ(list){CZ=Array.isArray(list)?list.filter(z=>z&&z.id&&z.label):[];for(const k of Object.keys(KINDS))if(k.startsWith('cz_'))KINDS[k].hidden=true;
@@ -337,7 +363,7 @@ function applyCZ(list){CZ=Array.isArray(list)?list.filter(z=>z&&z.id&&z.label):[
   if(typeof renderDraw==='function'&&$('#tab-draw'))renderDraw();if(typeof draw==='function')draw()}
 async function saveCZ(list){applyCZ(list);if(live){try{await db.doc(C('settings')+'/zones').set({list:CZ,updatedAt:new Date().toISOString()})}catch(e){toast('Zone types did not save.')}}else lsSet('bt.czones',CZ)}
 /* tool levels: 1 Essentials, 2 Designer (default), 3 Expert. big = broadacre tools hidden on small blocks */
-const KIND_LV={sewer:1,service:2,track:1,customzone:2,privacy:1,zone0:1,zone1:1,zone2:1,tank:1,building:1,path:1,tree:1,fruittree:1,nativetree:1,shrub:1,bed:1,raisedbed:1,herbs:1,lawn:1,paving:1,fence:1,note:1,driveway:1,shed:1,solar:1,compost:1,
+const KIND_LV={greenbreak:1,greenstrip:1,sewer:1,service:2,track:1,customzone:2,privacy:1,zone0:1,zone1:1,zone2:1,tank:1,building:1,path:1,tree:1,fruittree:1,nativetree:1,shrub:1,bed:1,raisedbed:1,herbs:1,lawn:1,paving:1,fence:1,note:1,driveway:1,shed:1,solar:1,compost:1,
   keypoint:3,diversion:3,damwall:3,coldair:3,section:3,crossing:3,reedbed:3,rockpool:3,irrigation:3,pipe:3,row:3,guild:3,hugel:3,goatzone:3,paddock:3,tpz:3,greywater:3,flow:3,soak:3,mushrooms:3,firebreak:3,obs:1};
 const BIG_KINDS=['zone3','goatzone','paddock','damwall','keypoint','diversion','track','crossing','firebreak','reedbed','row','cabin','amenities','container','nursery','rockpool'];
 const LV_NAMES=[[1,'Essentials'],[2,'Designer'],[3,'Expert']];
@@ -545,7 +571,7 @@ function render(){
   if(PH.on&&PH.data){const im=phImg(PH.i);if(im&&im.complete&&im.naturalWidth){const d=PH.data;ctx.globalAlpha=PH.op;ctx.drawImage(im,d.x0,d.y0,d.size,d.size);ctx.globalAlpha=1}}
   drawImgs(im=>!!im.design); // design drawings always sit above the photos and terrain layers
   drawPrivacy(1/s);
-  if(!T){return}
+  if(!T||!P.lot){return}   // terrain loaded but outlines not built yet (startup)
   const px=1/s;
   if(layers.catch){for(const c of P.catch){ctx.lineWidth=(c.main?2.2:1.3)*px;ctx.setLineDash(c.main?[8*px,5*px]:[3*px,4*px]);ctx.strokeStyle=c.main?'rgba(20,90,170,.9)':'rgba(20,90,170,.65)';if(c.main){ctx.fillStyle='rgba(60,140,220,.07)';ctx.fill(c.path)}ctx.stroke(c.path)}ctx.setLineDash([])}
   const showC1=layers.c1&&s>=0.9;
@@ -611,7 +637,7 @@ function drawFeatureLabels(){const L=[];
     const area=g.g==='polygon'?polyArea(g.pts):0;const name=f.name||k.label;
     if(!isZ&&id!==selected&&id!==hoverId&&((g.g==='polygon'&&Math.sqrt(area)*view.s<26)||(g.g==='point'&&view.s<1.1)||(g.g==='line'&&lineLen(g.pts)*view.s<60)))continue; // small things: name appears when zoomed in
     const col=isZ&&layers.zcol!==false?darker(k.color):'#1d2621';
-    const sub=g.g==='polygon'&&(isZ||area*view.s*view.s>2500)?fmtArea(area):'';
+    const sub=fSub(f,isZ,area,view.s);
     L.push({id,f,isZ,x,y,inner,area,name,sub,col,acol:k.color,point:g.g==='point',poly:g.g==='polygon'?g.pts:null})}
   // zones first (they are big and anchor the reading), then larger features
   L.sort((p,q)=>(q.isZ-p.isZ)||(q.area-p.area));
@@ -663,7 +689,9 @@ function wedge(cx,cy,r,a0,a1){const p=new Path2D();p.moveTo(cx,cy);const s=(a0-9
 function drawFeature(f,px,sel){
   const k=KINDS[f.kind]||KINDS.note,g=f.geom,col=k.color;ctx.setLineDash([]);
   if(g.g==='polygon'){const p=new Path2D();g.pts.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));p.closePath();
-    ctx.fillStyle=hexA(col,k.g==='Zones'?.18:.35);ctx.fill(p);ctx.lineWidth=(sel?3:2)*px;ctx.strokeStyle=col;if(k.g==='Zones'||k.dash)ctx.setLineDash((k.dash||[7,4]).map(v=>v*px));ctx.stroke(p);ctx.setLineDash([])}
+    ctx.fillStyle=hexA(col,k.fillA||(k.g==='Zones'?.18:.35));ctx.fill(p);ctx.lineWidth=(sel?3:k.solid?2.4:2)*px;ctx.strokeStyle=col;if((k.g==='Zones'&&!k.solid)||k.dash)ctx.setLineDash((k.dash||[7,4]).map(v=>v*px));ctx.stroke(p);ctx.setLineDash([])}
+  else if(g.g==='line'&&stripOf(f)){const b=stripOf(f);const p=new Path2D();for(const r of bandRings(b)){r.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));p.closePath()}
+    ctx.fillStyle=hexA(col,.35);ctx.fill(p,'evenodd');ctx.lineWidth=(sel?3:2.4)*px;ctx.strokeStyle=col;ctx.stroke(p);const c=new Path2D();g.pts.forEach((q,i)=>i?c.lineTo(...q):c.moveTo(...q));ctx.lineWidth=1.2*px;ctx.strokeStyle=darker(col,.7);ctx.setLineDash([4*px,4*px]);ctx.stroke(c);ctx.setLineDash([])}
   else if(g.g==='line'){const p=new Path2D();g.pts.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));
     ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=(k.w?k.w+2+(sel?1.5:0):(sel?6:4.5))*px;ctx.strokeStyle='rgba(255,255,255,.75)';ctx.stroke(p);
     if(k.checkGrade&&!sel){ // colour by grade
@@ -790,7 +818,7 @@ function dragGeom(vd,geom,w,shift){const g=structuredClone(geom);
   if(vd.move){const dx=w[0]-vd.w0[0],dy=w[1]-vd.w0[1];if(g.pts)g.pts=vd.orig.pts.map(q=>r1([q[0]+dx,q[1]+dy]));return g}
   if(vd.scale){const k=Math.max(.05,dist(w,vd.c)/vd.d0),o=vd.orig,c=vd.c;
     if(o.g==='polygon'||o.g==='line')g.pts=o.pts.map(q=>r1([c[0]+(q[0]-c[0])*k,c[1]+(q[1]-c[1])*k]));else if(o.g==='point')g.r=+Math.max(.3,o.r*k).toFixed(1);else g.r=+Math.max(5,o.r*k).toFixed(1)}
-  else if(vd.center){g.cx=w[0];g.cy=w[1]}else g.pts[vd.i]=[+w[0].toFixed(1),+w[1].toFixed(1)];return g}
+  else if(vd.center){g.cx=w[0];g.cy=w[1]}else{const n=g.pts.length,loop=g.g==='line'&&n>3&&dist(g.pts[0],g.pts[n-1])<1;g.pts[vd.i]=[+w[0].toFixed(1),+w[1].toFixed(1)];if(loop&&(vd.i===0||vd.i===n-1))g.pts[vd.i?0:n-1]=g.pts[vd.i].slice()}return g}  // a closed loop keeps its ends joined
 function endDrag(vd){const f=features.get(selected);if(!f)return;saveGeom(selected,f.geom);pushHist((vd.rot?'rotate':vd.move?'move':vd.scale?'resize':'reshape')+' “'+(f.name||'item')+'”',[{id:selected,before:vd.before,after:snapF(selected)}])}
 function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;clearTimeout(lpT);
   if(selBox){const {a,b}=selBox;selBox=null;const x0=Math.min(a[0],b[0]),x1=Math.max(a[0],b[0]),y0=Math.min(a[1],b[1]),y1=Math.max(a[1],b[1]);
@@ -846,7 +874,7 @@ function hitVertex(sx,sy,P=w2s,Wp=s2w,HF=hitFeature){const f=features.get(select
 function hitFeature(w){const tol=8/view.s;let best=null;
   for(const [id,f] of features){if(!vis(f))continue;const g=f.geom;let d=Infinity;
     if(g.g==='point'){d=dist(w,g.pts[0]);if(g.r&&d<g.r)d=Math.min(d,tol*.9)}
-    else if(g.g==='line'){for(let i=1;i<g.pts.length;i++)d=Math.min(d,segDist(w,g.pts[i-1],g.pts[i]))}
+    else if(g.g==='line'){for(let i=1;i<g.pts.length;i++)d=Math.min(d,segDist(w,g.pts[i-1],g.pts[i]));const b=stripOf(f);if(b&&inBand(w,b))d=Math.min(d,tol*.93)}
     else if(g.g==='polygon'){for(let i=0;i<g.pts.length;i++)d=Math.min(d,segDist(w,g.pts[i],g.pts[(i+1)%g.pts.length]));if(inPoly(w,g.pts))d=Math.min(d,tol*.95)}
     else {const r=dist(w,[g.cx,g.cy]);d=r<g.r?tol*.97:Infinity}
     const pri=(KINDS[f.kind]||{}).g==='Zones'?0.01:0;if(d<=tol&&(!best||d+pri<best.d))best={id,d:d+pri}}
@@ -900,7 +928,7 @@ function secOrder(){return [...features.entries()].filter(([i,f])=>f.kind==='sec
 function secLetters(id){const L='ABCDEFGHJKLMNPQRSTUVWXYZ';const k=secOrder().findIndex(([i])=>i===id);const n=k<0?secOrder().length:k;return [L[(2*n)%24],L[(2*n+1)%24]]}
 function nextName(kind){if(kind==='section'){const [a,b]=secLetters('__new__');return `Section ${a}–${b}`}const k=KINDS[kind];let n=1;for(const f of features.values())if(f.kind===kind)n++;return (k.g==='Zones'&&kind!=='goatzone')||k.geom==='sun'?k.label:`${k.label} ${n}`}
 async function commit(geom,extra={}){const kind=draft.kind;const KK=KINDS[kind]||{};if(geom.g==='point'&&KK.r&&!geom.r)geom.r=KK.r;const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  const doc={kind,name:nextName(kind),status:'idea',notes:'',stage:defStage(kind),geom,createdBy:myId||null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'map',...extra};
+  const doc={kind,name:nextName(kind),status:'idea',notes:KK.notes||'',...(KK.band?{width:KK.band,side:'centre'}:{}),stage:defStage(kind),geom,createdBy:myId||null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:'map',...extra};
   pushHist('add “'+doc.name+'”',[{id,before:null,after:structuredClone(doc)}]);multi.clear();
   if(KK.repeat&&geom.g==='point'){features.set(id,doc);draft={kind,pts:[],species:draft.species};updateDrawbar();renderTools();draw();toast(doc.name+' added. Click to place another, or press Esc when done.');await persist(id,doc);return}
   features.set(id,doc);selected=id;draft=null;tool=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;showTab('feat');renderDraw();renderFeatures();renderTools();draw();
@@ -2480,7 +2508,7 @@ const PANELS={
  change(g,x,y,w){const ch=EXTRA&&EXTRA.change;if(!ch)return 0;const ys=Object.keys(ch).sort();if(!ys.length)return 0;let h=shHead(g,x,y,w,'Ground change');
   for(const yy of ys){const c=ch[yy];shText(g,`Since ${yy}`,x,y+h+22,20,SC.ink,600);shText(g,`${c.lotLossHa} ha lowered · ${c.lotGainHa} ha raised`,x+w,y+h+22,19,SC.mute,400,'right');h+=31}
   h+=shWrap(g,'More than 1 m of change, after survey offsets. Mostly gully edges: leads to check on site.',x,y+h+8,w,17,SC.mute,22);return h+14},
- legend(g,x,y,w,ctx2){const vf=visList();const used={};vf.forEach(f=>{const k=f.kind;if((KINDS[k]||{}).g==='Zones')return;used[k]=used[k]||{n:0,a:0};used[k].n++;if(f.geom.g==='polygon')used[k].a+=polyArea(f.geom.pts)});
+ legend(g,x,y,w,ctx2){const vf=visList();const used={};vf.forEach(f=>{const k=f.kind;if((KINDS[k]||{}).g==='Zones'&&!(KINDS[k]||{}).band)return;used[k]=used[k]||{n:0,a:0};used[k].n++;if(f.geom.g==='polygon')used[k].a+=polyArea(f.geom.pts);else{const b=stripOf(f);if(b)used[k].a+=b.area}});
   const lg=[[SC.teal,'Property boundary',''],['#1969c8','Flow lines',''],['#8a6a45','Contours','']];if(layers.pros&&PROS)lg.push(['#a14e07','Prospects (computed)','']);Object.keys(KINDS).filter(k=>used[k]).forEach(k=>lg.push([KINDS[k].color,KINDS[k].label,used[k].a?fmtHa(used[k].a):(used[k].n>1?'× '+used[k].n:'')]));
   let h=shHead(g,x,y,w,'Legend');const cols=lg.length>10?2:1;const cw=(w-(cols-1)*20)/cols;const rows=Math.ceil(lg.length/cols);
   lg.forEach(([c,l,v],i)=>{const cx=x+Math.floor(i/rows)*(cw+20),cy=y+h+(i%rows)*28;g.fillStyle=c;g.fillRect(cx,cy+4,18,18);g.font='400 18px "IBM Plex Sans",sans-serif';let t=l;while(g.measureText(t).width>cw-(v?110:30)&&t.length>4)t=t.slice(0,-2);if(t!==l)t+='…';shText(g,t,cx+26,cy+19,18,SC.ink);if(v)shText(g,v,cx+cw,cy+19,16,SC.mute,400,'right')});
@@ -2816,11 +2844,12 @@ function v3WithS(c,fn){const sv=view.s;view.s=v3Scale(c);try{return fn()}finally
 // a feature's outline as world points (sectors and sun wedges become polygons)
 function v3Ring(f){const g=f.geom,k=KINDS[f.kind]||KINDS.note;if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}if(a1<=a0)a1+=360;const o=[[g.cx,g.cy]];for(let a=a0;a<=a1+.01;a+=Math.max(2,(a1-a0)/40)){const r=a*Math.PI/180;o.push([g.cx+Math.sin(r)*g.r,g.cy-Math.cos(r)*g.r])}return {pts:o,closed:true}}
   if(g.g==='point'&&g.r){const o=[];for(let i=0;i<36;i++){const a=i/36*2*Math.PI;o.push([g.pts[0][0]+Math.cos(a)*g.r,g.pts[0][1]+Math.sin(a)*g.r])}return {pts:o,closed:true}}
+  {const b=stripOf(f);if(b)return {rings:bandRings(b),closed:true}}
   return {pts:g.pts||[],closed:g.g==='polygon'}}
 // densify along the ground so lines follow the terrain, then project
 function v3Drape(pts,closed){const out=[];if(!pts.length)return out;const st=V3.L/255;const q=closed?pts.concat([pts[0]]):pts;
   for(let i=0;i<q.length;i++){if(i){const a=q[i-1],b=q[i],n=Math.min(200,Math.max(1,Math.ceil(dist(a,b)/st)));for(let k=1;k<n;k++){const t=k/n;out.push(v3Scr(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t))}}out.push(v3Scr(q[i][0],q[i][1]))}return out}
-function v3Proj(id,f){const c=V3.pc||(V3.pc=new Map());const h=c.get(id);if(h&&h.g===f.geom&&h.fr===V3.frame&&h.ex===V3.ex)return h.P;const r=v3Ring(f);const P=f.geom.g==='point'&&!f.geom.r?[v3Scr(...f.geom.pts[0])]:v3Drape(r.pts,r.closed);c.set(id,{g:f.geom,fr:V3.frame,ex:V3.ex,P,closed:r.closed});if(c.size>600)c.clear();return P}
+function v3Proj(id,f){const c=V3.pc||(V3.pc=new Map());const h=c.get(id);if(h&&h.g===f.geom&&h.fr===V3.frame&&h.ex===V3.ex)return h.P;const r=v3Ring(f);const P=f.geom.g==='point'&&!f.geom.r?[v3Scr(...f.geom.pts[0])]:r.rings?r.rings.flatMap((q,i)=>(i?[null]:[]).concat(v3Drape(q,true))):v3Drape(r.pts,r.closed);c.set(id,{g:f.geom,fr:V3.frame,ex:V3.ex,P,closed:r.closed});if(c.size>600)c.clear();return P}
 function v3Path(g2,P,closed){g2.beginPath();let on=false;for(const p of P){if(!p){on=false;continue}if(on)g2.lineTo(p[0],p[1]);else{g2.moveTo(p[0],p[1]);on=true}}if(closed)g2.closePath()}
 function v3InPoly(x,y,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if(!a||!b)continue;if(((a[1]>y)!=(b[1]>y))&&(x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]))c=!c}return c}
 // screen-space hit test against the draped drawings (same priorities as the 2D map: things beat zones, edges beat insides)
@@ -2828,7 +2857,7 @@ function v3HitFeature(sx,sy,coarse){const tol=coarse?16:9;let best=null;if(!laye
   for(const [id,f] of features){if(!vis(f)||(f.kind==='privacy'&&id!==selected))continue;const g=f.geom;let d=Infinity;const P=v3Proj(id,f);
     if(g.g==='point'){const p=v3Scr(...g.pts[0]);if(p)d=Math.hypot(p[0]-sx,p[1]-sy);if(g.r&&P.length>1&&v3InPoly(sx,sy,P))d=Math.min(d,tol*.9)}
     else{for(let i=1;i<P.length;i++){const a=P[i-1],b=P[i];if(a&&b)d=Math.min(d,segDist([sx,sy],a,b))}
-      if(g.g!=='line'&&v3InPoly(sx,sy,P))d=Math.min(d,tol*.95+(g.g==='polygon'?Math.min(.3,polyArea(g.pts)/2e5):.2))}
+      if((g.g!=='line'||stripOf(f))&&v3InPoly(sx,sy,P))d=Math.min(d,tol*.95+(g.g==='polygon'?Math.min(.3,polyArea(g.pts)/2e5):.2))}
     const pri=(KINDS[f.kind]||{}).g==='Zones'?.5:0;if(d<=tol&&(!best||d+pri<best.d))best={id,d:d+pri}}
   return best&&best.id}
 function v3HitHandle(sx,sy,coarse){const f=features.get(selected);if(!f)return null;const c=centroid(f);if(!c)return null;
@@ -2841,9 +2870,10 @@ function v3Overlay(){const c=$('#gl2');if(!c||!V3.on||!V3.cam||!V3.box)return;co
   const drawShape=(id,f,full,sel)=>{const k=KINDS[f.kind]||KINDS.note,col=k.color,gm=f.geom;const P=v3Proj(id,f);g2.setLineDash([]);g2.lineJoin='round';g2.lineCap='round';
     if(gm.g==='point'){const p=P[P.length===1?0:-1]||v3Scr(...gm.pts[0]);if(P.length>1){v3Path(g2,P,true);if(full){g2.fillStyle=hexA(col,.22);g2.fill()}g2.lineWidth=sel?2.5:1.5;g2.strokeStyle=col;g2.stroke()}
       const q=v3Scr(...gm.pts[0]);if(q&&full){g2.beginPath();g2.arc(q[0],q[1],7,0,7);g2.fillStyle=col;g2.fill();g2.lineWidth=2;g2.strokeStyle='#fff';g2.stroke()}return}
-    v3Path(g2,P,gm.g!=='line');
+    const bnd=gm.g==='line'&&stripOf(f);v3Path(g2,P,gm.g!=='line'&&!bnd);
+    if(bnd){if(full){g2.fillStyle=hexA(col,.35);g2.fill('evenodd')}g2.lineWidth=sel?4.5:3;g2.strokeStyle='rgba(255,255,255,.85)';g2.stroke();g2.lineWidth=sel?2.6:2;g2.strokeStyle=col;g2.stroke();return}
     if(gm.g==='line'){g2.lineWidth=(k.w?k.w+3:6)+(sel?1.5:0);g2.strokeStyle='rgba(255,255,255,.8)';g2.stroke();g2.lineWidth=(k.w||2.6)+(sel?1.2:0);g2.strokeStyle=col;if(k.dash)g2.setLineDash(k.dash);g2.stroke();g2.setLineDash([]);return}
-    if(full){g2.fillStyle=hexA(col,k.g==='Zones'?.2:.38);g2.fill()}g2.lineWidth=sel?4.5:3;g2.strokeStyle='rgba(255,255,255,.85)';g2.stroke();g2.lineWidth=sel?2.6:1.8;g2.strokeStyle=col;if(!sel&&(k.g==='Zones'||k.dash))g2.setLineDash(k.dash||[7,4]);g2.stroke();g2.setLineDash([])};
+    if(full){g2.fillStyle=hexA(col,k.fillA||(k.g==='Zones'?.2:.38));g2.fill()}g2.lineWidth=sel?4.5:3;g2.strokeStyle='rgba(255,255,255,.85)';g2.stroke();g2.lineWidth=sel?2.6:1.8;g2.strokeStyle=col;if(!sel&&((k.g==='Zones'&&!k.solid)||k.dash))g2.setLineDash(k.dash||[7,4]);g2.stroke();g2.setLineDash([])};
   if(skip&&features.has(skip))drawShape(skip,features.get(skip),true,true);
   if(hoverId3()&&hoverId3()!==selected&&features.has(hoverId3())){g2.globalAlpha=.7;drawShape(hoverId3(),features.get(hoverId3()),false,false);g2.globalAlpha=1}
   for(const id of multi){const f=features.get(id);if(f&&id!==skip)drawShape(id,f,false,true)}
@@ -2878,7 +2908,7 @@ function v3Labels(g2,W3,H3){if(!layers.labels||!layers.design)return;const L=[];
     const area=g.g==='polygon'?polyArea(g.pts):0;const sc=V3.cam.h/2*V3.cam.f/p[2];
     if(!isZ&&id!==selected&&id!==hov&&((g.g==='polygon'&&Math.sqrt(area)*sc<22)||(g.g==='point'&&sc<.9)||(g.g==='line'&&lineLen(g.pts)*sc<50)))continue;
     if(id!==selected&&v3Hidden(p))continue;
-    L.push({id,isZ,p,area,name:f.name||k.label,sub:g.g==='polygon'&&(isZ||area*sc*sc>2500)?fmtArea(area):'',col:isZ&&layers.zcol!==false?darker(k.color):'#1d2621',acol:k.color,pin:!isZ,near:p[2]})}
+    L.push({id,isZ,p,area:area||(stripOf(f)||{}).area||0,name:f.name||k.label,sub:fSub(f,isZ,area,sc),col:isZ&&layers.zcol!==false?darker(k.color):'#1d2621',acol:k.color,pin:!isZ,near:p[2]})}
   L.sort((p,q)=>((q.id===selected)-(p.id===selected))||(q.isZ-p.isZ)||(q.area-p.area)||(p.near-q.near));
   const boxes=[];const hit=b=>boxes.some(o=>b.x0<o.x1&&b.x1>o.x0&&b.y0<o.y1&&b.y1>o.y0);g2.textAlign='center';g2.textBaseline='middle';
   for(const l of L){const fs=l.isZ?13.5:12.5;g2.font=`${l.isZ?600:500} ${fs}px "IBM Plex Sans",sans-serif`;const w1=g2.measureText(l.name).width;g2.font='600 11px "IBM Plex Mono",monospace';const w2=l.sub?g2.measureText(l.sub).width:0;
@@ -3003,7 +3033,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
    (ECO?sec('eco','Native vegetation (regional ecosystems)',ecoHTML(),false):'')+
    (GEO?sec('geo','Underlying rock (geology)',geoHTML(),false):'')+
    (HAZ?sec('haz','Rules and hazards',hazHTML(),false):'')+
-   sec('lines','Water, contours & labels',lines.map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join('')+(SITE.boundarySrc?`<p class="hint">Sources: boundary ${esc(SITE.boundarySrc)}; flow lines, catchments and contours computed from the ${esc(SITE.source||'elevation data')}${T.focus?`; focus area traced from the ${esc(SITE.aerialSrc||'aerial photo')}`:''}.</p>`:''))+
+   sec('lines','Water, contours & labels',lines.map(([k,l,c])=>`<div class="row"><label><input type="checkbox" data-k="${k}" ${layers[k]?'checked':''}><i class="swatch" style="background:${c}"></i>${l}</label></div>`).join('')+`<div class="legend"><span><i class="swatch" style="background:rgba(26,158,142,.35);border:2px solid #1a9e8e"></i>Green firebreak: filled teal band, solid edge</span><span><i class="swatch" style="background:transparent;border:2px dashed #14898f"></i>Property boundary: dashed line, no fill</span></div><p class="hint">${esc(FIRE_SRC)}.</p>`+(SITE.boundarySrc?`<p class="hint">Sources: boundary ${esc(SITE.boundarySrc)}; flow lines, catchments and contours computed from the ${esc(SITE.source||'elevation data')}${T.focus?`; focus area traced from the ${esc(SITE.aerialSrc||'aerial photo')}`:''}.</p>`:''))+
    (PROS?sec('pros','Prospects (computed sites)',`<p class="hint">Screening sites found by scanning the terrain: where small pond walls store the most water for the least earth, where level building pads need the least cut and fill with good winter sun, the highest tank site, and the few flat spots. A starting point for a site walk, not a design.</p>`+prosHTML()):'')+
    `<p class="hint">${/NSW 5 m/.test(SITE.source||'')?`Terrain: ${esc(SITE.source)}.`:`Terrain from the ${SITE.main} LiDAR survey (bare earth, ${SITE.res}).`} Sun hours count terrain shading only, not trees.</p>`;
   const ch=EXTRA&&EXTRA.change;
@@ -3069,6 +3099,7 @@ function renderDraw(){const el=$('#tab-draw');const groups={};const q=drawQ.trim
   const head=`<div class="field"><label for="drawLvSeg">Tool set</label>${segHTML('drawLvSeg',LV_NAMES.map(([n,l])=>[String(n),l]),String(drawLv))}</div>
    <p class="hint">${drawLv===1?'The basics for most gardens and homes. Switch to Designer or Expert for more.':drawLv===2?'Adds water, access, built and landscape tools.':'Everything, including keypoint, dam and grazing tools.'}${SITEDEF.small?' Farm-scale tools are hidden on this small block.':''} Showing ${q?shown:Object.keys(KINDS).filter(kindShown).length} of ${total} tools.</p>
    <div class="field"><label for="drawFind">Find a tool</label><input id="drawFind" type="search" placeholder="e.g. fruit tree, tank, path" value="${esc(drawQ)}" autocomplete="off"></div>
+   ${tool&&(KINDS[tool]||{}).fire?firePanelHTML(true):''}
    ${rec.length&&!q?`<h2>Recently used</h2><div class="tools">${rec.map(k=>btn([k,KINDS[k]])).join('')}</div>`:''}`;
   el.innerHTML=head+(shown?'':'<p class="hint">No tools match. Try another word, or switch to Expert.</p>')+DRAW_ORDER.filter(g=>groups[g]).map(g=>`<h2>${g}</h2><p class="hint gh">${GROUP_HINT[g]||''}</p><div class="tools">${groups[g].map(([k,v])=>`<button class="tool" data-k="${k}" aria-pressed="${tool===k}"><i class="swatch" style="background:${v.color}"></i><span>${esc(v.label)}</span></button>`).join('')}</div>${g==='Sectors'?'<button class="btn" id="addWinds" style="margin-top:6px">Add typical SE Queensland wind sectors</button>':''}${g==='Zones'&&drawLv>=2&&!q?czFormHTML():''}`).join('')+
   sec('tips','How drawing works',`<p class="hint">Drag to pan, scroll or pinch to zoom. Lines and shapes: click points, then Finish (or double-click). Or pick <b>Sketch & tidy</b> in the drawing bar and draw with your finger: rough boxes become rectangles, loops become circles or ovals, anything else is smoothed.</p>
@@ -3095,6 +3126,7 @@ function measure(f){const g=f.geom,out=[];
   if(g.g==='sector'){out.push(['Bearings',`${g.a0.toFixed(0)}° → ${g.a1.toFixed(0)}° clockwise`],['Radius',Math.round(g.r)+' m'])}
   if(g.g==='sun'){const b=sunBearings(KINDS[f.kind].decl);out.push(['Sunrise',`${b.rise.toFixed(0)}° (${dirName(b.rise)})`],['Sunset',`${b.set.toFixed(0)}° (${dirName(b.set)})`],['Noon altitude',b.noonAlt.toFixed(0)+'° above the northern horizon'])}
   {const sn=sewerNote(f);if(sn)out.push(sn)}
+  {const b=stripOf(f);if(b)out.unshift(['Strip area',`${m2(b.area)} (${Math.round(lineLen(g.pts))} m long × ${+b.w.toFixed(1)} m wide${b.side==='centre'?', centred':', to the '+b.side}${b.closed?', closed loop':''})`])}
   const c=centroid(f);if(c){const ll=xy2ll(...c);out.push(['Lat, long',`${ll[1].toFixed(6)}, ${ll[0].toFixed(6)}`])}
   return out}
 let nameCache={};
@@ -3283,6 +3315,8 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
       ${f.photo?`<img class="obsimg" src="/_blob/${esc(f.photo)}" alt="Photo for ${esc(f.name)}">`:''}
       ${assets?`<input type="file" id="fphoto" accept="image/png,image/jpeg,image/webp" hidden><button class="btn" id="fphotob">${f.photo?'Replace photo':'Add a photo'}</button>`:'<p class="hint">Photos can be added by map editors.</p>'}`:''}
     ${f.kind==='paddock'||f.kind==='goatzone'?`${f.kind==='goatzone'?'<p class="hint">Goats browse shrubs and weeds more than grass. Fence with mesh or 5-strand electric, give a dry shelter, keep them out of creek lines, the vine-forest gullies and young plantings, and rotate before they strip the bark off trees.</p>':''}<div class="field"><label for="fpq">Pasture quality</label><select id="fpq">${Object.entries(PQ).map(([k,v])=>`<option value="${k}" ${(f.pq||'fair')===k?'selected':''}>${v[0]}</option>`).join('')}</select></div><p class="hint">${(()=>{const r=paddockCalc(f);return `${GZ.n} ${ANIMALS[GZ.animal][0].toLowerCase()} can graze it for about ${r.days<1?'under a day':Math.round(r.days)+' days'}, then it needs about ${Math.round(r.rest)} days to regrow (${GZ.season==='summer'?'growing season':'winter'}).`})()}</p>`:''}
+    ${k.band?`<div class="row"><div class="field" style="flex:1"><label for="fbw">Strip width (m, 5–20)</label><input id="fbw" type="number" min="5" max="20" step="0.5" value="${stripOf(f)?stripOf(f).w:k.band}"></div><div class="field" style="flex:1"><label>Strip sits</label>${segHTML('fbside',[['left','Left'],['centre','Centred'],['right','Right']],f.side||'centre')}</div></div><p class="hint">Left and right are as you walk the line in the direction it was drawn. Area is length × width. Join the last point to the first to make a closed loop.</p>`:''}
+    ${k.fire?firePanelHTML(true):''}
     ${f.kind==='tank'?`<div class="field"><label for="flit">Tank size (litres)</label><input id="flit" type="number" min="0" max="1000000" step="500" value="${+f.litres||''}" placeholder="e.g. 20000"></div>`:''}
     ${f.kind==='privacy'?`<div class="field"><label>How the area looks</label>${segHTML('fplook',[['low','Low detail'],['map','Map colours'],['blank','Blank']],f.look||'low')}</div>
     ${(f.look||'low')==='low'?`<div class="field"><label>Detail</label>${segHTML('fpres',[['5','5 m'],['10','10 m'],['30','30 m']],String(f.res||10))}</div>`:''}
@@ -3313,6 +3347,8 @@ function renderFeatures(fromSnap){const el=$('#tab-feat');if(fromSnap&&el.contai
     if($('#fphotob')){$('#fphotob').onclick=()=>$('#fphoto').click();$('#fphoto').onchange=async e=>{const file=e.target.files[0];if(!file)return;toast('Uploading photo…');
       try{const r=await assets.upload(file);await saveFields(selected,{photo:r.id});toast('Photo added');renderFeatures()}catch(er){toast(er&&er.code==='too_large'?'That photo is over 20 MB.':'The photo did not upload.')}}}
     if($('#fpq'))$('#fpq').onchange=e=>{saveFields(selected,{pq:e.target.value});renderFeatures();renderTools()};
+    if($('#fbw'))$('#fbw').onchange=e=>{saveFields(selected,{width:Math.max(5,Math.min(20,+e.target.value||10))});renderFeatures();renderTools()};
+    document.querySelectorAll('#fbside button').forEach(b=>b.onclick=()=>{saveFields(selected,{side:b.dataset.v});renderFeatures();draw()});
     if($('#flit'))$('#flit').onchange=e=>{saveFields(selected,{litres:Math.max(0,+e.target.value||0)});renderTools()};
     if($('#froof'))$('#froof').onchange=e=>{saveFields(selected,{roof:e.target.checked});renderTools()};
     if($('#fpriv'))$('#fpriv').onchange=e=>{saveFields(selected,{hideItems:e.target.checked});renderFeatures();draw()};

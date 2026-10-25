@@ -44,10 +44,11 @@ cfg = {'name': 'Mangiri', 'subtitle': 'Mongarlowe, NSW', 'state': 'NSW', 'counci
 json.dump(cfg, open(W + '/cfg.json', 'w'))
 r = subprocess.run(['python3', os.path.join(HERE, '..', 'build_site.py'), W + '/cfg.json'], capture_output=True, text=True); print(r.stdout[-2500:], r.stderr[-1500:])
 r = subprocess.run(['python3', os.path.join(HERE, '..', 'hydro_layers.py'), OUT], capture_output=True, text=True); print(r.stdout[-500:], r.stderr[-500:])
-# extra outlines: the other register parts and the focus area (the clearing round the driveway end and buildings)
+# extra outlines: the other register parts. No separate focus area since trial v40: Brett wants the whole 33 ha lot
+# as the focus, so the site opens fitted to the lot (focus.json, the clearing outline, is kept but not used)
 t = json.load(open(OUT + '/terrain.json'))
 t['lotParts'] = [np.round(local(r)[:-1], 1).ravel().tolist() for r in parts[1:]]
-t['focus'] = json.load(open(os.path.join(HERE, 'focus.json')))['p']
+t.pop('focus', None)
 t['meta']['site']['boundarySrc'] = 'NSW cadastre 2026'
 t['meta']['site']['aerialSrc'] = 'NSW aerial 2014'
 json.dump(t, open(OUT + '/terrain.json', 'w'), separators=(',', ':'))
