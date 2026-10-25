@@ -65,10 +65,10 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
   resilience' (2020s); Bright Tree notes 2026.
 - Layers legend: a filled teal band with a solid edge is the green firebreak; the dashed line with no fill is the
   property boundary.
-- Bright Tree: one draft "Perimeter green firebreak (draft)" strip, 10 m wide, just inside the whole boundary
-  (status idea), added to the trial map's drawings for Brett to adjust. About 800 m of the 1,357 m loop crosses ground
-  steeper than 50% (creek and cliff sides) in 34 separate stretches, too broken up to leave out neatly, so the full
-  loop is drawn and its notes say so.
+- Bright Tree: three draft strips just inside the boundary, one per side, each its own feature so it can be trimmed,
+  re-widthed or deleted on its own: "Green firebreak – east (draft)" (about 260 m), "– south (draft)" (about 385 m)
+  and "– west (draft)" (about 385 m), 10 m wide, status idea. Nothing on the north side. Added to the trial map's
+  drawings. (Much of the boundary is steeper than 50% in many short stretches, so the strips follow the whole of each side.)
 
 **Changed**
 - Mangiri: the whole 33 ha lot is now the focus, and the site opens fitted to it. The separate clearing outline is
