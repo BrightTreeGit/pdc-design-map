@@ -268,7 +268,7 @@ const KINDS={
   track:{g:'Access',label:'Track (≤10%)',geom:'line',color:'#8a5a2b',grade:8,checkGrade:10},
   path:{g:'Access',label:'Footpath',geom:'line',color:'#a8794a',dash:[3,3],checkGrade:15},
   building:{g:'Built',label:'Building',geom:'polygon',color:'#575757'},
-  structure:{g:'Built',label:'Structure / asset',geom:'point',color:'#444',sym:'square'},
+  structure:{g:'Built',label:'Structure / asset',geom:'point',color:'#444',sym:'square'},teepee:{g:'Built',label:'Teepee / tipi',geom:'point',color:'#e0218a',sym:'tri',size:1.7},
   foodforest:{g:'Plants',label:'Food forest / bed',geom:'polygon',color:'#5f9e2f'},
   guild:{g:'Plants',label:'Guild',geom:'point',color:'#3f8f3a',sym:'guild'},
   tree:{g:'Plants',label:'Tree',geom:'point',color:'#2e6b2a',sym:'tree'},
@@ -698,9 +698,9 @@ function drawFeature(f,px,sel){
       const d=densify(g.pts,2);for(let i=1;i<d.length;i++){const gr=Math.abs(d[i].z-d[i-1].z)/(d[i].d-d[i-1].d||1)*100;ctx.strokeStyle=gr>k.checkGrade?'#d32f2f':col;ctx.lineWidth=3*px;if(k.dash)ctx.setLineDash(k.dash.map(v=>v*px));ctx.beginPath();ctx.moveTo(d[i-1].x,d[i-1].y);ctx.lineTo(d[i].x,d[i].y);ctx.stroke()}ctx.setLineDash([])}
     else{ctx.lineWidth=((k.w||2.6)+(sel?1:0))*px;ctx.strokeStyle=col;if(k.dash)ctx.setLineDash(k.dash.map(v=>v*px));ctx.stroke(p);ctx.setLineDash([])}
     if(k.arrow&&g.pts.length>1){const a=g.pts[g.pts.length-2],b=g.pts[g.pts.length-1],an=Math.atan2(b[1]-a[1],b[0]-a[0]),L=12*px;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(b[0],b[1]);ctx.lineTo(b[0]-L*Math.cos(an-.45),b[1]-L*Math.sin(an-.45));ctx.lineTo(b[0]-L*Math.cos(an+.45),b[1]-L*Math.sin(an+.45));ctx.fill()}}
-  else if(g.g==='point'){const [x,y]=g.pts[0],r=(sel?9:7)*px;ctx.lineWidth=2*px;ctx.strokeStyle='#fff';ctx.fillStyle=col;
+  else if(g.g==='point'){const [x,y]=g.pts[0],r=(sel?9:7)*px*(k.size||1);ctx.lineWidth=2*px;ctx.strokeStyle='#fff';ctx.fillStyle=col;
     if(g.r){ctx.beginPath();ctx.arc(x,y,g.r,0,7);ctx.fillStyle=hexA(col,.22);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=1.5*px;ctx.stroke();ctx.fillStyle=col;ctx.strokeStyle='#fff';ctx.lineWidth=2*px}
-    ctx.beginPath();if(k.sym==='square'||k.sym==='tank'){ctx.rect(x-r,y-r,2*r,2*r)}else if(k.sym==='diamond'){ctx.moveTo(x,y-r*1.2);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r*1.2);ctx.lineTo(x-r,y);ctx.closePath()}else if(k.sym==='pin'){ctx.arc(x,y-r,r*.8,0,7);ctx.moveTo(x,y);ctx.lineTo(x-r*.5,y-r*.6);ctx.lineTo(x+r*.5,y-r*.6)}else ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();
+    ctx.beginPath();if(k.sym==='square'||k.sym==='tank'){ctx.rect(x-r,y-r,2*r,2*r)}else if(k.sym==='tri'){ctx.moveTo(x,y-r*1.4);ctx.lineTo(x+r*1.15,y+r);ctx.lineTo(x-r*1.15,y+r);ctx.closePath()}else if(k.sym==='diamond'){ctx.moveTo(x,y-r*1.2);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r*1.2);ctx.lineTo(x-r,y);ctx.closePath()}else if(k.sym==='pin'){ctx.arc(x,y-r,r*.8,0,7);ctx.moveTo(x,y);ctx.lineTo(x-r*.5,y-r*.6);ctx.lineTo(x+r*.5,y-r*.6)}else ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();
     if(k.sym==='tank'){ctx.strokeStyle='#fff';ctx.lineWidth=1.2*px;ctx.beginPath();ctx.moveTo(x-r*.6,y);ctx.lineTo(x+r*.6,y);ctx.stroke()}}
   else if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1,extra='';if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}
     const p=wedge(g.cx,g.cy,g.r,a0,a1);ctx.fillStyle=hexA(col,.16);ctx.fill(p);ctx.lineWidth=(sel?2.6:1.6)*px;ctx.strokeStyle=col;ctx.setLineDash([5*px,3*px]);ctx.stroke(p);ctx.setLineDash([]);

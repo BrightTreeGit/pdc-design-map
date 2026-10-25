@@ -46,6 +46,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v42 | 25 Oct 2026 | trial/willow-vale-team | New Teepee / tipi feature type: large bright-pink triangle so it stands out |
 | Trial v41 | 25 Oct 2026 | trial/willow-vale-team | Bright Tree: B4 pad becomes the treehouse spot; B6 pad (on the house) removed |
 | Beta v3 | 25 Oct 2026 | beta/group-maps | Mangiri beta rebuilt from trial v40 (whole lot as focus) |
 | Trial v40 | 25 Oct 2026 | trial/willow-vale-team | Green firebreak (area and strip); Mangiri opens on the whole lot |
@@ -54,6 +55,10 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Trial v42 (25 Oct 2026)
+**Added**
+- A **Teepee / tipi** feature type (Draw → Built): a bright pink triangle drawn 1.7× the size of other points, so it doesn't get lost among the dark structure squares. Bright Tree's valley teepee now uses it.
 
 ### Trial v41 (25 Oct 2026)
 **Changed**
