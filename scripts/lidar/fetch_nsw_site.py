@@ -117,6 +117,18 @@ def pluscode_to_latlon(text):
 def find_property(a):
     """Exact address first; if the register spells the road or locality differently, retry with looser matches
     (number + road, then road + locality, then road alone) and say which one matched."""
+    if a.pin and not a.propid:
+        # a point wins; the address (if given) is only a hint to check the right block was found
+        feats = _find_property_where(None, a)
+        want = a.address.split()[0] if a.address else None
+        if feats and want and want[:1].isdigit():
+            got = str(feats[0]["properties"].get("address", "")).split()[:1]
+            if got != [want]:
+                print(f"  the point is inside {feats[0]['properties'].get('address')}, not number {want}; looking at the properties around it")
+                near = nearby_properties(a)
+                if near and str(near[0]["properties"].get("address", "")).split()[:1] == [want]: return near
+                print("  keeping the property under the point")
+        return feats
     if a.address and not a.propid:
         words = a.address.upper().replace("'", "''").split()
         num = words[0] if words and words[0][:1].isdigit() else None
@@ -164,6 +176,38 @@ def _find_property_where(where, a=None):
         if j and j.get("features"):
             feats += j["features"]
     return feats
+
+def nearby_properties(a, radius_m=300):
+    """The point missed every property (Google often puts an address's Plus Code on the road). List the properties within
+    radius_m of it and pick: the one whose house number matches --address if given, else the nearest."""
+    lat, lon = [float(v) for v in a.pin.split(",")]
+    dlat = radius_m / 111320.0; dlon = radius_m / (111320.0 * math.cos(math.radians(lat)))
+    env = f"{lon - dlon},{lat - dlat},{lon + dlon},{lat + dlat}"
+    found = []
+    for layer in (1, 2, 3, 4):
+        j = get(PROP.format(layer=layer), {"geometry": env, "geometryType": "esriGeometryEnvelope", "inSR": "4326", "spatialRel": "esriSpatialRelIntersects",
+                                           "where": "1=1", "outFields": "propid,address,housenumber", "returnGeometry": "true", "outSR": "4326", "f": "geojson"}, f"properties near the point (layer {layer})")
+        for f in (j or {}).get("features", []):
+            if all(f["properties"].get("propid") != g["properties"].get("propid") for g in found): found.append(f)
+    if not found:
+        print(f"  no properties within {radius_m} m of the point either"); return []
+    def centre(f):
+        g = f["geometry"]; rings = g["coordinates"] if g["type"] == "Polygon" else [r for poly in g["coordinates"] for r in poly]
+        pts = [p for r in rings for p in r]; return sum(p[1] for p in pts) / len(pts), sum(p[0] for p in pts) / len(pts)
+    def dist(f):
+        c = centre(f); return math.hypot((c[0] - lat) * 111320, (c[1] - lon) * 111320 * math.cos(math.radians(lat)))
+    found.sort(key=dist)
+    print(f"  the point is not inside a property; {len(found)} within {radius_m} m:")
+    for f in found[:12]:
+        print(f"    {f['properties'].get('propid')}  {f['properties'].get('address')}  ({dist(f):.0f} m away)")
+    want = (a.address or "").split()[0] if a.address else None
+    if want and want[:1].isdigit():
+        hit = [f for f in found if str(f["properties"].get("address", "")).split()[:1] == [want]]
+        if hit:
+            print(f"  using the one numbered {want}"); return [hit[0]]
+    print("  using the nearest; if that's the wrong block, re-run with --propid <id> from the list above")
+    return [found[0]]
+
 
 def find_lots(lotdp):
     lots = [s.strip() for s in lotdp.split(",") if s.strip()]
@@ -301,6 +345,8 @@ def main():
         feats = find_lots(a.lotdp); src = "NSW cadastre lots " + a.lotdp
     else:
         feats = find_property(a); src = "NSW property register"
+    if not feats and a.pin:
+        feats = nearby_properties(a)
     if not feats:
         sys.exit("No property found. Check the address spelling as it appears on the NSW register, or use --lotdp or --pin.")
     if len(feats) > 1 and not a.lotdp:
