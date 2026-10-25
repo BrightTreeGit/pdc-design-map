@@ -46,9 +46,35 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v39 | 25 Oct 2026 | trial/willow-vale-team | Draw, select, move and reshape in 3D; upright 3D labels |
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Trial v39 (25 Oct 2026)
+**Added**
+- Drawing in the 3D view: with 3D open, pick a tool in the Draw tab and click on the ground to place points, corners
+  or a tank; the shape follows the terrain as you draw, with the side length and area shown by the cursor. Finish with
+  double-click, Enter or the Finish button; Esc or Cancel stops, Backspace takes off the last point, as in 2D.
+- Select and edit in 3D: click a drawing to select it; drag inside it to move it, drag a white corner to reshape it,
+  and the round-arrow and curved-arrow handles resize and rotate it, all sitting on the ground. Changes save and undo
+  (Ctrl+Z / Ctrl+Shift+Z) exactly as in 2D. Dragging empty ground still turns the view; a tap or click (no drag)
+  places a point, so it works with a finger on a phone too.
+- Upright labels in 3D: zone and feature names stand up facing you at the middle of each shape, readable from any
+  angle, and step aside or hide so they don't pile up (labels behind a hill are hidden).
+- QA test `scripts/qa/check_3d_edit.py`: draws, selects, moves, reshapes and undoes in 3D on one site, and taps on a
+  touch screen.
+
+**Changed**
+- While you drag in 3D only the shape you are moving is redrawn; the rest of the map is draped again once at the start
+  and end of the drag. The 3D view now refreshes by itself after a change (no need to press Refresh).
+- The sketch, box and auto-shape modes are hidden in 3D (dragging turns the view there); use them in 2D.
+
+**Fixed**
+- 3D labels no longer lie flat and sideways along the shape, and the selection handles no longer hang in the air on
+  dashed lines.
+- The drawing bar and the pop-up messages now show above the 3D view (they were hidden behind it). The drawing bar
+  also hides properly when the map is opened straight from the repo for testing.
 
 ### Trial v38 (25 Oct 2026)
 **Added**
