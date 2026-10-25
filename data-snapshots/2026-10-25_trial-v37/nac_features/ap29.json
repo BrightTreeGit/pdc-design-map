@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1018.8,
+        1007.6
+      ]
+    ],
+    "r": 1.2
+  },
+  "kind": "shrub",
+  "name": "Cinnamon myrtle",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Ange confirmed the red tree beside the lemon myrtle is a cinnamon myrtle (bush-food leaf).",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

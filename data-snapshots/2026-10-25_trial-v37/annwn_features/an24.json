@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1001.1,
+        1007.1
+      ],
+      [
+        1001.3,
+        1003.5
+      ],
+      [
+        1001.4,
+        1003.5
+      ],
+      [
+        1001.2,
+        1007.1
+      ]
+    ]
+  },
+  "kind": "herbs",
+  "name": "Long bed (front, east side)",
+  "notes": "The long blue bed on the sketch: a narrow garden bed or water feature (check with Bronwen). (From Bronwen's hand sketch, 24 Oct 2026; position approximate: drag to fit.)",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-23T22:30:00.000Z"
+}

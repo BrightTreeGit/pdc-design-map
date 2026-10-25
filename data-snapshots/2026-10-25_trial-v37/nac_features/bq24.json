@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "a0": 245,
+    "a1": 330,
+    "cx": 1008.6,
+    "cy": 1000.6,
+    "g": "sector",
+    "r": 70
+  },
+  "kind": "fire",
+  "name": "Fire risk (west to north-west)",
+  "notes": "From Ange's sector map: fire risk either side of the afternoon summer sun, west to north-west. The block is Bush Fire Prone Land (vegetation buffer) and the house is built to BAL 29.",
+  "source": "Ange's sector sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "agreed",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

@@ -1,0 +1,64 @@
+{
+  "createdAt": "2026-10-22T05:20:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        996,
+        1190
+      ],
+      [
+        994.8,
+        1193.5
+      ],
+      [
+        991.5,
+        1196.1
+      ],
+      [
+        987,
+        1197
+      ],
+      [
+        982.5,
+        1196.1
+      ],
+      [
+        979.2,
+        1193.5
+      ],
+      [
+        978,
+        1190
+      ],
+      [
+        979.2,
+        1186.5
+      ],
+      [
+        982.5,
+        1183.9
+      ],
+      [
+        987,
+        1183
+      ],
+      [
+        991.5,
+        1183.9
+      ],
+      [
+        994.8,
+        1186.5
+      ]
+    ]
+  },
+  "kind": "pond",
+  "name": "Existing dam",
+  "notes": "Team sector map: existing dam west of the home (placed on the dam visible in the aerial, about 140 m WSW of the house; check this is the one). (Traced from the team's sector map, which is a schematic: positions and angles are indicative; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026): sector map and design-area slides",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-22T05:20:00.000Z"
+}

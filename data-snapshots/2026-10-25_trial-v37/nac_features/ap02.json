@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1001.3,
+        995.8
+      ],
+      [
+        1007.8,
+        996.7
+      ],
+      [
+        1007.2,
+        1000.1
+      ],
+      [
+        1000.8,
+        999.3
+      ]
+    ]
+  },
+  "kind": "solar",
+  "name": "Solar 24 kW with battery",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Surplus sold to the grid.",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

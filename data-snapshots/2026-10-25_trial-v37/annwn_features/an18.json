@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        984.7,
+        990.4
+      ]
+    ]
+  },
+  "kind": "shrub",
+  "name": "Sugar cane",
+  "notes": "Sugar cane along the west fence by the small shed. (From Bronwen's hand sketch, 24 Oct 2026; position approximate: drag to fit.)",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-23T22:30:00.000Z"
+}
