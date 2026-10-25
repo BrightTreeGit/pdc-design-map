@@ -22,7 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MAPDIR = {'bright-tree': ROOT / 'map', 'bellbunya': ROOT / 'map/sites/bellbunya', 'noosa-forest-retreat': ROOT / 'map/sites/noosa-forest-retreat',
-          'annwn': ROOT / 'map/sites/annwn', 'willow-vale': ROOT / 'map/sites/willow-vale', 'nimbin': ROOT / 'map/sites/nimbin', 'nac': ROOT / 'map/sites/nac'}
+          'annwn': ROOT / 'map/sites/annwn', 'willow-vale': ROOT / 'map/sites/willow-vale', 'nimbin': ROOT / 'map/sites/nimbin', 'nac': ROOT / 'map/sites/nac', 'regenify': ROOT / 'map/sites/regenify'}
 
 # code: (short description, VM Act status, biodiversity status)
 REDD = {
@@ -112,7 +112,7 @@ def ecosystems(src, dst):
     print(f'  ecosystems: {len(polys)} polygons, {len(cat)} types, {os.path.getsize(dst)//1024} kB' + (f'  MISSING from REDD table: {sorted(missing)}' if missing else ''))
 
 
-STATE = {'bright-tree': 'Q', 'bellbunya': 'Q', 'noosa-forest-retreat': 'Q', 'annwn': 'Q', 'willow-vale': 'N', 'nimbin': 'N', 'nac': 'N'}
+STATE = {'bright-tree': 'Q', 'bellbunya': 'Q', 'noosa-forest-retreat': 'Q', 'annwn': 'Q', 'willow-vale': 'N', 'nimbin': 'N', 'nac': 'N', 'regenify': 'N'}
 
 
 def species(src, dst, site=''):

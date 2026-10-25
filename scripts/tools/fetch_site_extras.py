@@ -43,6 +43,7 @@ SITES = {
     "willow-vale": (-31.91075, 151.7787, "NSW", 383492.0, 6469820.0, 56),
     "nimbin": (-28.5654, 153.25403, "NSW", 523889.0, 6841186.0, 56),
     "nac": (-32.67477, 152.04486, "NSW", 409432.0, 6385368.0, 56),
+    "regenify": (-28.53412, 153.41612, "NSW", 539619.0, 6844643.0, 56),
 }
 SILO = "https://www.longpaddock.qld.gov.au/cgi-bin/silo/DataDrillDataset.php"
 RE = "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Biota/VegetationManagement/MapServer"

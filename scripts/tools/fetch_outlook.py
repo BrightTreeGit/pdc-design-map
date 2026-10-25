@@ -62,6 +62,7 @@ except Exception as e:                            # keep working even if that fi
         "willow-vale": (-31.91075, 151.7787, "NSW", 383492.0, 6469820.0, 56),
         "nimbin": (-28.5654, 153.25403, "NSW", 523889.0, 6841186.0, 56),
         "nac": (-32.67477, 152.04486, "NSW", 409432.0, 6385368.0, 56),
+        "regenify": (-28.53412, 153.41612, "NSW", 539619.0, 6844643.0, 56),
     }
     get = None
 
@@ -96,7 +97,7 @@ PRECIS_FTP = "ftp.bom.gov.au"; PRECIS_DIR = "/anon/gen/fwo/"
 # Nearest Bureau forecast towns to try, in order (the first one found in the state file is used).
 PRECIS_TOWNS = {"bright-tree": ["Maleny", "Nambour", "Sunshine Coast"], "bellbunya": ["Eumundi", "Cooroy", "Nambour", "Sunshine Coast"],
                 "noosa-forest-retreat": ["Pomona", "Cooroy", "Tewantin", "Noosa Heads", "Sunshine Coast"], "annwn": ["Cleveland", "Redland Bay", "Brisbane"],
-                "willow-vale": ["Gloucester", "Dungog", "Taree"], "nimbin": ["Nimbin", "Lismore", "Kyogle"], "nac": ["Bulahdelah", "Tea Gardens", "Nelson Bay", "Newcastle"]}
+                "willow-vale": ["Gloucester", "Dungog", "Taree"], "nimbin": ["Nimbin", "Lismore", "Kyogle"], "nac": ["Bulahdelah", "Tea Gardens", "Nelson Bay", "Newcastle"], "regenify": ["Mullumbimby", "Byron Bay", "Lismore"]}
 STATE_WORDS = {"QLD": ["queensland", "sunshine coast", "south-east queensland", "southeast queensland", "eastern australia", "east coast", "the east"],
                "NSW": ["new south wales", "nsw", "eastern australia", "east coast", "the east", "south-east", "southeast"]}
 
