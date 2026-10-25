@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1005.1,
+        1008
+      ],
+      [
+        1005.4,
+        1007
+      ],
+      [
+        1010.9,
+        1007.5
+      ],
+      [
+        1010.5,
+        1008.5
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Zone 1 · Herbs",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m).",
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

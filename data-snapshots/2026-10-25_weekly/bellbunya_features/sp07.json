@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T00:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1314.2,
+        1308.7
+      ],
+      [
+        1320.9,
+        1317.5
+      ],
+      [
+        1313.5,
+        1323.1
+      ],
+      [
+        1306.8,
+        1314.4
+      ]
+    ]
+  },
+  "kind": "building",
+  "name": "Existing building",
+  "notes": "Roof outline traced from the government aerial photo; use and name from the community site plan (DD1-01 D).",
+  "source": "site plan",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-20T00:00:00.000Z"
+}

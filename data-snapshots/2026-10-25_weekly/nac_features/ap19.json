@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        1018.1,
+        1004
+      ],
+      [
+        1018.5,
+        1003.2
+      ]
+    ]
+  },
+  "kind": "steps",
+  "name": "Steps (east)",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m).",
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

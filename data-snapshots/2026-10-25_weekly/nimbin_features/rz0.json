@@ -1,0 +1,64 @@
+{
+  "createdAt": "2026-10-20T04:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        597,
+        894
+      ],
+      [
+        576,
+        875
+      ],
+      [
+        574,
+        871
+      ],
+      [
+        582,
+        861
+      ],
+      [
+        558,
+        835
+      ],
+      [
+        575,
+        816
+      ],
+      [
+        589,
+        818
+      ],
+      [
+        602,
+        831
+      ],
+      [
+        604,
+        835
+      ],
+      [
+        596,
+        845
+      ],
+      [
+        620,
+        871
+      ],
+      [
+        597,
+        894
+      ]
+    ]
+  },
+  "kind": "zone0",
+  "name": "Zone 0 · Home",
+  "notes": "Recommended draft zone from distance to the house, slope and height: reshape freely. The house and sheds.",
+  "source": "recommended plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T04:30:00.000Z"
+}
