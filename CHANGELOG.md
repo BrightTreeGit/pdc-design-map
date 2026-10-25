@@ -46,6 +46,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v45 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site extras: soil, wildlife, bushfire mapping, design rainfall, climate record |
 | Trial v44 | 25 Oct 2026 | trial/willow-vale-team | Bright Tree photo history (1953–2022) published with the trial map |
 | Trial v43 | 25 Oct 2026 | trial/willow-vale-team | Map names in order of importance, never overlapping; choosable colour per item; Custom building / marker type |
 | Trial v42 | 25 Oct 2026 | trial/willow-vale-team | New Teepee / tipi feature type: large bright-pink triangle so it stands out |
@@ -57,6 +58,10 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Trial v45 (25 Oct 2026)
+**Added**
+- Mangiri site extras: soil grid (9 measurements), 185 species recorded nearby (4 with a conservation listing), bushfire mapping (5 areas), design rainfall (IFD), SILO daily weather 1995–2026 and the full record from 1889. The NSW geology services hold no polygons for this window, so Mangiri has no geology layer.
 
 ### Trial v44 (25 Oct 2026)
 **Fixed**
