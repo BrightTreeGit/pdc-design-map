@@ -46,12 +46,19 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Beta v3 | 25 Oct 2026 | beta/group-maps | Mangiri beta rebuilt from trial v40 (whole lot as focus) |
 | Trial v40 | 25 Oct 2026 | trial/willow-vale-team | Green firebreak (area and strip); Mangiri opens on the whole lot |
 | Trial v39 | 25 Oct 2026 | trial/willow-vale-team | Draw, select, move and reshape in 3D; upright 3D labels |
 | Beta v2 | 25 Oct 2026 | beta/group-maps | Mangiri beta map (8th group) |
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Beta v3 (25 Oct 2026)
+**Changed**
+- Mangiri beta rebuilt from trial v40 and republished (the only beta rebuilt): it opens fitted to the whole 33 ha lot
+  with no separate clearing outline, and gets 3D drawing and editing, upright 3D labels and the green firebreak tools.
+  The other seven betas are unchanged until Brett approves a rebuild.
 
 ### Trial v40 (25 Oct 2026)
 **Added**
