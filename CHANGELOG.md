@@ -46,6 +46,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v41 | 25 Oct 2026 | trial/willow-vale-team | Bright Tree: B4 pad becomes the treehouse spot; B6 pad (on the house) removed |
 | Beta v3 | 25 Oct 2026 | beta/group-maps | Mangiri beta rebuilt from trial v40 (whole lot as focus) |
 | Trial v40 | 25 Oct 2026 | trial/willow-vale-team | Green firebreak (area and strip); Mangiri opens on the whole lot |
 | Trial v39 | 25 Oct 2026 | trial/willow-vale-team | Draw, select, move and reshape in 3D; upright 3D labels |
@@ -53,6 +54,13 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Trial v41 (25 Oct 2026)
+**Changed**
+- Bright Tree building-pad suggestions: B4 in the north-east corner is now labelled "B4 treehouse (no pad)", with a note for the space-net treehouse planned between two large trees there (no earthworks).
+
+**Removed**
+- Bright Tree pad B6, which sat on top of the existing house.
 
 ### Beta v3 (25 Oct 2026)
 **Changed**
