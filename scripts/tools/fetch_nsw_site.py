@@ -69,13 +69,35 @@ def ll2mga(lon, lat, zone=56):
     return 500000 + _k0 * _A * Y, 10000000 + _k0 * _A * X
 
 def find_property(a):
+    """Exact address first; if the register spells the road or locality differently, retry with looser matches
+    (number + road, then road + locality, then road alone) and say which one matched."""
+    if a.address and not a.propid:
+        words = a.address.upper().replace("'", "''").split()
+        num = words[0] if words and words[0][:1].isdigit() else None
+        rest = words[1:] if num else words
+        road_i = next((i for i, w in enumerate(rest) if w in ("ROAD", "RD", "STREET", "ST", "LANE", "LN", "DRIVE", "DR", "WAY", "AVENUE", "AVE", "CIRCUIT", "CCT", "BOULEVARD", "BLVD", "PLACE", "PL", "COURT", "CT", "CLOSE", "TRACK", "TRAIL")), None)
+        road = " ".join(rest[:road_i + 1]) if road_i is not None else " ".join(rest[:2])
+        name = rest[0] if rest else ""
+        tries = [" ".join(words) + "%"]
+        if num and road: tries.append(f"{num} {road}%")
+        if num and name: tries.append(f"{num} {name}%")          # road type spelt differently (RD vs ROAD)
+        if road: tries.append(f"%{road}%")
+        for i, pat in enumerate(tries):
+            feats = _find_property_where(f"address LIKE '{pat}'")
+            if feats:
+                if i: print(f"  matched the register with '{pat.strip('%')}' (the full address is spelt differently there)")
+                if len(feats) > 1 and not num:
+                    print("  several properties on that road; rerun with --pin lat,lon of a point inside the block")
+                return feats
+            print(f"  no match for '{pat.strip('%')}'")
+        return []
+    return _find_property_where(None, a)
+
+
+def _find_property_where(where, a=None):
     q = {"outFields": "propid,address,housenumber", "returnGeometry": "true", "outSR": "4326", "f": "geojson"}
-    if a.propid:
+    if where is None and a is not None and a.propid:
         where = f"propid={int(a.propid)}"
-    elif a.address:
-        where = "address LIKE '" + a.address.upper().replace("'", "''").strip() + "%'"
-    else:
-        where = None
     feats = []
     for layer in (1, 2, 3, 4):
         p = dict(q)
