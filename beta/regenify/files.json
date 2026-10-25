@@ -1,0 +1,20 @@
+{
+ "terrain.json": "beta/regenify/terrain.json",
+ "hydro.json": "beta/regenify/hydro.json",
+ "extra.json": "beta/regenify/extra.json",
+ "geology.json": "beta/regenify/geology.json",
+ "hazard.json": "beta/regenify/hazard.json",
+ "species.json": "beta/regenify/species.json",
+ "aerial.jpg": "beta/regenify/aerial.jpg",
+ "relief.jpg": "beta/regenify/relief.jpg",
+ "hillshade.jpg": "beta/regenify/hillshade.jpg",
+ "slope.png": "beta/regenify/slope.png",
+ "aspect.png": "beta/regenify/aspect.png",
+ "cold.png": "beta/regenify/cold.png",
+ "sun_winter.png": "beta/regenify/sun_winter.png",
+ "sun_equinox.png": "beta/regenify/sun_equinox.png",
+ "sun_summer.png": "beta/regenify/sun_summer.png",
+ "fire.png": "beta/regenify/fire.png",
+ "wet.png": "beta/regenify/wet.png",
+ "erosion.png": "beta/regenify/erosion.png"
+}

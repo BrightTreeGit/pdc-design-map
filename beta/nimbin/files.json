@@ -1,0 +1,21 @@
+{
+ "terrain.json": "beta/nimbin/terrain.json",
+ "hydro.json": "beta/nimbin/hydro.json",
+ "extra.json": "beta/nimbin/extra.json",
+ "prospects.json": "beta/nimbin/prospects.json",
+ "geology.json": "beta/nimbin/geology.json",
+ "hazard.json": "beta/nimbin/hazard.json",
+ "species.json": "beta/nimbin/species.json",
+ "aerial.jpg": "beta/nimbin/aerial.jpg",
+ "relief.jpg": "beta/nimbin/relief.jpg",
+ "hillshade.jpg": "beta/nimbin/hillshade.jpg",
+ "slope.png": "beta/nimbin/slope.png",
+ "aspect.png": "beta/nimbin/aspect.png",
+ "cold.png": "beta/nimbin/cold.png",
+ "sun_winter.png": "beta/nimbin/sun_winter.png",
+ "sun_equinox.png": "beta/nimbin/sun_equinox.png",
+ "sun_summer.png": "beta/nimbin/sun_summer.png",
+ "fire.png": "beta/nimbin/fire.png",
+ "wet.png": "beta/nimbin/wet.png",
+ "erosion.png": "beta/nimbin/erosion.png"
+}

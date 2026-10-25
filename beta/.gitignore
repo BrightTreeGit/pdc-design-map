@@ -1,0 +1,6 @@
+# copied site data: rebuilt by scripts/beta/build_beta.py
+*
+!.gitignore
+!*/
+!*/index.html
+!*/files.json

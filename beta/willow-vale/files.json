@@ -1,0 +1,19 @@
+{
+ "terrain.json": "beta/willow-vale/terrain.json",
+ "hydro.json": "beta/willow-vale/hydro.json",
+ "extra.json": "beta/willow-vale/extra.json",
+ "hazard.json": "beta/willow-vale/hazard.json",
+ "species.json": "beta/willow-vale/species.json",
+ "aerial.jpg": "beta/willow-vale/aerial.jpg",
+ "relief.jpg": "beta/willow-vale/relief.jpg",
+ "hillshade.jpg": "beta/willow-vale/hillshade.jpg",
+ "slope.png": "beta/willow-vale/slope.png",
+ "aspect.png": "beta/willow-vale/aspect.png",
+ "cold.png": "beta/willow-vale/cold.png",
+ "sun_winter.png": "beta/willow-vale/sun_winter.png",
+ "sun_equinox.png": "beta/willow-vale/sun_equinox.png",
+ "sun_summer.png": "beta/willow-vale/sun_summer.png",
+ "fire.png": "beta/willow-vale/fire.png",
+ "wet.png": "beta/willow-vale/wet.png",
+ "erosion.png": "beta/willow-vale/erosion.png"
+}
