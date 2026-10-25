@@ -46,6 +46,8 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v43 | 25 Oct 2026 | trial/willow-vale-team | Map names in order of importance, never overlapping; choosable colour per item; Custom building / marker type |
+| Trial v42 | 25 Oct 2026 | trial/willow-vale-team | New Teepee / tipi feature type: large bright-pink triangle so it stands out |
 | Trial v41 | 25 Oct 2026 | trial/willow-vale-team | Bright Tree: B4 pad becomes the treehouse spot; B6 pad (on the house) removed |
 | Beta v3 | 25 Oct 2026 | beta/group-maps | Mangiri beta rebuilt from trial v40 (whole lot as focus) |
 | Trial v40 | 25 Oct 2026 | trial/willow-vale-team | Green firebreak (area and strip); Mangiri opens on the whole lot |
@@ -54,6 +56,40 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Trial v43 (25 Oct 2026)
+**Changed**
+- **Names on the 2D map no longer pile up.** Each name is measured and tried at a few spots next to its shape (inside an
+  area, around a point symbol, along a line); if every spot would cover another name, a symbol, the selected item's
+  handles, the map buttons or the edge of the map, it is left off. Hover over the item (or long-press on a phone) or
+  select it to see it.
+- **A hierarchy decides who gets the space**, placed in this order: the selected item, the item under the mouse, then
+  zones and big areas (Zone 0–5, goat zones, green firebreaks, W bands) › buildings and structures (house, sauna,
+  cabin, teepee, tanks, guilds, ponds, rock pools) › beds, plantings, swales, tracks, paths and pipes › computed
+  prospects (building pads, ponds, keypoints, gully flats, catchment flows) › contour heights. Within each level the
+  biggest area or longest line goes first.
+- **More names appear as you zoom in**: zoomed out to the whole lot you see zone names and prospect codes (B5, P7);
+  building names appear next, then beds, tracks and paths, then the full prospect labels.
+- **Long names shorten when space is tight**: the m² line goes first, then "Zone 1 · Daily - Greens and kitchen garden"
+  becomes "Greens and kitchen garden", "W2 · Upper gaps and benches (draft) – north pocket" becomes "W2 · north pocket",
+  long names wrap to two lines or end in "…".
+- Zone names are slightly larger than other names; names moved away from their shape keep a thin leader line.
+- "Names on structures & features" is on again by default, now that names only show where there is room. The A3
+  presentation sheet uses the same placement. (The 3D view already had its own upright labels; unchanged.)
+
+**Added**
+- **Choosable colour for any item** (points and areas): select it, open **Colour** in the feature panel and pick one of
+  ten swatches (bright pink, orange, yellow, teal, purple, red, blue, green, brown, black) or ↺ to go back to the type's
+  colour. It shows on the map, in 3D, on the A3 sheet (with its own legend line) and in the features list, saves for
+  everyone, and Ctrl+Z undoes it. Stored as an optional `color` on the drawing; nothing else in the data changes.
+- **Custom building / marker** feature type (Draw → Built): a square marker meant to be given its own colour, so any
+  building or spot can be picked out. Its Colour panel opens straight away.
+- Test script `scripts/qa/check_labels.py`: loads Bright Tree with the trial drawings at four zoom levels and checks no
+  two names overlap, the selected item's name always shows and avoids its handles, and the colour picker saves and undoes.
+
+### Trial v42 (25 Oct 2026)
+**Added**
+- A **Teepee / tipi** feature type (Draw → Built): a bright pink triangle drawn 1.7× the size of other points, so it doesn't get lost among the dark structure squares. Bright Tree's valley teepee now uses it.
 
 ### Trial v41 (25 Oct 2026)
 **Changed**
