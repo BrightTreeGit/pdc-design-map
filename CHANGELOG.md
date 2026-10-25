@@ -46,6 +46,8 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Beta v4 | 25 Oct 2026 | beta/group-maps | Mangiri beta gains Wildlife recorded nearby (ALA) and the bushfire-prone land layer (data only) |
+| Trial v44 | 25 Oct 2026 | beta/group-maps | Data only: Regenify and Mangiri site extras (wildlife, soils, design rainfall, climate record, bushfire mapping) |
 | Trial v43 | 25 Oct 2026 | trial/willow-vale-team | Map names in order of importance, never overlapping; choosable colour per item; Custom building / marker type |
 | Trial v42 | 25 Oct 2026 | trial/willow-vale-team | New Teepee / tipi feature type: large bright-pink triangle so it stands out |
 | Trial v41 | 25 Oct 2026 | trial/willow-vale-team | Bright Tree: B4 pad becomes the treehouse spot; B6 pad (on the house) removed |
@@ -56,6 +58,21 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Trial v44 (25 Oct 2026): data only
+**Added**
+- **Regenify**: geology, rules and hazards, soil, design rainfall (IFD), 137-year climate record, season outlook and
+  wildlife recorded nearby, from the 25 Oct site-extras run (in the repo since then, now on the trial map).
+- **Mangiri**: wildlife recorded nearby (185 species, 4 listed: gang-gang cockatoo,
+  spotted-tailed quoll, a vulnerable eucalypt and an endangered Isopogon; red fox flagged as a pest), soil by depth,
+  design rainfall, daily weather and the 1889-to-now climate record, and NSW Bush Fire Prone Land (5 polygons).
+- No surface-geology polygons exist in the NSW services for the Mangiri or Willow Vale map squares, so neither has a
+  geology layer yet.
+
+### Beta v4 (25 Oct 2026)
+**Added**
+- Mangiri beta: the Wildlife recorded nearby (ALA) section (names and counts only) and the bushfire-prone land layer
+  under Rules and hazards. Page code unchanged (still from trial v40).
 
 ### Trial v43 (25 Oct 2026)
 **Changed**

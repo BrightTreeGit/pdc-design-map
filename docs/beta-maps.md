@@ -9,6 +9,7 @@ Beta v2 (25 Oct 2026) added Mangiri, built from trial v38; the other seven were 
 (rebuild them with `build_beta.py all` to pick up trial v38's map changes: focus-area outline, NSW source wording).
 Beta v3 (25 Oct 2026) rebuilt and republished Mangiri only, from trial v40 (whole lot as the focus, 3D editing,
 green firebreak tools).
+Beta v4 (25 Oct 2026) added Mangiri's wildlife (ALA) and bushfire-prone land data to its beta; page code unchanged.
 
 | Group | Site id (db prefix) | Beta map | Seeded drawings |
 |---|---|---|---|

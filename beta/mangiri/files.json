@@ -13,5 +13,7 @@
  "sun_summer.png": "beta/mangiri/sun_summer.png",
  "fire.png": "beta/mangiri/fire.png",
  "wet.png": "beta/mangiri/wet.png",
- "erosion.png": "beta/mangiri/erosion.png"
+ "erosion.png": "beta/mangiri/erosion.png",
+ "hazard.json": "beta/mangiri/hazard.json",
+ "species.json": "beta/mangiri/species.json"
 }
