@@ -3,7 +3,7 @@
  "lat": -32.67477,
  "lon": 152.04486,
  "state": "NSW",
- "fetched": "2026-10-24T13:06+10:00",
+ "fetched": "2026-10-25T12:46+10:00",
  "drivers": {
   "soi_latest_month": "2026-09",
   "soi": -20.6,
@@ -44,8 +44,8 @@
   "point_how_to": "Open https://www.bom.gov.au/climate/outlooks/#/rainfall/median, click the property on the map, and type the four 'chance of above median' percentages and the issue date into 'point' above (a number like 65 means 65%). They stay until the Bureau's next issue."
  },
  "short_range": {
-  "source": "Open-Meteo (ECMWF/BoM blend), issued 2026-10-24T13:06+10:00",
-  "issued": "2026-10-24T13:06+10:00",
+  "source": "Open-Meteo (ECMWF/BoM blend), issued 2026-10-25T12:46+10:00",
+  "issued": "2026-10-25T12:46+10:00",
   "url": "https://api.open-meteo.com/v1/forecast",
   "grid_point": [
    -32.653778,
@@ -53,110 +53,102 @@
   ],
   "days": [
    {
-    "date": "2026-10-24",
-    "rain_mm": 2.0,
-    "tmax_c": 29.9,
-    "tmin_c": 14.9
-   },
-   {
     "date": "2026-10-25",
-    "rain_mm": 6.7,
-    "tmax_c": 32.0,
-    "tmin_c": 16.9
+    "rain_mm": 3.2,
+    "tmax_c": 32.5,
+    "tmin_c": 17.6
    },
    {
     "date": "2026-10-26",
-    "rain_mm": 5.6,
-    "tmax_c": 21.3,
-    "tmin_c": 17.0
+    "rain_mm": 5.0,
+    "tmax_c": 24.3,
+    "tmin_c": 16.5
    },
    {
     "date": "2026-10-27",
-    "rain_mm": 2.6,
-    "tmax_c": 22.4,
-    "tmin_c": 13.0
+    "rain_mm": 4.0,
+    "tmax_c": 19.0,
+    "tmin_c": 13.7
    },
    {
     "date": "2026-10-28",
-    "rain_mm": 0.0,
-    "tmax_c": 25.7,
-    "tmin_c": 13.0
+    "rain_mm": 0.1,
+    "tmax_c": 25.9,
+    "tmin_c": 10.8
    },
    {
     "date": "2026-10-29",
     "rain_mm": 0.0,
-    "tmax_c": 23.8,
-    "tmin_c": 12.1
+    "tmax_c": 23.5,
+    "tmin_c": 9.9
    },
    {
     "date": "2026-10-30",
-    "rain_mm": 0.3,
-    "tmax_c": 27.3,
-    "tmin_c": 11.4
+    "rain_mm": 0.0,
+    "tmax_c": 23.8,
+    "tmin_c": 9.9
    },
    {
     "date": "2026-10-31",
-    "rain_mm": 19.6,
-    "tmax_c": 28.0,
-    "tmin_c": 16.7
+    "rain_mm": 1.8,
+    "tmax_c": 29.5,
+    "tmin_c": 14.7
    },
    {
     "date": "2026-11-01",
-    "rain_mm": 13.4,
-    "tmax_c": 21.9,
-    "tmin_c": 12.7
+    "rain_mm": 0.6,
+    "tmax_c": 30.6,
+    "tmin_c": 14.1
    },
    {
     "date": "2026-11-02",
-    "rain_mm": 5.1,
-    "tmax_c": 21.0,
-    "tmin_c": 12.5
+    "rain_mm": 3.7,
+    "tmax_c": 32.6,
+    "tmin_c": 17.6
+   },
+   {
+    "date": "2026-11-03",
+    "rain_mm": 0.7,
+    "tmax_c": 33.5,
+    "tmin_c": 17.9
    }
   ],
-  "total_rain_mm_10_days": 55.3,
-  "total_rain_mm_7_days": 17.2,
+  "total_rain_mm_10_days": 19.1,
+  "total_rain_mm_7_days": 14.1,
   "status": "ok"
  },
  "bom_precis": {
-  "source": "Bureau of Meteorology 7-day forecast for Bulahdelah (IDN11060), issued 2026-10-24T09:45:16+11:00",
-  "issued": "2026-10-24T09:45:16+11:00",
+  "source": "Bureau of Meteorology 7-day forecast for Bulahdelah (IDN11060), issued 2026-10-25T13:43:37+11:00",
+  "issued": "2026-10-25T13:43:37+11:00",
   "town": "Bulahdelah",
   "days": [
    {
-    "date": "2026-10-24",
-    "precis": "Cloud clearing.",
-    "tmin_c": null,
-    "tmax_c": "28",
-    "rain_range_mm": null,
-    "chance_of_rain": "20%"
-   },
-   {
     "date": "2026-10-25",
-    "precis": "Showers developing.",
-    "tmin_c": "17",
+    "precis": "Showers. Possible storm.",
+    "tmin_c": null,
     "tmax_c": "30",
-    "rain_range_mm": "0 to 8 mm",
+    "rain_range_mm": null,
     "chance_of_rain": "80%"
    },
    {
     "date": "2026-10-26",
-    "precis": "Possible morning storm. Showers.",
+    "precis": "Showers. Possible storm.",
     "tmin_c": "17",
     "tmax_c": "25",
-    "rain_range_mm": "1 to 10 mm",
+    "rain_range_mm": "4 to 20 mm",
     "chance_of_rain": "90%"
    },
    {
     "date": "2026-10-27",
-    "precis": "Shower or two.",
+    "precis": "Showers.",
     "tmin_c": "14",
-    "tmax_c": "23",
+    "tmax_c": "22",
     "rain_range_mm": "0 to 4 mm",
-    "chance_of_rain": "70%"
+    "chance_of_rain": "80%"
    },
    {
     "date": "2026-10-28",
-    "precis": "Mostly sunny.",
+    "precis": "Partly cloudy.",
     "tmin_c": "12",
     "tmax_c": "25",
     "rain_range_mm": null,
@@ -164,19 +156,27 @@
    },
    {
     "date": "2026-10-29",
-    "precis": "Mostly sunny.",
+    "precis": "Sunny.",
     "tmin_c": "11",
-    "tmax_c": "26",
+    "tmax_c": "25",
     "rain_range_mm": null,
     "chance_of_rain": "10%"
    },
    {
     "date": "2026-10-30",
     "precis": "Partly cloudy.",
-    "tmin_c": "14",
-    "tmax_c": "25",
-    "rain_range_mm": "0 to 1 mm",
-    "chance_of_rain": "30%"
+    "tmin_c": "12",
+    "tmax_c": "27",
+    "rain_range_mm": null,
+    "chance_of_rain": "20%"
+   },
+   {
+    "date": "2026-10-31",
+    "precis": "Shower or two.",
+    "tmin_c": "15",
+    "tmax_c": "27",
+    "rain_range_mm": "0 to 3 mm",
+    "chance_of_rain": "50%"
    }
   ],
   "status": "ok"
