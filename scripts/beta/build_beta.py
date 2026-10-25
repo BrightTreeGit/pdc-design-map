@@ -29,7 +29,7 @@ NODE_TOOLS = os.environ.get('NODE_TOOLS', '/opt/npm-tools/node_modules')
 
 # the groups that get a beta (site id in SITES -> folder under map/sites and beta/)
 GROUPS = {'nimbin-group': 'nimbin', 'bellbunya': 'bellbunya', 'willow-vale-team': 'willow-vale',
-          'noosa-forest-retreat': 'noosa-forest-retreat', 'nac': 'nac', 'annwn': 'annwn', 'regenify': 'regenify'}
+          'noosa-forest-retreat': 'noosa-forest-retreat', 'nac': 'nac', 'annwn': 'annwn', 'regenify': 'regenify', 'mangiri': 'mangiri'}
 
 # data the kept layers read; everything else in the site folder (silo_*, outlook, rain_daily, ifd, soils) is tools-only
 LAYER_FILES = ['terrain.json', 'hydro.json', 'extra.json', 'prospects.json', 'geology.json', 'hazard.json', 'services.json',

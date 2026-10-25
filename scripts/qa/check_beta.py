@@ -20,8 +20,8 @@ import build_beta as B  # noqa: E402
 SNAP = ROOT / 'data-snapshots' / '2026-10-25_trial-v37'
 NAMES = {'nimbin-group': ['Firefly', 'Nimbin'], 'bellbunya': ['Bellbunya', 'Belli Park'], 'willow-vale-team': ['Willow Vale', 'Bowman'],
          'noosa-forest-retreat': ['Noosa Forest', 'Kin Kin'], 'nac': ['NAC', 'North Arm'], 'annwn': ['Annwn', 'Capalaba'],
-         'regenify': ['Regenify', 'Koonyum']}
-OTHER = ['Bright Tree Village', 'Diamond Valley', 'Mangiri', 'Gemini']
+         'regenify': ['Regenify', 'Koonyum'], 'mangiri': ['Mangiri', 'Mongarlowe']}
+OTHER = ['Bright Tree Village', 'Diamond Valley', 'Gemini']
 PRIV = re.compile(r"\b\d{1,5}\s+[A-Z][a-z]+\s(?:Road|Rd|Street|Lane|Drive|Avenue|Court|Crescent|Parade)\b|\b[A-Z][a-z]+\s(?:Road|Rd)\b|"
                   r"\bLot\s?\d+\b|\b(?:RP|SP|DP)\s?\d{4,}\b|[\w.+-]+@[\w-]+\.(?:com|net|org|au)\b")
 

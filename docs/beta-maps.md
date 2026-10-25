@@ -5,6 +5,8 @@ account, Editor is the only role that lets outside invitees save drawings). Each
 data, and the tools stay out.
 
 Published 25 Oct 2026 as Beta v1, from branch `beta/group-maps` (full map at trial v37 plus the 25 Oct site extras).
+Beta v2 (25 Oct 2026) added Mangiri, built from trial v38; the other seven were not rebuilt or republished then
+(rebuild them with `build_beta.py all` to pick up trial v38's map changes: focus-area outline, NSW source wording).
 
 | Group | Site id (db prefix) | Beta map | Seeded drawings |
 |---|---|---|---|
@@ -15,8 +17,9 @@ Published 25 Oct 2026 as Beta v1, from branch `beta/group-maps` (full map at tri
 | NAC | `nac` | https://claude.ai/artifact/EgJNQ5fnEdS4t2MfFRokZ9 | 93 features, 2 overlays |
 | Annwn | `annwn` | https://claude.ai/artifact/8Aw2uJ8dpYfBoBinq5ehET | 25 features, 2 overlays |
 | Regenify | `regenify` | https://claude.ai/artifact/JwYsuca86oQAeydC41vNbw | none yet |
+| Mangiri (Mully) | `mangiri` | https://claude.ai/artifact/K75efkDtfLMqjyxQALt7Px | none yet |
 
-All seven are private until Brett shares each one (Share menu → invite the group as Editor).
+All eight are private until Brett shares each one (Share menu → invite the group as Editor).
 
 ## What's in a beta
 - **Layers**: base maps (relief, hillshade, aerial), terrain analysis overlays with source and year in each legend,
@@ -40,7 +43,7 @@ The data files only those tools read (silo_full, silo_long, outlook, rain_daily,
 ## Rebuilding after a map change
 ```
 python3 scripts/beta/build_beta.py all          # rebuilds beta/<site>/index.html and copies each site's data
-python3 scripts/qa/check_beta.py                # must print OK for all seven
+python3 scripts/qa/check_beta.py                # must print OK for all eight
 ```
 Then republish each page with the Artifact tool: `file_path` beta/<folder>/index.html, `root` beta/<folder>,
 `files` = the keys of beta/<folder>/files.json, same URL. The copied data files are not committed (they are

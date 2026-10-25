@@ -46,9 +46,14 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Beta v2 | 25 Oct 2026 | beta/group-maps | Mangiri beta map (8th group) |
 | Trial v38 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site |
 | Beta v1 | 25 Oct 2026 | beta/group-maps | Mapping-only maps for 7 groups |
 | Trial v37 | 25 Oct 2026 | trial/willow-vale-team | Regenify site |
+
+### Beta v2 (25 Oct 2026)
+**Added**
+- A mapping-only beta map for Mangiri, built and checked like the other seven (they were not rebuilt).
 
 ### Trial v38 (25 Oct 2026)
 **Added**

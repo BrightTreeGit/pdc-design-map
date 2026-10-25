@@ -1,0 +1,17 @@
+{
+ "terrain.json": "beta/mangiri/terrain.json",
+ "hydro.json": "beta/mangiri/hydro.json",
+ "extra.json": "beta/mangiri/extra.json",
+ "aerial.jpg": "beta/mangiri/aerial.jpg",
+ "relief.jpg": "beta/mangiri/relief.jpg",
+ "hillshade.jpg": "beta/mangiri/hillshade.jpg",
+ "slope.png": "beta/mangiri/slope.png",
+ "aspect.png": "beta/mangiri/aspect.png",
+ "cold.png": "beta/mangiri/cold.png",
+ "sun_winter.png": "beta/mangiri/sun_winter.png",
+ "sun_equinox.png": "beta/mangiri/sun_equinox.png",
+ "sun_summer.png": "beta/mangiri/sun_summer.png",
+ "fire.png": "beta/mangiri/fire.png",
+ "wet.png": "beta/mangiri/wet.png",
+ "erosion.png": "beta/mangiri/erosion.png"
+}
