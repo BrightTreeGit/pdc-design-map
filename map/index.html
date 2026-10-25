@@ -57,7 +57,7 @@ h2:first-child{margin-top:4px}
 .hint{font-size:12.5px;color:var(--muted);line-height:1.45}
 .setup{margin:6px 0 0;padding-left:20px;font-size:13px}.setup li{margin:0 0 10px}.setup li b{display:block;font-weight:600}.setup li.done b{color:var(--muted);font-weight:500}.setup li .hint{display:block;margin:1px 0 4px}.setup .btn{font-size:12px;padding:3px 9px}
 .prow .field{flex:1;margin:4px 0}.ptab{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}.ptab th{text-align:left;font-weight:600;font-size:11.5px;color:var(--muted);padding:4px 4px;border-bottom:1px solid var(--line)}.ptab td{padding:5px 4px;border-bottom:1px solid var(--line);vertical-align:top}.ptab small{color:var(--muted)}h3.sub{font-size:13px;margin:12px 0 4px;font-weight:600}
-#v3d{position:absolute;inset:0;z-index:6;background:#dbe5ec}#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#v3d{position:absolute;inset:0;z-index:6;background:#dbe5ec}#gl2{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}#mapwrap.v3on .drawbar{z-index:8;top:auto;bottom:calc(var(--sheet-vis,0px) + 52px)}#mapwrap.v3on .toast{z-index:9}#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 .v3bar.min>*:not(#v3drag):not(#v3min):not(#v3plus){display:none!important}.v3bar.min{resize:none;padding:4px 6px}
 .v3bar.compact{font-size:11.5px;gap:4px;padding:4px 6px;max-width:min(330px,calc(100% - 20px))}.v3bar.compact .v3sun{justify-content:flex-start;gap:4px}.v3bar.compact .btn{padding:2px 6px;font-size:11.5px}.v3bar.compact #v3n,.v3bar.compact #v3reset,.v3bar.compact #v3refresh,.v3bar.compact .v3exl,.v3bar.compact #v3info,.v3bar.compact .v3ticks,.v3bar.compact .v3sun>label{display:none!important}.v3bar.compact .v3sun{padding-top:3px}.v3bar.compact .v3tw{width:150px}
 .v3bar{resize:horizontal;overflow:auto;min-width:120px}#v3min,#v3plus{min-width:26px;padding:3px 6px}#v3drag{cursor:move;user-select:none;touch-action:none}
@@ -112,7 +112,7 @@ canvas#map.drawing{cursor:crosshair}
 .cmenu button:hover,.cmenu button:focus-visible{background:var(--hover,rgba(0,0,0,.07));outline:none}.cmenu .cmh{padding:6px 10px 4px;font-weight:600;font-size:12px;color:var(--muted)}.cmenu hr{border:0;border-top:1px solid var(--line,#ddd);margin:4px 0}.cmenu select{flex:1;font:inherit}
 .multi{display:grid;gap:8px}.multi .names{font-size:12px;color:var(--muted);max-height:120px;overflow:auto}.lockpill{font-size:11px;padding:1px 6px;border-radius:9px;background:var(--hover,rgba(0,0,0,.08));margin-left:6px}.czbox{margin-top:8px}.czbox>summary{cursor:pointer;font-size:13px;color:var(--accent,#2a7)}.czrow{display:flex;gap:6px;align-items:center}.czrow #czName{flex:1;min-width:0}.czrow input[type=color]{width:40px;height:32px;padding:0;border:none;background:none}.czlist{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:4px}.czlist li{display:flex;align-items:center;gap:6px;font-size:13px}.toast.act{pointer-events:auto;display:flex;gap:10px;align-items:center}.toastbtn{background:none;border:1px solid currentColor;color:inherit;border-radius:4px;padding:3px 10px;font:inherit;font-weight:600;cursor:pointer}.toastbtn:focus-visible{outline:2px solid var(--accent,#3a7)}
 .loading{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
-.loading[hidden]{display:none}
+.loading[hidden]{display:none}.drawbar[hidden]{display:none}
 .empty{border:1px dashed var(--line);border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:var(--muted)}
 .empty ol{margin:6px 0 0 18px;padding:0}
 .kpl button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 0;font:inherit;color:var(--ink);cursor:pointer}
@@ -218,13 +218,13 @@ details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset
     <div class="maplegend" id="mapLegend" hidden></div>
     <div class="hud" id="hud">Move over the map for elevation, slope and sun</div>
     <div class="toast" id="toast"></div>
-    <div id="v3d" hidden><canvas id="gl" aria-label="3D view of the terrain"></canvas>
+    <div id="v3d" hidden><canvas id="gl" aria-label="3D view of the terrain"></canvas><canvas id="gl2" aria-hidden="true"></canvas>
       <div class="v3bar" id="v3bar"><b id="v3drag" title="Drag to move this panel">⠿ 3D view</b><button class="btn" id="v3min" title="Make smaller" aria-label="Make the panel smaller">–</button><button class="btn" id="v3plus" title="Make bigger" aria-label="Make the panel bigger">+</button><label class="v3exl">Height <select id="v3ex"><option value="1">1×</option><option value="1.5">1.5×</option><option value="2">2×</option><option value="3">3×</option></select></label><button class="btn" id="v3n" title="Turn to face north">Face N</button><button class="btn" id="v3reset">Reset</button><button class="btn" id="v3refresh" title="Redraw with the current layers and drawings">Refresh</button><button class="btn" id="v3suntog" aria-expanded="false" title="Show the sun simulation controls">☀ Sun</button><button class="btn primary" id="v3close">Back to map</button>
         <div class="v3sun off" id="v3sunrow" hidden><label>Sun <select id="v3season"><option value="off">Off</option><option value="172">Winter solstice · 21 Jun</option><option value="80">Equinox · 21 Mar / 23 Sep</option><option value="355">Summer solstice · 21 Dec</option></select></label>
           <button class="btn" id="v3play" title="Play the day from sunrise to sunset in 5 seconds">▶ Play day</button>
           <span class="v3tw"><input type="range" id="v3time" min="4.5" max="19.5" step="0.0833" value="9" aria-label="Time of day"><span class="v3grad" id="v3grad"></span><span class="v3ticks" id="v3ticks"></span></span><span id="v3clock" class="v3clock">9:00</span></div>
         <div class="v3info" id="v3info" hidden></div></div>
-      <div class="v3hint">Drag to orbit and tilt · right-drag or Shift-drag to pan · scroll or pinch to zoom · shows the area you were viewing</div>
+      <div class="v3hint">Drag to orbit and tilt · right-drag or Shift-drag to pan · scroll or pinch to zoom · click a drawing to select it, then drag it or its corners · Draw tab tools work here: click on the ground</div>
       <div class="v3msg" id="v3msg"></div>
       <div class="v3n" aria-hidden="true"><div id="v3north">▲<br>N</div></div></div>
   </main>
@@ -513,7 +513,7 @@ const s2w=(sx,sy)=>[(sx-W/2)/view.s+view.cx,(sy-H/2)/view.s+view.cy];
 function fitBox(x0,y0,x1,y1,pad=40){view.cx=(x0+x1)/2;view.cy=(y0+y1)/2;view.s=Math.min((W-pad*2)/(x1-x0),(H-pad*2)/(y1-y0));if(!isFinite(view.s)||view.s<=0)view.s=1}
 function fitFocus(){if(!T||!T.focus)return fitLot();const p=flat(T.focus);const xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);fitBox(Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys),40)}
 function fitLot(){if(!T){fitBox(700,850,1150,1220);return}const p=flat(T.lot);const xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);fitBox(Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys),50)}
-let raf=0; function draw(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
+let raf=0; function draw(){if(window.__v3on&&!window.__v3tex)v3Dirty();if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
 const P={};
 function pathFrom(arr,close){const p=new Path2D();p.moveTo(arr[0],arr[1]);for(let i=2;i<arr.length;i+=2)p.lineTo(arr[i],arr[i+1]);if(close)p.closePath();return p}
 function buildPaths(){
@@ -643,7 +643,7 @@ function drawLabels(){
     if(p.kind==='flat'){t=view.s>1.2?p.label:p.id;ctx.textAlign='right';haloText(t,x-14,y+12,10.5,col,'IBM Plex Sans');ctx.textAlign='center';continue}
     haloText(t,x,y+(p.kind==='tank'?-16:-18),10.5,col,'IBM Plex Sans')}
   if(layers.kp)for(const k of T.kp){const [x,y]=w2s(k.x,k.y);ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/4);ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.strokeRect(-6,-6,12,12);ctx.strokeStyle='#0b5c8f';ctx.lineWidth=1.6;ctx.setLineDash([3,2]);ctx.strokeRect(-6,-6,12,12);ctx.restore();ctx.setLineDash([]);if(view.s>0.6)haloText(`KP? ${k.z.toFixed(0)} m`,x,y-14,10.5,'#0b5c8f')}
-  if(layers.design&&view.s>0.5)drawFeatureLabels();
+  if(layers.design&&view.s>0.5&&!window.__v3tex)drawFeatureLabels(); // 3D draws its own upright labels
   if(layers.design)drawSectionEnds();
 }
 function drawScale(){const target=110/view.s;const nice=[1,2,5,10,20,25,50,100,200,250,500,1000];let m=nice[0];for(const n of nice)if(n<=target)m=n;const L=m*view.s;
@@ -689,7 +689,7 @@ function drawFeature(f,px,sel){
 const ORDER={Zones:0,Sectors:1,Landscape:2,Plants:3,Built:4,Water:5,Access:6,Observe:7};
 const DRAW_ORDER=['Observe','Zones','Sectors','Water','Access','Built','Landscape','Plants'];
 function fmtArea(a){return a<2000?Math.round(a).toLocaleString()+' m²':(a/4046.86).toFixed(a<40469?2:1)+' ac'}
-function drawFeatures(px){const arr=[...features.entries()].filter(([i,f])=>vis(f)&&(f.kind!=='privacy'||i===selected||multi.has(i))) /* privacy zones stay invisible unless selected, so they don't draw the eye */ .sort((a,b)=>(ORDER[(KINDS[a[1].kind]||{}).g]??9)-(ORDER[(KINDS[b[1].kind]||{}).g]??9));for(const [id,f] of arr){try{drawFeature(f,px,id===selected||multi.has(id))}catch(e){}}
+function drawFeatures(px){const arr=[...features.entries()].filter(([i,f])=>vis(f)&&(f.kind!=='privacy'||i===selected||multi.has(i))&&!(window.__v3tex&&i===window.__v3skip)) /* the 3D view draws the one being dragged itself */ /* privacy zones stay invisible unless selected, so they don't draw the eye */ .sort((a,b)=>(ORDER[(KINDS[a[1].kind]||{}).g]??9)-(ORDER[(KINDS[b[1].kind]||{}).g]??9));for(const [id,f] of arr){try{drawFeature(f,px,id===selected||multi.has(id))}catch(e){}}
   if(multi.size){ctx.save();ctx.setLineDash([4*px,3*px]);ctx.strokeStyle='#ff7a00';ctx.lineWidth=1.5*px;for(const id of multi){const f=features.get(id);const c=f&&centroid(f);if(c){ctx.beginPath();ctx.arc(c[0],c[1],10*px,0,7);ctx.stroke()}}ctx.restore()}
   if(selBox){const {a,b}=selBox;ctx.save();ctx.fillStyle='rgba(255,122,0,.08)';ctx.strokeStyle='#ff7a00';ctx.lineWidth=1.5*px;ctx.setLineDash([6*px,4*px]);ctx.fillRect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));ctx.strokeRect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));ctx.restore()}}
 function drawDraft(px){const k=KINDS[draft.kind];if(boxDrag){const {a,b}=boxDrag;ctx.strokeStyle=k.color;ctx.fillStyle=hexA(k.color,.15);ctx.lineWidth=2*px;ctx.setLineDash([6*px,4*px]);ctx.beginPath();ctx.rect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));ctx.fill();ctx.stroke();ctx.setLineDash([]);return}const pts=draft.pts.concat(draft.preview||[]);
@@ -712,7 +712,8 @@ function gradePath(start,target,grade,dir){
   return out.filter((q,i)=>i%2===1||i===out.length-1)}
 
 /* ---------------- freehand pen: sketch, then tidy into a shape ---------------- */
-function penOn(){if(!draft)return false;const k=KINDS[draft.kind];return (k.geom==='polygon'||k.geom==='line')&&penMode!=='off'&&!draft.pen}
+function penOn(){if(!draft||window.__v3on)return false;  // 3D: drags orbit, clicks place points
+  const k=KINDS[draft.kind];return (k.geom==='polygon'||k.geom==='line')&&penMode!=='off'&&!draft.pen}
 function resamp(p,n,closed){const q=closed?p.concat([p[0]]):p;const seg=[];let L=0;for(let i=1;i<q.length;i++){const d=dist(q[i-1],q[i]);seg.push(d);L+=d}
   const out=[];let i=0,t=0;const m=closed?n:n-1;for(let k=0;k<n;k++){const target=k*L/m;while(i<seg.length-1&&t+seg[i]<target){t+=seg[i];i++}const f=seg[i]?Math.min(1,(target-t)/seg[i]):0;out.push([q[i][0]+(q[i+1][0]-q[i][0])*f,q[i][1]+(q[i+1][1]-q[i][1])*f])}return out}
 function chaikin(p,closed,it=2){for(let r=0;r<it;r++){const o=[];const n=p.length;for(let i=0;i<(closed?n:n-1);i++){const a=p[i],b=p[(i+1)%n];o.push([.75*a[0]+.25*b[0],.75*a[1]+.25*b[1]],[.25*a[0]+.75*b[0],.25*a[1]+.75*b[1]])}if(!closed){o.unshift(p[0]);o.push(p[n-1])}p=o}return p}
@@ -776,18 +777,21 @@ cv.addEventListener('pointermove',e=>{const pt=[e.offsetX,e.offsetY];if(pointers
   if(pinch&&pointers.size===2){const [a,b]=[...pointers.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);view.s=clampS(pinch.s*d/pinch.d);const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];view.cx=pinch.c[0]-(m[0]-W/2)/view.s;view.cy=pinch.c[1]-(m[1]-H/2)/view.s;moved=true;draw();return}
   if(imgDrag){const im=imagery.get(align&&align.id);if(im){moved=true;im.c=imgDrag.c+(pt[0]-imgDrag.x)/view.s;im.d=imgDrag.d+(pt[1]-imgDrag.y)/view.s;draw()}return}
   if(bdrag){moved=true;mt.pts[bdrag.i]=r1(w);renderMTBar();draw();return}
-  if(vdrag){moved=true;const f=features.get(selected);if(!f)return;const g=structuredClone(f.geom);
-    if(vdrag.rot){const c=vdrag.c;let da=Math.atan2(w[1]-c[1],w[0]-c[0])-vdrag.a0;if(e.shiftKey)da=Math.round(da/(Math.PI/12))*(Math.PI/12);const cs=Math.cos(da),sn=Math.sin(da);g.pts=vdrag.orig.pts.map(q=>r1([c[0]+(q[0]-c[0])*cs-(q[1]-c[1])*sn,c[1]+(q[0]-c[0])*sn+(q[1]-c[1])*cs]));vdrag.deg=((da*180/Math.PI)%360+360)%360;$('#hud').innerHTML=`Rotated <b>${(vdrag.deg>180?vdrag.deg-360:vdrag.deg).toFixed(0)}°</b> · hold Shift to snap to 15°`;features.set(selected,{...f,geom:g});draw();return}
-    if(vdrag.move){const dx=w[0]-vdrag.w0[0],dy=w[1]-vdrag.w0[1];g.pts=vdrag.orig.pts.map(q=>r1([q[0]+dx,q[1]+dy]));features.set(selected,{...f,geom:g});draw();return}
-    if(vdrag.scale){const k=Math.max(.05,dist(w,vdrag.c)/vdrag.d0),o=vdrag.orig,c=vdrag.c;
-    if(o.g==='polygon'||o.g==='line')g.pts=o.pts.map(q=>r1([c[0]+(q[0]-c[0])*k,c[1]+(q[1]-c[1])*k]));else if(o.g==='point')g.r=+Math.max(.3,o.r*k).toFixed(1);else g.r=+Math.max(5,o.r*k).toFixed(1)}
-  else if(vdrag.center){g.cx=w[0];g.cy=w[1]}else g.pts[vdrag.i]=[+w[0].toFixed(1),+w[1].toFixed(1)];features.set(selected,{...f,geom:g});draw();return}
+  if(vdrag){moved=true;const f=features.get(selected);if(!f)return;features.set(selected,{...f,geom:dragGeom(vdrag,f.geom,w,e.shiftKey)});draw();return}
   if(dragStart){const dx=pt[0]-dragStart.x,dy=pt[1]-dragStart.y;if(Math.hypot(dx,dy)>4)moved=true;if(moved){view.cx=dragStart.cx-dx/view.s;view.cy=dragStart.cy-dy/view.s;draw()}}
   if(mt&&mt.type==='ruler'&&!mt.closed&&mt.pts.length){mt.hover=w;draw()}
   if(mt&&mt.type==='pattern'&&mt.pts.length&&mt.pts.length<PAT_SHAPES[PAT.shape].clicks){mt.hover=w;draw()}
   if(draft&&!penOn()&&draft.pts.length&&['line','polygon'].includes(KINDS[draft.kind].geom)&&!draft.pen){const hw=SNAP.on?snapW(w):w;const last=draft.pts[draft.pts.length-1];const tot=lineLen(draft.pts)+dist(last,hw);const k=KINDS[draft.kind];
     $('#hud').innerHTML=`This side <b>${dist(last,hw).toFixed(1)} m</b> · ${k.geom==='polygon'&&draft.pts.length>=2?`area <b>${fmtArea(polyArea([...draft.pts,hw]))}</b> · perimeter ${(tot+dist(hw,draft.pts[0])).toFixed(1)} m`:`total <b>${tot.toFixed(1)} m</b>`}${SNAP.on?' · snapping to '+SNAP.step+' m':''}`}
   if(draft){draft.hover=SNAP.on&&!draft.pen?snapW(w):w;if(draft.pen&&draft.pts.length){draft.preview=gradePath(draft.pts[draft.pts.length-1],w,gradePen.grade,gradePen.dir)}draw()}});
+/* shared by the 2D map and the 3D view: apply a handle drag (rotate / move / resize / centre / one corner) to a feature's geometry */
+function dragGeom(vd,geom,w,shift){const g=structuredClone(geom);
+  if(vd.rot){const c=vd.c;let da=Math.atan2(w[1]-c[1],w[0]-c[0])-vd.a0;if(shift)da=Math.round(da/(Math.PI/12))*(Math.PI/12);const cs=Math.cos(da),sn=Math.sin(da);g.pts=vd.orig.pts.map(q=>r1([c[0]+(q[0]-c[0])*cs-(q[1]-c[1])*sn,c[1]+(q[0]-c[0])*sn+(q[1]-c[1])*cs]));vd.deg=((da*180/Math.PI)%360+360)%360;$('#hud').innerHTML=`Rotated <b>${(vd.deg>180?vd.deg-360:vd.deg).toFixed(0)}°</b> · hold Shift to snap to 15°`;return g}
+  if(vd.move){const dx=w[0]-vd.w0[0],dy=w[1]-vd.w0[1];if(g.pts)g.pts=vd.orig.pts.map(q=>r1([q[0]+dx,q[1]+dy]));return g}
+  if(vd.scale){const k=Math.max(.05,dist(w,vd.c)/vd.d0),o=vd.orig,c=vd.c;
+    if(o.g==='polygon'||o.g==='line')g.pts=o.pts.map(q=>r1([c[0]+(q[0]-c[0])*k,c[1]+(q[1]-c[1])*k]));else if(o.g==='point')g.r=+Math.max(.3,o.r*k).toFixed(1);else g.r=+Math.max(5,o.r*k).toFixed(1)}
+  else if(vd.center){g.cx=w[0];g.cy=w[1]}else g.pts[vd.i]=[+w[0].toFixed(1),+w[1].toFixed(1)];return g}
+function endDrag(vd){const f=features.get(selected);if(!f)return;saveGeom(selected,f.geom);pushHist((vd.rot?'rotate':vd.move?'move':vd.scale?'resize':'reshape')+' “'+(f.name||'item')+'”',[{id:selected,before:vd.before,after:snapF(selected)}])}
 function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;clearTimeout(lpT);
   if(selBox){const {a,b}=selBox;selBox=null;const x0=Math.min(a[0],b[0]),x1=Math.max(a[0],b[0]),y0=Math.min(a[1],b[1]),y1=Math.max(a[1],b[1]);
     if((x1-x0)*view.s>5||(y1-y0)*view.s>5){if(!e.shiftKey&&selMode){multi.clear();selected=null}if(selected)multi.add(selected);for(const [id,f] of features){if(!vis(f))continue;const c=centroid(f);if(c&&c[0]>=x0&&c[0]<=x1&&c[1]>=y0&&c[1]<=y1)multi.add(id)}selected=multi.size===1?[...multi][0]:null;if(multi.size===1)multi.clear();showTab('feat');renderFeatures()}draw();return}
@@ -796,7 +800,7 @@ function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=nul
   if(freeStroke){const s=freeStroke;freeStroke=null;if(e.type==='pointerup')finishFree(s);draw();return}
   if(imgDrag){imgDrag=null;if(moved)saveImageryLater(align.id);moved=false;return}
   if(bdrag){bdrag=null;moved=false;return}
-  if(vdrag){const f=features.get(selected);if(f&&moved){saveGeom(selected,f.geom);pushHist((vdrag.rot?'rotate':vdrag.move?'move':vdrag.scale?'resize':'reshape')+' “'+(f.name||'item')+'”',[{id:selected,before:vdrag.before,after:snapF(selected)}])}vdrag=null;moved=false;renderFeatures();return}
+  if(vdrag){if(moved)endDrag(vdrag);vdrag=null;moved=false;renderFeatures();return}
   if(dragStart&&!moved&&e.type==='pointerup')click(s2w(e.offsetX,e.offsetY),e);dragStart=null}
 cv.addEventListener('pointerup',endPointer);cv.addEventListener('pointercancel',endPointer);
 cv.addEventListener('dblclick',e=>{if(mt&&mt.type==='bound'){const hb=boundHit(e.offsetX,e.offsetY);if(hb&&!hb.insert&&mt.pts.length>3){mt.pts.splice(hb.i,1);mt.dirty=true;renderMTBar();draw()}return}if(draft){e.preventDefault();finishDraft()}});
@@ -833,12 +837,12 @@ document.addEventListener('keydown',e=>{if(e.target.closest('input,textarea,sele
   if(e.key==='Escape'){multi.clear();closeCtx()}});
 function hud(w){if(!dem2)return;const z=zAt(...w);if(!isFinite(z)){$('#hud').textContent='Outside the LiDAR area';return}const s=slopeAt(...w),ll=xy2ll(...w);
   $('#hud').innerHTML=`<b>${z.toFixed(1)} m</b> · slope <b>${s.pct.toFixed(0)}%</b> (${s.deg.toFixed(0)}°) faces ${dirName(s.asp)} · winter sun <b>${sunAt('winter',...w).toFixed(1)} h</b><br>${ll[1].toFixed(6)}, ${ll[0].toFixed(6)}`}
-function hitVertex(sx,sy){const f=features.get(selected);if(!f||f.locked)return null;const g=f.geom;
-  const rp=rotPos(f);if(rp){const [x,y]=w2s(...rp);if(Math.hypot(x-sx,y-sy)<13){const c=centroid(f);const w=s2w(sx,sy);return {rot:true,c,a0:Math.atan2(w[1]-c[1],w[0]-c[0]),orig:structuredClone(g)}}}
-  const hp=handlePos(f);if(hp){const [x,y]=w2s(...hp);if(Math.hypot(x-sx,y-sy)<14){const c=centroid(f);return {scale:true,c,d0:Math.max(.01,dist(hp,c)),orig:structuredClone(g)}}}if((g.g==='sector'||g.g==='sun')){const [x,y]=w2s(g.cx,g.cy);if(Math.hypot(x-sx,y-sy)<10)return {center:true}}
-  if(!g.pts||g.g==='point'){if(g.g==='point'){const [x,y]=w2s(...g.pts[0]);if(Math.hypot(x-sx,y-sy)<12)return {i:0}}return null}
-  for(let i=0;i<g.pts.length;i++){const [x,y]=w2s(...g.pts[i]);if(Math.hypot(x-sx,y-sy)<10)return {i}}
-  const w=s2w(sx,sy);if(hitFeature(w)===selected&&(g.g==='polygon'||g.g==='line'))return {move:true,w0:w,orig:structuredClone(g)};return null}
+function hitVertex(sx,sy,P=w2s,Wp=s2w,HF=hitFeature){const f=features.get(selected);if(!f||f.locked)return null;const g=f.geom;
+  const rp=rotPos(f);if(rp){const [x,y]=P(...rp);if(Math.hypot(x-sx,y-sy)<13){const c=centroid(f);const w=Wp(sx,sy);if(!w)return null;return {rot:true,c,a0:Math.atan2(w[1]-c[1],w[0]-c[0]),orig:structuredClone(g)}}}
+  const hp=handlePos(f);if(hp){const [x,y]=P(...hp);if(Math.hypot(x-sx,y-sy)<14){const c=centroid(f);return {scale:true,c,d0:Math.max(.01,dist(hp,c)),orig:structuredClone(g)}}}if((g.g==='sector'||g.g==='sun')){const [x,y]=P(g.cx,g.cy);if(Math.hypot(x-sx,y-sy)<10)return {center:true}}
+  if(!g.pts||g.g==='point'){if(g.g==='point'){const [x,y]=P(...g.pts[0]);if(Math.hypot(x-sx,y-sy)<12)return {i:0}}return null}
+  for(let i=0;i<g.pts.length;i++){const [x,y]=P(...g.pts[i]);if(Math.hypot(x-sx,y-sy)<10)return {i}}
+  const w=Wp(sx,sy);if(w&&HF(w)===selected&&(g.g==='polygon'||g.g==='line'))return {move:true,w0:w,orig:structuredClone(g)};return null}
 function hitFeature(w){const tol=8/view.s;let best=null;
   for(const [id,f] of features){if(!vis(f))continue;const g=f.geom;let d=Infinity;
     if(g.g==='point'){d=dist(w,g.pts[0]);if(g.r&&d<g.r)d=Math.min(d,tol*.9)}
@@ -858,7 +862,8 @@ function click(w,e){
     if(draft.pen&&draft.pts.length&&draft.preview&&draft.preview.length){draft.pts.push(...draft.preview);draft.preview=[]}else draft.pts.push(r1(w));
     if(draft.kind==='section'&&draft.pts.length===2){commit({g:'line',pts:draft.pts});return}
     draw();updateDrawbar();return}
-  const id=hitFeature(w);
+  pickSel(hitFeature(w),e)}
+function pickSel(id,e){
   if(e&&e.shiftKey){if(id){if(selected){multi.add(selected)}if(multi.has(id))multi.delete(id);else multi.add(id);selected=multi.size===1?[...multi][0]:null;if(multi.size===1)multi.clear();showTab('feat');renderFeatures();draw()}return}
   multi.clear();selected=id||null;if(id)showTab('feat');renderFeatures();draw()}
 const r1=w=>[+w[0].toFixed(1),+w[1].toFixed(1)];
@@ -876,7 +881,7 @@ function finishDraft(){if(!draft)return;const k=KINDS[draft.kind];if(draft.previ
 function updateDrawbar(){const b=$('#drawbar');if(!draft){b.hidden=true;return}const k=KINDS[draft.kind];b.hidden=false;
   const help={point:'Click to place',sun:'Click the centre (e.g. the house)',sector:['Click the centre','Click where the sector starts (sets the radius)','Click where it ends (clockwise)'][Math.min(2,draft.pts.length)],line:draft.kind==='section'?(draft.pts.length?'Click point B: the end of the cross-section':'Click point A: the start of the cross-section'):draft.pen?'Click to fix each stretch along the grade':'Click to add points',polygon:'Click to add corners'}[k.geom];
   const pen=k.geom==='line'&&k.grade!==undefined;
-  const canFree=(k.geom==='polygon'||k.geom==='line')&&!draft.pen;
+  const canFree=(k.geom==='polygon'||k.geom==='line')&&!draft.pen&&!window.__v3on;
   const freeOpts=k.geom==='polygon'?[['off','Click points'],['box','⬚ Drag box'],['snap','✎ Auto'],['rect','▭ Rectangle'],['circle','◯ Circle'],['oval','⬭ Oval'],['tri','△ Triangle'],['smooth','✎ Freeform']]:[['off','Click points'],['smooth','✎ Sketch']];
   const freeUI=canFree?`<div class="seg">${freeOpts.map(([v,l])=>`<button data-pm="${v}" aria-pressed="${v==='off'?penMode==='off':(k.geom==='line'?penMode!=='off':penMode===v)}">${l}</button>`).join('')}</div>`:'';
   const helpTxt=penOn()?(k.geom==='polygon'?({box:'Press at one corner and drag to the opposite corner. Rotate it afterwards with the curved-arrow handle',snap:'Sketch and lift: Auto guesses rectangle, circle, oval or triangle',rect:'Sketch roughly and lift: it becomes a rectangle',circle:'Sketch roughly and lift: it becomes a circle',oval:'Sketch roughly and lift: it becomes an oval',tri:'Sketch roughly and lift: it becomes a triangle',smooth:'Sketch and lift: the outline is smoothed'}[penMode]||'Sketch and lift'):'Sketch with your finger or mouse and lift to finish'):help;
@@ -2659,8 +2664,8 @@ function recomputeLot(){if(!EXTRA||!EXTRA.d8||!dem2)return;const N=1000,d8=EXTRA
 const V3={sun:null,sunT:9,sunDoy:172,play:null,shCache:new Map(),on:false,gl:null,prog:null,buf:null,n:0,tex:null,yaw:0,pitch:.62,dist:1,tgt:[0,0,0],ex:+lsGet('bt.v3ex',1),L:1000,zmid:0,drag:null,pts:new Map()};
 function v3Box(){const L=Math.max(200,Math.min(2000,Math.max(W,H)/view.s));let cx=view.cx,cy=view.cy;cx=Math.max(L/2,Math.min(2000-L/2,cx));cy=Math.max(L/2,Math.min(2000-L/2,cy));return {L,x0:cx-L/2,y0:cy-L/2,cx,cy}}
 function v3Texture(b){const S=2048;const sv={W,H,DPR,cx:view.cx,cy:view.cy,s:view.s,w:cv.width,h:cv.height};
-  let out=null;try{V3.tex2d=true;W=S;H=S;DPR=1;cv.width=S;cv.height=S;view.cx=b.x0+b.L/2;view.cy=b.y0+b.L/2;view.s=S/b.L;render();out=document.createElement('canvas');out.width=S;out.height=S;out.getContext('2d').drawImage(cv,0,0)}
-  finally{V3.tex2d=false;W=sv.W;H=sv.H;DPR=sv.DPR;cv.width=sv.w;cv.height=sv.h;view.cx=sv.cx;view.cy=sv.cy;view.s=sv.s;render()}return out}
+  const ks={sel:selected,draft,hov:hoverId,multi:[...multi]};let out=null;try{V3.tex2d=true;window.__v3tex=true;selected=null;draft=null;hoverId=null;multi.clear();W=S;H=S;DPR=1;cv.width=S;cv.height=S;view.cx=b.x0+b.L/2;view.cy=b.y0+b.L/2;view.s=S/b.L;render();out=document.createElement('canvas');out.width=S;out.height=S;out.getContext('2d').drawImage(cv,0,0)}
+  finally{V3.tex2d=false;window.__v3tex=false;selected=ks.sel;draft=ks.draft;hoverId=ks.hov;ks.multi.forEach(i=>multi.add(i));W=sv.W;H=sv.H;DPR=sv.DPR;cv.width=sv.w;cv.height=sv.h;view.cx=sv.cx;view.cy=sv.cy;view.s=sv.s;render()}return out}
 function v3Shader(gl,type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s}
 function v3Init(){const c=$('#gl');const gl=c.getContext('webgl',{antialias:true,preserveDrawingBuffer:true});if(!gl)return false;V3.gl=gl;
   const vs=`attribute vec3 p;attribute vec2 t;attribute vec3 nm;attribute float so;uniform mat4 M;uniform float ex,zm,sunOn,amb;uniform vec3 S;varying vec2 vt;varying float sh;
@@ -2680,10 +2685,17 @@ function v3Build(){const gl=V3.gl,b=v3Box(),N=256,L=b.L;V3.L=L;V3.box=b;
   const idx=new Uint16Array((N-1)*(N-1)*6);let q=0;for(let j=0;j<N-1;j++)for(let i=0;i<N-1;i++){const a=j*N+i,b2=a+1,c=a+N,e=c+1;idx[q++]=a;idx[q++]=c;idx[q++]=b2;idx[q++]=b2;idx[q++]=c;idx[q++]=e}
   const mk=(data,tgt=gl.ARRAY_BUFFER)=>{const bf=gl.createBuffer();gl.bindBuffer(tgt,bf);gl.bufferData(tgt,data,gl.STATIC_DRAW);return bf};
   V3.buf={p:mk(pos),t:mk(uv),n:mk(nm),i:mk(idx,gl.ELEMENT_ARRAY_BUFFER),so:mk(new Float32Array(N*N).fill(1))};V3.n=idx.length;
-  const img=v3Texture(b);const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
+  V3.ymax=(zmax-V3.zmid);V3.ymin=(zmin-V3.zmid);
+  if(V3.tex)gl.deleteTexture(V3.tex);V3.tex=gl.createTexture();v3Retex(true,true);v3Reset();if(V3.sun)sunSet(V3.sunT)}
+/* re-drape the 2D map onto the terrain (only when something it shows has changed; force skips the check) */
+function v3Sig(){const sk=window.__v3skip;return JSON.stringify([layers,[...features].filter(([i])=>i!==sk),[...imagery].map(([i,m])=>[i,m.on,m.op,m.a,m.b,m.c,m.d,m.design]),PH.on&&PH.i,!!mt,SUG.size])}
+function v3Retex(force,noDraw){const gl=V3.gl;if(!gl||!V3.box||!V3.tex)return;const sig=v3Sig();if(!force&&sig===V3.sig)return;V3.sig=sig;
+  const img=v3Texture(V3.box);gl.bindTexture(gl.TEXTURE_2D,V3.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
   gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
   const af=gl.getExtension('EXT_texture_filter_anisotropic');if(af)gl.texParameterf(gl.TEXTURE_2D,af.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(8,gl.getParameter(af.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
-  V3.tex=tx;v3Reset();if(V3.sun)sunSet(V3.sunT)}
+  if(!noDraw)v3Draw()}
+/* called from draw(): something in the design changed while 3D is open */
+function v3Dirty(){if(!V3.on)return;if(!V3.ovRaf)V3.ovRaf=requestAnimationFrame(()=>{V3.ovRaf=0;v3Overlay()});clearTimeout(V3.texT);V3.texT=setTimeout(()=>{if(V3.on&&!V3.edit)v3Retex()},140)}
 function v3Reset(){V3.yaw=0;V3.pitch=.62;V3.dist=V3.L*1.15;V3.tgt=[0,0,0];v3Draw()}
 function mat4Mul(a,b){const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s}return o}
 function v3Draw(sz){const gl=V3.gl;if(!gl||!V3.buf)return;const c=$('#gl');const r=c.getBoundingClientRect(),dp=Math.min(2,window.devicePixelRatio||1);const w=sz?sz[0]:Math.max(1,Math.round(r.width*dp)),h=sz?sz[1]:Math.max(1,Math.round(r.height*dp));if(c.width!==w||c.height!==h){c.width=w;c.height=h}
@@ -2693,7 +2705,7 @@ function v3Draw(sz){const gl=V3.gl;if(!gl||!V3.buf)return;const c=$('#gl');const
   const cp=Math.cos(V3.pitch),eye=[V3.tgt[0]+V3.dist*cp*Math.sin(V3.yaw),V3.tgt[1]+V3.dist*Math.sin(V3.pitch),V3.tgt[2]+V3.dist*cp*Math.cos(V3.yaw)];
   const zf=[eye[0]-V3.tgt[0],eye[1]-V3.tgt[1],eye[2]-V3.tgt[2]],zl=Math.hypot(...zf),Z=zf.map(v=>v/zl);let X=[Z[2],0,-Z[0]];const xl=Math.hypot(...X)||1;X=X.map(v=>v/xl);const Y=[Z[1]*X[2]-Z[2]*X[1],Z[2]*X[0]-Z[0]*X[2],Z[0]*X[1]-Z[1]*X[0]];
   const Vw=new Float32Array([X[0],Y[0],Z[0],0,X[1],Y[1],Z[1],0,X[2],Y[2],Z[2],0,-(X[0]*eye[0]+X[1]*eye[1]+X[2]*eye[2]),-(Y[0]*eye[0]+Y[1]*eye[1]+Y[2]*eye[2]),-(Z[0]*eye[0]+Z[1]*eye[1]+Z[2]*eye[2]),1]);
-  const M=mat4Mul(P,Vw);const pr=V3.prog;gl.useProgram(pr);
+  const M=mat4Mul(P,Vw);if(!sz){V3.M=M;V3.eye=eye;V3.cam={X,Y,Z,f,asp,w:r.width,h:r.height};V3.frame=(V3.frame||0)+1}const pr=V3.prog;gl.useProgram(pr);
   const at=(nm,bf,sz)=>{const l=gl.getAttribLocation(pr,nm);gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,sz,gl.FLOAT,false,0,0)};
   at('p',V3.buf.p,3);at('t',V3.buf.t,2);at('nm',V3.buf.n,3);at('so',V3.buf.so,1);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,V3.buf.i);
   const sn=V3.sunNow,u=k=>gl.getUniformLocation(pr,k);
@@ -2702,11 +2714,11 @@ function v3Draw(sz){const gl=V3.gl;if(!gl||!V3.buf)return;const c=$('#gl');const
   else{gl.uniform1f(u('sunOn'),0);gl.uniform3f(u('tint'),1,1,1)}
   gl.uniformMatrix4fv(gl.getUniformLocation(pr,'M'),false,M);gl.uniform1f(gl.getUniformLocation(pr,'ex'),V3.ex);gl.uniform1f(gl.getUniformLocation(pr,'zm'),V3.zmid);
   gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,V3.tex);gl.uniform1i(gl.getUniformLocation(pr,'tx'),0);gl.drawElements(gl.TRIANGLES,V3.n,gl.UNSIGNED_SHORT,0);
-  const nd=$('#v3north');if(nd)nd.style.transform=`rotate(${V3.yaw*180/Math.PI}deg)`}
-async function open3D(){if(!dem2){toast('Terrain still loading');return}const o=$('#v3d');o.hidden=false;V3.on=true;if(V3.placeBar)V3.placeBar();
-  if(!V3.gl&&!v3Init()){o.hidden=true;V3.on=false;toast('3D needs WebGL, which this browser has turned off.');return}
+  const nd=$('#v3north');if(nd)nd.style.transform=`rotate(${V3.yaw*180/Math.PI}deg)`;if(!sz)v3Overlay()}
+async function open3D(){if(!dem2){toast('Terrain still loading');return}const o=$('#v3d');o.hidden=false;V3.on=true;window.__v3on=true;$('#mapwrap').classList.add('v3on');if(draft)updateDrawbar();if(V3.placeBar)V3.placeBar();
+  if(!V3.gl&&!v3Init()){o.hidden=true;V3.on=false;window.__v3on=false;$('#mapwrap').classList.remove('v3on');toast('3D needs WebGL, which this browser has turned off.');return}
   $('#v3msg').textContent='Building 3D view…';await new Promise(r=>setTimeout(r,30));try{v3Build();$('#v3msg').textContent=''}catch(e){$('#v3msg').textContent='3D view failed: '+e.message}}
-function close3D(){sunStop();$('#v3d').hidden=true;V3.on=false}
+function close3D(){sunStop();if(V3.edit){const ed=V3.edit;V3.edit=null;if(ed.started&&ed.before){features.set(selected,structuredClone(ed.before))}}window.__v3skip=null;$('#v3d').hidden=true;V3.on=false;window.__v3on=false;$('#mapwrap').classList.remove('v3on');if(draft)updateDrawbar();draw()}
 /* sun simulation in 3D: terrain shadows marched over the 2 m DEM (whole 2 km window, so outside hills cast shade too) */
 function v3Shadow(alt,az){const key=V3.sunDoy+'|'+Math.round(alt*10)+'|'+Math.round(az*10);if(V3.shCache.has(key))return V3.shCache.get(key);
   const N=V3.N,b=V3.box,L=V3.L,z=V3.zg,out=new Float32Array(N*N);
@@ -2737,14 +2749,24 @@ function sunPlay(){const st=sunTimes(V3.sunDoy);const t0=st.rise-.25,t1=st.set+.
   const step=now=>{if(!V3.play)return;const f=Math.min(1,(now-start)/dur);sunSet(t0+(t1-t0)*f);if(f<1)V3.play=requestAnimationFrame(step);else sunStop()};V3.play=requestAnimationFrame(step)}
 function sunStop(){if(V3.play){cancelAnimationFrame(V3.play);V3.play=null}const b=$('#v3play');if(b)b.textContent='▶ Play day'}
 function wire3D(){const c=$('#gl');
-  c.addEventListener('pointerdown',e=>{c.setPointerCapture(e.pointerId);V3.pts.set(e.pointerId,[e.clientX,e.clientY]);V3.drag={btn:e.button,shift:e.shiftKey}});
-  c.addEventListener('pointermove',e=>{if(!V3.pts.has(e.pointerId))return;const prev=V3.pts.get(e.pointerId);const dx=e.clientX-prev[0],dy=e.clientY-prev[1];
+  c.addEventListener('pointerdown',e=>{c.setPointerCapture(e.pointerId);V3.pts.set(e.pointerId,[e.clientX,e.clientY]);
+    if(V3.pts.size>1){v3EndEdit(true);V3.down=null;V3.pinched=true;V3.drag={btn:0};return}
+    V3.pinched=false;V3.drag={btn:e.button,shift:e.shiftKey};V3.down={x:e.clientX,y:e.clientY,moved:false};
+    if(e.button===0&&!e.shiftKey&&!draft&&!mt&&selected){const f=features.get(selected);if(f&&!f.locked&&vis(f)){const [sx,sy]=v3Loc(e);const h=v3HitHandle(sx,sy,e.pointerType==='touch');if(h){h.before=snapF(selected);V3.edit=h;c.style.cursor='grabbing'}}}});
+  c.addEventListener('pointermove',e=>{if(!V3.pts.has(e.pointerId)){if(e.pointerType==='mouse')v3Hover(e);return}const prev=V3.pts.get(e.pointerId);const dx=e.clientX-prev[0],dy=e.clientY-prev[1];
     if(V3.pts.size===2){const ps=[...V3.pts.values()];const d0=Math.hypot(ps[0][0]-ps[1][0],ps[0][1]-ps[1][1]);V3.pts.set(e.pointerId,[e.clientX,e.clientY]);const qs=[...V3.pts.values()];const d1=Math.hypot(qs[0][0]-qs[1][0],qs[0][1]-qs[1][1]);
       if(d0>0)V3.dist=Math.max(V3.L*.08,Math.min(V3.L*4,V3.dist*d0/d1));V3.pitch=Math.max(.08,Math.min(1.5,V3.pitch+dy*.0025));v3Draw();return}
     V3.pts.set(e.pointerId,[e.clientX,e.clientY]);
+    const dn=V3.down;if(dn&&!dn.moved&&Math.hypot(e.clientX-dn.x,e.clientY-dn.y)>5)dn.moved=true;if(!dn||!dn.moved)return;   // a click, not a drag (yet)
+    if(V3.edit){v3EditMove(e);return}
     if(V3.drag&&(V3.drag.btn===2||V3.drag.shift)){const k=V3.dist/600,cy=Math.cos(V3.yaw),sy=Math.sin(V3.yaw);V3.tgt[0]+=(-cy*dx-sy*dy)*k;V3.tgt[2]+=(sy*dx-cy*dy)*k;V3.tgt[2]=Math.max(-V3.L/2,Math.min(V3.L/2,V3.tgt[2]));V3.tgt[0]=Math.max(-V3.L/2,Math.min(V3.L/2,V3.tgt[0]))}
     else{V3.yaw-=dx*.006;V3.pitch=Math.max(.08,Math.min(1.5,V3.pitch+dy*.004))}v3Draw()});
-  const up=e=>{V3.pts.delete(e.pointerId);if(!V3.pts.size)V3.drag=null};c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
+  const up=e=>{if(!V3.pts.has(e.pointerId))return;V3.pts.delete(e.pointerId);if(V3.pts.size)return;const dn=V3.down,pin=V3.pinched,btn=V3.drag&&V3.drag.btn;V3.drag=null;V3.down=null;V3.pinched=false;
+    if(V3.edit){if(v3EndEdit(e.type!=='pointerup'))return}
+    if(dn&&!dn.moved&&!pin&&e.type==='pointerup'&&btn===0)v3Click(e)};
+  c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
+  c.addEventListener('pointerleave',()=>{if(V3.hover){V3.hover=null;v3Overlay()}});
+  c.addEventListener('dblclick',e=>{if(draft){e.preventDefault();finishDraft()}});
   c.addEventListener('contextmenu',e=>e.preventDefault());
   c.addEventListener('wheel',e=>{e.preventDefault();V3.dist=Math.max(V3.L*.08,Math.min(V3.L*4,V3.dist*Math.exp(e.deltaY*.0012)));v3Draw()},{passive:false});
   $('#v3close').onclick=close3D;$('#v3reset').onclick=v3Reset;$('#v3refresh').onclick=()=>{if(V3.gl){v3Build()}};
@@ -2765,7 +2787,127 @@ function wire3D(){const c=$('#gl');
   $('#v3time').oninput=e=>{sunStop();sunSet(+e.target.value)};
   $('#v3play').onclick=()=>{if(V3.play){sunStop();return}if(!V3.sun){$('#v3season').value='172';V3.sun='172';V3.sunDoy=172;$('#v3sunrow').classList.remove('off');sunTrack()}sunPlay()};
   window.addEventListener('resize',()=>{if(V3.on)v3Draw()});
-  document.addEventListener('keydown',e=>{if(V3.on&&e.key==='Escape')close3D()})}
+  document.addEventListener('keydown',e=>{if(V3.on&&e.key==='Escape'&&!e.target.closest('input,textarea,select')){if(V3.edit){v3EndEdit(true);e.stopImmediatePropagation();return}if(!draft&&!mt&&!selected&&!multi.size)close3D()}},true)}
+/* ---------------- 3D drawing and editing: terrain picking, draped previews, handles and upright labels ----------------
+   Uses the same features Map, draft, click(), hitVertex(), dragGeom(), endDrag() and persist/undo path as the 2D map. */
+// terrain height in model units (metres above the middle height, times the height exaggeration) at model x,z; null outside the 3D window
+function v3Hm(x,z){const N=V3.N,L=V3.L,d=L/(N-1);const u=(x+L/2)/d,v=(z+L/2)/d;if(!(u>=0&&v>=0&&u<=N-1&&v<=N-1))return null;
+  const i=Math.min(N-2,u|0),j=Math.min(N-2,v|0),fx=u-i,fy=v-j,a=V3.zg;
+  const h=(a[j*N+i]*(1-fx)+a[j*N+i+1]*fx)*(1-fy)+(a[(j+1)*N+i]*(1-fx)+a[(j+1)*N+i+1]*fx)*fy;return (h-V3.zmid)*V3.ex}
+const v3M=(E,N)=>[E-(V3.box.x0+V3.L/2),N-(V3.box.y0+V3.L/2)];
+// world E,N (draped on the terrain, lifted a little) -> CSS pixels on the 3D canvas, plus depth; null when behind the camera or off the terrain
+function v3Scr(E,N,lift=.25){if(!V3.M||!V3.box)return null;const [x,z]=v3M(E,N);const h=v3Hm(x,z);if(h===null)return null;const y=h+lift*V3.ex,M=V3.M;
+  const cx=M[0]*x+M[4]*y+M[8]*z+M[12],cy=M[1]*x+M[5]*y+M[9]*z+M[13],cw=M[3]*x+M[7]*y+M[11]*z+M[15];if(cw<=1e-6)return null;
+  return [(cx/cw+1)/2*V3.cam.w,(1-cy/cw)/2*V3.cam.h,cw,x,y,z]}
+function v3Ray(sx,sy){const c=V3.cam;const nx=2*sx/c.w-1,ny=1-2*sy/c.h,a=nx*c.asp/c.f,b=ny/c.f;const d=[-c.Z[0]+c.X[0]*a+c.Y[0]*b,-c.Z[1]+c.X[1]*a+c.Y[1]*b,-c.Z[2]+c.X[2]*a+c.Y[2]*b];const l=Math.hypot(...d);return {o:V3.eye,d:d.map(v=>v/l)}}
+// march along a ray against the height grid, then refine by bisection; returns the distance to the ground or null
+function v3March(o,d,tmax){const st=V3.L/600,top=V3.ymax*V3.ex+1;let t=0;if(o[1]>top){if(d[1]>=0)return null;t=(o[1]-top)/(-d[1])}
+  let prev=t;for(;t<=tmax;t+=st){const x=o[0]+d[0]*t,y=o[1]+d[1]*t,z=o[2]+d[2]*t;const h=v3Hm(x,z);if(h!==null&&y<=h){let a=prev,b=t;for(let k=0;k<22;k++){const m=(a+b)/2;const hm=v3Hm(o[0]+d[0]*m,o[2]+d[2]*m);if(hm!==null&&o[1]+d[1]*m<=hm)b=m;else a=m}return b}
+    if(y<V3.ymin*V3.ex-50&&d[1]<0)return null;prev=t}return null}
+// mouse / touch position (CSS px on the 3D canvas) -> MGA metres [E,N] on the terrain, or null
+function v3Pick(sx,sy){if(!V3.cam||!V3.box)return null;const {o,d}=v3Ray(sx,sy);const t=v3March(o,d,V3.dist*8+V3.L*4);if(t===null)return null;
+  const E=o[0]+d[0]*t+V3.box.x0+V3.L/2,N=o[2]+d[2]*t+V3.box.y0+V3.L/2;if(E<0||N<0||E>2000||N>2000)return null;return [E,N]}
+function v3Loc(e){const r=$('#gl').getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]}
+// is a projected ground point hidden behind a hill?
+function v3Hidden(p){const o=V3.eye,v=[p[3]-o[0],p[4]+1.5*V3.ex-o[1],p[5]-o[2]],L=Math.hypot(...v);const t=v3March(o,v.map(q=>q/L),L-Math.max(3,L*.015));return t!==null}
+// pixels per metre on the ground near world point c (for handle offsets and hit tolerances)
+function v3Scale(c){const p=v3Scr(c[0],c[1]);if(!p)return view.s;return Math.max(.02,V3.cam.h/2*V3.cam.f/p[2])}
+function v3WithS(c,fn){const sv=view.s;view.s=v3Scale(c);try{return fn()}finally{view.s=sv}}
+// a feature's outline as world points (sectors and sun wedges become polygons)
+function v3Ring(f){const g=f.geom,k=KINDS[f.kind]||KINDS.note;if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}if(a1<=a0)a1+=360;const o=[[g.cx,g.cy]];for(let a=a0;a<=a1+.01;a+=Math.max(2,(a1-a0)/40)){const r=a*Math.PI/180;o.push([g.cx+Math.sin(r)*g.r,g.cy-Math.cos(r)*g.r])}return {pts:o,closed:true}}
+  if(g.g==='point'&&g.r){const o=[];for(let i=0;i<36;i++){const a=i/36*2*Math.PI;o.push([g.pts[0][0]+Math.cos(a)*g.r,g.pts[0][1]+Math.sin(a)*g.r])}return {pts:o,closed:true}}
+  return {pts:g.pts||[],closed:g.g==='polygon'}}
+// densify along the ground so lines follow the terrain, then project
+function v3Drape(pts,closed){const out=[];if(!pts.length)return out;const st=V3.L/255;const q=closed?pts.concat([pts[0]]):pts;
+  for(let i=0;i<q.length;i++){if(i){const a=q[i-1],b=q[i],n=Math.min(200,Math.max(1,Math.ceil(dist(a,b)/st)));for(let k=1;k<n;k++){const t=k/n;out.push(v3Scr(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t))}}out.push(v3Scr(q[i][0],q[i][1]))}return out}
+function v3Proj(id,f){const c=V3.pc||(V3.pc=new Map());const h=c.get(id);if(h&&h.g===f.geom&&h.fr===V3.frame&&h.ex===V3.ex)return h.P;const r=v3Ring(f);const P=f.geom.g==='point'&&!f.geom.r?[v3Scr(...f.geom.pts[0])]:v3Drape(r.pts,r.closed);c.set(id,{g:f.geom,fr:V3.frame,ex:V3.ex,P,closed:r.closed});if(c.size>600)c.clear();return P}
+function v3Path(g2,P,closed){g2.beginPath();let on=false;for(const p of P){if(!p){on=false;continue}if(on)g2.lineTo(p[0],p[1]);else{g2.moveTo(p[0],p[1]);on=true}}if(closed)g2.closePath()}
+function v3InPoly(x,y,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if(!a||!b)continue;if(((a[1]>y)!=(b[1]>y))&&(x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]))c=!c}return c}
+// screen-space hit test against the draped drawings (same priorities as the 2D map: things beat zones, edges beat insides)
+function v3HitFeature(sx,sy,coarse){const tol=coarse?16:9;let best=null;if(!layers.design)return null;
+  for(const [id,f] of features){if(!vis(f)||(f.kind==='privacy'&&id!==selected))continue;const g=f.geom;let d=Infinity;const P=v3Proj(id,f);
+    if(g.g==='point'){const p=v3Scr(...g.pts[0]);if(p)d=Math.hypot(p[0]-sx,p[1]-sy);if(g.r&&P.length>1&&v3InPoly(sx,sy,P))d=Math.min(d,tol*.9)}
+    else{for(let i=1;i<P.length;i++){const a=P[i-1],b=P[i];if(a&&b)d=Math.min(d,segDist([sx,sy],a,b))}
+      if(g.g!=='line'&&v3InPoly(sx,sy,P))d=Math.min(d,tol*.95+(g.g==='polygon'?Math.min(.3,polyArea(g.pts)/2e5):.2))}
+    const pri=(KINDS[f.kind]||{}).g==='Zones'?.5:0;if(d<=tol&&(!best||d+pri<best.d))best={id,d:d+pri}}
+  return best&&best.id}
+function v3HitHandle(sx,sy,coarse){const f=features.get(selected);if(!f)return null;const c=centroid(f);if(!c)return null;
+  return v3WithS(c,()=>hitVertex(sx,sy,(x,y)=>{const p=v3Scr(x,y);if(!p)return [-1e5,-1e5];const dx=p[0]-sx,dy=p[1]-sy;return coarse?[sx+dx*.6,sy+dy*.6]:[p[0],p[1]]},v3Pick,()=>v3HitFeature(sx,sy,coarse)))}
+/* the overlay: dragged feature, selection with handles on the ground, draft preview, upright labels */
+function v3Overlay(){const c=$('#gl2');if(!c||!V3.on||!V3.cam||!V3.box)return;const dp=Math.min(2,window.devicePixelRatio||1),w=V3.cam.w,h=V3.cam.h;
+  if(c.width!==Math.round(w*dp)||c.height!==Math.round(h*dp)){c.width=Math.round(w*dp);c.height=Math.round(h*dp)}const g2=c.getContext('2d');g2.setTransform(dp,0,0,dp,0,0);g2.clearRect(0,0,w,h);
+  if(!layers.design&&!draft){return}
+  const skip=window.__v3skip;
+  const drawShape=(id,f,full,sel)=>{const k=KINDS[f.kind]||KINDS.note,col=k.color,gm=f.geom;const P=v3Proj(id,f);g2.setLineDash([]);g2.lineJoin='round';g2.lineCap='round';
+    if(gm.g==='point'){const p=P[P.length===1?0:-1]||v3Scr(...gm.pts[0]);if(P.length>1){v3Path(g2,P,true);if(full){g2.fillStyle=hexA(col,.22);g2.fill()}g2.lineWidth=sel?2.5:1.5;g2.strokeStyle=col;g2.stroke()}
+      const q=v3Scr(...gm.pts[0]);if(q&&full){g2.beginPath();g2.arc(q[0],q[1],7,0,7);g2.fillStyle=col;g2.fill();g2.lineWidth=2;g2.strokeStyle='#fff';g2.stroke()}return}
+    v3Path(g2,P,gm.g!=='line');
+    if(gm.g==='line'){g2.lineWidth=(k.w?k.w+3:6)+(sel?1.5:0);g2.strokeStyle='rgba(255,255,255,.8)';g2.stroke();g2.lineWidth=(k.w||2.6)+(sel?1.2:0);g2.strokeStyle=col;if(k.dash)g2.setLineDash(k.dash);g2.stroke();g2.setLineDash([]);return}
+    if(full){g2.fillStyle=hexA(col,k.g==='Zones'?.2:.38);g2.fill()}g2.lineWidth=sel?4.5:3;g2.strokeStyle='rgba(255,255,255,.85)';g2.stroke();g2.lineWidth=sel?2.6:1.8;g2.strokeStyle=col;if(!sel&&(k.g==='Zones'||k.dash))g2.setLineDash(k.dash||[7,4]);g2.stroke();g2.setLineDash([])};
+  if(skip&&features.has(skip))drawShape(skip,features.get(skip),true,true);
+  if(hoverId3()&&hoverId3()!==selected&&features.has(hoverId3())){g2.globalAlpha=.7;drawShape(hoverId3(),features.get(hoverId3()),false,false);g2.globalAlpha=1}
+  for(const id of multi){const f=features.get(id);if(f&&id!==skip)drawShape(id,f,false,true)}
+  const sf=selected&&features.get(selected);
+  if(sf&&vis(sf)){if(selected!==skip)drawShape(selected,sf,false,true);if(!sf.locked)v3Handles(g2,sf)}
+  if(draft)v3DraftDraw(g2);
+  v3Labels(g2,w,h)}
+const hoverId3=()=>V3.hover||null;
+function v3Handles(g2,f){const gm=f.geom,col=(KINDS[f.kind]||KINDS.note).color,c=centroid(f);if(!c)return;
+  const sq=(p)=>{if(!p)return;const hid=v3Hidden(p);g2.globalAlpha=hid?.45:1;g2.fillStyle='#fff';g2.strokeStyle='#111';g2.lineWidth=1.5;g2.beginPath();g2.rect(p[0]-5,p[1]-5,10,10);g2.fill();g2.stroke();g2.globalAlpha=1};
+  if(gm.pts&&gm.g!=='point')gm.pts.forEach(q=>sq(v3Scr(q[0],q[1])));
+  if(gm.g==='point'){const p=v3Scr(...gm.pts[0]);if(p){g2.beginPath();g2.arc(p[0],p[1],10,0,7);g2.lineWidth=2.5;g2.strokeStyle='#fff';g2.stroke();g2.lineWidth=1.5;g2.strokeStyle='#111';g2.stroke()}}
+  if(gm.g==='sector'||gm.g==='sun'){const p=v3Scr(gm.cx,gm.cy);if(p){g2.fillStyle='#fff';g2.strokeStyle='#111';g2.lineWidth=1.5;g2.beginPath();g2.arc(p[0],p[1],6,0,7);g2.fill();g2.stroke()}}
+  v3WithS(c,()=>{const rp=rotPos(f);if(rp){const p=v3Scr(rp[0],rp[1]);if(p){g2.fillStyle='#fff';g2.strokeStyle=col;g2.lineWidth=2.2;g2.beginPath();g2.arc(p[0],p[1],9,0,7);g2.fill();g2.stroke();g2.lineWidth=1.8;g2.beginPath();g2.arc(p[0],p[1],4.4,-2.6,1.2);g2.stroke();const ex=p[0]+4.4*Math.cos(1.2),ey=p[1]+4.4*Math.sin(1.2);g2.beginPath();g2.moveTo(ex-2.8,ey-.7);g2.lineTo(ex,ey);g2.lineTo(ex+1,ey-2.8);g2.stroke()}}
+    const hp=handlePos(f);if(hp){const p=v3Scr(hp[0],hp[1]);if(p){g2.fillStyle=col;g2.strokeStyle='#fff';g2.lineWidth=2;g2.beginPath();g2.arc(p[0],p[1],8.5,0,7);g2.fill();g2.stroke();g2.lineWidth=1.6;g2.beginPath();g2.moveTo(p[0]-4,p[1]);g2.lineTo(p[0]+4,p[1]);g2.moveTo(p[0]+1.7,p[1]-2.3);g2.lineTo(p[0]+4,p[1]);g2.lineTo(p[0]+1.7,p[1]+2.3);g2.stroke()}}})}
+function v3DraftDraw(g2){const k=KINDS[draft.kind];const pts=draft.pts.concat(draft.preview||[]);let info='';
+  if(k.geom==='sector'&&draft.pts.length){const cc=draft.pts[0],m=draft.hover||cc;let ring;if(draft.pts.length===1)ring=[cc,m];else{const r=dist(cc,draft.pts[1]);let a0=bear(cc,draft.pts[1]),a1=bear(cc,m);if(a1<=a0)a1+=360;ring=[cc];for(let a=a0;a<=a1+.01;a+=Math.max(2,(a1-a0)/40)){const q=a*Math.PI/180;ring.push([cc[0]+Math.sin(q)*r,cc[1]-Math.cos(q)*r])}}
+    v3Path(g2,v3Drape(ring,draft.pts.length>1),draft.pts.length>1);g2.fillStyle=hexA(k.color,.15);if(draft.pts.length>1)g2.fill();g2.strokeStyle=k.color;g2.lineWidth=2;g2.setLineDash([5,4]);g2.stroke();g2.setLineDash([])}
+  else if(pts.length){const ring=pts.slice();if(draft.hover&&(k.geom==='line'||k.geom==='polygon')&&!draft.pen)ring.push(draft.hover);const closed=k.geom==='polygon'&&ring.length>2;const P=v3Drape(ring,closed);
+    if(closed){v3Path(g2,P,true);g2.fillStyle=hexA(k.color,.16);g2.fill()}v3Path(g2,P,closed);g2.lineWidth=5;g2.strokeStyle='rgba(255,255,255,.8)';g2.stroke();g2.lineWidth=2.6;g2.strokeStyle=k.color;g2.setLineDash([7,4]);g2.stroke();g2.setLineDash([]);
+    for(const q of draft.pts){const p=v3Scr(q[0],q[1]);if(!p)continue;g2.fillStyle='#fff';g2.beginPath();g2.arc(p[0],p[1],4.5,0,7);g2.fill();g2.strokeStyle=k.color;g2.lineWidth=2;g2.stroke()}
+    if(draft.hover&&draft.pts.length&&(k.geom==='line'||k.geom==='polygon')){const last=draft.pts[draft.pts.length-1],hw=draft.hover;const tot=lineLen(draft.pts)+dist(last,hw);
+      info=`This side ${dist(last,hw).toFixed(1)} m · `+(k.geom==='polygon'&&draft.pts.length>=2?`area ${fmtArea(polyArea([...draft.pts,hw]))} · perimeter ${(tot+dist(hw,draft.pts[0])).toFixed(1)} m`:`total ${tot.toFixed(1)} m`)}}
+  if(draft.hover&&!draft.pen){const p=v3Scr(...draft.hover);if(p){g2.strokeStyle=k.color;g2.lineWidth=2;g2.beginPath();g2.arc(p[0],p[1],6,0,7);g2.stroke();g2.beginPath();g2.moveTo(p[0]-10,p[1]);g2.lineTo(p[0]-4,p[1]);g2.moveTo(p[0]+4,p[1]);g2.lineTo(p[0]+10,p[1]);g2.moveTo(p[0],p[1]-10);g2.lineTo(p[0],p[1]-4);g2.moveTo(p[0],p[1]+4);g2.lineTo(p[0],p[1]+10);g2.stroke()}}
+  if(info){g2.font='600 12.5px "IBM Plex Mono",monospace';g2.textAlign='center';g2.textBaseline='middle';const tw=g2.measureText(info).width,hp=draft.hover&&v3Scr(...draft.hover),x=hp?Math.max(tw/2+14,Math.min(V3.cam.w-tw/2-14,hp[0])):V3.cam.w/2,y=hp?Math.max(20,hp[1]-30):V3.cam.h/2;g2.fillStyle='rgba(20,30,25,.8)';g2.beginPath();g2.roundRect?g2.roundRect(x-tw/2-10,y-12,tw+20,24,6):g2.rect(x-tw/2-10,y-12,tw+20,24);g2.fill();g2.fillStyle='#fff';g2.fillText(info,x,y)}}
+// upright labels: anchored at the feature's inside point on the ground, facing the screen, decluttered
+function v3Labels(g2,W3,H3){if(!layers.labels||!layers.design)return;const L=[];const hov=hoverId3();
+  for(const [id,f] of features){if(!vis(f))continue;const k=KINDS[f.kind]||KINDS.note;const isZ=k.g==='Zones';if(f.kind==='section'||(f.kind==='privacy'&&id!==selected))continue;
+    if(isZ?!layers.zlabels:!(layers.flabels||id===selected||id===hov||multi.has(id)))continue;const g=f.geom;let a;
+    if(g.g==='polygon')a=interiorPoint(g).p;else{a=centroid(f);if(!a)continue;if(g.g==='sector'||g.g==='sun'){let a0=g.a0,a1=g.a1;if(g.g==='sun'){const b=sunBearings(k.decl);a0=b.set;a1=b.rise}if(a1<a0)a1+=360;const m=((a0+a1)/2)*Math.PI/180;a=[g.cx+Math.sin(m)*g.r*.72,g.cy-Math.cos(m)*g.r*.72]}}
+    const p=v3Scr(a[0],a[1]);if(!p||p[0]<-100||p[1]<-40||p[0]>W3+100||p[1]>H3+40)continue;
+    const area=g.g==='polygon'?polyArea(g.pts):0;const sc=V3.cam.h/2*V3.cam.f/p[2];
+    if(!isZ&&id!==selected&&id!==hov&&((g.g==='polygon'&&Math.sqrt(area)*sc<22)||(g.g==='point'&&sc<.9)||(g.g==='line'&&lineLen(g.pts)*sc<50)))continue;
+    if(id!==selected&&v3Hidden(p))continue;
+    L.push({id,isZ,p,area,name:f.name||k.label,sub:g.g==='polygon'&&(isZ||area*sc*sc>2500)?fmtArea(area):'',col:isZ&&layers.zcol!==false?darker(k.color):'#1d2621',acol:k.color,pin:!isZ,near:p[2]})}
+  L.sort((p,q)=>((q.id===selected)-(p.id===selected))||(q.isZ-p.isZ)||(q.area-p.area)||(p.near-q.near));
+  const boxes=[];const hit=b=>boxes.some(o=>b.x0<o.x1&&b.x1>o.x0&&b.y0<o.y1&&b.y1>o.y0);g2.textAlign='center';g2.textBaseline='middle';
+  for(const l of L){const fs=l.isZ?13.5:12.5;g2.font=`${l.isZ?600:500} ${fs}px "IBM Plex Sans",sans-serif`;const w1=g2.measureText(l.name).width;g2.font='600 11px "IBM Plex Mono",monospace';const w2=l.sub?g2.measureText(l.sub).width:0;
+    const bw=Math.max(w1,w2)+12,bh=l.sub?34:20;const base=l.pin?-(bh/2+14):0;let pos=null;
+    for(const [dx,dy] of [[0,0],[0,-22],[0,22],[-bw*.6,0],[bw*.6,0],[0,-44],[0,44]]){const cx=l.p[0]+dx,cy=l.p[1]+base+dy;const b={x0:cx-bw/2,x1:cx+bw/2,y0:cy-bh/2,y1:cy+bh/2};if(!hit(b)){pos={cx,cy,b};break}}
+    if(!pos){if(l.id!==selected)continue;const cx=l.p[0],cy=l.p[1]+base;pos={cx,cy,b:{x0:cx-bw/2,x1:cx+bw/2,y0:cy-bh/2,y1:cy+bh/2}}}boxes.push(pos.b);
+    if(l.pin||Math.hypot(pos.cx-l.p[0],pos.cy-l.p[1])>2){g2.strokeStyle='rgba(255,255,255,.9)';g2.lineWidth=3;g2.beginPath();g2.moveTo(l.p[0],l.p[1]);g2.lineTo(pos.cx,pos.b.y1);g2.stroke();g2.strokeStyle=l.isZ?l.col:'rgba(30,38,33,.8)';g2.lineWidth=1.4;g2.stroke();g2.fillStyle=l.acol;g2.beginPath();g2.arc(l.p[0],l.p[1],3,0,7);g2.fill();g2.strokeStyle='#fff';g2.lineWidth=1;g2.stroke()}
+    g2.fillStyle=l.id===selected?'rgba(255,255,255,.96)':'rgba(255,255,255,.84)';g2.beginPath();g2.roundRect?g2.roundRect(pos.b.x0,pos.b.y0,bw,bh,5):g2.rect(pos.b.x0,pos.b.y0,bw,bh);g2.fill();g2.lineWidth=l.id===selected?1.6:1;g2.strokeStyle=l.isZ?hexA(l.acol,.7):'rgba(30,38,33,.25)';g2.stroke();
+    g2.font=`${l.isZ?600:500} ${fs}px "IBM Plex Sans",sans-serif`;g2.fillStyle=l.col;g2.fillText(l.name,pos.cx,l.sub?pos.cy-7:pos.cy+.5);
+    if(l.sub){g2.font='600 11px "IBM Plex Mono",monospace';g2.fillStyle=l.isZ?l.col:l.acol;g2.fillText(l.sub,pos.cx,pos.cy+9)}}
+  g2.textAlign='left';g2.textBaseline='alphabetic'}
+// pointer handling for the 3D canvas
+function v3Hover(e){const [sx,sy]=v3Loc(e);V3.hoverAt=[sx,sy];if(V3.hRaf)return;V3.hRaf=requestAnimationFrame(()=>{V3.hRaf=0;if(!V3.on||V3.pts.size)return;const [x,y]=V3.hoverAt;const c=$('#gl');
+  if(draft){const w=v3Pick(x,y);if(w){draft.hover=SNAP.on&&!draft.pen?snapW(w):w;if(draft.pen&&draft.pts.length)draft.preview=gradePath(draft.pts[draft.pts.length-1],w,gradePen.grade,gradePen.dir)}c.style.cursor='crosshair';v3Overlay();return}
+  if(mt){c.style.cursor='';return}
+  const hh=selected&&features.get(selected)&&!features.get(selected).locked&&v3HitHandle(x,y);const id=hh?selected:v3HitFeature(x,y);
+  c.style.cursor=hh?(hh.move?'move':'grab'):id?'pointer':'';if(id!==V3.hover){V3.hover=id;v3Overlay()}})}
+function v3Click(e){const [sx,sy]=v3Loc(e);const coarse=e.pointerType==='touch';
+  if(mt)return;
+  if(draft){const w=v3Pick(sx,sy);if(!w){toast('Click on the ground to place a point');return}
+    if(draft.pts.length){const lp=draft.pts[draft.pts.length-1],p=v3Scr(lp[0],lp[1]);if(p&&Math.hypot(p[0]-sx,p[1]-sy)<6)return}   // second click of a double-click
+    draft.hover=w;click(w,e);v3Overlay();return}
+  pickSel(v3HitFeature(sx,sy,coarse),e)}
+function v3EditMove(e){const ed=V3.edit,[sx,sy]=v3Loc(e);const w=v3Pick(sx,sy);if(!w)return;const f=features.get(selected);if(!f)return;
+  if(!ed.started){ed.started=true;window.__v3skip=selected;v3Retex(true,true)}   // re-drape once without it; the overlay draws it while it moves
+  features.set(selected,{...f,geom:dragGeom(ed,f.geom,w,e.shiftKey)});v3Draw()}
+function v3EndEdit(cancel){const ed=V3.edit;if(!ed)return false;V3.edit=null;$('#gl').style.cursor='';if(!ed.started)return false;window.__v3skip=null;
+  if(cancel&&ed.before)features.set(selected,structuredClone(ed.before));else{endDrag(ed);renderFeatures()}v3Retex(true);return true}
+
 
 /* ---------------- panels ---------------- */
 /* ---------------- notebook: everyone's thoughts on the design, and where they differ from Claude's ---------------- */
