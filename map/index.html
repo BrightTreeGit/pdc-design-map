@@ -397,7 +397,7 @@ const SITES=[
  {id:'nimbin-group',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW · the group plan, house-area sketch and tracks to the upper pads',base:'sites/nimbin/',ready:true,prosKinds:['pond','tank'],cgrid:'NSW LiDAR 2017 (Lismore)'},
  {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true,history:true},
  {id:'bright-tree',name:'Bright Tree',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true,niche:true},
- {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true,cgrid:'NSW LiDAR 2018 (Upper Manning)',seasonal:[[930,1065,1140,1135]]},
+ {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true,cgrid:'NSW LiDAR 2018 (Upper Manning), trimmed to Sentinel-2 31 Aug 2026',s2:'31 Aug 2026',seasonal:[[930,1065,1140,1135]]},
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'PDC host',area:'Kin Kin, Qld',ready:true,history:true},
  {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
  {id:'annwn',name:'Annwn',group:'Small block',area:'Capalaba, Qld · 770 m² suburban block',ready:true,small:true},
@@ -478,7 +478,9 @@ function applySite(){const ms=T&&T.meta&&T.meta.site;
   const LOCn=SITE.council==='Sunshine Coast'?LOC:SITE.council?`Check ${SITE.council} Council's local weed list; control it and don't plant it.`:'Check your council\'s local weed list; control it and don\'t plant it.';
   for(const k in WEEDS){let t=WEEDS[k][1].replace(R3,R3n).replace(LOC,LOCn);if(!SITE.lfw){t=t.replace(' '+LFW,'').replace(LFW+' ','').replace(LFW,'').replace(/^Land for Wildlife[^:]*: ?/,'Common advice: ').replace('Land for Wildlife medium priority.','Environmental weed; remove seedlings.')}WEEDS[k][1]=t||'Environmental weed.'}
   const ch=OVERLAYS[1].items;for(let i=ch.length-1;i>=0;i--)if(ch[i][0].startsWith('change_'))ch.splice(i,1);
-  for(const y of (SITE.changeYears||[]).slice().sort()){ch.push(['change_'+y,'Ground change since '+y]);OVNAME['change_'+y]='Ground change since '+y}}
+  for(const y of (SITE.changeYears||[]).slice().sort()){ch.push(['change_'+y,'Ground change since '+y]);OVNAME['change_'+y]='Ground change since '+y}
+  if(SITEDEF.s2&&!OVERLAYS.some(g=>g.s2)){const d=SITEDEF.s2;OVERLAYS.push({grp:'Satellite · Sentinel-2 '+d,s2:true,items:[['s2_ndvi','Greenness (NDVI)'],['s2_ndmi','Moisture (NDMI)'],['s2_change','Trees: LiDAR 2018 vs '+d]]});
+    Object.assign(OVNAME,{s2_ndvi:'Greenness (NDVI) · '+d,s2_ndmi:'Moisture (NDMI) · '+d,s2_change:'Tree cover change · LiDAR 2018 vs '+d})}}
 function siteBanner(){return; // banner removed: the site picker shows which site is open
   if(SITEID==='bright-tree')return;const d=document.createElement('div');d.className='warn';d.style.margin='8px 0 0';d.innerHTML=`You're viewing <b>${esc(SITEDEF.name)}</b>, which has its own drawings. <button class="linkish" id="backBT">Back to Bright Tree (manual)</button>`;$('header.brand').appendChild(d);$('#backBT').onclick=()=>switchSite('bright-tree')}
 function renderSiteSel(){siteBanner();const el=$('#siteSel');if(!el)return;el.innerHTML=SITES.map(x=>`<option value="${x.id}" ${x.id===SITEID?'selected':''} ${x.ready?'':'disabled'}>${esc(x.name)} · ${esc(x.group)}${x.ready?'':' (coming soon)'}</option>`).join('');el.onchange=()=>{const id=el.value;if(id!==SITEID)switchSite(id)}}
@@ -489,6 +491,7 @@ async function boot(){renderSiteSel();
   if(SITEDEF.lot)T.lot=SITEDEF.lot.slice();
   const cy=(T.meta.site?T.meta.site.changeYears:SITE.changeYears)||[];
   try{const hy=await fetch(SB+'hydro.json');HYDRO=hy.ok?await hy.json():null}catch(e){HYDRO=null}
+  if(SITEDEF.s2)imgs.push('s2_ndvi.png','s2_ndmi.png','s2_change.png');
   if(SITEDEF.niche){imgs.push('niche.png');try{NICHE=await (await fetch(SB+'niche.json')).json()}catch(e){NICHE=null}}
   try{const dr=await fetch(SB+'rain_daily.json');DAILY=dr.ok?await dr.json():null}catch(e){DAILY=null}
   try{const sf=await fetch(SB+'silo_full.json');SFULL=sf.ok?await sf.json():null;if(SFULL&&!(SFULL.eto10||[]).some(v=>v>=0))SFULL=null}catch(e){SFULL=null}
@@ -3326,6 +3329,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
     legends.light_equinox=`The same estimate for the equinox (March and September), when the sun is higher. About ${Le.ha2h} ha of the lot gets 2 hours or more of sun at ground level, and ${Le.ha4h} ha 4 hours or more. Compare with the winter layer to find spots that stay sunny all year.`}
    if(C0.productivity){const P=C0.productivity;legends.productivity=`Where trees grew faster or slower than is typical for their size between 2008 and 2022 (each tree compared with others that started at the same height). Green: faster than typical, the sign of better soil moisture, depth and nutrients: the places to give fruit trees, the food forest and nursery plantings. Orange: slower (dry ridges, shallow sandy soil, exposure) or lost height (tree fall). Inside the lot about ${P.aboveHa} ha grows clearly faster than typical and ${P.belowHa} ha clearly slower. Typical growth was about 2 m in 14 years. Match with the soil tests before committing.`}
    legends.fuel=`An indicative, relative fuel-structure rating from the 2022 LiDAR: dense near-ground growth, ladder fuels from 2 to 10 m that let fire climb, and canopy cover. Ranked against the whole map window. Inside the lot: ${C0.fuel.vhighHa} ha very high, ${C0.fuel.highHa} ha high, ${C0.fuel.modHa} ha moderate. Not an official fuel hazard assessment; read it with the Fire run layer and your fire plan.`}
+  if(SITEDEF.s2){legends.s2_ndvi='Green and dense (forest, about 0.85–0.95) to dry pasture and bare ground (brown, under 0.45). 10 m pixels: trails and single trees do not show.';legends.s2_ndmi='Leaf and soil moisture: blue is moist (closed forest, damp gullies, soaks), red is dry (sun-baked pasture, bare soil). Compare seasons to find springs.';legends.s2_change='Green: trees in the 2018 LiDAR still there. Red: trees in 2018 that are gone by the satellite date (canopy taken out of the 3D print). Blue: new green since 2018 (regrowth; added to the print as young 5 m canopy).'}
   for(const y of SITE.changeYears||[])legends['change_'+y]=`Ground that has moved since the ${y} survey, after removing survey-wide offsets: red is lower now (cut, erosion, slips, gully incision), blue is higher (fill, deposition, new pads). Faint scatter under forest is survey noise; treat patches as leads to check on the ground.`+(ch&&ch[y]?` Inside the lot: ${ch[y].lotLossHa} ha lowered and ${ch[y].lotGainHa} ha raised by more than 1 m.`:'');
   const setLeg=()=>{$('#ovLegend').innerHTML=(legends[layers.overlay]||'')+srcNote(layers.overlay);const sw=$('#shWrap');if(layers.overlay==='shadow'){if(!sw.innerHTML){sw.innerHTML=shadowCtl();wireShadow(el)}computeShadow()}else sw.innerHTML='';mapLegend()};setLeg();if(layers.overlay==='shadow')wireShadow(el);
   el.querySelectorAll('#baseSeg button').forEach(b=>b.onclick=()=>{setLayer('base',b.dataset.v);el.querySelectorAll('#baseSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
@@ -3338,6 +3342,7 @@ function renderLayers(){const el=$('#tab-layers');const m=T.meta;
 /* every overlay says where its data comes from (Brett's rule 4) */
 function srcNote(ov){if(!ov||ov==='none')return '';const st=(T&&T.meta&&T.meta.site)||{};const terr=st.source||'LiDAR terrain';let s;
   if(['slope','aspect','cold','fire','sun_winter','sun_equinox','sun_summer','shadow','wet','erosion'].includes(ov))s=`Computed by the map from ${terr}.`+(ov==='wet'||ov==='erosion'?' Flow routing at 2 m (24 Oct 2026).':'');
+  else if(ov.startsWith('s2_'))s=`Sentinel-2 L2A, ${SITEDEF.s2||''} (bands B4, B8, B11 at 10–20 m), via the Copernicus Browser. Contains modified Copernicus Sentinel data (${String(SITEDEF.s2||'').slice(-4)}).`+(ov==='s2_change'?' Compared with the 2018 LiDAR canopy (ELVIS).':'');
   else if(ov.startsWith('change_'))s=`Difference between the ${ov.slice(7)} and ${st.main||'latest'} LiDAR surveys (ELVIS).`;
   else if(['veg','canopy_h','canopy_change','productivity','understorey','fuel','light_winter','light_equinox','niche'].includes(ov))s=`From the ${(st.years||[]).slice().sort().join(', ')} LiDAR point clouds (ELVIS), computed by the map.`;
   else return '';return `<div class="hint" style="margin-top:4px">Source: ${esc(s)}</div>`}
