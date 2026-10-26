@@ -1130,9 +1130,9 @@ function wireImagery(el){el.querySelector('#imgadd').onclick=()=>el.querySelecto
   el.querySelectorAll('[data-imgdel]').forEach(b=>b.onclick=()=>{const id=b.dataset.imgdel;const box=el.querySelector(`[data-imgconf="${id}"]`);box.innerHTML=`<p class="hint">Remove this image for everyone?</p><div class="seg"><button class="btn danger">Remove</button><button class="btn">Keep</button></div>`;const [y,n]=box.querySelectorAll('button');y.onclick=()=>deleteImage(id);n.onclick=()=>box.innerHTML=''})}
 
 /* ---------------- 3D print export (3MF with one part per colour, or STL) ---------------- */
-const P3=Object.assign({dgrow:6,house:true,sink:true,dams:true,tcol:'orange',area:'lot',clip:true,size:180,exag:1,base:4,terrace:0,bound:true,water:true,design:true,zones:true,trees:true,canopy:true,cex:2,wdepth:1.5,swid:1.5,fill:true},lsGet('bt.p3',{}));
+const P3=Object.assign({dgrow:6,house:true,sink:true,dams:true,tcol:'orange',area:'lot',clip:true,size:180,exag:1,base:4,terrace:0,bound:true,water:true,design:true,zones:true,trees:true,canopy:true,cex:0.5,wdepth:1.5,swid:1.5,fill:true},lsGet('bt.p3',{}));
 if(!P3.v46){P3.tcol='orange';P3.v46=1}
-if(!P3.v47){P3.cex=1;P3.cmode='smooth';P3.detail='fine';P3.v47=1} // smoother canopy at true height, finer model // the three-colour print (orange ground, green canopy, blue creeks) is the new default
+if(!P3.v47){P3.cex=0.5;P3.cmode='smooth';P3.detail='fine';P3.v47=1} // smooth canopy at half height (Brett's pick), finer model // the three-colour print (orange ground, green canopy, blue creeks) is the new default
 const TCOL={orange:'#E07B39',green:'#5E9B4A',tan:'#C9B48A'};
 function morph3(a,nx,ny,R,dil){const t=new Uint8Array(a.length),o=new Uint8Array(a.length);
   for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){let v=dil?0:1;for(let d=-R;d<=R;d++){const ii=i+d;const x=(ii<0||ii>=nx)?0:a[j*nx+ii];if(dil?x:!x){v=dil?1:0;break}}t[j*nx+i]=v}
