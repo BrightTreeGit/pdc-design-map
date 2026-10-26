@@ -1271,7 +1271,7 @@ function build3D(){
     if(treeLy>=0&&GR){const gg=new Uint8Array(cells);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)gg[j*nx+i]=grassAt(x0+(i+.5)*c,y0+(j+.5)*c);
       for(let k=0;k<cells;k++){if(own[k]===treeLy&&gg[k])own[k]=-1;else if(own[k]===-1&&inside[k]&&!gg[k])own[k]=treeLy}isTreeC=k=>inside[k]&&!gg[k]&&(own[k]===treeLy)}
     if(treeLy>=0){focus=null;let nt=0,ni=0;for(let k=0;k<cells;k++){if(!inside[k])continue;ni++;if(isTreeC(k))nt++}
-      if(nt>=ni/2){treeMajor=true;focus=new Uint8Array(cells);for(let k=0;k<cells;k++)if(inside[k]&&!isTreeC(k)&&own[k]===-1)focus[k]=1;terrM.color='#2F9E44';
+      {treeMajor=true;focus=new Uint8Array(cells);for(let k=0;k<cells;k++)if(inside[k]&&!isTreeC(k)&&own[k]===-1)focus[k]=1;terrM.color='#2F9E44';
         // the rim along the boundary and the banks of creeks stay green (body colour): no thin orange bands to print
         {const wl=L.findIndex(ly=>ly.name==='Water');const near=new Uint8Array(cells);const Rr=Math.max(2,Math.round(6/c));
           for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!inside[k]||(wl>=0&&own[k]===wl)){for(let dj=-Rr;dj<=Rr;dj++)for(let di=-Rr;di<=Rr;di++){const ii=i+di,jj=j+dj;if(ii>=0&&jj>=0&&ii<nx&&jj<ny)near[jj*nx+ii]=1}}}
@@ -1280,11 +1280,14 @@ function build3D(){
         const minC=Math.max(1,Math.round((+P3.minPatch||5000)/(c*c)));const seen=new Uint8Array(cells);
         for(let k0=0;k0<cells;k0++){if(!focus[k0]||seen[k0])continue;const st=[k0],comp=[];seen[k0]=1;while(st.length){const k=st.pop();comp.push(k);for(const kk of [k-1,k+1,k-nx,k+nx])if(kk>=0&&kk<cells&&focus[kk]&&!seen[kk]){seen[kk]=1;st.push(kk)}}
           if(comp.length<minC)for(const k of comp)focus[k]=0}}}
+    let skinCol='#E07B39',skinName=null;
+    if(!focus&&treeLy<0&&terrM.color.toLowerCase()!=='#2f9e44'){skinCol=terrM.color;skinName='Ground surface (skin)';terrM.color='#2F9E44';focus=new Uint8Array(cells);
+      for(let k=0;k<cells;k++)if(inside[k]&&tOwn[k]===0&&(own[k]===-1||(own[k]>=0&&L[own[k]]&&L[own[k]].soft)))focus[k]=1}
     if(focus||treeLy>=0){const isSkin=k=>(focus&&focus[k])||(!treeMajor&&treeLy>=0&&own[k]===treeLy);const fv=new Uint8Array(W1*(ny+1));for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!inside[k]||!isSkin(k))continue;for(const v of [j*W1+i,j*W1+i+1,(j+1)*W1+i,(j+1)*W1+i+1])fv[v]++}
       const SK=1.0,gTop=(i,j)=>{const v=j*W1+i;return hn[v]&&fv[v]===hn[v]?Math.max(.6,topT(i,j)-SK):topT(i,j)};
       padSmooth(terrM,tOwn,0,nx,ny,X,Y,gTop,()=>0);meshes.push(terrM);
       if(focus){const fo=new Int16Array(cells).fill(-2);for(let k=0;k<cells;k++)if(focus[k]&&tOwn[k]===0&&(own[k]===-1||own[k]===-2||(L[own[k]]&&L[own[k]].soft)))fo[k]=0;
-        const om=new Mesh3(treeMajor?'Open ground (orange skin)':'Working area (orange skin)','#E07B39');padSmooth(om,fo,0,nx,ny,X,Y,topT,gTop);if(om.t.length)meshes.push(om)}
+        const om=new Mesh3(skinName||(treeMajor?'Open ground (orange skin)':'Working area (orange skin)'),skinCol);padSmooth(om,fo,0,nx,ny,X,Y,topT,gTop);if(om.t.length)meshes.push(om)}
       if(treeLy>=0){const ly=L[treeLy];if(treeMajor)ly.skipMesh=true;else{ly.skinTop=topT;ly.skinBot=gTop}}}
     else{padSmooth(terrM,tOwn,0,nx,ny,X,Y,topT,()=>0);meshes.push(terrM)}
     L.forEach((ly,li)=>{if(ly.skipMesh)return;const m=new Mesh3(ly.name,ly.color);if(ly.zone&&ly.skinTop)padSmooth(m,own,li,nx,ny,X,Y,ly.skinTop,ly.skinBot);else padSmooth(m,own,li,nx,ny,X,Y,(i,j)=>lyTop(ly,topT(i,j),ly.canopy?hv(i,j):0),ly.sink?(i,j)=>topT(i,j)-ly.sink:topT);if(m.t.length)meshes.push(m)})}

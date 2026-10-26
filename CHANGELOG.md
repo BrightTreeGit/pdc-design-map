@@ -46,6 +46,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v54 | 27 Oct 2026 | trial/firefly-canopy | 3D print: the base and sides are always green; orange ground is only ever a 1 mm skin on top (tree zone, Economy and Display). Display on Firefly drops from about 1,050 to 710 colour changes |
 | Trial v53 | 27 Oct 2026 | trial/firefly-canopy | 3D print: 'Extend past the boundary' (25/50 m west or all round, e.g. to catch Firefly's west creek); tree zone uses a grass map (Firefly from the 2023 LiDAR with paddock tree crowns cut out as rounded green islands; Willow Vale from Sentinel-2 dry-season greenness), grass orange, trees green; the boundary rim and creek banks stay green so no thin orange bands |
 | Trial v52 | 27 Oct 2026 | trial/firefly-canopy | 3D print tree-zone mode: the body takes the majority surface colour (green on mostly-forest blocks) and the minority becomes a 1 mm skin; new 'Smallest clearing shown' (0.05–1 ha, default 0.5 ha) so tiny gaps don't add colour changes. Firefly tree zone + main creek only: about 124 changes, 43 g purge |
 | Trial v51 | 27 Oct 2026 | trial/firefly-canopy | Firefly boundary now includes the reserve strip between the two parcels (owners treat it as theirs; about 0.4 ha added, 36.2 ha total), so the map and the print follow one outline at full ground height; Economy print always cuts to the boundary shape |
