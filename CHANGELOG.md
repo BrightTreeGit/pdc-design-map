@@ -46,6 +46,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v47 | 26 Oct 2026 | trial/firefly-canopy | Willow Vale rebuilt on 2018 Upper Manning LiDAR (2 m): contours, slope, creeks, wetness, erosion, sun, fire. Sentinel-2 layers (dry 31 Aug 2026, wet 14 Apr 2026, 17 Mar 2018): greenness, seasonal swing, moisture, tree change since 2018 (no clearing; about 0.7 ha regrowth). 3D print: smooth canopy at half height by default, flat-cover and raw options, finer detail, canopy may cover drawn zones, southern runoff stream thin, pipes and tanks not printed as water, roofs out of the canopy |
 | Trial v46 | 26 Oct 2026 | trial/firefly-canopy | 3D print in three colours: orange ground, green LiDAR tree canopy lifted 2–5×, blue creeks carved 1–3 mm and wider; buildings black; gaps in the boundary (Firefly road reserve) joined with a flat base strip; Willow Vale canopy grid from NSW LiDAR. Also records the dams/house/print-preview work published earlier from another session |
 | Trial v45 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site extras: soil, wildlife, bushfire mapping, design rainfall, climate record |
 | Trial v44 | 25 Oct 2026 | trial/willow-vale-team | Bright Tree photo history (1953–2022) published with the trial map |
