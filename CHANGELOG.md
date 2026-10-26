@@ -46,6 +46,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v46 | 26 Oct 2026 | trial/firefly-canopy | 3D print in three colours: orange ground, green LiDAR tree canopy lifted 2–5×, blue creeks carved 1–3 mm and wider; buildings black; gaps in the boundary (Firefly road reserve) joined with a flat base strip; Willow Vale canopy grid from NSW LiDAR. Also records the dams/house/print-preview work published earlier from another session |
 | Trial v45 | 25 Oct 2026 | trial/willow-vale-team | Mangiri site extras: soil, wildlife, bushfire mapping, design rainfall, climate record |
 | Trial v44 | 25 Oct 2026 | trial/willow-vale-team | Bright Tree photo history (1953–2022) published with the trial map |
 | Trial v43 | 25 Oct 2026 | trial/willow-vale-team | Map names in order of importance, never overlapping; choosable colour per item; Custom building / marker type |
