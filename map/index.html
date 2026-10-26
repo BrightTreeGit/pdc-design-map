@@ -315,6 +315,7 @@ const KINDS={
   note:{g:'Observe',label:'Note',geom:'point',color:'#b0306a',sym:'pin'},
   obs:{g:'Observe',label:'Observation',geom:'point',color:'#6a3fa0',sym:'pin'},
   damwall:{g:'Water',label:'Dam wall',geom:'line',color:'#0b5c8f',w:4},
+  leakyweir:{g:'Water',label:'Leaky rock weir',geom:'line',color:'#7a5c3a',w:5},
   fruittree:{g:'Plants',label:'Fruit tree',geom:'point',color:'#a3478f',sym:'tree',r:2,repeat:true},
   nativetree:{g:'Plants',label:'Native tree / gum',geom:'point',color:'#4c7a3a',sym:'tree',r:4,repeat:true},
   shrub:{g:'Plants',label:'Shrub / small native',geom:'point',color:'#c99a1e',sym:'circle',r:1,repeat:true},
@@ -1129,7 +1130,7 @@ function wireImagery(el){el.querySelector('#imgadd').onclick=()=>el.querySelecto
   el.querySelectorAll('[data-imgdel]').forEach(b=>b.onclick=()=>{const id=b.dataset.imgdel;const box=el.querySelector(`[data-imgconf="${id}"]`);box.innerHTML=`<p class="hint">Remove this image for everyone?</p><div class="seg"><button class="btn danger">Remove</button><button class="btn">Keep</button></div>`;const [y,n]=box.querySelectorAll('button');y.onclick=()=>deleteImage(id);n.onclick=()=>box.innerHTML=''})}
 
 /* ---------------- 3D print export (3MF with one part per colour, or STL) ---------------- */
-const P3=Object.assign({area:'lot',clip:true,size:180,exag:1,base:4,terrace:0,bound:true,water:true,design:true,zones:true,trees:true},lsGet('bt.p3',{}));
+const P3=Object.assign({dgrow:6,house:true,sink:true,dams:true,tcol:'green',area:'lot',clip:true,size:180,exag:1,base:4,terrace:0,bound:true,water:true,design:true,zones:true,trees:true},lsGet('bt.p3',{}));
 class Mesh3{constructor(name,color){this.name=name;this.color=color;this.v=[];this.t=[];this.key=new Map()}
   vert(k,x,y,z){let i=this.key.get(k);if(i===undefined){i=this.v.length/3;this.v.push(x,y,z);this.key.set(k,i)}return i}
   tri(a,b,c,nx,ny,nz){if(a===b||b===c||a===c)return;const v=this.v,ax=v[3*a],ay=v[3*a+1],az=v[3*a+2],ux=v[3*b]-ax,uy=v[3*b+1]-ay,uz=v[3*b+2]-az,wx=v[3*c]-ax,wy=v[3*c+1]-ay,wz=v[3*c+2]-az;
@@ -1148,6 +1149,20 @@ function padCols(m,own,id,nx,ny,X,Y,cb,ct){const V=(i,j,z)=>m.vert(i+','+j+','+z
     for(const [di,dj,n,p,q] of EDGES){const ii=i+di,jj=j+dj;let parts=[[zb,zt]];
       if(ii>=0&&jj>=0&&ii<nx&&jj<ny&&own[jj*nx+ii]===id){const nb=cb[jj*nx+ii],nt=ct[jj*nx+ii];parts=[];if(nb>zb)parts.push([zb,Math.min(nb,zt)]);if(nt<zt)parts.push([Math.max(nt,zb),zt])}
       for(const [lo,hi] of parts){if(hi-lo<1e-4)continue;const pi=i+p[0],pj=j+p[1],qi=i+q[0],qj=j+q[1];m.quad(V(pi,pj,lo),V(qi,qj,lo),V(qi,qj,hi),V(pi,pj,hi),n)}}}}
+/* the water behind a dam for the print: the wall's height if its name or notes say it, otherwise the height whose flooded shape best matches the pond drawn beside it */
+function dam3D(f,ponds){
+  const cen=p=>[p.reduce((s,q)=>s+q[0],0)/p.length,p.reduce((s,q)=>s+q[1],0)/p.length];
+  const mH=/([0-9]+(?:\.[0-9]+)?) m high/.exec(f.notes||'')||/([0-9]+(?:\.[0-9]+)?) m\s*$/.exec(f.name||'');
+  const wc=cen(f.geom.pts);let near=null,nd=150;
+  for(const p of ponds){const d=dist(cen(p.geom.pts),wc);if(d<nd){nd=d;near=p}}
+  const calc=h=>{try{const r=damCalc(f.geom.pts,h);return r&&!r.err&&r.outline&&r.outline.length>2?r:null}catch(e){return null}};
+  let dr=null;
+  if(mH)dr=calc(+mH[1]);
+  else if(near){const A=Math.max(polyArea(near.geom.pts),1),pc=cen(near.geom.pts);let best=2.5;
+    for(const h of [0.3,0.5,0.75,1,1.25,1.5,2,2.5,3,4,5]){const r=calc(h);if(!r)continue;const sc=Math.abs(Math.log(Math.max(r.area,1)/A))+dist(cen(r.outline),pc)/Math.sqrt(A);if(sc<best){best=sc;dr=r}}}
+  else dr=calc(2);
+  return {dr,near}}
+function growPoly(p,d){if(!(d>0)||p.length<3)return p;const A=offsetLine(p,d,true),B=offsetLine(p,-d,true);return polyArea(A)>polyArea(B)?A:B}
 function build3D(){
   const lp=flat(T.lot);let src=lp,mg=8;if(P3.area==='context')mg=60;if(P3.area==='catch'){src=flat(T.catch[0].p);mg=20}
   const xs=src.map(q=>q[0]),ys=src.map(q=>q[1]);const x0=Math.min(...xs)-mg,y0=Math.min(...ys)-mg,x1=Math.max(...xs)+mg,y1=Math.max(...ys)+mg;
@@ -1158,18 +1173,30 @@ function build3D(){
   const cells=nx*ny;const own=new Int16Array(cells).fill(-2);
   for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const p=[x0+(i+.5)*c,y0+(j+.5)*c];if(!clip||inPoly(p,lp))own[j*nx+i]=-1}
   const q=z=>I>0?Math.floor(z/I)*I:z;
-  let zmin=Infinity;const zc=new Float32Array(cells);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const z=q(zAt(x0+(i+.5)*c,y0+(j+.5)*c));zc[j*nx+i]=z;if(own[j*nx+i]!==-2&&z<zmin)zmin=z}
+  const zC=(x,y)=>{let z=zAt(x,y);if(z!==z){const cl=v=>Math.min(1996,Math.max(4,v));z=zAt(cl(x),cl(y))}return z};
+  let zmin=Infinity;const zc=new Float32Array(cells);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const z=q(zC(x0+(i+.5)*c,y0+(j+.5)*c));zc[j*nx+i]=z;if(own[j*nx+i]!==-2&&z<zmin)zmin=z}
   const mm=z=>+(+P3.base+(z-zmin)*s*ex).toFixed(3);
-  const zv=(i,j)=>mm(zAt(x0+i*c,y0+j*c));
+  const zv=(i,j)=>mm(zC(x0+i*c,y0+j*c));
   // layers in priority order (first claim wins)
   const L=[];const add=(name,color,h,items)=>{if(items.length)L.push({name,color,h,items})};
   const hw=mmw=>mmw/2/s; // half width in metres for a printed width in mm
   if(P3.bound)add('Boundary','#C2185B',1.2,[{t:'line',p:lp.concat([lp[0]]),r:hw(1.4)}]);
+  /* dams: the wall at crest level, and the water behind it filled flat to full level wherever the ground is lower (the real flooded shape, not an oval) */
+  const damPonds=visList().filter(f=>f.kind==='pond'&&f.geom.g==='polygon');
+  const hasDam=P3.dams!==false&&visList().some(f=>f.kind==='damwall'&&f.geom.g==='line');
+  if(hasDam){let nd=0;for(const f of visList()){if(f.kind!=='damwall'||f.geom.g!=='line')continue;
+    const {dr,near}=dam3D(f,damPonds);nd++;const sf=nd>1?' '+nd:'';
+    L.push({name:'Dam wall'+sf,color:'#7A4A1C',h:1,abs:dr&&dr.crest?mm(dr.crest):0,items:[{t:'line',p:f.geom.pts,r:hw(1.6)}]});
+    if(dr)L.push({name:'Dam water'+sf,color:'#2D8FD5',h:0.8,abs:mm(dr.fsl)+0.5,items:[{t:'poly',p:growPoly(dr.outline,+P3.dgrow)}].concat(near?[{t:'poly',p:growPoly(near.geom.pts,+P3.dgrow)}]:[])});
+    else if(near){const zs=near.geom.pts.map(q=>zAt(q[0],q[1])).filter(v=>isFinite(v)).sort((x,y)=>x-y);if(zs.length)L.push({name:'Dam water'+sf,color:'#2D8FD5',h:0.8,abs:mm(zs[zs.length>>1])+0.5,items:[{t:'poly',p:growPoly(near.geom.pts,+P3.dgrow)}]})}}}
+  if(P3.house!==false){const hz=visList().filter(f=>['zone0','building','cabin','shed','greenhouse','container','amenities','carport'].includes(f.kind)&&f.geom.g==='polygon');add('House','#8A6D3B',2.4,hz.map(f=>featItem(f,hw)).filter(Boolean))}
   if(P3.water){const it=T.streams.filter(st=>st.k>=1).map(st=>({t:'line',p:flat(st.p),r:hw([0,1,1.4,2][st.k])}));
-    for(const f of visList()){const k=KINDS[f.kind];if(!k||k.g!=='Water')continue;it.push(featItem(f,hw))}add('Water','#2D8FD5',0.8,it.filter(Boolean))}
+    for(const f of visList()){const k=KINDS[f.kind];if(!k||k.g!=='Water'||(hasDam&&(f.kind==='pond'||f.kind==='damwall')))continue;it.push(featItem(f,hw))}add('Water','#2D8FD5',0.8,it.filter(Boolean))}
   if(P3.design)for(const g of ['Access','Built','Landscape','Plants']){const col={Access:'#8A5A2B',Built:'#5A5A5A',Landscape:'#9A7420',Plants:'#3F8F3A'}[g];
     add(g,col,0.8,visList().filter(f=>(KINDS[f.kind]||{}).g===g&&!(P3.trees&&(f.kind==='tree'||f.kind==='guild'))).map(f=>featItem(f,hw)).filter(Boolean))}
   if(P3.zones)for(let z=0;z<=5;z++){const kk='zone'+z;add(KINDS[kk].label,KINDS[kk].color,0.4,visList().filter(f=>f.kind===kk).map(f=>featItem(f,hw)).filter(Boolean))}
+  /* rivers and dam water: sunk 1.2 mm into the terrain and finished level with the surface, so the blue overlaps the green and sits flush */
+  if(P3.sink!==false)L.forEach(ly=>{if(/water/i.test(ly.name)){ly.sink=1.2;if(!/^dam/i.test(ly.name))ly.h=Math.min(ly.h,0.15)}});
   L.forEach((ly,li)=>{for(const it of ly.items){let bx0,by0,bx1,by1;const pts=it.p||[it.c];bx0=Math.min(...pts.map(p=>p[0]))-(it.r||0);bx1=Math.max(...pts.map(p=>p[0]))+(it.r||0);by0=Math.min(...pts.map(p=>p[1]))-(it.r||0);by1=Math.max(...pts.map(p=>p[1]))+(it.r||0);
     const i0=Math.max(0,Math.floor((bx0-x0)/c)),i1=Math.min(nx-1,Math.ceil((bx1-x0)/c)),j0=Math.max(0,Math.floor((by0-y0)/c)),j1=Math.min(ny-1,Math.ceil((by1-y0)/c));
     for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=j*nx+i;if(own[k]!==-1)continue;const p=[x0+(i+.5)*c,y0+(j+.5)*c];let hit=false;
@@ -1177,10 +1204,10 @@ function build3D(){
       if(hit)own[k]=li}}});
   // terrain body owns everything inside the shape
   const tOwn=new Int16Array(cells);for(let k=0;k<cells;k++)tOwn[k]=own[k]===-2?-2:0;
-  const meshes=[];const terrM=new Mesh3('Terrain','#C9B48A');
+  const meshes=[];const terrM=new Mesh3('Terrain',P3.tcol==='tan'?'#C9B48A':'#5E9B4A');
   if(terr){const cb=new Float32Array(cells).fill(0),ct=new Float32Array(cells);for(let k=0;k<cells;k++)ct[k]=mm(zc[k]);padCols(terrM,tOwn,0,nx,ny,X,Y,cb,ct);
-    meshes.push(terrM);L.forEach((ly,li)=>{const m=new Mesh3(ly.name,ly.color);const top=new Float32Array(cells);for(let k=0;k<cells;k++)top[k]=ct[k]+ly.h;padCols(m,own,li,nx,ny,X,Y,ct,top);if(m.t.length)meshes.push(m)})}
-  else{padSmooth(terrM,tOwn,0,nx,ny,X,Y,zv,()=>0);meshes.push(terrM);L.forEach((ly,li)=>{const m=new Mesh3(ly.name,ly.color);padSmooth(m,own,li,nx,ny,X,Y,(i,j)=>zv(i,j)+ly.h,zv);if(m.t.length)meshes.push(m)})}
+    meshes.push(terrM);L.forEach((ly,li)=>{const m=new Mesh3(ly.name,ly.color);const top=new Float32Array(cells);for(let k=0;k<cells;k++)top[k]=ly.abs?Math.max(ct[k]+ly.h,ly.abs):ct[k]+ly.h;padCols(m,own,li,nx,ny,X,Y,ly.sink?ct.map(v=>v-ly.sink):ct,top);if(m.t.length)meshes.push(m)})}
+  else{padSmooth(terrM,tOwn,0,nx,ny,X,Y,zv,()=>0);meshes.push(terrM);L.forEach((ly,li)=>{const m=new Mesh3(ly.name,ly.color);padSmooth(m,own,li,nx,ny,X,Y,ly.abs?(i,j)=>Math.max(zv(i,j)+ly.h,ly.abs):(i,j)=>zv(i,j)+ly.h,ly.sink?(i,j)=>zv(i,j)-ly.sink:zv);if(m.t.length)meshes.push(m)})}
   // planned trees and guilds as domes at their mature height and canopy width
   const tr=visList().filter(f=>P3.trees&&(f.kind==='tree'||f.kind==='guild')&&f.geom.g==='point');
   if(tr.length){const m=new Mesh3('Planned trees & guilds','#2E6B2A');const S=20,R=6;
@@ -1215,7 +1242,9 @@ function to3MF(r){const enc=new TextEncoder();const out=[];
   const model=enc.encode(out.join(''));
   const ct=enc.encode('<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>');
   const rels=enc.encode('<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>');
-  return zipStore([{name:'[Content_Types].xml',data:ct},{name:'_rels/.rels',data:rels},{name:'3D/3dmodel.model',data:model}])}
+  const ex=m=>/water/i.test(m.name)?2:1;
+  const ms=enc.encode('<?xml version="1.0" encoding="UTF-8"?><config><object id="'+pid+'"><metadata key="name" value="'+esc(SITE.name)+' model"/><metadata key="extruder" value="1"/>'+r.meshes.map((m,mi)=>'<part id="'+(mi+2)+'" subtype="normal_part"><metadata key="name" value="'+esc(m.name)+'"/><metadata key="extruder" value="'+ex(m)+'"/></part>').join('')+'</object></config>');
+  return zipStore([{name:'[Content_Types].xml',data:ct},{name:'_rels/.rels',data:rels},{name:'3D/3dmodel.model',data:model},{name:'Metadata/model_settings.config',data:ms}])}
 function toSTL(r){const n=r.meshes.reduce((s,m)=>s+m.t.length/3,0);const b=new ArrayBuffer(84+n*50),d=new DataView(b);d.setUint32(80,n,true);let o=84;
   for(const m of r.meshes){const v=m.v,t=m.t;for(let i=0;i<t.length;i+=3){o+=12;for(const k of [t[i],t[i+1],t[i+2]]){d.setFloat32(o,v[3*k],true);d.setFloat32(o+4,v[3*k+1],true);d.setFloat32(o+8,v[3*k+2],true);o+=12}o+=2}}
   return new Blob([b],{type:'model/stl'})}
@@ -1223,8 +1252,8 @@ async function export3D(fmt){const st=$('#p3status');st.textContent='Building th
   let r;try{r=build3D()}catch(e){st.textContent='The model could not be built: '+e.message;return}
   const blob=fmt==='3mf'?to3MF(r):toSTL(r);const tris=r.meshes.reduce((s,m)=>s+m.t.length/3,0);
   st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')}) · ${(blob.size/1e6).toFixed(1)} MB`;
-  window.__bt3d={r,blob};const name=`${slug()}-terrain${+P3.terrace?'-terraced':''}.${fmt}`;
-  if(downloads){try{await downloads.save({filename:name,data:blob});toast('Saved '+name)}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start: '+(e&&e.code||'error'))}}else toast('Downloads are not available in this view')}
+  window.__bt3d={r,blob};const inner=`${slug()}-terrain${+P3.terrace?'-terraced':''}.${fmt}`;const name=inner.replace(/\.[^.]+$/,'')+`-${fmt}.zip`;
+  if(downloads){try{const zb=zipStore([{name:inner,data:new Uint8Array(await blob.arrayBuffer())}]);await downloads.save({filename:name,data:zb});toast('Saved '+name+': unzip it to get the '+inner+' file')}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start: '+(e&&e.code||'error'))}}else toast('Downloads are not available in this view')}
 function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`<option value="${k}" ${String(v)===String(k)?'selected':''}>${l}</option>`).join('')}</select>`;
   return `<p class="hint">A printable model of the land with the boundary, creeks and your design raised on top. The 3MF file keeps each layer as its own part, so a multi-colour printer can give terrain, water, zones and features different colours.</p>
   <div class="field"><label for="p3area">Area</label>${o('p3area',[['lot','The lot'],['context','The lot and 60 m around it'],['catch','The whole catchment (40 ha)']],P3.area)}</div>
@@ -1235,12 +1264,89 @@ function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`
   <div class="row"><label><input type="checkbox" id="p3b" ${P3.bound?'checked':''}> Boundary</label><label><input type="checkbox" id="p3w" ${P3.water?'checked':''}> Creeks & water</label></div>
   <div class="row"><label><input type="checkbox" id="p3z" ${P3.zones?'checked':''}> Zones</label><label><input type="checkbox" id="p3d" ${P3.design?'checked':''}> Design features</label></div>
   <div class="row"><label><input type="checkbox" id="p3t" ${P3.trees?'checked':''}> Planned trees & guilds as domes at mature size</label></div>
+  <div class="row"><label><input type="checkbox" id="p3dm" ${P3.dams!==false?'checked':''}> Dam walls, with the water behind them filled to full level</label></div>
+  <div class="field"><label for="p3dg">Dam water spread (wider than drawn, filled solid)</label>${o('p3dg',[[0,'As drawn'],[3,'+3 m'],[6,'+6 m'],[10,'+10 m'],[15,'+15 m']],P3.dgrow)}</div>
+  <div class="row"><label><input type="checkbox" id="p3sk" ${P3.sink!==false?'checked':''}> Sink rivers and dam water into the terrain (blue overlaps the green, level with the surface)</label></div>
+  <div class="row"><label><input type="checkbox" id="p3hs" ${P3.house!==false?'checked':''}> House (Zone 0 home and any buildings), raised 2.4 mm</label></div>
+  <div class="seg"><button class="btn" id="p3simple" title="Terrain, house, creeks and dams only">Simple: terrain, house, water and dams</button></div>
+  <div class="field"><label for="p3tc">Terrain colour</label>${o('p3tc',[['green','Green'],['tan','Tan']],P3.tcol)}</div>
+  <div class="seg"><button class="btn primary" id="p3pv">Preview model (3D)</button></div>
   <div class="seg"><button class="btn primary" id="p3mf">Download 3MF (multi-colour)</button><button class="btn" id="p3stl">STL (one colour)</button></div><p class="hint" id="p3status" aria-live="polite"></p>`}
 function wireP3(el){const set=(k,v)=>{P3[k]=v;lsSet('bt.p3',P3)};
   el.querySelector('#p3area').onchange=e=>set('area',e.target.value);el.querySelector('#p3clip').onchange=e=>set('clip',e.target.checked);el.querySelector('#p3size').onchange=e=>set('size',+e.target.value);
   el.querySelector('#p3exag').onchange=e=>set('exag',+e.target.value);el.querySelector('#p3terr').onchange=e=>set('terrace',+e.target.value);
   el.querySelector('#p3b').onchange=e=>set('bound',e.target.checked);el.querySelector('#p3w').onchange=e=>set('water',e.target.checked);el.querySelector('#p3z').onchange=e=>set('zones',e.target.checked);el.querySelector('#p3d').onchange=e=>set('design',e.target.checked);el.querySelector('#p3t').onchange=e=>set('trees',e.target.checked);
-  el.querySelector('#p3mf').onclick=()=>export3D('3mf');el.querySelector('#p3stl').onclick=()=>export3D('stl')}
+  el.querySelector('#p3tc').onchange=e=>set('tcol',e.target.value);el.querySelector('#p3dm').onchange=e=>set('dams',e.target.checked);el.querySelector('#p3dg').onchange=e=>set('dgrow',+e.target.value);el.querySelector('#p3sk').onchange=e=>set('sink',e.target.checked);el.querySelector('#p3hs').onchange=e=>set('house',e.target.checked);el.querySelector('#p3simple').onclick=()=>{Object.assign(P3,{bound:false,water:true,zones:false,design:false,trees:false,dams:true,house:true,sink:true});lsSet('bt.p3',P3);renderTools();toast('Set to terrain, house, water and dams only')};el.querySelector('#p3pv').onclick=preview3D;el.querySelector('#p3mf').onclick=()=>export3D('3mf');el.querySelector('#p3stl').onclick=()=>export3D('stl')}
+
+/* Print preview: opens the model in a 3D viewer on an A1-sized bed before download */
+function preview3D(){const st=$('#p3status');st.textContent='Building the preview…';
+  setTimeout(()=>{let r;try{r=build3D()}catch(e){st.textContent='The model could not be built: '+e.message;return}
+    st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')})`;
+    try{show3DPreview(r)}catch(e){st.textContent='The preview could not open: '+e.message}},30)}
+function show3DPreview(r){
+  const old=document.getElementById('p3pv');if(old&&old._close)old._close();
+  const BED=256,W=r.wmm,H=r.hmm,Z=r.zmm;
+  const ov=document.createElement('div');ov.id='p3pv';ov.setAttribute('role','dialog');ov.setAttribute('aria-label','3D print preview');
+  ov.style.cssText='position:fixed;inset:0;z-index:60;background:linear-gradient(#e9eef2,#cfd8df);display:flex;flex-direction:column;font:13px var(--f-body,system-ui)';
+  const fits=W<=BED&&H<=BED&&Z<=BED;
+  ov.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 12px;background:var(--panel,#fff);color:var(--ink,#111);border-bottom:1px solid var(--line,#ccc)"><b style="font-family:var(--f-display,inherit);font-size:16px;letter-spacing:.03em">Print preview</b><span id="p3pvparts" style="display:flex;flex-wrap:wrap;gap:4px 12px"></span><label><input type="checkbox" id="p3pvbed" checked> A1 bed (256 mm)</label><span style="font-family:var(--f-mono,monospace);font-size:12px;color:var(--muted,#555)">${W} × ${H} × ${Z} mm · 1:${r.scale.toLocaleString()} · ${fits?'fits the A1 bed':'<b style="color:#b4471f">too big for a 256 mm bed: pick a smaller size</b>'}</span><span style="flex:1"></span><button class="btn primary" id="p3pvdl">Download 3MF</button><button class="btn" id="p3pvx">Close</button></div><div style="position:relative;flex:1;min-height:0"><canvas id="p3pvc" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab"></canvas><div id="p3pvmsg" style="position:absolute;left:10px;bottom:10px;background:rgba(255,255,255,.85);border-radius:6px;padding:5px 8px;font-size:11.5px;color:#444">Drag to turn · right-drag or Shift-drag to move · scroll or pinch to zoom. Colours show the parts as they will be separate objects in the slicer.</div></div>`;
+  document.body.appendChild(ov);
+  const cv=ov.querySelector('#p3pvc'),gl=cv.getContext('webgl',{antialias:true});
+  let raf=0,alive=true;const onKey=e=>{if(e.key==='Escape')close()};
+  function close(){alive=false;cancelAnimationFrame(raf);removeEventListener('resize',need);document.removeEventListener('keydown',onKey);try{const x=gl&&gl.getExtension('WEBGL_lose_context');x&&x.loseContext()}catch(e){}ov.remove()}
+  ov._close=close;ov.querySelector('#p3pvx').onclick=close;document.addEventListener('keydown',onKey);
+  ov.querySelector('#p3pvdl').onclick=()=>export3D('3mf');
+  if(!gl){ov.querySelector('#p3pvmsg').textContent='This browser could not start 3D graphics, so the preview is unavailable. The download still works.';return}
+  const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o};
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec3 p;attribute vec3 n;uniform mat4 M;varying vec3 vn;void main(){vn=n;gl_Position=M*vec4(p,1.0);}'));
+  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,'precision mediump float;varying vec3 vn;uniform vec3 col;void main(){vec3 L=normalize(vec3(-.45,-.55,.7));float d=max(dot(normalize(vn),L),0.0);gl_FragColor=vec4(col*(.42+.68*d),1.0);}'));
+  gl.linkProgram(pr);gl.useProgram(pr);
+  const aP=gl.getAttribLocation(pr,'p'),aN=gl.getAttribLocation(pr,'n'),uM=gl.getUniformLocation(pr,'M'),uC=gl.getUniformLocation(pr,'col');
+  const hex=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)/255);
+  const objs=[];
+  const mk=(pos,nor,col,name)=>{const bp=gl.createBuffer(),bn=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bp);gl.bufferData(gl.ARRAY_BUFFER,pos,gl.STATIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,bn);gl.bufferData(gl.ARRAY_BUFFER,nor,gl.STATIC_DRAW);const o={bp,bn,n:pos.length/3,col,name,on:true};objs.push(o);return o};
+  const bedObj=[];
+  const quad=(x0,y0,x1,y1,z,col)=>{const p=new Float32Array([x0,y0,z,x1,y0,z,x1,y1,z,x0,y0,z,x1,y1,z,x0,y1,z]),n=new Float32Array([0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1]);const o=mk(p,n,col,'bed');objs.pop();return o};
+  const cx=W/2,cy=H/2;
+  bedObj.push(quad(cx-BED/2-3,cy-BED/2-3,cx+BED/2+3,cy+BED/2+3,-.6,[.2,.21,.23]),quad(cx-BED/2,cy-BED/2,cx+BED/2,cy+BED/2,-.3,[.30,.32,.34]));
+  r.meshes.forEach(m=>{const v=m.v,t=m.t,nt=t.length/3,pos=new Float32Array(nt*9),nor=new Float32Array(nt*9);
+    for(let i=0;i<nt;i++){const a=t[3*i]*3,b=t[3*i+1]*3,c=t[3*i+2]*3;
+      const ux=v[b]-v[a],uy=v[b+1]-v[a+1],uz=v[b+2]-v[a+2],wx=v[c]-v[a],wy=v[c+1]-v[a+1],wz=v[c+2]-v[a+2];
+      let nx=uy*wz-uz*wy,ny=uz*wx-ux*wz,nz=ux*wy-uy*wx;const l=Math.hypot(nx,ny,nz)||1;nx/=l;ny/=l;nz/=l;
+      [a,b,c].forEach((q,k)=>{const o=i*9+k*3;pos[o]=v[q];pos[o+1]=v[q+1];pos[o+2]=v[q+2];nor[o]=nx;nor[o+1]=ny;nor[o+2]=nz})}
+    mk(pos,nor,hex(m.color),m.name)});
+  const pl=ov.querySelector('#p3pvparts');
+  objs.forEach((o,i)=>{const lb=document.createElement('label');lb.innerHTML=`<input type="checkbox" checked> <i class="swatch" style="display:inline-block;vertical-align:-2px;background:rgb(${o.col.map(x=>Math.round(x*255))})"></i> ${esc(o.name)}`;lb.querySelector('input').onchange=e=>{o.on=e.target.checked;need()};pl.appendChild(lb)});
+  let bedOn=true;ov.querySelector('#p3pvbed').onchange=e=>{bedOn=e.target.checked;need()};
+  const cam={az:.35,el:.62,d:Math.max(W,H)*1.7,c:[cx,cy,Z/3]};
+  const mul=(a,b)=>{const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s}return o};
+  const eyeOf=()=>[cam.c[0]+cam.d*Math.cos(cam.el)*Math.sin(cam.az),cam.c[1]-cam.d*Math.cos(cam.el)*Math.cos(cam.az),cam.c[2]+cam.d*Math.sin(cam.el)];
+  function matrix(asp){const e=eyeOf(),c=cam.c;let f=[c[0]-e[0],c[1]-e[1],c[2]-e[2]];let l=Math.hypot(...f);f=f.map(x=>x/l);
+    let s=[f[1]*1-f[2]*0,f[2]*0-f[0]*1,0];l=Math.hypot(...s)||1;s=s.map(x=>x/l);const u=[s[1]*f[2]-s[2]*f[1],s[2]*f[0]-s[0]*f[2],s[0]*f[1]-s[1]*f[0]];
+    const V=new Float32Array([s[0],u[0],-f[0],0,s[1],u[1],-f[1],0,s[2],u[2],-f[2],0,-(s[0]*e[0]+s[1]*e[1]+s[2]*e[2]),-(u[0]*e[0]+u[1]*e[1]+u[2]*e[2]),(f[0]*e[0]+f[1]*e[1]+f[2]*e[2]),1]);
+    const fv=1/Math.tan(.31),n=2,fa=cam.d*8+2000;const P=new Float32Array([fv/asp,0,0,0,0,fv,0,0,0,0,(fa+n)/(n-fa),-1,0,0,2*fa*n/(n-fa),0]);
+    return {M:mul(P,V),s,u}}
+  let cur=null;
+  function draw(){raf=0;if(!alive)return;const dpr=Math.min(devicePixelRatio||1,2),w=Math.max(1,cv.clientWidth*dpr|0),h=Math.max(1,cv.clientHeight*dpr|0);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}
+    gl.viewport(0,0,w,h);gl.clearColor(.86,.9,.93,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
+    cur=matrix(w/h);gl.uniformMatrix4fv(uM,false,cur.M);gl.enableVertexAttribArray(aP);gl.enableVertexAttribArray(aN);
+    const one=o=>{gl.uniform3fv(uC,o.col);gl.bindBuffer(gl.ARRAY_BUFFER,o.bp);gl.vertexAttribPointer(aP,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,o.bn);gl.vertexAttribPointer(aN,3,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,o.n)};
+    if(bedOn)bedObj.forEach(one);objs.forEach(o=>{if(o.on)one(o)})}
+  function need(){if(!raf&&alive)raf=requestAnimationFrame(draw)}
+  addEventListener('resize',need);
+  const ptr=new Map();let pd=0;
+  cv.addEventListener('contextmenu',e=>e.preventDefault());
+  cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptr.set(e.pointerId,{x:e.clientX,y:e.clientY,b:e.button,sh:e.shiftKey});cv.style.cursor='grabbing';if(ptr.size===2){const [a,b]=[...ptr.values()];pd=Math.hypot(a.x-b.x,a.y-b.y)}});
+  cv.addEventListener('pointermove',e=>{const p=ptr.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;
+    if(ptr.size===2){p.x=e.clientX;p.y=e.clientY;const [a,b]=[...ptr.values()],nd=Math.hypot(a.x-b.x,a.y-b.y);if(pd>0)cam.d=Math.max(20,Math.min(2000,cam.d*pd/nd));pd=nd;need();return}
+    p.x=e.clientX;p.y=e.clientY;
+    if(p.b===2||p.sh||e.shiftKey){const k=cam.d*.0016;if(cur){for(let i=0;i<3;i++)cam.c[i]+=(-cur.s[i]*dx+cur.u[i]*dy)*k}}
+    else{cam.az-=dx*.008;cam.el=Math.max(.05,Math.min(1.5,cam.el+dy*.008))}
+    need()});
+  const up=e=>{ptr.delete(e.pointerId);if(!ptr.size)cv.style.cursor='grab'};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  cv.addEventListener('wheel',e=>{e.preventDefault();cam.d=Math.max(20,Math.min(2000,cam.d*Math.exp(e.deltaY*.0012)));need()},{passive:false});
+  need()}
+
 
 /* ---------------- water balance: roofs, tanks, household use, BoM rainfall ---------------- */
 let RAIN={station:'Nambour DAFF – Hillside (040988)',period:'2007–2026',
@@ -1587,7 +1693,7 @@ function featTasksHTML(id){const list=[...tasks.entries()].filter(([i,t])=>t.fea
 let mt=null; // active measuring tool
 function startMT(type){cancelDraft();if(align)endAlign();selected=null;mt={type,pts:[],H:+lsGet('bt.damH',3),T:lsGet('bt.damT','auto')};cv.classList.add('drawing');renderMTBar();renderFeatures();draw();if(isPhone())setSheet('peek')}
 function endMT(){if(!mt)return;mt=null;cv.classList.remove('drawing');$('#drawbar').hidden=true;draw()}
-function mtClick(w){if(mt.type==='bound')return;if(mt.type==='pattern'){patClick(w);return}if(mt.type==='lop'){lopClick(w);return}if(mt.type==='ram'){if(mt.pts.length>=3){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===3)mt.res=ramCalc(...mt.pts);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='hydro'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===2)mt.res=hydroCalc(mt.pts[0],mt.pts[1]);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='route'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){$('#drawbar .hint')&&($('#drawbar .hint').textContent='Finding a route…');setTimeout(()=>{mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade);renderMTBar();draw()},20)}renderMTBar();draw();return}
+function mtClick(w){if(mt.type==='bound')return;if(mt.type==='weirs'){weirClick(w);return}if(mt.type==='pattern'){patClick(w);return}if(mt.type==='lop'){lopClick(w);return}if(mt.type==='ram'){if(mt.pts.length>=3){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===3)mt.res=ramCalc(...mt.pts);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='hydro'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===2)mt.res=hydroCalc(mt.pts[0],mt.pts[1]);renderMTBar();showTab('tools');renderTools();draw();return}if(mt.type==='route'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){$('#drawbar .hint')&&($('#drawbar .hint').textContent='Finding a route…');setTimeout(()=>{mt.res=findRoute(mt.pts[0],mt.pts[1],RT.grade);renderMTBar();draw()},20)}renderMTBar();draw();return}
   if(mt.type==='fire'){let foot=null;for(const f of features.values()){if(['building','shed','greenhouse','futurebuilding','carport'].includes(f.kind)&&f.geom.g==='polygon'&&inPoly(w,f.geom.pts)){foot=f.geom.pts;break}}mt.res=fireCheck(foot?centroid({geom:{g:'polygon',pts:foot}}):r1(w),foot);renderMTBar();renderTools();draw();return}
   if(mt.type==='ruler'){if(mt.closed){mt.pts=[];mt.closed=false}mt.pts.push(r1(w));renderMTBar();draw();return}
   if(mt.type==='measure'){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(r1(w));if(mt.pts.length===2){mt.res=headCalc(mt.pts[0],mt.pts[1]);showTab('tools');renderTools();const d=document.querySelector('details[data-sec="t-head"]');if(d){d.open=true;d.scrollIntoView({block:'start'})}}}
@@ -1974,7 +2080,7 @@ async function addPattern(G){if(!G.length)return;const kind=PAT.kind,K=KINDS[kin
   pushHist(`add ${base.toLowerCase()} (${ids.length})`,items);multi.clear();ids.forEach(i=>multi.add(i));selected=ids.length===1?ids[0]:null;mt.pts=[];renderMTBar();renderFeatures();draw();
   toast(`Added ${ids.length>1?ids.length+' pieces':'it'} to the design. ${ids.length>1?'They are selected together: drag to move them.':'Select it to move, rotate or resize.'}`);for(const id of ids)await persist(id,features.get(id))}
 /* ---------------- design checks (Plan tab): brief tracker, principles lens, function stacking, scale of permanence, zones & elevation, wildlife ---------------- */
-const FN={tank:['water storage','fire protection'],pond:['water storage','habitat','fire protection','irrigation'],swale:['water harvesting','erosion control','tree establishment'],diversion:['water harvesting','erosion control'],raingarden:['water harvesting','habitat','beauty'],soak:['water harvesting'],reedbed:['water treatment','habitat','biomass'],greywater:['water reuse','food'],rockpool:['habitat','water storage','beauty'],damwall:['water storage','access'],
+const FN={tank:['water storage','fire protection'],pond:['water storage','habitat','fire protection','irrigation'],swale:['water harvesting','erosion control','tree establishment'],diversion:['water harvesting','erosion control'],raingarden:['water harvesting','habitat','beauty'],soak:['water harvesting'],reedbed:['water treatment','habitat','biomass'],greywater:['water reuse','food'],rockpool:['habitat','water storage','beauty'],leakyweir:['water harvesting','erosion control','habitat'],damwall:['water storage','access'],
  track:['access','fire protection'],road:['access','fire protection'],path:['access'],firebreak:['fire protection','access'],driveway:['access'],steps:['access'],
  building:['shelter','water harvesting'],shed:['storage','water harvesting'],greenhouse:['food','propagation','shelter'],cabin:['shelter','income','water harvesting'],solar:['energy'],carport:['shelter','water harvesting'],futurebuilding:['shelter','water harvesting'],amenities:['shelter','water harvesting'],nursery:['propagation','income','education'],
  foodforest:['food','habitat','biomass','soil building','shade'],guild:['food','soil building','habitat','biomass'],fruittree:['food','shade','habitat'],tree:['shade','habitat','windbreak'],nativetree:['habitat','shade','windbreak','carbon'],shrub:['habitat','pollinators'],hedge:['windbreak','habitat','food','privacy'],screen:['privacy','windbreak','habitat'],row:['food','biomass','erosion control'],raisedbed:['food'],herbs:['food','medicinal','pollinators'],bed:['food','beauty'],groundcover:['erosion control','soil building','weed suppression'],herbspiral:['food','medicinal','microclimate'],hugel:['food','water harvesting','soil building'],
@@ -2145,6 +2251,7 @@ function wireTank(el){const b=(id,k)=>{const x=el.querySelector('#'+id);if(x)x.o
 {const rp0=renderPlan;renderPlan=function(){rp0();const el=$('#tab-plan');if(!el||(el.contains(document.activeElement)&&document.activeElement.matches('input:not([type=checkbox]),textarea,select')))return;const w=document.createElement('div');w.id='checksBox';w.innerHTML=checksHTML();el.prepend(w);wireChecks(w)}}
 function renderMTBar(){const b=$('#drawbar');if(!mt){b.hidden=true;return}b.hidden=false;
   if(mt.type==='bound'){boundBar(b);return}
+  if(mt.type==='weirs'){weirBar(b);return}
   if(mt.type==='lop'){lopBar(b);return}
   if(mt.type==='pattern'){patBar(b);return}
   if(mt.type==='route'){routeBar(b);return}
@@ -2174,6 +2281,7 @@ function renderMTBar(){const b=$('#drawbar');if(!mt){b.hidden=true;return}b.hidd
   $('#mtClose').onclick=()=>{endMT();renderTools()}}
 function drawMT(px){if(!mt)return;ctx.setLineDash([]);
   if(mt.type==='bound'){drawBound(px);return}
+  if(mt.type==='weirs'){drawWeirs(px);return}
   if(mt.type==='lop'){drawLop(px);return}
   if(mt.type==='pattern'){drawPattern(px);return}
   if(mt.type==='fire'){drawFire(px);return}
@@ -2188,6 +2296,52 @@ function drawMT(px){if(!mt)return;ctx.setLineDash([]);
     mt.pts.forEach((q,i)=>{ctx.fillStyle='#fff';ctx.strokeStyle='#1d2621';ctx.lineWidth=1.5*px;ctx.beginPath();ctx.arc(q[0],q[1],6*px,0,7);ctx.fill();ctx.stroke();ctx.fillStyle='#1d2621';ctx.font=`600 ${9*px}px "IBM Plex Sans",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i?'B':'A',q[0],q[1])});return}
   if(mt.res&&mt.res.outline){ctx.fillStyle='rgba(45,143,213,.45)';ctx.strokeStyle='#0b5c8f';ctx.lineWidth=1.5*px;const p=new Path2D();mt.res.outline.forEach((q,i)=>i?p.lineTo(...q):p.moveTo(...q));p.closePath();ctx.fill(p);ctx.stroke(p)}
   if(mt.pts.length){ctx.strokeStyle='#0b5c8f';ctx.lineWidth=5*px;ctx.lineCap='round';ctx.beginPath();mt.pts.forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q));ctx.stroke();mt.pts.forEach(q=>{ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(q[0],q[1],3.5*px,0,7);ctx.fill()})}}
+
+/* ---------------- leaky rock weirs along a gully: spaced at the flatter spots, evenly, or head to toe ---------------- */
+let WR=Object.assign({H:0.4,mode:'spaced',gap:30,smax:20},lsGet('bt.weirs',{}));
+const WMODES=[['spaced','Spaced, at the flatter spots'],['even','Evenly, every N metres'],['tight','Head to toe (tight chain)']];
+function wTrace(a,b){const acc=hyAcc();if(!acc||!EXTRA||!EXTRA.d8)return null;const N=1000,d8=EXTRA.d8;const s=hySnap(a).p;let c=Math.floor(s[1]/2)*N+Math.floor(s[0]/2);const out=[];let best=Infinity,bi=0,L=0;
+  for(let st=0;st<2000;st++){const r=(c/N)|0,cc=c%N,x=cc*2+1,y=r*2+1;if(out.length)L+=dist(out[out.length-1].p,[x,y]);let z=zAt(x,y);if(!isFinite(z))z=dem2[c]/10;out.push({p:[x,y],d:L,z,ha:acc[c]/1e4});
+    const db=dist([x,y],b);if(db<best){best=db;bi=out.length-1}if(db>best+80&&out.length>5)break;const k=d8[c];if(k>=8)break;const nr=r+D8OFF[k][0],nc=cc+D8OFF[k][1];if(nr<0||nc<0||nr>=N||nc>=N)break;c=nr*N+nc}
+  return best<40?out.slice(0,bi+1):null}
+function weirRock(ha){return ha<8?'150–200 mm':ha<20?'200–300 mm':'300 mm or larger (riprap)'}
+function weirCalc(){const P=wTrace(mt.pts[0],mt.pts[1]);if(!P||P.length<5)return {err:'Could not follow one flow line between those points. Click on a blue flow line near the top of the gully first, then further down the same gully.'};
+  const n=P.length,H=WR.H;const s=P.map((q,k)=>{let a=k,b=k;while(a>0&&P[k].d-P[a].d<6)a--;while(b<n-1&&P[b].d-P[k].d<6)b++;return Math.max(.005,(P[a].z-P[b].z)/Math.max(1,P[b].d-P[a].d))});
+  const ok=k=>s[k]>=.015&&s[k]<=WR.smax/100;const cand=[];for(let k=2;k<n-1;k++)if(ok(k))cand.push(k);
+  let skipped=0;for(let k=1;k<n;k++)if(s[k]>WR.smax/100)skipped+=P[k].d-P[k-1].d;
+  let out=[];
+  if(WR.mode==='tight'){let k=cand[0];while(k!==undefined){out.push(k);const tgt=P[k].d+Math.max(1.5,H/s[k]);let j=k+1;while(j<n-1&&(P[j].d<tgt||!ok(j)))j++;if(j>=n-1)break;k=j}}
+  else if(WR.mode==='even'){let t=-1;for(const k of cand)if(P[k].d>=t){out.push(k);t=P[k].d+WR.gap}}
+  else{for(const k of cand.slice().sort((a,b)=>s[a]-s[b]))if(out.every(o=>Math.abs(P[k].d-P[o].d)>=WR.gap))out.push(k);out.sort((a,b)=>a-b)}
+  const sites=out.map(k=>{const a=P[Math.max(0,k-3)].p,b=P[Math.min(n-1,k+3)].p,L0=dist(a,b)||1,ux=(b[0]-a[0])/L0,uy=(b[1]-a[1])/L0,nx=-uy,ny=ux,z0=P[k].z;
+    const ends=[1,-1].map(sg=>{let L=1;while(L<14){const z=zAt(P[k].p[0]+sg*nx*L,P[k].p[1]+sg*ny*L);if(!isFinite(z)||z>=z0+H*1.3)break;L+=.5}L=Math.max(L,2.5);return r1([P[k].p[0]+sg*nx*L,P[k].p[1]+sg*ny*L])});
+    const w=dist(ends[0],ends[1]),pool=H/s[k],vol=w*H*(0.6+H)*0.6+w*1.5*0.25;const back=[];for(let j=k;j>=0&&P[k].d-P[j].d<=Math.min(pool,40);j--)back.push(P[j].p);
+    return {k,p:P[k].p,z:z0,s:s[k],ha:P[k].ha,pool,ends,w,vol,t:vol*1.6,rock:weirRock(P[k].ha),back}});
+  const t=sites.reduce((a,x)=>a+x.t,0);return {P,sites,L:P[n-1].d,ha0:P[0].ha,ha1:P[n-1].ha,t,days:Math.max(1,Math.round(t/1.2)),skipped:Math.round(skipped)}}
+function weirClick(w){if(mt.pts.length>=2){mt.pts=[];mt.res=null}mt.pts.push(mt.pts.length?r1(w):hySnap(r1(w)).p);if(mt.pts.length===2)mt.res=weirCalc();renderMTBar();draw()}
+function weirBar(b){const r=mt.res,n=mt.pts.length;
+  b.innerHTML=`<span class="what">Leaky rock weirs</span><span class="hint">${n===0?'Click near the top of a gully (it snaps to the flow line)':n===1?'Now click further down the same gully, where the weirs should stop':r&&r.err?esc(r.err):r?(r.sites.length?`<b>${r.sites.length} weir${r.sites.length===1?'':'s'}</b> along ${Math.round(r.L)} m of gully (${r.ha0.toFixed(1)}–${r.ha1.toFixed(1)} ha draining in): about ${r.t.toFixed(r.t<10?1:0)} t of rock, roughly ${r.days} person-day${r.days>1?'s':''} by hand.`:'No spot along here suits a weir at these settings.')+(r.skipped?` ${r.skipped} m is steeper than ${WR.smax}% and left free: use log steps or plant it out.`:''):''}</span>
+  <label class="gp">Spacing <select id="wrM">${WMODES.map(([k,l])=>`<option value="${k}" ${WR.mode===k?'selected':''}>${l}</option>`).join('')}</select></label>${WR.mode!=='tight'?`<label class="gp">${WR.mode==='spaced'?'At least':'Every'} <input type="number" id="wrG" min="5" max="200" step="5" value="${WR.gap}"> m apart</label>`:''}<label class="gp">Height <input type="number" id="wrH" min="0.2" max="0.8" step="0.05" value="${WR.H}"> m</label><label class="gp">Skip over <input type="number" id="wrS" min="5" max="40" step="1" value="${WR.smax}"> % fall</label>
+  ${n?'<button class="btn" id="wrUndo">Start again</button>':''}${r&&!r.err&&r.sites.length?'<button class="btn primary" id="wrSave">Save to design</button>':''}<button class="btn" id="mtClose">Close</button>`;
+  const re=()=>{lsSet('bt.weirs',WR);if(mt.pts.length===2)mt.res=weirCalc();renderMTBar();draw()};
+  $('#wrM').onchange=e=>{WR.mode=e.target.value;re()};if($('#wrG'))$('#wrG').onchange=e=>{WR.gap=Math.max(5,Math.min(200,+e.target.value||30));re()};
+  $('#wrH').onchange=e=>{WR.H=Math.round(Math.max(.2,Math.min(.8,+e.target.value||.4))*100)/100;re()};$('#wrS').onchange=e=>{WR.smax=Math.max(5,Math.min(40,+e.target.value||20));re()};
+  if($('#wrUndo'))$('#wrUndo').onclick=()=>{mt.pts=[];mt.res=null;renderMTBar();draw()};if($('#wrSave'))$('#wrSave').onclick=()=>saveWeirs();
+  $('#mtClose').onclick=()=>{endMT();renderTools()}}
+function drawWeirs(px){const r=mt.res;
+  if(r&&!r.err){ctx.strokeStyle='rgba(29,111,184,.6)';ctx.lineWidth=3*px;ctx.setLineDash([6*px,4*px]);ctx.beginPath();r.P.forEach((q,i)=>i?ctx.lineTo(...q.p):ctx.moveTo(...q.p));ctx.stroke();ctx.setLineDash([]);ctx.lineCap='round';ctx.lineJoin='round';
+    r.sites.forEach((s,i)=>{if(s.back.length>1){ctx.strokeStyle='rgba(95,176,224,.8)';ctx.lineWidth=7*px;ctx.beginPath();s.back.forEach((q,j)=>j?ctx.lineTo(...q):ctx.moveTo(...q));ctx.stroke()}
+      ctx.strokeStyle='#fff';ctx.lineWidth=9*px;ctx.beginPath();ctx.moveTo(...s.ends[0]);ctx.lineTo(...s.ends[1]);ctx.stroke();ctx.strokeStyle=s.ha<15?'#7a5c3a':'#a85a22';ctx.lineWidth=5*px;ctx.stroke();
+      const e=s.ends[0];ctx.font=`700 ${10*px}px "IBM Plex Sans",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3*px;ctx.strokeStyle='rgba(255,255,255,.9)';const tx=e[0]+(e[0]-s.p[0])*.5,ty=e[1]+(e[1]-s.p[1])*.5;ctx.strokeText(String(i+1),tx,ty);ctx.fillStyle='#5a3f22';ctx.fillText(String(i+1),tx,ty)})}
+  mt.pts.forEach((q,i)=>{ctx.fillStyle=i?'#a85a22':'#1d6fb8';ctx.strokeStyle='#fff';ctx.lineWidth=2*px;ctx.beginPath();ctx.arc(q[0],q[1],6*px,0,7);ctx.fill();ctx.stroke()})}
+async function saveWeirs(){const r=mt.res;if(!r||!r.sites.length)return;const H=WR.H,mode=WMODES.find(m=>m[0]===WR.mode)[1].toLowerCase();let n0=0;for(const f of features.values())if(f.kind==='leakyweir')n0++;
+  const ids=[],items=[],now=new Date().toISOString();
+  r.sites.forEach((s,i)=>{const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+i;
+    const notes=`${H} m loose-rock leaky weir across a gully about ${Math.round(s.w)} m wide. Bed fall about ${Math.round(s.s*100)}%, so the pool behind it after rain runs about ${Math.round(s.pool)} m upstream. ${s.ha.toFixed(1)} ha drains here: use ${s.rock} rock, key it about 0.5 m into both banks, keep the middle lowest so floods spill there, and lay a rock apron about 1.5 m long below it; geotextile under it, no plastic. About ${s.t.toFixed(1)} t of rock. Placed with the leaky-weir tool (${mode}). Check the real bed slope and banks on site, and whether a riverine protection permit is needed, before placing rock.`;
+    const doc={kind:'leakyweir',name:`Leaky rock weir ${n0+i+1}`,status:'idea',notes,stage:s.ha<15?'now':'y2',geom:{g:'line',pts:s.ends},createdBy:myId||null,createdAt:now,updatedAt:now,source:'map'};features.set(id,doc);ids.push(id);items.push({id,before:null,after:structuredClone(doc)})});
+  pushHist(`add leaky weirs (${ids.length})`,items);multi.clear();ids.forEach(i=>multi.add(i));selected=null;endMT();renderFeatures();renderTools();draw();
+  toast(`Added ${ids.length} leaky weir${ids.length>1?'s':''}. They are selected together; click one to see its notes.`);for(const id of ids)await persist(id,features.get(id))}
+
 const D8OFF=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 /* what kind of structure: sets the wall shape, freeboard, material and who can build it */
 const DAMTYPES={
@@ -2421,7 +2575,7 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
    sec('t-ram','Ram & Bunyip pumps (test)',`<button class="btn primary" id="tRam">Pick intake, pump and tank</button><div id="rpRes">${ramHTML(mt&&mt.type==='ram'?mt.res:null)}</div>`)+
    sec('t-hydro','Micro-hydro power',`<button class="btn primary" id="tHydro">Pick intake and turbine site</button><div id="hyRes">${hydroHTML(mt&&mt.type==='hydro'?mt.res:null)}</div>`)+
    sec('t-head','Height & water pressure',`<p class="hint">Click two points to get the height difference, distance and the static pressure water would have flowing downhill between them. Use it to place tanks above the house and gardens: every 10 m of fall gives about 1 bar.</p><details class="mini"><summary>What pressure feels like</summary><dl class="facts"><dt>Under 15 kPa (1.5 m)</dt><dd>trickle: buckets, watering cans</dd><dt>15–50 kPa (1.5–5 m)</dt><dd>gravity drip kits, soaker hoses</dd><dt>50–100 kPa (5–10 m)</dt><dd>weak hose, microsprays, slow shower</dd><dt>100–200 kPa (10–20 m)</dt><dd>usable hose, most drip, modest shower</dd><dt>200–350 kPa (20–35 m)</dt><dd>like town water: showers, sprinklers</dd><dt>Over 500 kPa (50 m)</dt><dd>fit a pressure-limiting valve before the house</dd></dl><p class="hint">Pressure drops while water flows, more in long or thin pipes, so allow extra fall for long runs.</p></details><button class="btn primary" id="tMeasure">Measure between two points</button><div id="headRes">${pipeHTML(mt&&mt.type==='measure'?mt.res:null)}</div>`)+
-   sec('t-dam','Dam & pond calculator',`<p class="hint">Draw a wall line across a gully, pick the kind of structure and its height, and the terrain gives the storage, the flooded area, the catchment and what it takes to build. Anything from a 20 cm rock check that just slows water to a machine-built farm dam. Any dam in the Dams list or the computed prospects can be resized too.</p><details class="mini"><summary>The four kinds</summary><dl class="facts">${Object.values(DAMTYPES).map(t=>`<dt>${t.label} (${t.h[0]}–${t.h[1]<15?t.h[1]:'3+'} m)</dt><dd>${t.blurb}</dd>`).join('')}</dl></details><button class="btn primary" id="tDam">Draw a dam wall</button>
+   sec('t-dam','Dam & pond calculator',`<p class="hint">Draw a wall line across a gully, pick the kind of structure and its height, and the terrain gives the storage, the flooded area, the catchment and what it takes to build. Anything from a 20 cm rock check that just slows water to a machine-built farm dam. Any dam in the Dams list or the computed prospects can be resized too.</p><details class="mini"><summary>The four kinds</summary><dl class="facts">${Object.values(DAMTYPES).map(t=>`<dt>${t.label} (${t.h[0]}–${t.h[1]<15?t.h[1]:'3+'} m)</dt><dd>${t.blurb}</dd>`).join('')}</dl></details><button class="btn primary" id="tDam">Draw a dam wall</button> <button class="btn" id="tWeirs" title="Place a series of low rock weirs down a gully, spaced at the flatter spots">Place leaky weirs along a gully</button><p class="hint" style="margin-top:6px">Leaky weirs: click the top of a gully, then further down. The tool picks spots along the flow line, spaced apart at the flatter reaches (or evenly, or head to toe), and gives each one its pool length, width, catchment and rock size.</p>
      ${dr?`<dl class="facts" style="margin-top:10px"><dt>Storage</dt><dd>${dr.vol<1000?Math.round(dr.vol)+' m³ ('+Math.round(dr.vol*1000).toLocaleString()+' L)':(dr.vol/1000).toFixed(1)+' ML ('+Math.round(dr.vol).toLocaleString()+' m³)'}${DAMTYPES[dr.tk].leaky?' just after rain; it seeps away as the rock leaks, which is the point':''}</dd><dt>Flooded area</dt><dd>${fmtArea(dr.area)}</dd><dt>Full level</dt><dd>${dr.fsl.toFixed(1)} m, ${dr.maxD.toFixed(1)} m deep at the wall</dd><dt>Catchment</dt><dd>${dr.catchHa.toFixed(1)} ha</dd><dt>Rain on catchment</dt><dd>about ${Math.round(rain)} ML a year</dd><dt>Kind</dt><dd>${DAMTYPES[dr.tk].label}, ${dr.H} m high${dr.wallL?`, wall about ${Math.round(dr.wallL)} m long`:''}</dd><dt>Building it</dt><dd>${damBuildText(dr)}</dd></dl>
      <p class="hint">If 10–20% of that rain runs off, inflow is about ${Math.round(rain*.1)}–${Math.round(rain*.2)} ML a year, filling the pond ${(rain*.1/(dr.vol/1000)).toFixed(0)}–${(rain*.2/(dr.vol/1000)).toFixed(0)} times. Forested catchments yield less runoff than cleared ones. Dams on watercourses need state and council approval.</p>`:''}`)+
    sec('t-fire','Bushfire site check',fireHTML())+
@@ -2429,7 +2583,7 @@ function renderTools(){const el=$('#tab-tools');if(!el||!T)return;const dr=mt&&m
    sec('t-3d','3D print',p3HTML())+
    sec('t-sheet','Presentation sheet (A3 PDF)',sheetHTML())+
    sec('t-data','Export design data',`<div class="seg"><button class="btn" id="exGeo">GeoJSON</button><button class="btn" id="exKml">KML</button></div><p class="hint">KML opens in Google Earth, Avenza and Queensland Globe.</p>`);
-  wireTank(el);wireWB(el);wireFire(el);wireGraze(el);$('#tRoute').onclick=()=>startMT('route');$('#tRuler').onclick=()=>startMT('ruler');{const h=$('#tHydro');if(h)h.onclick=()=>startMT('hydro');wireHydro(el)}{const h=$('#tRam');if(h)h.onclick=()=>startMT('ram');wireRam(el)}{const b=$('#tSection');if(b)b.onclick=()=>{showTab('draw');startTool('section')};el.querySelectorAll('[data-secv]').forEach(x=>x.onclick=()=>{selected=x.dataset.secv;showTab('feat');renderFeatures();zoomTo(features.get(selected));draw()})}$('#tMeasure').onclick=()=>startMT('measure');wirePipe(el);$('#tDam').onclick=()=>startMT('dam');
+  wireTank(el);wireWB(el);wireFire(el);wireGraze(el);$('#tRoute').onclick=()=>startMT('route');$('#tRuler').onclick=()=>startMT('ruler');{const h=$('#tHydro');if(h)h.onclick=()=>startMT('hydro');wireHydro(el)}{const h=$('#tRam');if(h)h.onclick=()=>startMT('ram');wireRam(el)}{const b=$('#tSection');if(b)b.onclick=()=>{showTab('draw');startTool('section')};el.querySelectorAll('[data-secv]').forEach(x=>x.onclick=()=>{selected=x.dataset.secv;showTab('feat');renderFeatures();zoomTo(features.get(selected));draw()})}$('#tMeasure').onclick=()=>startMT('measure');wirePipe(el);$('#tDam').onclick=()=>startMT('dam');{const b=$('#tWeirs');if(b)b.onclick=()=>startMT('weirs')}
   wireSheet(el);wireLop(el);wireDrone(el);el.querySelectorAll('[data-pat]').forEach(x=>x.onclick=()=>startPattern(x.dataset.pat));
   $('#exGeo').onclick=()=>exportFile('geojson');$('#exKml').onclick=()=>exportFile('kml');wireP3(el);wireSecs(el)}
 /* ---------------- A3 presentation sheet: options, layout engine, panels, PNG or PDF ---------------- */
