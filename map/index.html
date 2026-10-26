@@ -1137,7 +1137,13 @@ function wireImagery(el){el.querySelector('#imgadd').onclick=()=>el.querySelecto
 const P3=Object.assign({dgrow:6,house:true,sink:true,dams:true,tcol:'orange',area:'lot',clip:true,size:180,exag:1,base:4,terrace:0,bound:true,water:true,design:true,zones:true,trees:true,canopy:true,cex:0.5,wdepth:1.5,swid:1.5,fill:true},lsGet('bt.p3',{}));
 if(!P3.v46){P3.tcol='orange';P3.v46=1}
 if(!P3.v47){P3.cex=0.5;P3.cmode='smooth';P3.detail='fine';P3.v47=1} // smooth canopy at half height (Brett's pick), finer model // the three-colour print (orange ground, green canopy, blue creeks) is the new default
-const TCOL={orange:'#E07B39',green:'#5E9B4A',tan:'#C9B48A'};
+if(!P3.v48){P3.scheme='economy';P3.v48=1} // fewer filament changes by default
+const P3G=P3;
+const TCOL={orange:'#E07B39',green:'#2F9E44',tan:'#C9B48A'};
+/* rough multi-colour cost: colour changes per 0.2 mm layer, purge and time (Bambu A1 + AMS lite defaults) */
+function swapEst(r,lh=0.2){const zmax=Math.max(...r.meshes.map(m=>{let z=0;for(let i=2;i<m.v.length;i+=3)if(m.v[i]>z)z=m.v[i];return z}));const nl=Math.ceil(zmax/lh)+1;const cols=[...new Set(r.meshes.map(m=>m.color.toLowerCase()))];const pres=cols.map(()=>new Uint8Array(nl));
+  r.meshes.forEach(m=>{const ci=cols.indexOf(m.color.toLowerCase()),pr=pres[ci],v=m.v,t=m.t;for(let i=0;i<t.length;i+=3){const a=v[3*t[i]+2],b=v[3*t[i+1]+2],c=v[3*t[i+2]+2];const lo=Math.floor(Math.min(a,b,c)/lh),hi=Math.ceil(Math.max(a,b,c)/lh);for(let l=lo;l<hi&&l<nl;l++)pr[l]=1}});
+  let sw=0;for(let l=0;l<nl;l++){let n=0;for(const pr of pres)n+=pr[l];if(n>1)sw+=n-1}return {colours:cols.length,changes:sw,grams:Math.round(sw*0.35),hours:+(sw*55/3600).toFixed(1),layers:nl}}
 function morph3(a,nx,ny,R,dil){const t=new Uint8Array(a.length),o=new Uint8Array(a.length);
   for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){let v=dil?0:1;for(let d=-R;d<=R;d++){const ii=i+d;const x=(ii<0||ii>=nx)?0:a[j*nx+ii];if(dil?x:!x){v=dil?1:0;break}}t[j*nx+i]=v}
   for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){let v=dil?0:1;for(let d=-R;d<=R;d++){const jj=j+d;const x=(jj<0||jj>=ny)?0:t[jj*nx+i];if(dil?x:!x){v=dil?1:0;break}}o[j*nx+i]=v}return o}
@@ -1175,9 +1181,10 @@ function dam3D(f,ponds){
   return {dr,near}}
 function growPoly(p,d){if(!(d>0)||p.length<3)return p;const A=offsetLine(p,d,true),B=offsetLine(p,-d,true);return polyArea(A)>polyArea(B)?A:B}
 function build3D(){
+  const eco=P3G.scheme==='economy';const P3=eco?Object.assign({},P3G,{bound:false,zones:false,design:false,trees:false,tcol:P3G.cmode==='zone'?'orange':'green',wdepth:1}):P3G;const zoneMode=P3.canopy&&P3.cmode==='zone';
   const lp=flat(T.lot);let src=lp,mg=8;if(P3.area==='context')mg=60;if(P3.area==='catch'){src=flat(T.catch[0].p);mg=20}
   const xs=src.map(q=>q[0]),ys=src.map(q=>q[1]);const x0=Math.min(...xs)-mg,y0=Math.min(...ys)-mg,x1=Math.max(...xs)+mg,y1=Math.max(...ys)+mg;
-  const terr=+P3.terrace>0;const fine=P3.detail==='fine';const N=terr?(fine?240:150):(fine?340:200);const c=Math.max(x1-x0,y1-y0)/N;const nx=Math.round((x1-x0)/c),ny=Math.round((y1-y0)/c);
+  const terr=+P3.terrace>0;const dt=P3.detail||'fine';const N=terr?({xfine:340,fine:240}[dt]||150):({xfine:520,fine:340}[dt]||200);const c=Math.max(x1-x0,y1-y0)/N;const nx=Math.round((x1-x0)/c),ny=Math.round((y1-y0)/c);
   const s=P3.size/Math.max(x1-x0,y1-y0);const ex=+P3.exag,I=+P3.terrace;
   const X=i=>+(i*c*s).toFixed(3),Y=j=>+((ny-j)*c*s).toFixed(3);
   const clip=P3.clip&&P3.area!=='catch';
@@ -1202,7 +1209,8 @@ function build3D(){
     else if(near){const zs=near.geom.pts.map(q=>zAt(q[0],q[1])).filter(v=>isFinite(v)).sort((x,y)=>x-y);if(zs.length)L.push({name:'Dam water'+sf,color:'#2D8FD5',h:0.8,abs:mm(zs[zs.length>>1])+0.5,items:[{t:'poly',p:growPoly(near.geom.pts,+P3.dgrow)}]})}}}
   if(P3.house!==false){let hz=visList().filter(f=>['building','cabin','shed','greenhouse','container','amenities','carport'].includes(f.kind)&&f.geom.g==='polygon');if(!hz.length)hz=visList().filter(f=>f.kind==='zone0'&&f.geom.g==='polygon');add('Buildings','#111111',2.4,hz.map(f=>featItem(f,hw)).filter(Boolean))}
   if(P3.water){const sw=+P3.swid||1;const SZ=SITEDEF.seasonal||[];const seas=P=>SZ.some(([a,b,c2,d])=>{const n=P.filter(q=>q[0]>=a&&q[0]<=c2&&q[1]>=b&&q[1]<=d).length;return n>=P.length/2});
-    const it=T.streams.filter(st=>st.k>=1).map(st=>{const P=flat(st.p);return {t:'line',p:P,r:seas(P)?hw(0.7):hw([0,1,1.4,2][st.k]*sw)}});
+    const kmin={all:1,main:2,big:3}[P3.creeks||(eco?'main':'all')]||1;const W=eco?[0,0.45,0.8,1.4]:[0,1,1.4,2].map(v=>v*sw);
+    const it=T.streams.filter(st=>st.k>=kmin).map(st=>{const P=flat(st.p);return {t:'line',p:P,r:seas(P)?hw(eco?0.4:0.7):hw(W[st.k])}});
     for(const f of visList()){const k=KINDS[f.kind];if(!k||k.g!=='Water'||['pipe','sewer','irrigation','tank','keypoint','soak'].includes(f.kind)||(hasDam&&(f.kind==='pond'||f.kind==='damwall')))continue;it.push(featItem(f,hw))}add('Water','#1E7FD8',0.8,it.filter(Boolean));if(+P3.wdepth>0&&L.length&&L[L.length-1].name==='Water'){L[L.length-1].carve=+P3.wdepth;L[L.length-1].h=Math.min(0.6,+P3.wdepth/2)}}
   if(P3.design)for(const g of ['Access','Built','Landscape','Plants']){const col={Access:'#8A5A2B',Built:'#5A5A5A',Landscape:'#9A7420',Plants:'#3F8F3A'}[g];
     add(g,col,0.8,visList().filter(f=>(KINDS[f.kind]||{}).g===g&&!(P3.trees&&(f.kind==='tree'||f.kind==='guild'))).map(f=>featItem(f,hw)).filter(Boolean));if(L.length&&L[L.length-1].name===g&&(g==='Plants'||g==='Landscape'))L[L.length-1].soft=true}
@@ -1232,7 +1240,7 @@ function build3D(){
       if(comp.length<6)for(const k of comp)m[k]=0}
     cgr=new Float32Array(cells);const cap=+P3.ccap||30;
     for(let k=0;k<cells;k++)if(m[k]){cgr[k]=mode==='cover'?0:Math.min(sm[k],cap);own[k]=li;any=true}
-    if(any)L.push({name:'Tree canopy (LiDAR)',color:'#2F9E44',h:0,canopy:true,cover:mode==='cover',items:[]})}
+    if(any)L.push({name:zoneMode?'Tree zone (LiDAR, flush with ground)':'Tree canopy (LiDAR)',color:'#2F9E44',h:0,canopy:true,cover:mode==='cover',zone:zoneMode,items:[]})}
   // gaps in the boundary (road reserves, notches) become a flat strip at base height so the print holds together
   const inside=new Uint8Array(cells);for(let k=0;k<cells;k++)inside[k]=own[k]===-2?0:1;
   const bridge=new Uint8Array(cells);if(clip&&P3.fill){const Rr=Math.max(1,Math.ceil(25/c));const clo=morph3(morph3(inside,nx,ny,Rr,true),nx,ny,Rr,false);for(let k=0;k<cells;k++)if(!inside[k]&&clo[k])bridge[k]=1}
@@ -1249,8 +1257,20 @@ function build3D(){
       for(const v of vs){if(inside[k])vin[v]=1;if(carveLy>=0&&own[k]===carveLy)cv[v]=D;if(inside[k]){hn[v]++;if(cgr&&cgr[k])hs[v]+=cgr[k]}}}
     const topT=(i,j)=>{const v=j*W1+i;return vin[v]?Math.max(base*.5,zv(i,j)-cv[v]):base};
     const hv=(i,j)=>{const v=j*W1+i;return hn[v]?hs[v]/hn[v]*s*ex*cex:0};
-    padSmooth(terrM,tOwn,0,nx,ny,X,Y,topT,()=>0);meshes.push(terrM);
-    L.forEach((ly,li)=>{const m=new Mesh3(ly.name,ly.color);padSmooth(m,own,li,nx,ny,X,Y,(i,j)=>lyTop(ly,topT(i,j),ly.canopy?hv(i,j):0),ly.sink?(i,j)=>topT(i,j)-ly.sink:topT);if(m.t.length)meshes.push(m)})}
+    const treeLy=L.findIndex(ly=>ly.zone);
+    let focus=null;if(eco&&!zoneMode){focus=new Uint8Array(cells);let zs=visList().filter(f=>['zone0','zone1','zone2'].includes(f.kind)&&f.geom.g==='polygon').map(f=>f.geom.pts);
+      const bl=visList().filter(f=>['building','cabin','shed','container','amenities','carport','greenhouse'].includes(f.kind)&&f.geom.g==='polygon').map(f=>centroid(f));
+      for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!inside[k])continue;const p=[x0+(i+.5)*c,y0+(j+.5)*c];if(zs.length?zs.some(z=>inPoly(p,z)):bl.some(q=>dist(p,q)<=45))focus[k]=1}
+      if(!focus.some(v=>v))focus=null}
+    if(treeLy>=0){focus=null}
+    if(focus||treeLy>=0){const isSkin=k=>(focus&&focus[k])||(treeLy>=0&&own[k]===treeLy);const fv=new Uint8Array(W1*(ny+1));for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!inside[k]||!isSkin(k))continue;for(const v of [j*W1+i,j*W1+i+1,(j+1)*W1+i,(j+1)*W1+i+1])fv[v]++}
+      const SK=1.0,gTop=(i,j)=>{const v=j*W1+i;return hn[v]&&fv[v]===hn[v]?Math.max(.6,topT(i,j)-SK):topT(i,j)};
+      padSmooth(terrM,tOwn,0,nx,ny,X,Y,gTop,()=>0);meshes.push(terrM);
+      if(focus){const fo=new Int16Array(cells).fill(-2);for(let k=0;k<cells;k++)if(focus[k]&&tOwn[k]===0&&(own[k]===-1||own[k]===-2||(L[own[k]]&&L[own[k]].soft)))fo[k]=0;
+        const om=new Mesh3('Working area (orange skin)','#E07B39');padSmooth(om,fo,0,nx,ny,X,Y,topT,gTop);if(om.t.length)meshes.push(om)}
+      if(treeLy>=0){const ly=L[treeLy];ly.skinTop=topT;ly.skinBot=gTop}}
+    else{padSmooth(terrM,tOwn,0,nx,ny,X,Y,topT,()=>0);meshes.push(terrM)}
+    L.forEach((ly,li)=>{const m=new Mesh3(ly.name,ly.color);if(ly.zone&&ly.skinTop)padSmooth(m,own,li,nx,ny,X,Y,ly.skinTop,ly.skinBot);else padSmooth(m,own,li,nx,ny,X,Y,(i,j)=>lyTop(ly,topT(i,j),ly.canopy?hv(i,j):0),ly.sink?(i,j)=>topT(i,j)-ly.sink:topT);if(m.t.length)meshes.push(m)})}
   // planned trees and guilds as domes at their mature height and canopy width
   const tr=visList().filter(f=>P3.trees&&(f.kind==='tree'||f.kind==='guild')&&f.geom.g==='point');
   if(tr.length){const m=new Mesh3('Planned trees & guilds','#2E6B2A');const S=20,R=6;
@@ -1294,11 +1314,12 @@ function toSTL(r){const n=r.meshes.reduce((s,m)=>s+m.t.length/3,0);const b=new A
 async function export3D(fmt){const st=$('#p3status');st.textContent='Building the model…';if(P3.canopy)await loadCG();await new Promise(r=>setTimeout(r,30));
   let r;try{r=build3D()}catch(e){st.textContent='The model could not be built: '+e.message;return}
   const blob=fmt==='3mf'?to3MF(r):toSTL(r);const tris=r.meshes.reduce((s,m)=>s+m.t.length/3,0);
-  st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')}) · ${(blob.size/1e6).toFixed(1)} MB${r.meshes.some(m=>m.name==='Tree canopy (LiDAR)')?` · canopy: ${esc(CANOPY_SRC())}, lifted ${P3.cex}×`:''}`;
+  const se=swapEst(r);st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')}) · ${(blob.size/1e6).toFixed(1)} MB · about ${se.changes} colour changes, ${se.grams} g purge, +${se.hours} h (rough, A1 + AMS lite)${r.meshes.some(m=>m.name==='Tree canopy (LiDAR)')?` · canopy: ${esc(CANOPY_SRC())}, lifted ${P3.cex}×`:''}`;
   window.__bt3d={r,blob};const inner=`${slug()}-terrain${+P3.terrace?'-terraced':''}.${fmt}`;const name=inner.replace(/\.[^.]+$/,'')+`-${fmt}.zip`;
   if(downloads){try{const zb=zipStore([{name:inner,data:new Uint8Array(await blob.arrayBuffer())}]);await downloads.save({filename:name,data:zb});toast('Saved '+name+': unzip it to get the '+inner+' file')}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start: '+(e&&e.code||'error'))}}else toast('Downloads are not available in this view')}
 function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`<option value="${k}" ${String(v)===String(k)?'selected':''}>${l}</option>`).join('')}</select>`;
   return `<p class="hint">A printable model of the land with the boundary, creeks and your design raised on top. The 3MF file keeps each layer as its own part, so a multi-colour printer can give terrain, water, zones and features different colours.</p>
+  <div class="field"><label for="p3sch">Colours</label>${o('p3sch',[['economy','Economy: green land and trees, orange skin only around the house, thin blue creeks, black buildings (fewer filament changes)'],['display','Display: every layer in its own colour (most filament changes)']],P3.scheme||'economy')}</div>
   <div class="field"><label for="p3area">Area</label>${o('p3area',[['lot','The lot'],['context','The lot and 60 m around it'],['catch','The whole catchment (40 ha)']],P3.area)}</div>
   <div class="row"><label><input type="checkbox" id="p3clip" ${P3.clip?'checked':''}> Cut to the lot boundary shape</label></div>
   <div class="field"><label for="p3size">Longest side</label>${o('p3size',[[120,'120 mm (fits A1 mini)'],[180,'180 mm'],[220,'220 mm'],[250,'250 mm (A1, K2)']],P3.size)}</div>
@@ -1313,10 +1334,11 @@ function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`
   <div class="row"><label><input type="checkbox" id="p3hs" ${P3.house!==false?'checked':''}> Buildings (house, cabin, shed…; the Zone 0 home if none drawn), black, raised 2.4 mm</label></div>
   <div class="seg"><button class="btn" id="p3simple" title="Terrain, house, creeks and dams only">Simple: terrain, house, water and dams</button></div>
   <div class="row"><label><input type="checkbox" id="p3c" ${P3.canopy?'checked':''} ${SITEDEF.canopy||SITEDEF.cgrid?'':'disabled'}> Tree canopy from LiDAR (green part)</label></div>
-  ${SITEDEF.canopy||SITEDEF.cgrid?`<div class="field"><label for="p3cm">Canopy shape</label>${o('p3cm',[['smooth','Smooth crowns at their height'],['cover','Flat cover layer (1.6 mm, cleanest print)'],['raw','Raw LiDAR (spiky)']],P3.cmode||'smooth')}</div>
+  ${SITEDEF.canopy||SITEDEF.cgrid?`<div class="field"><label for="p3cm">Canopy shape</label>${o('p3cm',[['smooth','Smooth crowns at their height'],['zone','Tree zone: green on the true LiDAR ground, nothing raised'],['cover','Flat cover layer (1.6 mm, cleanest print)'],['raw','Raw LiDAR (spiky)']],P3.cmode||'smooth')}</div>
   <div class="field"><label for="p3cex">Canopy height</label>${o('p3cex',[[0.5,'Half height'],[1,'Same scale as the ground'],[1.5,'1.5× taller'],[2,'2× taller']],P3.cex)}</div>`:'<p class="hint">No LiDAR canopy for this site yet.</p>'}
-  <div class="field"><label for="p3dt">Detail</label>${o('p3dt',[['fine','Fine (smoother slopes and edges, bigger file)'],['normal','Normal (faster)']],P3.detail||'fine')}</div>
+  <div class="field"><label for="p3dt">Detail</label>${o('p3dt',[['xfine','Extra fine (closest to what the printer can show; big file)'],['fine','Fine (smoother slopes and edges)'],['normal','Normal (faster)']],P3.detail||'fine')}</div>
   <div class="field"><label for="p3wd">Creeks</label>${o('p3wd',[[0,'Not carved (use the sink option above)'],[1,'Carved 1 mm into the ground'],[1.5,'Carved 1.5 mm'],[2,'Carved 2 mm'],[3,'Carved 3 mm']],P3.wdepth)}</div>
+  <div class="field"><label for="p3ck">Which creeks</label>${o('p3ck',[['all','All flow lines (most colour changes)'],['main','Main creeks and gullies'],['big','Only the main creek (fewest colour changes)']],P3.creeks||((P3.scheme||'economy')==='economy'?'main':'all'))}</div>
   <div class="field"><label for="p3sw">Creek width</label>${o('p3sw',[[1,'Normal'],[1.5,'1.5× wider'],[2,'2× wider'],[3,'3× wider']],P3.swid)}</div>
   <div class="row"><label><input type="checkbox" id="p3f" ${P3.fill?'checked':''}> Join gaps in the boundary (road reserves) with a flat base strip</label></div>
   <div class="field"><label for="p3tc">Ground colour</label>${o('p3tc',[['orange','Orange'],['green','Green'],['tan','Tan']],P3.tcol)}</div>
@@ -1324,15 +1346,15 @@ function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`
   <div class="seg"><button class="btn primary" id="p3pv">Preview model (3D)</button></div>
   <div class="seg"><button class="btn primary" id="p3mf">Download 3MF (multi-colour)</button><button class="btn" id="p3stl">STL (one colour)</button></div><p class="hint" id="p3status" aria-live="polite"></p>`}
 function wireP3(el){const set=(k,v)=>{P3[k]=v;lsSet('bt.p3',P3)};
-  el.querySelector('#p3area').onchange=e=>set('area',e.target.value);el.querySelector('#p3clip').onchange=e=>set('clip',e.target.checked);el.querySelector('#p3size').onchange=e=>set('size',+e.target.value);
+  el.querySelector('#p3area').onchange=e=>set('area',e.target.value);el.querySelector('#p3sch').onchange=e=>{set('scheme',e.target.value);renderTools()};el.querySelector('#p3clip').onchange=e=>set('clip',e.target.checked);el.querySelector('#p3size').onchange=e=>set('size',+e.target.value);
   el.querySelector('#p3exag').onchange=e=>set('exag',+e.target.value);el.querySelector('#p3terr').onchange=e=>set('terrace',+e.target.value);
   el.querySelector('#p3b').onchange=e=>set('bound',e.target.checked);el.querySelector('#p3w').onchange=e=>set('water',e.target.checked);el.querySelector('#p3z').onchange=e=>set('zones',e.target.checked);el.querySelector('#p3d').onchange=e=>set('design',e.target.checked);el.querySelector('#p3t').onchange=e=>set('trees',e.target.checked);
-  el.querySelector('#p3tc').onchange=e=>set('tcol',e.target.value);el.querySelector('#p3c').onchange=e=>set('canopy',e.target.checked);{const ce=el.querySelector('#p3cex');if(ce)ce.onchange=e=>set('cex',+e.target.value);const cm=el.querySelector('#p3cm');if(cm)cm.onchange=e=>set('cmode',e.target.value)}el.querySelector('#p3dt').onchange=e=>set('detail',e.target.value);el.querySelector('#p3wd').onchange=e=>set('wdepth',+e.target.value);el.querySelector('#p3sw').onchange=e=>set('swid',+e.target.value);el.querySelector('#p3f').onchange=e=>set('fill',e.target.checked);el.querySelector('#p3dm').onchange=e=>set('dams',e.target.checked);el.querySelector('#p3dg').onchange=e=>set('dgrow',+e.target.value);el.querySelector('#p3sk').onchange=e=>set('sink',e.target.checked);el.querySelector('#p3hs').onchange=e=>set('house',e.target.checked);el.querySelector('#p3simple').onclick=()=>{Object.assign(P3,{bound:false,water:true,zones:false,design:false,trees:false,dams:true,house:true,sink:true,canopy:true});lsSet('bt.p3',P3);renderTools();toast('Set to terrain, house, water and dams only')};el.querySelector('#p3pv').onclick=preview3D;el.querySelector('#p3mf').onclick=()=>export3D('3mf');el.querySelector('#p3stl').onclick=()=>export3D('stl')}
+  el.querySelector('#p3tc').onchange=e=>set('tcol',e.target.value);el.querySelector('#p3c').onchange=e=>set('canopy',e.target.checked);{const ce=el.querySelector('#p3cex');if(ce)ce.onchange=e=>set('cex',+e.target.value);const cm=el.querySelector('#p3cm');if(cm)cm.onchange=e=>set('cmode',e.target.value)}el.querySelector('#p3dt').onchange=e=>set('detail',e.target.value);el.querySelector('#p3wd').onchange=e=>set('wdepth',+e.target.value);el.querySelector('#p3sw').onchange=e=>set('swid',+e.target.value);el.querySelector('#p3ck').onchange=e=>set('creeks',e.target.value);el.querySelector('#p3f').onchange=e=>set('fill',e.target.checked);el.querySelector('#p3dm').onchange=e=>set('dams',e.target.checked);el.querySelector('#p3dg').onchange=e=>set('dgrow',+e.target.value);el.querySelector('#p3sk').onchange=e=>set('sink',e.target.checked);el.querySelector('#p3hs').onchange=e=>set('house',e.target.checked);el.querySelector('#p3simple').onclick=()=>{Object.assign(P3,{bound:false,water:true,zones:false,design:false,trees:false,dams:true,house:true,sink:true,canopy:true});lsSet('bt.p3',P3);renderTools();toast('Set to terrain, house, water and dams only')};el.querySelector('#p3pv').onclick=preview3D;el.querySelector('#p3mf').onclick=()=>export3D('3mf');el.querySelector('#p3stl').onclick=()=>export3D('stl')}
 
 /* Print preview: opens the model in a 3D viewer on an A1-sized bed before download */
 async function preview3D(){const st=$('#p3status');st.textContent='Building the preview…';if(P3.canopy)await loadCG();
   setTimeout(()=>{let r;try{r=build3D()}catch(e){st.textContent='The model could not be built: '+e.message;return}
-    st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')})`;
+    const se=swapEst(r);st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')}) · about ${se.changes} colour changes, ${se.grams} g purge, +${se.hours} h (rough, A1 + AMS lite)`;
     try{show3DPreview(r)}catch(e){st.textContent='The preview could not open: '+e.message}},30)}
 function show3DPreview(r){
   const old=document.getElementById('p3pv');if(old&&old._close)old._close();
