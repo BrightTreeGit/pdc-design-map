@@ -149,7 +149,14 @@ def main():
     for year in sorted(by_year):
         out = outdir / f'canopy_{site}_{year}.npz'
         if out.exists():
-            log(f'{year}: already done ({out.name}), skipping. Delete it to redo.'); continue
+            try:
+                with np.load(out) as old:
+                    same = int(old['E0']) == E0 and int(old['N0']) == N0
+            except Exception:
+                same = False
+            if same:
+                log(f'{year}: already done ({out.name}), skipping. Delete it to redo.'); continue
+            log(f'{year}: {out.name} was made for a different map window, redoing it')
         log(f'{year}: {len(by_year[year])} tile file(s)')
         tmp = tempfile.mkdtemp()
         try:
