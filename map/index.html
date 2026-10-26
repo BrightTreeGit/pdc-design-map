@@ -397,7 +397,7 @@ const SITES=[
  {id:'nimbin-group',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW · the group plan, house-area sketch and tracks to the upper pads',base:'sites/nimbin/',ready:true,prosKinds:['pond','tank'],cgrid:'NSW LiDAR 2017 (Lismore)'},
  {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true,history:true},
  {id:'bright-tree',name:'Bright Tree',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true,niche:true},
- {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true,cgrid:'NSW Spatial Services LiDAR'},
+ {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true,cgrid:'NSW Spatial Services LiDAR',seasonal:[[930,1065,1125,1105]]},
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'PDC host',area:'Kin Kin, Qld',ready:true,history:true},
  {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
  {id:'annwn',name:'Annwn',group:'Small block',area:'Capalaba, Qld · 770 m² suburban block',ready:true,small:true},
@@ -1197,8 +1197,9 @@ function build3D(){
     if(dr)L.push({name:'Dam water'+sf,color:'#2D8FD5',h:0.8,abs:mm(dr.fsl)+0.5,items:[{t:'poly',p:growPoly(dr.outline,+P3.dgrow)}].concat(near?[{t:'poly',p:growPoly(near.geom.pts,+P3.dgrow)}]:[])});
     else if(near){const zs=near.geom.pts.map(q=>zAt(q[0],q[1])).filter(v=>isFinite(v)).sort((x,y)=>x-y);if(zs.length)L.push({name:'Dam water'+sf,color:'#2D8FD5',h:0.8,abs:mm(zs[zs.length>>1])+0.5,items:[{t:'poly',p:growPoly(near.geom.pts,+P3.dgrow)}]})}}}
   if(P3.house!==false){let hz=visList().filter(f=>['building','cabin','shed','greenhouse','container','amenities','carport'].includes(f.kind)&&f.geom.g==='polygon');if(!hz.length)hz=visList().filter(f=>f.kind==='zone0'&&f.geom.g==='polygon');add('Buildings','#111111',2.4,hz.map(f=>featItem(f,hw)).filter(Boolean))}
-  if(P3.water){const sw=+P3.swid||1;const it=T.streams.filter(st=>st.k>=1).map(st=>({t:'line',p:flat(st.p),r:hw([0,1,1.4,2][st.k]*sw)}));
-    for(const f of visList()){const k=KINDS[f.kind];if(!k||k.g!=='Water'||(hasDam&&(f.kind==='pond'||f.kind==='damwall')))continue;it.push(featItem(f,hw))}add('Water','#1E7FD8',0.8,it.filter(Boolean));if(+P3.wdepth>0&&L.length&&L[L.length-1].name==='Water'){L[L.length-1].carve=+P3.wdepth;L[L.length-1].h=Math.min(0.6,+P3.wdepth/2)}}
+  if(P3.water){const sw=+P3.swid||1;const SZ=SITEDEF.seasonal||[];const seas=P=>SZ.some(([a,b,c2,d])=>{const n=P.filter(q=>q[0]>=a&&q[0]<=c2&&q[1]>=b&&q[1]<=d).length;return n>=P.length/2});
+    const it=T.streams.filter(st=>st.k>=1).map(st=>{const P=flat(st.p);return {t:'line',p:P,r:seas(P)?hw(0.7):hw([0,1,1.4,2][st.k]*sw)}});
+    for(const f of visList()){const k=KINDS[f.kind];if(!k||k.g!=='Water'||['pipe','sewer','irrigation','tank','keypoint','soak'].includes(f.kind)||(hasDam&&(f.kind==='pond'||f.kind==='damwall')))continue;it.push(featItem(f,hw))}add('Water','#1E7FD8',0.8,it.filter(Boolean));if(+P3.wdepth>0&&L.length&&L[L.length-1].name==='Water'){L[L.length-1].carve=+P3.wdepth;L[L.length-1].h=Math.min(0.6,+P3.wdepth/2)}}
   if(P3.design)for(const g of ['Access','Built','Landscape','Plants']){const col={Access:'#8A5A2B',Built:'#5A5A5A',Landscape:'#9A7420',Plants:'#3F8F3A'}[g];
     add(g,col,0.8,visList().filter(f=>(KINDS[f.kind]||{}).g===g&&!(P3.trees&&(f.kind==='tree'||f.kind==='guild'))).map(f=>featItem(f,hw)).filter(Boolean));if(L.length&&L[L.length-1].name===g&&(g==='Plants'||g==='Landscape'))L[L.length-1].soft=true}
   if(P3.zones)for(let z=0;z<=5;z++){const kk='zone'+z;add(KINDS[kk].label,KINDS[kk].color,0.4,visList().filter(f=>f.kind===kk).map(f=>featItem(f,hw)).filter(Boolean));if(L.length&&L[L.length-1].name===KINDS[kk].label)L[L.length-1].soft=true}
