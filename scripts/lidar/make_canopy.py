@@ -29,6 +29,7 @@ SITES = {  # map window: west edge E0, north edge N0 (MGA zone 56), size 2000 m
     "noosa-forest-retreat": (483394, 7096927),
     "bellbunya": (484159, 7071282),
     "nimbin": (522889, 6842186),   # Firefly Farm: 2 km window centred on 523889 E, 6841186 N (MGA zone 56)
+    "willow-vale": (382492, 6470820),   # Willow Vale: 2 km window centred on 383492 E, 6469820 N (MGA zone 56)
 }
 SIZE = 2000
 BANDS = [0.5, 2, 5, 10, 20, 30]          # band edges in metres above ground
