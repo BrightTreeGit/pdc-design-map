@@ -394,10 +394,10 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('act');t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600)}
 /* ---------------- PDC sites: one map page, one data space per site ---------------- */
 const SITES=[
- {id:'nimbin-group',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW · the group plan, house-area sketch and tracks to the upper pads',base:'sites/nimbin/',ready:true,prosKinds:['pond','tank'],cgrid:'NSW LiDAR (Richmond River 2023)',s2:'12 Aug 2026',s2wet:'9 Apr 2026',s2old:'20 Jul 2017',s2mid:'19 Jul 2023',s2part:true},
+ {id:'nimbin-group',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW · the group plan, house-area sketch and tracks to the upper pads',base:'sites/nimbin/',ready:true,prosKinds:['pond','tank'],grass:true,cgrid:'NSW LiDAR (Richmond River 2023)',s2:'12 Aug 2026',s2wet:'9 Apr 2026',s2old:'20 Jul 2017',s2mid:'19 Jul 2023',s2part:true},
  {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true,history:true},
  {id:'bright-tree',name:'Bright Tree',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true,niche:true},
- {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true,cgrid:'NSW LiDAR 2018 (Upper Manning) plus regrowth to 2026 from Sentinel-2',s2:'31 Aug 2026',s2wet:'14 Apr 2026',s2old:'17 Mar 2018',seasonal:[[930,1065,1140,1135]]},
+ {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true,grass:true,cgrid:'NSW LiDAR 2018 (Upper Manning) plus regrowth to 2026 from Sentinel-2',s2:'31 Aug 2026',s2wet:'14 Apr 2026',s2old:'17 Mar 2018',seasonal:[[930,1065,1140,1135]]},
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'PDC host',area:'Kin Kin, Qld',ready:true,history:true},
  {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
  {id:'annwn',name:'Annwn',group:'Small block',area:'Capalaba, Qld · 770 m² suburban block',ready:true,small:true},
@@ -1183,13 +1183,17 @@ function growPoly(p,d){if(!(d>0)||p.length<3)return p;const A=offsetLine(p,d,tru
 function build3D(){
   const eco=P3G.scheme==='economy';const P3=eco?Object.assign({},P3G,{clip:P3G.area!=='catch',bound:false,zones:false,design:false,trees:false,tcol:P3G.cmode==='zone'?'orange':'green',wdepth:1}):P3G;const zoneMode=P3.canopy&&P3.cmode==='zone';
   const lp=flat(T.lot);let src=lp,mg=8;if(P3.area==='context')mg=60;if(P3.area==='catch'){src=flat(T.catch[0].p);mg=20}
-  const xs=src.map(q=>q[0]),ys=src.map(q=>q[1]);const x0=Math.min(...xs)-mg,y0=Math.min(...ys)-mg,x1=Math.max(...xs)+mg,y1=Math.max(...ys)+mg;
+  const [exD,exM]=String(P3.extend||'none').split(':');const exm=+exM||0;const exW=exD==='W'||exD==='all'?exm:0,exA=exD==='all'?exm:0;
+  const xs=src.map(q=>q[0]),ys=src.map(q=>q[1]);const x0=Math.min(...xs)-mg-exW,y0=Math.min(...ys)-mg-exA,x1=Math.max(...xs)+mg+exA,y1=Math.max(...ys)+mg+exA;
   const terr=+P3.terrace>0;const dt=P3.detail||'fine';const N=terr?({xfine:340,fine:240}[dt]||150):({xfine:520,fine:340}[dt]||200);const c=Math.max(x1-x0,y1-y0)/N;const nx=Math.round((x1-x0)/c),ny=Math.round((y1-y0)/c);
   const s=P3.size/Math.max(x1-x0,y1-y0);const ex=+P3.exag,I=+P3.terrace;
   const X=i=>+(i*c*s).toFixed(3),Y=j=>+((ny-j)*c*s).toFixed(3);
   const clip=P3.clip&&P3.area!=='catch';
   const cells=nx*ny;const own=new Int16Array(cells).fill(-2);
-  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const p=[x0+(i+.5)*c,y0+(j+.5)*c];if(!clip||inPoly(p,lp))own[j*nx+i]=-1}
+  const near=(p,d)=>{if(inPoly(p,lp))return true;if(!d)return false;for(let a=1;a<lp.length+1;a++)if(segDist(p,lp[a-1],lp[a%lp.length])<=d)return true;return false};
+  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const p=[x0+(i+.5)*c,y0+(j+.5)*c];let ok=!clip||inPoly(p,lp);
+    if(!ok&&exA)ok=near(p,exA);if(!ok&&exW){for(let d=c/2;d<=exW&&!ok;d+=c/2)ok=inPoly([p[0]+d,p[1]],lp)}
+    if(ok)own[j*nx+i]=-1}
   const q=z=>I>0?Math.floor(z/I)*I:z;
   const zC=(x,y)=>{let z=zAt(x,y);if(z!==z){const cl=v=>Math.min(1996,Math.max(4,v));z=zAt(cl(x),cl(y))}return z};
   let zmin=Infinity;const zc=new Float32Array(cells);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const z=q(zC(x0+(i+.5)*c,y0+(j+.5)*c));zc[j*nx+i]=z;if(own[j*nx+i]!==-2&&z<zmin)zmin=z}
@@ -1263,8 +1267,15 @@ function build3D(){
       for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!inside[k])continue;const p=[x0+(i+.5)*c,y0+(j+.5)*c];if(zs.length?zs.some(z=>inPoly(p,z)):bl.some(q=>dist(p,q)<=45))focus[k]=1}
       if(!focus.some(v=>v))focus=null}
     let treeMajor=false;
-    if(treeLy>=0){focus=null;let nt=0,ni=0;for(let k=0;k<cells;k++){if(!inside[k])continue;ni++;if(own[k]===treeLy)nt++}
-      if(nt>=ni/2){treeMajor=true;focus=new Uint8Array(cells);for(let k=0;k<cells;k++)if(inside[k]&&own[k]!==treeLy)focus[k]=1;terrM.color='#2F9E44';
+    let isTreeC=k=>own[k]===treeLy;
+    if(treeLy>=0&&GR){const gg=new Uint8Array(cells);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)gg[j*nx+i]=grassAt(x0+(i+.5)*c,y0+(j+.5)*c);
+      for(let k=0;k<cells;k++){if(own[k]===treeLy&&gg[k])own[k]=-1;else if(own[k]===-1&&inside[k]&&!gg[k])own[k]=treeLy}isTreeC=k=>inside[k]&&!gg[k]&&(own[k]===treeLy)}
+    if(treeLy>=0){focus=null;let nt=0,ni=0;for(let k=0;k<cells;k++){if(!inside[k])continue;ni++;if(isTreeC(k))nt++}
+      if(nt>=ni/2){treeMajor=true;focus=new Uint8Array(cells);for(let k=0;k<cells;k++)if(inside[k]&&!isTreeC(k)&&own[k]===-1)focus[k]=1;terrM.color='#2F9E44';
+        // the rim along the boundary and the banks of creeks stay green (body colour): no thin orange bands to print
+        {const wl=L.findIndex(ly=>ly.name==='Water');const near=new Uint8Array(cells);const Rr=Math.max(2,Math.round(6/c));
+          for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!inside[k]||(wl>=0&&own[k]===wl)){for(let dj=-Rr;dj<=Rr;dj++)for(let di=-Rr;di<=Rr;di++){const ii=i+di,jj=j+dj;if(ii>=0&&jj>=0&&ii<nx&&jj<ny)near[jj*nx+ii]=1}}}
+          for(let k=0;k<cells;k++)if(near[k])focus[k]=0}
         // keep only real paddocks and clearings: small gaps take the body colour, so the second colour appears on fewer layers
         const minC=Math.max(1,Math.round((+P3.minPatch||5000)/(c*c)));const seen=new Uint8Array(cells);
         for(let k0=0;k0<cells;k0++){if(!focus[k0]||seen[k0])continue;const st=[k0],comp=[];seen[k0]=1;while(st.length){const k=st.pop();comp.push(k);for(const kk of [k-1,k+1,k-nx,k+nx])if(kk>=0&&kk<cells&&focus[kk]&&!seen[kk]){seen[kk]=1;st.push(kk)}}
@@ -1317,7 +1328,7 @@ function to3MF(r){const enc=new TextEncoder();const out=[];
 function toSTL(r){const n=r.meshes.reduce((s,m)=>s+m.t.length/3,0);const b=new ArrayBuffer(84+n*50),d=new DataView(b);d.setUint32(80,n,true);let o=84;
   for(const m of r.meshes){const v=m.v,t=m.t;for(let i=0;i<t.length;i+=3){o+=12;for(const k of [t[i],t[i+1],t[i+2]]){d.setFloat32(o,v[3*k],true);d.setFloat32(o+4,v[3*k+1],true);d.setFloat32(o+8,v[3*k+2],true);o+=12}o+=2}}
   return new Blob([b],{type:'model/stl'})}
-async function export3D(fmt){const st=$('#p3status');st.textContent='Building the model…';if(P3.canopy)await loadCG();await new Promise(r=>setTimeout(r,30));
+async function export3D(fmt){const st=$('#p3status');st.textContent='Building the model…';if(P3.canopy){await loadCG();await loadGrass()}await new Promise(r=>setTimeout(r,30));
   let r;try{r=build3D()}catch(e){st.textContent='The model could not be built: '+e.message;return}
   const blob=fmt==='3mf'?to3MF(r):toSTL(r);const tris=r.meshes.reduce((s,m)=>s+m.t.length/3,0);
   const se=swapEst(r);st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')}) · ${(blob.size/1e6).toFixed(1)} MB · about ${se.changes} colour changes, ${se.grams} g purge, +${se.hours} h (rough, A1 + AMS lite)${r.meshes.some(m=>m.name==='Tree canopy (LiDAR)')?` · canopy: ${esc(CANOPY_SRC())}, lifted ${P3.cex}×`:''}`;
@@ -1327,6 +1338,7 @@ function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`
   return `<p class="hint">A printable model of the land with the boundary, creeks and your design raised on top. The 3MF file keeps each layer as its own part, so a multi-colour printer can give terrain, water, zones and features different colours.</p>
   <div class="field"><label for="p3sch">Colours</label>${o('p3sch',[['economy','Economy: green land and trees, orange skin only around the house, thin blue creeks, black buildings (fewer filament changes)'],['display','Display: every layer in its own colour (most filament changes)']],P3.scheme||'economy')}</div>
   <div class="field"><label for="p3area">Area</label>${o('p3area',[['lot','The lot'],['context','The lot and 60 m around it'],['catch','The whole catchment (40 ha)']],P3.area)}</div>
+  <div class="field"><label for="p3ex">Extend past the boundary</label>${o('p3ex',[['none','No: cut at the boundary'],['W:25','25 m further west'],['W:50','50 m further west'],['all:25','25 m all round'],['all:50','50 m all round']],P3.extend||'none')}</div>
   <div class="row"><label><input type="checkbox" id="p3clip" ${P3.clip?'checked':''}> Cut to the lot boundary shape</label></div>
   <div class="field"><label for="p3size">Longest side</label>${o('p3size',[[120,'120 mm (fits A1 mini)'],[180,'180 mm'],[220,'220 mm'],[250,'250 mm (A1, K2)']],P3.size)}</div>
   <div class="field"><label for="p3exag">Height</label>${o('p3exag',[[1,'True to scale'],[1.5,'1.5× exaggerated'],[2,'2× exaggerated']],P3.exag)}</div>
@@ -1353,13 +1365,13 @@ function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`
   <div class="seg"><button class="btn primary" id="p3pv">Preview model (3D)</button></div>
   <div class="seg"><button class="btn primary" id="p3mf">Download 3MF (multi-colour)</button><button class="btn" id="p3stl">STL (one colour)</button></div><p class="hint" id="p3status" aria-live="polite"></p>`}
 function wireP3(el){const set=(k,v)=>{P3[k]=v;lsSet('bt.p3',P3)};
-  el.querySelector('#p3area').onchange=e=>set('area',e.target.value);el.querySelector('#p3sch').onchange=e=>{set('scheme',e.target.value);renderTools()};el.querySelector('#p3clip').onchange=e=>set('clip',e.target.checked);el.querySelector('#p3size').onchange=e=>set('size',+e.target.value);
+  el.querySelector('#p3area').onchange=e=>set('area',e.target.value);el.querySelector('#p3ex').onchange=e=>set('extend',e.target.value);el.querySelector('#p3sch').onchange=e=>{set('scheme',e.target.value);renderTools()};el.querySelector('#p3clip').onchange=e=>set('clip',e.target.checked);el.querySelector('#p3size').onchange=e=>set('size',+e.target.value);
   el.querySelector('#p3exag').onchange=e=>set('exag',+e.target.value);el.querySelector('#p3terr').onchange=e=>set('terrace',+e.target.value);
   el.querySelector('#p3b').onchange=e=>set('bound',e.target.checked);el.querySelector('#p3w').onchange=e=>set('water',e.target.checked);el.querySelector('#p3z').onchange=e=>set('zones',e.target.checked);el.querySelector('#p3d').onchange=e=>set('design',e.target.checked);el.querySelector('#p3t').onchange=e=>set('trees',e.target.checked);
   el.querySelector('#p3tc').onchange=e=>set('tcol',e.target.value);el.querySelector('#p3c').onchange=e=>set('canopy',e.target.checked);{const ce=el.querySelector('#p3cex');if(ce)ce.onchange=e=>set('cex',+e.target.value);const cm=el.querySelector('#p3cm');if(cm)cm.onchange=e=>set('cmode',e.target.value)}el.querySelector('#p3dt').onchange=e=>set('detail',e.target.value);el.querySelector('#p3wd').onchange=e=>set('wdepth',+e.target.value);el.querySelector('#p3sw').onchange=e=>set('swid',+e.target.value);el.querySelector('#p3ck').onchange=e=>set('creeks',e.target.value);el.querySelector('#p3mp').onchange=e=>set('minPatch',+e.target.value);el.querySelector('#p3f').onchange=e=>set('fill',e.target.checked);el.querySelector('#p3dm').onchange=e=>set('dams',e.target.checked);el.querySelector('#p3dg').onchange=e=>set('dgrow',+e.target.value);el.querySelector('#p3sk').onchange=e=>set('sink',e.target.checked);el.querySelector('#p3hs').onchange=e=>set('house',e.target.checked);el.querySelector('#p3simple').onclick=()=>{Object.assign(P3,{bound:false,water:true,zones:false,design:false,trees:false,dams:true,house:true,sink:true,canopy:true});lsSet('bt.p3',P3);renderTools();toast('Set to terrain, house, water and dams only')};el.querySelector('#p3pv').onclick=preview3D;el.querySelector('#p3mf').onclick=()=>export3D('3mf');el.querySelector('#p3stl').onclick=()=>export3D('stl')}
 
 /* Print preview: opens the model in a 3D viewer on an A1-sized bed before download */
-async function preview3D(){const st=$('#p3status');st.textContent='Building the preview…';if(P3.canopy)await loadCG();
+async function preview3D(){const st=$('#p3status');st.textContent='Building the preview…';if(P3.canopy){await loadCG();await loadGrass()}
   setTimeout(()=>{let r;try{r=build3D()}catch(e){st.textContent='The model could not be built: '+e.message;return}
     const se=swapEst(r);st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')}) · about ${se.changes} colour changes, ${se.grams} g purge, +${se.hours} h (rough, A1 + AMS lite)`;
     try{show3DPreview(r)}catch(e){st.textContent='The preview could not open: '+e.message}},30)}
@@ -1916,6 +1928,8 @@ function wireRam(el){const box=el.querySelector('#rpRes');if(!box)return;const u
 /* ---------------- light & lopping planner: direct sun at garden height through terrain and tree crowns ---------------- */
 let CG=null;const LOP=Object.assign({doy:172,size:30,r:6,mode:'spot',fit:true,from:'today',plan:'none',saveStage:'now'},lsGet('bt.lop',{}));if(!LOP.v2){LOP.size=30;LOP.fit=true;LOP.v2=1}
 async function loadCG(){if(CG||!(SITEDEF.canopy||SITEDEF.cgrid))return CG;try{const im=new Image();im.src=SB+'canopy_grid.png';await im.decode();const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);const d=g.getImageData(0,0,c.width,c.height).data;const n=c.width*c.height;const h=new Float32Array(n),gp=new Float32Array(n);for(let i=0;i<n;i++){h[i]=d[i*4]/3;gp[i]=d[i*4+1]/255}CG={w:c.width,h,gp}}catch(e){CG=null}return CG}
+let GR=null;async function loadGrass(){if(GR!==null)return GR;if(!SITEDEF.grass){GR=false;return GR}try{const im=new Image();im.src=SB+'grass.png';await im.decode();const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);const d=g.getImageData(0,0,c.width,c.height).data;const a=new Uint8Array(c.width*c.height);for(let i=0;i<a.length;i++)a[i]=d[i*4]>127?1:0;GR={w:c.width,a}}catch(e){GR=false}return GR}
+function grassAt(x,y){if(!GR)return 0;const i=Math.floor(x/2),j=Math.floor(y/2);return i<0||j<0||i>=GR.w||j>=GR.w?0:GR.a[j*GR.w+i]}
 function cgAt(x,y,edits){const i=Math.floor(x/2),j=Math.floor(y/2);if(!CG||i<0||j<0||i>=CG.w||j>=CG.w)return [0,1];let h=CG.h[j*CG.w+i],gp=CG.gp[j*CG.w+i];
   for(const e of edits){if((x-e.x)**2+(y-e.y)**2<=e.r*e.r){if(e.mode==='remove'){h=0;gp=1}else gp=Math.min(1,gp+0.35)}}return [h,gp]}
 /* light at garden height: direct sun hours traced through terrain and crowns, plus the share of open sky seen (diffuse light).
