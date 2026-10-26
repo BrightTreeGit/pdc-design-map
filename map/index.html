@@ -1181,7 +1181,7 @@ function dam3D(f,ponds){
   return {dr,near}}
 function growPoly(p,d){if(!(d>0)||p.length<3)return p;const A=offsetLine(p,d,true),B=offsetLine(p,-d,true);return polyArea(A)>polyArea(B)?A:B}
 function build3D(){
-  const eco=P3G.scheme==='economy';const P3=eco?Object.assign({},P3G,{bound:false,zones:false,design:false,trees:false,tcol:P3G.cmode==='zone'?'orange':'green',wdepth:1}):P3G;const zoneMode=P3.canopy&&P3.cmode==='zone';
+  const eco=P3G.scheme==='economy';const P3=eco?Object.assign({},P3G,{clip:P3G.area!=='catch',bound:false,zones:false,design:false,trees:false,tcol:P3G.cmode==='zone'?'orange':'green',wdepth:1}):P3G;const zoneMode=P3.canopy&&P3.cmode==='zone';
   const lp=flat(T.lot);let src=lp,mg=8;if(P3.area==='context')mg=60;if(P3.area==='catch'){src=flat(T.catch[0].p);mg=20}
   const xs=src.map(q=>q[0]),ys=src.map(q=>q[1]);const x0=Math.min(...xs)-mg,y0=Math.min(...ys)-mg,x1=Math.max(...xs)+mg,y1=Math.max(...ys)+mg;
   const terr=+P3.terrace>0;const dt=P3.detail||'fine';const N=terr?({xfine:340,fine:240}[dt]||150):({xfine:520,fine:340}[dt]||200);const c=Math.max(x1-x0,y1-y0)/N;const nx=Math.round((x1-x0)/c),ny=Math.round((y1-y0)/c);
