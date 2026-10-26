@@ -1131,7 +1131,8 @@ function wireImagery(el){el.querySelector('#imgadd').onclick=()=>el.querySelecto
 
 /* ---------------- 3D print export (3MF with one part per colour, or STL) ---------------- */
 const P3=Object.assign({dgrow:6,house:true,sink:true,dams:true,tcol:'orange',area:'lot',clip:true,size:180,exag:1,base:4,terrace:0,bound:true,water:true,design:true,zones:true,trees:true,canopy:true,cex:2,wdepth:1.5,swid:1.5,fill:true},lsGet('bt.p3',{}));
-if(!P3.v46){P3.tcol='orange';P3.v46=1} // the three-colour print (orange ground, green canopy, blue creeks) is the new default
+if(!P3.v46){P3.tcol='orange';P3.v46=1}
+if(!P3.v47){P3.cex=1;P3.cmode='smooth';P3.detail='fine';P3.v47=1} // smoother canopy at true height, finer model // the three-colour print (orange ground, green canopy, blue creeks) is the new default
 const TCOL={orange:'#E07B39',green:'#5E9B4A',tan:'#C9B48A'};
 function morph3(a,nx,ny,R,dil){const t=new Uint8Array(a.length),o=new Uint8Array(a.length);
   for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){let v=dil?0:1;for(let d=-R;d<=R;d++){const ii=i+d;const x=(ii<0||ii>=nx)?0:a[j*nx+ii];if(dil?x:!x){v=dil?1:0;break}}t[j*nx+i]=v}
@@ -1172,7 +1173,7 @@ function growPoly(p,d){if(!(d>0)||p.length<3)return p;const A=offsetLine(p,d,tru
 function build3D(){
   const lp=flat(T.lot);let src=lp,mg=8;if(P3.area==='context')mg=60;if(P3.area==='catch'){src=flat(T.catch[0].p);mg=20}
   const xs=src.map(q=>q[0]),ys=src.map(q=>q[1]);const x0=Math.min(...xs)-mg,y0=Math.min(...ys)-mg,x1=Math.max(...xs)+mg,y1=Math.max(...ys)+mg;
-  const terr=+P3.terrace>0;const N=terr?150:200;const c=Math.max(x1-x0,y1-y0)/N;const nx=Math.round((x1-x0)/c),ny=Math.round((y1-y0)/c);
+  const terr=+P3.terrace>0;const fine=P3.detail==='fine';const N=terr?(fine?240:150):(fine?340:200);const c=Math.max(x1-x0,y1-y0)/N;const nx=Math.round((x1-x0)/c),ny=Math.round((y1-y0)/c);
   const s=P3.size/Math.max(x1-x0,y1-y0);const ex=+P3.exag,I=+P3.terrace;
   const X=i=>+(i*c*s).toFixed(3),Y=j=>+((ny-j)*c*s).toFixed(3);
   const clip=P3.clip&&P3.area!=='catch';
@@ -1199,8 +1200,8 @@ function build3D(){
   if(P3.water){const sw=+P3.swid||1;const it=T.streams.filter(st=>st.k>=1).map(st=>({t:'line',p:flat(st.p),r:hw([0,1,1.4,2][st.k]*sw)}));
     for(const f of visList()){const k=KINDS[f.kind];if(!k||k.g!=='Water'||(hasDam&&(f.kind==='pond'||f.kind==='damwall')))continue;it.push(featItem(f,hw))}add('Water','#1E7FD8',0.8,it.filter(Boolean));if(+P3.wdepth>0&&L.length&&L[L.length-1].name==='Water'){L[L.length-1].carve=+P3.wdepth;L[L.length-1].h=Math.min(0.6,+P3.wdepth/2)}}
   if(P3.design)for(const g of ['Access','Built','Landscape','Plants']){const col={Access:'#8A5A2B',Built:'#5A5A5A',Landscape:'#9A7420',Plants:'#3F8F3A'}[g];
-    add(g,col,0.8,visList().filter(f=>(KINDS[f.kind]||{}).g===g&&!(P3.trees&&(f.kind==='tree'||f.kind==='guild'))).map(f=>featItem(f,hw)).filter(Boolean))}
-  if(P3.zones)for(let z=0;z<=5;z++){const kk='zone'+z;add(KINDS[kk].label,KINDS[kk].color,0.4,visList().filter(f=>f.kind===kk).map(f=>featItem(f,hw)).filter(Boolean))}
+    add(g,col,0.8,visList().filter(f=>(KINDS[f.kind]||{}).g===g&&!(P3.trees&&(f.kind==='tree'||f.kind==='guild'))).map(f=>featItem(f,hw)).filter(Boolean));if(L.length&&L[L.length-1].name===g&&(g==='Plants'||g==='Landscape'))L[L.length-1].soft=true}
+  if(P3.zones)for(let z=0;z<=5;z++){const kk='zone'+z;add(KINDS[kk].label,KINDS[kk].color,0.4,visList().filter(f=>f.kind===kk).map(f=>featItem(f,hw)).filter(Boolean));if(L.length&&L[L.length-1].name===KINDS[kk].label)L[L.length-1].soft=true}
   /* rivers and dam water: sunk 1.2 mm into the terrain and finished level with the surface, so the blue overlaps the green and sits flush */
   if(P3.sink!==false)L.forEach(ly=>{if(/water/i.test(ly.name)&&!ly.carve){ly.sink=1.2;if(!/^dam/i.test(ly.name))ly.h=Math.min(ly.h,0.15)}});
   L.forEach((ly,li)=>{for(const it of ly.items){let bx0,by0,bx1,by1;const pts=it.p||[it.c];bx0=Math.min(...pts.map(p=>p[0]))-(it.r||0);bx1=Math.max(...pts.map(p=>p[0]))+(it.r||0);by0=Math.min(...pts.map(p=>p[1]))-(it.r||0);by1=Math.max(...pts.map(p=>p[1]))+(it.r||0);
@@ -1210,11 +1211,23 @@ function build3D(){
       if(hit)own[k]=li}}});
   // tree canopy from the LiDAR canopy grid: green, lifted by its own exaggeration, on cells no other layer claimed
   const W1=nx+1,cex=+P3.cex||1,base=+P3.base;let cgr=null;
-  if(P3.canopy&&CG){cgr=new Float32Array(cells);const li=L.length;let any=false;
-    for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(own[k]!==-1)continue;let h=0;
-      for(const a of [.2,.5,.8])for(const b of [.2,.5,.8]){const v=cgAt(x0+(i+a)*c,y0+(j+b)*c,[])[0];if(v>h)h=v}
-      if(h>=2){cgr[k]=h;own[k]=li;any=true}}
-    if(any)L.push({name:'Tree canopy (LiDAR)',color:'#2F9E44',h:0,canopy:true,items:[]})}
+  if(P3.canopy&&CG){const li=L.length;let any=false;const mode=P3.cmode||'smooth';
+    // canopy height per cell (mean of 9 samples, not the tallest, so single tall trees don't become needles)
+    const open=k=>own[k]===-1||(own[k]>=0&&L[own[k]]&&L[own[k]].soft);
+    const raw=new Float32Array(cells);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!open(k))continue;let h=0;
+      for(const a of [.2,.5,.8])for(const b of [.2,.5,.8])h+=cgAt(x0+(i+a)*c,y0+(j+b)*c,[])[0];raw[k]=h/9}
+    // smooth into crown masses (two passes of a 3×3 mean over open cells)
+    let sm=raw;if(mode!=='raw')for(let pass=0;pass<2;pass++){const o=new Float32Array(cells);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!open(k))continue;let t=0,n=0;
+      for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){const ii=i+di,jj=j+dj;if(ii<0||jj<0||ii>=nx||jj>=ny)continue;const kk=jj*nx+ii;if(own[kk]===-2)continue;t+=sm[kk];n++}o[k]=n?t/n:0}sm=o}
+    // keep canopy one cell in from the boundary and other parts, and drop specks under 6 cells
+    const m=new Uint8Array(cells);for(let j=1;j<ny-1;j++)for(let i=1;i<nx-1;i++){const k=j*nx+i;if(!open(k)||sm[k]<2.5)continue;
+      if(!open(k-1)||!open(k+1)||!open(k-nx)||!open(k+nx))continue;m[k]=1}
+    const seen=new Uint8Array(cells);for(let k0=0;k0<cells;k0++){if(!m[k0]||seen[k0])continue;const st=[k0],comp=[];seen[k0]=1;
+      while(st.length){const k=st.pop();comp.push(k);for(const kk of [k-1,k+1,k-nx,k+nx])if(kk>=0&&kk<cells&&m[kk]&&!seen[kk]){seen[kk]=1;st.push(kk)}}
+      if(comp.length<6)for(const k of comp)m[k]=0}
+    cgr=new Float32Array(cells);const cap=+P3.ccap||30;
+    for(let k=0;k<cells;k++)if(m[k]){cgr[k]=mode==='cover'?0:Math.min(sm[k],cap);own[k]=li;any=true}
+    if(any)L.push({name:'Tree canopy (LiDAR)',color:'#2F9E44',h:0,canopy:true,cover:mode==='cover',items:[]})}
   // gaps in the boundary (road reserves, notches) become a flat strip at base height so the print holds together
   const inside=new Uint8Array(cells);for(let k=0;k<cells;k++)inside[k]=own[k]===-2?0:1;
   const bridge=new Uint8Array(cells);if(clip&&P3.fill){const Rr=Math.max(1,Math.ceil(25/c));const clo=morph3(morph3(inside,nx,ny,Rr,true),nx,ny,Rr,false);for(let k=0;k<cells;k++)if(!inside[k]&&clo[k])bridge[k]=1}
@@ -1222,7 +1235,7 @@ function build3D(){
   const tOwn=new Int16Array(cells);for(let k=0;k<cells;k++)tOwn[k]=inside[k]||bridge[k]?0:-2;
   const carveLy=L.findIndex(ly=>ly.carve);const D=carveLy>=0?L[carveLy].carve:0;
   const meshes=[];const terrM=new Mesh3('Ground',TCOL[P3.tcol]||TCOL.orange);
-  const lyTop=(ly,t,hc)=>ly.canopy?t+Math.max(.4,hc):ly.abs?Math.max(t+ly.h,ly.abs):t+ly.h;
+  const lyTop=(ly,t,hc)=>ly.canopy?t+(ly.cover?1.6:Math.max(.6,hc)):ly.abs?Math.max(t+ly.h,ly.abs):t+ly.h;
   if(terr){const cb=new Float32Array(cells).fill(0),ct=new Float32Array(cells);for(let k=0;k<cells;k++){ct[k]=bridge[k]?base:mm(zc[k]);if(carveLy>=0&&own[k]===carveLy)ct[k]=Math.max(base*.5,ct[k]-D)}
     padCols(terrM,tOwn,0,nx,ny,X,Y,cb,ct);meshes.push(terrM);
     L.forEach((ly,li)=>{const m=new Mesh3(ly.name,ly.color);const top=new Float32Array(cells);for(let k=0;k<cells;k++)top[k]=lyTop(ly,ct[k],(cgr?cgr[k]:0)*s*ex*cex);padCols(m,own,li,nx,ny,X,Y,ly.sink?ct.map(v=>v-ly.sink):ct,top);if(m.t.length)meshes.push(m)})}
@@ -1295,7 +1308,9 @@ function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`
   <div class="row"><label><input type="checkbox" id="p3hs" ${P3.house!==false?'checked':''}> Buildings (house, cabin, shed…; the Zone 0 home if none drawn), black, raised 2.4 mm</label></div>
   <div class="seg"><button class="btn" id="p3simple" title="Terrain, house, creeks and dams only">Simple: terrain, house, water and dams</button></div>
   <div class="row"><label><input type="checkbox" id="p3c" ${P3.canopy?'checked':''} ${SITEDEF.canopy||SITEDEF.cgrid?'':'disabled'}> Tree canopy from LiDAR (green part)</label></div>
-  ${SITEDEF.canopy||SITEDEF.cgrid?`<div class="field"><label for="p3cex">Canopy lift</label>${o('p3cex',[[1,'Same as the ground'],[2,'2× taller'],[3,'3× taller'],[5,'5× taller']],P3.cex)}</div>`:'<p class="hint">No LiDAR canopy for this site yet.</p>'}
+  ${SITEDEF.canopy||SITEDEF.cgrid?`<div class="field"><label for="p3cm">Canopy shape</label>${o('p3cm',[['smooth','Smooth crowns at their height'],['cover','Flat cover layer (1.6 mm, cleanest print)'],['raw','Raw LiDAR (spiky)']],P3.cmode||'smooth')}</div>
+  <div class="field"><label for="p3cex">Canopy height</label>${o('p3cex',[[0.5,'Half height'],[1,'Same scale as the ground'],[1.5,'1.5× taller'],[2,'2× taller']],P3.cex)}</div>`:'<p class="hint">No LiDAR canopy for this site yet.</p>'}
+  <div class="field"><label for="p3dt">Detail</label>${o('p3dt',[['fine','Fine (smoother slopes and edges, bigger file)'],['normal','Normal (faster)']],P3.detail||'fine')}</div>
   <div class="field"><label for="p3wd">Creeks</label>${o('p3wd',[[0,'Not carved (use the sink option above)'],[1,'Carved 1 mm into the ground'],[1.5,'Carved 1.5 mm'],[2,'Carved 2 mm'],[3,'Carved 3 mm']],P3.wdepth)}</div>
   <div class="field"><label for="p3sw">Creek width</label>${o('p3sw',[[1,'Normal'],[1.5,'1.5× wider'],[2,'2× wider'],[3,'3× wider']],P3.swid)}</div>
   <div class="row"><label><input type="checkbox" id="p3f" ${P3.fill?'checked':''}> Join gaps in the boundary (road reserves) with a flat base strip</label></div>
@@ -1307,7 +1322,7 @@ function wireP3(el){const set=(k,v)=>{P3[k]=v;lsSet('bt.p3',P3)};
   el.querySelector('#p3area').onchange=e=>set('area',e.target.value);el.querySelector('#p3clip').onchange=e=>set('clip',e.target.checked);el.querySelector('#p3size').onchange=e=>set('size',+e.target.value);
   el.querySelector('#p3exag').onchange=e=>set('exag',+e.target.value);el.querySelector('#p3terr').onchange=e=>set('terrace',+e.target.value);
   el.querySelector('#p3b').onchange=e=>set('bound',e.target.checked);el.querySelector('#p3w').onchange=e=>set('water',e.target.checked);el.querySelector('#p3z').onchange=e=>set('zones',e.target.checked);el.querySelector('#p3d').onchange=e=>set('design',e.target.checked);el.querySelector('#p3t').onchange=e=>set('trees',e.target.checked);
-  el.querySelector('#p3tc').onchange=e=>set('tcol',e.target.value);el.querySelector('#p3c').onchange=e=>set('canopy',e.target.checked);{const ce=el.querySelector('#p3cex');if(ce)ce.onchange=e=>set('cex',+e.target.value)}el.querySelector('#p3wd').onchange=e=>set('wdepth',+e.target.value);el.querySelector('#p3sw').onchange=e=>set('swid',+e.target.value);el.querySelector('#p3f').onchange=e=>set('fill',e.target.checked);el.querySelector('#p3dm').onchange=e=>set('dams',e.target.checked);el.querySelector('#p3dg').onchange=e=>set('dgrow',+e.target.value);el.querySelector('#p3sk').onchange=e=>set('sink',e.target.checked);el.querySelector('#p3hs').onchange=e=>set('house',e.target.checked);el.querySelector('#p3simple').onclick=()=>{Object.assign(P3,{bound:false,water:true,zones:false,design:false,trees:false,dams:true,house:true,sink:true});lsSet('bt.p3',P3);renderTools();toast('Set to terrain, house, water and dams only')};el.querySelector('#p3pv').onclick=preview3D;el.querySelector('#p3mf').onclick=()=>export3D('3mf');el.querySelector('#p3stl').onclick=()=>export3D('stl')}
+  el.querySelector('#p3tc').onchange=e=>set('tcol',e.target.value);el.querySelector('#p3c').onchange=e=>set('canopy',e.target.checked);{const ce=el.querySelector('#p3cex');if(ce)ce.onchange=e=>set('cex',+e.target.value);const cm=el.querySelector('#p3cm');if(cm)cm.onchange=e=>set('cmode',e.target.value)}el.querySelector('#p3dt').onchange=e=>set('detail',e.target.value);el.querySelector('#p3wd').onchange=e=>set('wdepth',+e.target.value);el.querySelector('#p3sw').onchange=e=>set('swid',+e.target.value);el.querySelector('#p3f').onchange=e=>set('fill',e.target.checked);el.querySelector('#p3dm').onchange=e=>set('dams',e.target.checked);el.querySelector('#p3dg').onchange=e=>set('dgrow',+e.target.value);el.querySelector('#p3sk').onchange=e=>set('sink',e.target.checked);el.querySelector('#p3hs').onchange=e=>set('house',e.target.checked);el.querySelector('#p3simple').onclick=()=>{Object.assign(P3,{bound:false,water:true,zones:false,design:false,trees:false,dams:true,house:true,sink:true,canopy:true});lsSet('bt.p3',P3);renderTools();toast('Set to terrain, house, water and dams only')};el.querySelector('#p3pv').onclick=preview3D;el.querySelector('#p3mf').onclick=()=>export3D('3mf');el.querySelector('#p3stl').onclick=()=>export3D('stl')}
 
 /* Print preview: opens the model in a 3D viewer on an A1-sized bed before download */
 async function preview3D(){const st=$('#p3status');st.textContent='Building the preview…';if(P3.canopy)await loadCG();
