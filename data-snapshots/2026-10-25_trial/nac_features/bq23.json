@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        994.4,
+        1000.9
+      ],
+      [
+        996.5,
+        1000.9
+      ],
+      [
+        996.8,
+        1002.4
+      ],
+      [
+        994.7,
+        1002.3
+      ]
+    ]
+  },
+  "kind": "pond",
+  "name": "Water pond (idea)",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Wanted (answer 10); location to be chosen. Shown at the low side of the lawn for now.",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

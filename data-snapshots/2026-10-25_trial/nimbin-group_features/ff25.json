@@ -1,0 +1,60 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        604,
+        850
+      ],
+      [
+        597,
+        834
+      ],
+      [
+        586,
+        826
+      ],
+      [
+        604,
+        822
+      ],
+      [
+        630,
+        830
+      ],
+      [
+        640,
+        850
+      ],
+      [
+        640,
+        885
+      ],
+      [
+        625,
+        900
+      ],
+      [
+        614,
+        894
+      ],
+      [
+        602,
+        884
+      ],
+      [
+        606,
+        868
+      ]
+    ]
+  },
+  "kind": "zone3",
+  "name": "Zone 3 · east of the cabin and along the spur",
+  "notes": "Beyond the east shelterbelt and along the spur drive: less-visited ground between the house area and the bush (light green on Brett's sketch). Redrawn from the sketch on 24 Oct; drag the corners to fit.",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

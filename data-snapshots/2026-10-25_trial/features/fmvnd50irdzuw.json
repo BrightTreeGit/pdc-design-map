@@ -1,0 +1,36 @@
+{
+  "createdAt": "2026-10-25T05:04:13.539Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        865.2,
+        922.6
+      ],
+      [
+        832,
+        883.5
+      ],
+      [
+        820.6,
+        892.8
+      ],
+      [
+        854,
+        935.2
+      ],
+      [
+        865.4,
+        922.6
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · Orchard",
+  "notes": "West/north-west fruit forest expansion (phase 2, from mid-2027 over the following year). The largest Zone 2: extend the hairpin's contour swales out across this slope.\nWater: rain held in extended swales; treated water by sub-surface drip only if it falls inside the approved irrigation area (check first). Bucket-water new trees through the first dry spring (Jul–Sep).\nTrees (plant Aug–Nov if watered, Dec–Mar if rain-fed): avocado on the best-drained swale mounds, mango in full sun, white and black sapote, macadamia (rain only, no treated water), more citrus, jaboticaba and grumichama in part shade, mulberry, abiu.\nSupport layer: pigeon pea and cassava as nurse and chop-and-drop, comfrey and vetiver on the swale banks, sweet potato and pinto peanut as ground cover.\nSequence: dig swales in the dry (Jun–Aug 2027), sow pioneers at first storms, plant trees into the pioneer shelter.\nPlan: Bright Tree planting calendar and phasing (Oct 2026).",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T05:07:21.983Z"
+}

@@ -1,0 +1,16 @@
+{
+  "dryPct": 65,
+  "eff": 0.8,
+  "extraRoof": 300,
+  "extraTank": 55000,
+  "garden": 0,
+  "gardenMonths": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "lpp": 120,
+  "people": 6,
+  "scen": "dry"
+}

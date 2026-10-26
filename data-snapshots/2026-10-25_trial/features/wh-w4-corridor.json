@@ -1,0 +1,124 @@
+{
+  "createdAt": "2026-10-25T06:19:57.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        831.5,
+        1029.5
+      ],
+      [
+        824.5,
+        1038.5
+      ],
+      [
+        842.5,
+        1058.5
+      ],
+      [
+        834.5,
+        1069.5
+      ],
+      [
+        838.5,
+        1076.5
+      ],
+      [
+        834.5,
+        1086.5
+      ],
+      [
+        845.5,
+        1097.5
+      ],
+      [
+        842.5,
+        1106.5
+      ],
+      [
+        847.5,
+        1111.5
+      ],
+      [
+        846.5,
+        1118.5
+      ],
+      [
+        849.5,
+        1121.5
+      ],
+      [
+        837.5,
+        1137.5
+      ],
+      [
+        838.5,
+        1143.5
+      ],
+      [
+        842.5,
+        1144.5
+      ],
+      [
+        850.5,
+        1133.5
+      ],
+      [
+        850.5,
+        1127.5
+      ],
+      [
+        861.5,
+        1116.5
+      ],
+      [
+        862.5,
+        1103.5
+      ],
+      [
+        855.5,
+        1096.5
+      ],
+      [
+        855.5,
+        1092.5
+      ],
+      [
+        861.5,
+        1086.5
+      ],
+      [
+        864.5,
+        1076.5
+      ],
+      [
+        862.5,
+        1072.5
+      ],
+      [
+        867.5,
+        1066.5
+      ],
+      [
+        865.5,
+        1057.5
+      ],
+      [
+        872.5,
+        1047.5
+      ],
+      [
+        852.5,
+        1035.5
+      ]
+    ]
+  },
+  "kind": "zone5",
+  "name": "W4 · Gully heads and corridor edge (draft) – corridor edge",
+  "notes": "Job: where the western side gullies start and the vine-forest corridor edge begins. Zone 5, left wild.\nWeed control only (molasses grass, lantana and other woody weeds), working in from the edges a little at a time.\nLet local species come back; if gaps need help, plant only local LFW rainforest species.\nNo fruit trees, no earthworks, no burning; leave fallen timber in the gully.\nPlaced at the heads of LiDAR flow lines (2022, 1 m), where water first gathers into a channel.\nDraft from the 19–20 Oct western high edge plan – adjust on site.",
+  "source": "claude",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:19:57.000Z"
+}

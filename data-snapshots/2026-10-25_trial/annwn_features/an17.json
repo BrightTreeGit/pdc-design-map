@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        992.3,
+        981.1
+      ]
+    ]
+  },
+  "kind": "fruittree",
+  "name": "Goldfinger banana",
+  "notes": "Goldfinger banana clump near the back fence. (From Bronwen's hand sketch, 24 Oct 2026; position approximate: drag to fit.)",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-23T22:30:00.000Z"
+}

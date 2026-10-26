@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-25T07:13:08.528Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        912,
+        952.2
+      ],
+      [
+        914.1,
+        949.7
+      ],
+      [
+        910,
+        946.6
+      ],
+      [
+        907.4,
+        949
+      ],
+      [
+        912.2,
+        952
+      ],
+      [
+        912.2,
+        952
+      ]
+    ]
+  },
+  "kind": "mushrooms",
+  "name": "Mushroom logs at sauna mist",
+  "notes": "Mushroom logs in the sauna mist: shiitake on fresh Blackbutt (trial beside Casuarina; eucalypt runs slower but fruits longer) plus native oyster or turkey tail from the PDC session.\nMethod: plug (dowel) logs – fresh untreated logs cut and rested 2–4 weeks, holes drilled in a diamond pattern, dowels hammered in, sealed with wax, each log tagged with species and date; or a totem stack of 30 cm rounds with grain spawn between.\nPlacement: shaded, in the mister overspray; roof drip is fine; logs off the ground on a base and above any flood reach.\nTiming: inoculate in the cool months (Jun–Aug); spawn runs 6–18 months on hardwood; soak logs to trigger a flush.\nTimber: use lopped and weed-tree wood (fresh, untreated) from the property.\nAfter: spent logs go into hügel beds and compost.\nFood rule: never eat a wild mushroom unless identified with certainty.\nSource: PDC session 29 (mushroom inoculation) and Spa Guild notes.",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T07:13:32.760Z"
+}

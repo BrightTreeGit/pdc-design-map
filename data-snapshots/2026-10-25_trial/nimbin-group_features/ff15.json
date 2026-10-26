@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        554,
+        852
+      ],
+      [
+        564,
+        852
+      ],
+      [
+        564,
+        872
+      ],
+      [
+        576,
+        872
+      ],
+      [
+        576,
+        892
+      ],
+      [
+        554,
+        892
+      ]
+    ]
+  },
+  "kind": "chickens",
+  "name": "Chicken enclosure",
+  "notes": "Group plan: chickens fenced in a run along the west and south of the house, reaching the kitchen window for scraps. 5–8 birds; at least 0.5 m² coop and 1 m² run per bird. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

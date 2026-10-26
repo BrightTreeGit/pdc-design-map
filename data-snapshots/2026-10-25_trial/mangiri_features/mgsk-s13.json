@@ -1,0 +1,36 @@
+{
+  "createdAt": "2026-10-25T06:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        1142.1,
+        1210
+      ],
+      [
+        1150.8,
+        1224
+      ],
+      [
+        1157.1,
+        1233.8
+      ],
+      [
+        1162.7,
+        1243.6
+      ],
+      [
+        1171.5,
+        1257
+      ]
+    ]
+  },
+  "kind": "swale",
+  "name": "Line by the track west of Zone 1",
+  "notes": "From Mully's sketch, 25 Oct 2026 – approximate. Drawn as a blue water line; check it runs on contour on site.",
+  "source": "Mully's zone sketch (25 Oct 2026), fitted to the NSW 2014 aerial",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:00:00.000Z"
+}

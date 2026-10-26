@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-22T05:20:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "a0": 125,
+    "a1": 155,
+    "cx": 1108,
+    "cy": 1105,
+    "g": "sector",
+    "r": 120
+  },
+  "kind": "view",
+  "name": "Road access and traffic noise (south-east)",
+  "notes": "Team sector map: road access and potential traffic noise from the south-east. A mixed hedgerow along that side screens noise and dust. (Traced from the team's sector map, which is a schematic: positions and angles are indicative; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026): sector map and design-area slides",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-22T05:20:00.000Z"
+}

@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-25T04:53:50.581Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        883.4,
+        947.5
+      ],
+      [
+        870.8,
+        937.9
+      ],
+      [
+        867.9,
+        935.2
+      ],
+      [
+        862.3,
+        929
+      ]
+    ]
+  },
+  "kind": "swale",
+  "name": "Rows on contour swale (level) 3",
+  "notes": "Drawn with the natural-pattern tool: level rows 2 m apart; check on the ground before digging.",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T04:57:47.975Z"
+}

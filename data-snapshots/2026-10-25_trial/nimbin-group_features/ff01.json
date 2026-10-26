@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        566,
+        855
+      ],
+      [
+        584,
+        855
+      ],
+      [
+        584,
+        872
+      ],
+      [
+        566,
+        872
+      ]
+    ]
+  },
+  "kind": "building",
+  "name": "Main house",
+  "notes": "Existing house with solar panels; four 10,000 L tanks on the west side. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

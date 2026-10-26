@@ -1,0 +1,60 @@
+{
+  "createdAt": "2026-10-25T06:19:57.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        860.5,
+        1001.5
+      ],
+      [
+        860.5,
+        1004.5
+      ],
+      [
+        867.5,
+        1011.5
+      ],
+      [
+        873.5,
+        1012.5
+      ],
+      [
+        887.5,
+        1020.5
+      ],
+      [
+        892.5,
+        1019.5
+      ],
+      [
+        896.5,
+        1014.5
+      ],
+      [
+        895.5,
+        1011.5
+      ],
+      [
+        890.5,
+        1006.5
+      ],
+      [
+        874.5,
+        997.5
+      ],
+      [
+        865.5,
+        996.5
+      ]
+    ]
+  },
+  "kind": "zone5",
+  "name": "W4 · Gully heads and corridor edge (draft) – middle gully",
+  "notes": "Job: where the western side gullies start and the vine-forest corridor edge begins. Zone 5, left wild.\nWeed control only (molasses grass, lantana and other woody weeds), working in from the edges a little at a time.\nLet local species come back; if gaps need help, plant only local LFW rainforest species.\nNo fruit trees, no earthworks, no burning; leave fallen timber in the gully.\nPlaced at the heads of LiDAR flow lines (2022, 1 m), where water first gathers into a channel.\nDraft from the 19–20 Oct western high edge plan – adjust on site.",
+  "source": "claude",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:19:57.000Z"
+}

@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-22T00:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1123,
+        1036
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "2 × IBC on shed (proposed)",
+  "notes": "Team: shed roof capture into two eastern IBCs. (Positions are indicative, traced from the team's bubble plan onto the aerial; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026)",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-22T00:30:00.000Z"
+}

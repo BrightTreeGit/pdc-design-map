@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "a0": 195,
+    "a1": 235,
+    "cx": 574,
+    "cy": 863,
+    "g": "sector",
+    "r": 100
+  },
+  "kind": "view",
+  "name": "View (south-west, to the ranges)",
+  "notes": "Group sector analysis: the view.",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

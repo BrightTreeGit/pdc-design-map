@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-25T07:00:00.000Z",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1113,
+        917
+      ]
+    ]
+  },
+  "kind": "structure",
+  "name": "Treehouse – space-net between two large trees",
+  "notes": "Space-net style treehouse slung between two large trees in the north-east corner, in place of the B4 building pad (about 117 m, north-west facing spur). Before building: arborist check of both trees (health, limbs, root zone), attach with tree-friendly fixings that allow growth; the spur is exposed to wind and to fire running upslope, so keep a low-fuel clearing under it and a safe access path. Drag the point to the actual trees.",
+  "source": "claude",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-25T07:00:00.000Z"
+}

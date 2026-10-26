@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-22T05:20:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1108,
+        1030
+      ],
+      [
+        1134,
+        1030
+      ],
+      [
+        1134,
+        1092
+      ],
+      [
+        1108,
+        1092
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · Orchard (group design area)",
+  "notes": "The team's design focus: about 60 × 25 m, about 1,500 m² (slides 'from property to orchard'). (Traced from the team's sector map, which is a schematic: positions and angles are indicative; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026): sector map and design-area slides",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-22T05:20:00.000Z"
+}

@@ -1,0 +1,72 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        536,
+        848
+      ],
+      [
+        540,
+        833
+      ],
+      [
+        548,
+        826
+      ],
+      [
+        562,
+        823
+      ],
+      [
+        580,
+        824
+      ],
+      [
+        586,
+        826
+      ],
+      [
+        568,
+        830
+      ],
+      [
+        563,
+        842
+      ],
+      [
+        561,
+        862
+      ],
+      [
+        564,
+        884
+      ],
+      [
+        558,
+        898
+      ],
+      [
+        540,
+        898
+      ],
+      [
+        533,
+        880
+      ],
+      [
+        534,
+        862
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · orchard and food forest inside the driveway loop",
+  "notes": "The existing citrus and mango orchard and the food forest belt west of the house, inside the driveway loop and its tree row (orange and dark green on Brett's sketch). Redrawn from the sketch on 24 Oct; drag the corners to fit.",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

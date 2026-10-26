@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-10-23T19:31:37.631Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        985,
+        887
+      ],
+      [
+        963,
+        887
+      ]
+    ]
+  },
+  "kind": "damwall",
+  "name": "Hand-built weir or small pond wall · 1 m",
+  "notes": "Hand-built weir or small pond, 1 m high (crest 52.5 m), full at 52.4 m: about 54 m³ (0.05 ML) over 136 m², 0.9 m deep at the wall. Catchment 38.3 ha. About 14 m³ of earth and rock: roughly 9 person-days by hand. (1 m crest, 2:1 sides). Computed from the 2022 LiDAR; check on site and with council and state water rules before building.",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-23T19:31:38.335Z"
+}

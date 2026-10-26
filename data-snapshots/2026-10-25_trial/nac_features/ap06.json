@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        995.8,
+        991.3
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "Water tank 30,000 L",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Fed by the house roof (173 m²) and half the garage (18 m²), 191 m² in all. Electric pump supplies the house. Overflow runs to the street gutter. Leaf guards on every gutter.",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z",
+  "vol": 30000
+}

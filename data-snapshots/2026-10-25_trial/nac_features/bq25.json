@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "a0": 130,
+    "a1": 185,
+    "cx": 1008.6,
+    "cy": 1000.6,
+    "g": "sector",
+    "r": 70
+  },
+  "kind": "wind",
+  "name": "Cool and cold wind (south to south-east)",
+  "notes": "From Ange's sector map: the cool and cold winds come from the south to south-east (answer 22). A screen or hedge on that side shelters the vegie beds and the herb strip.",
+  "source": "Ange's sector sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "agreed",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

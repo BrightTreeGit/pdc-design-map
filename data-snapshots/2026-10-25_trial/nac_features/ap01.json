@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1000.8,
+        993.8
+      ],
+      [
+        1018.6,
+        996.2
+      ],
+      [
+        1015.8,
+        1006.9
+      ],
+      [
+        999.3,
+        1004.9
+      ]
+    ]
+  },
+  "kind": "building",
+  "name": "Home",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). 173 m² roof, all to the 30,000 L tank. Built to BAL 29. Completed Sept 2024.",
+  "roof": true,
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

@@ -1,0 +1,60 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        431,
+        875
+      ],
+      [
+        470,
+        898
+      ],
+      [
+        500,
+        908
+      ],
+      [
+        522,
+        902
+      ],
+      [
+        531,
+        878
+      ],
+      [
+        534,
+        850
+      ],
+      [
+        541,
+        828
+      ],
+      [
+        560,
+        819
+      ],
+      [
+        590,
+        818
+      ],
+      [
+        615,
+        822
+      ],
+      [
+        630,
+        830
+      ]
+    ]
+  },
+  "kind": "road",
+  "name": "Driveway loop",
+  "notes": "Existing driveway: crosses the creek (floods regularly) and loops round the orchard to the shed and house. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

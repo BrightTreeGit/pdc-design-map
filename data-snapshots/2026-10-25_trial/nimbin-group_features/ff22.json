@@ -1,0 +1,60 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        563,
+        842
+      ],
+      [
+        568,
+        830
+      ],
+      [
+        586,
+        826
+      ],
+      [
+        597,
+        834
+      ],
+      [
+        604,
+        850
+      ],
+      [
+        606,
+        868
+      ],
+      [
+        602,
+        884
+      ],
+      [
+        590,
+        891
+      ],
+      [
+        574,
+        891
+      ],
+      [
+        564,
+        884
+      ],
+      [
+        561,
+        862
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Zone 1 · house, shed and cabin surrounds",
+  "notes": "Daily-use area: the work yard between the shed and the house, the herb spiral, the vegetable garden, and the cabin with its path and the big shade tree (yellow and red on Brett's house-area sketch). Redrawn from the sketch on 24 Oct; drag the corners to fit.",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

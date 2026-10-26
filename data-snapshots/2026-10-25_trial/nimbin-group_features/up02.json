@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T20:20:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1253,
+        1129
+      ],
+      [
+        1269,
+        1129
+      ],
+      [
+        1269,
+        1145
+      ],
+      [
+        1253,
+        1145
+      ]
+    ]
+  },
+  "kind": "futurebuilding",
+  "name": "Upper building pad 2 (about 316 m)",
+  "notes": "Level 16 × 16 m pad at about 316 m needs roughly 62 m³ of cut and fill (up to 1.2 m deep). About 9.5 h of winter sun (terrain only), north-facing. Mid-slope: sheltered, with moderate cold-air risk. One of the two upper building sites Brett and Blake are working out access to (23 Oct). Computed pad site: check on site.",
+  "source": "Computed building pad (B4), map prospects",
+  "stage": "y3",
+  "status": "idea",
+  "updatedAt": "2026-10-23T20:20:00.000Z"
+}

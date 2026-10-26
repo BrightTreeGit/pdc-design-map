@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-10-18T03:14:46.546Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "cx": 945.5114820846906,
+    "cy": 1157.8767915309447,
+    "g": "sun",
+    "r": 90
+  },
+  "kind": "sunW",
+  "name": "Winter sun 21 Jun",
+  "notes": "",
+  "source": "map",
+  "status": "idea",
+  "updatedAt": "2026-10-21T23:27:21.364Z"
+}

@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1001.7,
+        1004.6
+      ]
+    ]
+  },
+  "kind": "tree",
+  "name": "Large existing tree (front garden)",
+  "notes": "The big tree in the front garden, east of the driveway. (From Bronwen's hand sketch, 24 Oct 2026; position approximate: drag to fit.)",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T22:30:00.000Z"
+}
