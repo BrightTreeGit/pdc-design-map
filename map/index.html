@@ -1191,7 +1191,8 @@ function build3D(){
   const clip=P3.clip&&P3.area!=='catch';
   const cells=nx*ny;const own=new Int16Array(cells).fill(-2);
   const near=(p,d)=>{if(inPoly(p,lp))return true;if(!d)return false;for(let a=1;a<lp.length+1;a++)if(segDist(p,lp[a-1],lp[a%lp.length])<=d)return true;return false};
-  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const p=[x0+(i+.5)*c,y0+(j+.5)*c];let ok=!clip||inPoly(p,lp);
+  const lotIn=new Uint8Array(cells);
+  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const p=[x0+(i+.5)*c,y0+(j+.5)*c];let ok=!clip||inPoly(p,lp);if(inPoly(p,lp))lotIn[j*nx+i]=1;
     if(!ok&&exA)ok=near(p,exA);if(!ok&&exW){for(let d=c/2;d<=exW&&!ok;d+=c/2)ok=inPoly([p[0]+d,p[1]],lp)}
     if(ok)own[j*nx+i]=-1}
   const q=z=>I>0?Math.floor(z/I)*I:z;
@@ -1274,8 +1275,8 @@ function build3D(){
       {treeMajor=true;focus=new Uint8Array(cells);for(let k=0;k<cells;k++)if(inside[k]&&!isTreeC(k)&&own[k]===-1)focus[k]=1;terrM.color='#2F9E44';
         // the rim along the boundary and the banks of creeks stay green (body colour): no thin orange bands to print
         {const wl=L.findIndex(ly=>ly.name==='Water');const near=new Uint8Array(cells);const Rr=Math.max(2,Math.round(6/c));
-          for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!inside[k]||(wl>=0&&own[k]===wl)){for(let dj=-Rr;dj<=Rr;dj++)for(let di=-Rr;di<=Rr;di++){const ii=i+di,jj=j+dj;if(ii>=0&&jj>=0&&ii<nx&&jj<ny)near[jj*nx+ii]=1}}}
-          for(let k=0;k<cells;k++)if(near[k])focus[k]=0}
+          for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!lotIn[k]||(wl>=0&&own[k]===wl)){for(let dj=-Rr;dj<=Rr;dj++)for(let di=-Rr;di<=Rr;di++){const ii=i+di,jj=j+dj;if(ii>=0&&jj>=0&&ii<nx&&jj<ny)near[jj*nx+ii]=1}}}
+          for(let k=0;k<cells;k++)if(near[k]||!lotIn[k])focus[k]=0}
         // keep only real paddocks and clearings: small gaps take the body colour, so the second colour appears on fewer layers
         const minC=Math.max(1,Math.round((+P3.minPatch||5000)/(c*c)));const seen=new Uint8Array(cells);
         for(let k0=0;k0<cells;k0++){if(!focus[k0]||seen[k0])continue;const st=[k0],comp=[];seen[k0]=1;while(st.length){const k=st.pop();comp.push(k);for(const kk of [k-1,k+1,k-nx,k+nx])if(kk>=0&&kk<cells&&focus[kk]&&!seen[kk]){seen[kk]=1;st.push(kk)}}
@@ -1283,6 +1284,10 @@ function build3D(){
     let skinCol='#E07B39',skinName=null;
     if(!focus&&treeLy<0&&terrM.color.toLowerCase()!=='#2f9e44'){skinCol=terrM.color;skinName='Ground surface (skin)';terrM.color='#2F9E44';focus=new Uint8Array(cells);
       for(let k=0;k<cells;k++)if(inside[k]&&tOwn[k]===0&&(own[k]===-1||(own[k]>=0&&L[own[k]]&&L[own[k]].soft)))focus[k]=1}
+    if(focus)for(let k=0;k<cells;k++)if(!lotIn[k])focus[k]=0;
+    if(focus){const wl=L.findIndex(ly=>ly.name==='Water');const Rr=Math.max(2,Math.round(6/c));const near=new Uint8Array(cells);
+      for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!lotIn[k]||(wl>=0&&own[k]===wl)){for(let dj=-Rr;dj<=Rr;dj++)for(let di=-Rr;di<=Rr;di++){const ii=i+di,jj=j+dj;if(ii>=0&&jj>=0&&ii<nx&&jj<ny)near[jj*nx+ii]=1}}}
+      for(let k=0;k<cells;k++)if(near[k])focus[k]=0}
     if(focus||treeLy>=0){const isSkin=k=>(focus&&focus[k])||(!treeMajor&&treeLy>=0&&own[k]===treeLy);const fv=new Uint8Array(W1*(ny+1));for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!inside[k]||!isSkin(k))continue;for(const v of [j*W1+i,j*W1+i+1,(j+1)*W1+i,(j+1)*W1+i+1])fv[v]++}
       const SK=1.0,gTop=(i,j)=>{const v=j*W1+i;return hn[v]&&fv[v]===hn[v]?Math.max(.6,topT(i,j)-SK):topT(i,j)};
       padSmooth(terrM,tOwn,0,nx,ny,X,Y,gTop,()=>0);meshes.push(terrM);
