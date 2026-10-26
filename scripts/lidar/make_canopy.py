@@ -38,8 +38,11 @@ CHUNK = 4_000_000
 def log(*a): print(time.strftime('%H:%M:%S'), *a, flush=True)
 
 def tile_origin(name):
-    m = re.search(r'_(\d{6})_(\d{7})_', name)
-    return (int(m.group(1)), int(m.group(2))) if m else None
+    m = re.search(r'_(\d{6})_(\d{7})_', name)                     # Qld: _483000_7094000_1k
+    if m: return (int(m.group(1)), int(m.group(2)), 1000)
+    m = re.search(r'_(\d{3})(\d{4})_\d\d_(\d{4})_(\d{4})', name)  # NSW: _5236839_56_0001_0001 (km, SW corner, tile km)
+    if m: return (int(m.group(1)) * 1000, int(m.group(2)) * 1000, int(m.group(3)) * 1000)
+    return None
 
 def year_of(name):
     m = re.search(r'(19|20)\d\d', name)
@@ -47,10 +50,14 @@ def year_of(name):
 
 def overlaps(o, E0, N0):
     if o is None: return True
-    e, n = o  # SW corner of a 1 km tile
-    return e < E0 + SIZE and e + 1000 > E0 and n < N0 and n + 1000 > N0 - SIZE
+    e, n, t = o  # SW corner and size of the tile
+    return e < E0 + SIZE and e + t > E0 and n < N0 and n + t > N0 - SIZE
 
 def laz_files(path, tmp):
+    if '::' in path:                       # one point-cloud file inside a big ELVIS zip
+        zp, member = path.split('::', 1); d = tempfile.mkdtemp(dir=tmp)
+        with zipfile.ZipFile(zp) as z: z.extract(member, d)
+        return [os.path.join(d, member)]
     if path.lower().endswith('.zip'):
         d = tempfile.mkdtemp(dir=tmp)
         with zipfile.ZipFile(path) as z:
@@ -137,9 +144,19 @@ def main():
     E0, N0 = SITES[site]
     files = sorted(glob.glob(os.path.join(folder, '**', '*.zip'), recursive=True) +
                    glob.glob(os.path.join(folder, '**', '*.la[sz]'), recursive=True))
+    entries = []
+    for f in files:                        # list the point clouds inside each zip, so each survey year is kept apart
+        if f.lower().endswith('.zip'):
+            try:
+                with zipfile.ZipFile(f) as z:
+                    entries += [f + '::' + m for m in z.namelist() if m.lower().endswith(('.laz', '.las'))]
+            except Exception as e:
+                log('could not open', f, e)
+        else:
+            entries.append(f)
     by_year = {}
-    for f in files:
-        name = os.path.basename(f)
+    for f in entries:
+        name = os.path.basename(f.split('::')[-1])
         if not overlaps(tile_origin(name), E0, N0):
             continue
         by_year.setdefault(year_of(name), []).append(f)
