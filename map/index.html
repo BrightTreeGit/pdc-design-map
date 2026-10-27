@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Design Map Trial</title>
@@ -574,7 +575,7 @@ function render(){
   ctx.setTransform(DPR*s,0,0,DPR*s,DPR*(W/2-view.cx*s),DPR*(H/2-view.cy*s));
   ctx.imageSmoothingEnabled=true;
   const drawImgs=pred=>{for(const [id,im] of imagery){if(!pred(im))continue;const el=IMGX[id];if(!el||!el.complete||!el.naturalWidth)continue;if(!im.on&&!(align&&align.id===id))continue;
-    ctx.save();ctx.transform(im.a,im.b,-im.b,im.a,im.c,im.d);ctx.globalAlpha=im.op;ctx.drawImage(el,0,0);ctx.restore()}ctx.globalAlpha=1};
+    drawOneImage(im,el)}ctx.globalAlpha=1};
   const photoOnTop=layers.base==='aerial';  // a sharper photo of your own sits over the government aerial
   if(!photoOnTop)drawImgs(im=>!im.design);
   // base terrain sits ON TOP of the photo, so Base strength blends relief <-> photo
@@ -609,6 +610,7 @@ function render(){
   if(SUG.size&&layers.sug!==false)drawSug(px);
   if(draft)drawDraft(px);
   if(mt)drawMT(px);
+  if(align)drawAlignPins(px);
   if(freeStroke&&freeStroke.length>1&&draft){ctx.strokeStyle=KINDS[draft.kind].color;ctx.lineWidth=3*px;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([]);ctx.beginPath();freeStroke.forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q));ctx.stroke()}
   // screen-space overlays
   ctx.setTransform(DPR,0,0,DPR,0,0);
@@ -860,6 +862,7 @@ cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pointers
   if(penOn()){freeStroke=[s2w(e.offsetX,e.offsetY)];dragStart=null;draw();return}
   dragStart={x:e.offsetX,y:e.offsetY,cx:view.cx,cy:view.cy};
   if(align&&align.mode==='move'){const im=imagery.get(align.id);if(im){imgDrag={x:e.offsetX,y:e.offsetY,c:im.c,d:im.d};dragStart=null}return}
+  if(align&&align.mode==='pts'&&!e.altKey){const pi=pinAt(e.offsetX,e.offsetY);if(pi>=0){pinDrag={i:pi};dragStart=null;return}}
   if(mt&&mt.type==='bound'){const hb=boundHit(e.offsetX,e.offsetY);if(hb){if(hb.insert)mt.pts.splice(hb.i,0,r1(s2w(e.offsetX,e.offsetY)));bdrag=hb;mt.dirty=true;dragStart=null;draw()}return}
   if(e.pointerType==='touch'&&!draft&&!mt){clearTimeout(lpT);if(hoverId){hoverId=null;draw()}const p0=[e.offsetX,e.offsetY];lpT=setTimeout(()=>{if(!moved&&pointers.size===1){dragStart=null;hoverId=hitFeature(s2w(p0[0],p0[1]))||null;draw();openCtx(p0[0],p0[1])}},560)}
   if(!tool&&!draft&&!mt&&(e.shiftKey||selMode)&&e.button===0&&!(selMode&&multi.size>1&&multi.has(hitFeature(s2w(e.offsetX,e.offsetY))))){const w0=s2w(e.offsetX,e.offsetY);selBox={a:w0,b:w0};dragStart=null;draw();return}
@@ -874,7 +877,8 @@ cv.addEventListener('pointermove',e=>{const pt=[e.offsetX,e.offsetY];if(pointers
   if(boxDrag){boxDrag.b=w;const dx=Math.abs(w[0]-boxDrag.a[0]),dy=Math.abs(w[1]-boxDrag.a[1]);$('#hud').innerHTML=`<b>${dx.toFixed(1)} × ${dy.toFixed(1)} m</b> · ${fmtArea(dx*dy)}`;draw();return}
   if(freeStroke&&pointers.size===1){if(dist(freeStroke[freeStroke.length-1],w)*view.s>2)freeStroke.push(w);draw();return}
   if(pinch&&pointers.size===2){const [a,b]=[...pointers.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);view.s=clampS(pinch.s*d/pinch.d);const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];view.cx=pinch.c[0]-(m[0]-W/2)/view.s;view.cy=pinch.c[1]-(m[1]-H/2)/view.s;moved=true;draw();return}
-  if(imgDrag){const im=imagery.get(align&&align.id);if(im){moved=true;im.c=imgDrag.c+(pt[0]-imgDrag.x)/view.s;im.d=imgDrag.d+(pt[1]-imgDrag.y)/view.s;draw()}return}
+  if(imgDrag){const im=imagery.get(align&&align.id);if(im){moved=true;shiftImage(im,imgDrag.c+(pt[0]-imgDrag.x)/view.s-im.c,imgDrag.d+(pt[1]-imgDrag.y)/view.s-im.d);draw()}return}
+  if(pinDrag){const im=imagery.get(align&&align.id);if(im&&im.pts[pinDrag.i]){moved=true;im.pts[pinDrag.i][2]=w[0];im.pts[pinDrag.i][3]=w[1];refitImage(im);draw()}return}
   if(bdrag){moved=true;mt.pts[bdrag.i]=r1(w);renderMTBar();draw();return}
   if(vdrag){moved=true;const f=features.get(selected);if(!f)return;features.set(selected,{...f,geom:dragGeom(vdrag,f.geom,w,e.shiftKey)});draw();return}
   if(dragStart){const dx=pt[0]-dragStart.x,dy=pt[1]-dragStart.y;if(Math.hypot(dx,dy)>4)moved=true;if(moved){view.cx=dragStart.cx-dx/view.s;view.cy=dragStart.cy-dy/view.s;draw()}}
@@ -898,6 +902,7 @@ function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=nul
   if(boxDrag){const {a,b}=boxDrag;boxDrag=null;if(e.type==='pointerup'&&Math.abs(b[0]-a[0])*view.s>6&&Math.abs(b[1]-a[1])*view.s>6){const x0=Math.min(a[0],b[0]),x1=Math.max(a[0],b[0]),y0=Math.min(a[1],b[1]),y1=Math.max(a[1],b[1]);toast(`Rectangle ${(x1-x0).toFixed(1)} × ${(y1-y0).toFixed(1)} m · ${fmtArea((x1-x0)*(y1-y0))}. Use the curved-arrow handle to rotate it.`);commit({g:'polygon',pts:[[x0,y0],[x1,y0],[x1,y1],[x0,y1]].map(r1)})}draw();return}
   if(freeStroke){const s=freeStroke;freeStroke=null;if(e.type==='pointerup')finishFree(s);draw();return}
   if(imgDrag){imgDrag=null;if(moved)saveImageryLater(align.id);moved=false;return}
+  if(pinDrag){pinDrag=null;if(moved){saveImageryLater(align.id);renderAlignBar()}moved=false;draw();return}
   if(bdrag){bdrag=null;moved=false;return}
   if(vdrag){if(moved)endDrag(vdrag);vdrag=null;moved=false;renderFeatures();return}
   if(dragStart&&!moved&&e.type==='pointerup')click(s2w(e.offsetX,e.offsetY),e);dragStart=null}
@@ -952,7 +957,7 @@ function hitFeature(w){const tol=8/view.s;let best=null;
   return best&&best.id}
 function click(w,e){
   if(mt){mtClick(w);return}
-  if(align&&align.mode==='pts'){alignClick(w);return}
+  if(align&&align.mode==='pts'){alignClick(w,e);return}
   if(draft){const k=KINDS[draft.kind];if(SNAP.on&&!draft.pen)w=snapW(w);
     if(k.geom==='point'){const sp=draft.species&&SPECIES[draft.species];const ex=sp?{species:draft.species,height:sp[2],name:sp[0]+(()=>{let n=0;for(const f of features.values())if(f.species===draft.species)n++;return n?' '+(n+1):''})()}:{};
       commit({g:'point',pts:[r1(w)],...(sp?{r:sp[3]/2}:draft.kind==='guild'?{r:3}:draft.kind==='tree'?{r:4}:{})},ex);return}
@@ -1078,15 +1083,50 @@ async function connect(){
   const nudge=()=>{if(tries)sub();for(const st of LIVE_SUBS)if(st.tries)st.go()};window.addEventListener('online',nudge);document.addEventListener('visibilitychange',()=>{if(!document.hidden)nudge()});
 }
 
-/* ---------------- aerial imagery: upload, align (similarity transform), share ---------------- */
-// image pixel (u,v) -> map (x,y): x = a*u - b*v + c, y = b*u + a*v + d
-function imgToWorld(im,u,v){return [im.a*u-im.b*v+im.c,im.b*u+im.a*v+im.d]}
-function worldToImg(im,x,y){const k=im.a*im.a+im.b*im.b,dx=x-im.c,dy=y-im.d;return [(im.a*dx+im.b*dy)/k,(-im.b*dx+im.a*dy)/k]}
+/* ---------------- aerial imagery: upload, align, share ----------------
+   Base fit: similarity (move, turn, scale): x = a*u - b*v + c, y = b*u + a*v + d.
+   With 3+ matched points (im.pts = [[u,v,x,y],...]) an image can also be stretched (affine, least squares)
+   or rubber-sheeted (a triangle mesh that passes exactly through every point), so a drone shot of a slope
+   can be pinned to the road, the house and the LiDAR. */
+const FITS=[['sim','Turn & scale'],['aff','Stretch'],['mesh','Rubber-sheet']];
+function simTo(im,u,v){return [im.a*u-im.b*v+im.c,im.b*u+im.a*v+im.d]}
+function simFrom(im,x,y){const k=im.a*im.a+im.b*im.b,dx=x-im.c,dy=y-im.d;return [(im.a*dx+im.b*dy)/k,(-im.b*dx+im.a*dy)/k]}
+function affApply(A,u,v){return [A[0]*u+A[2]*v+A[4],A[1]*u+A[3]*v+A[5]]}
+function affInv(A){const det=A[0]*A[3]-A[1]*A[2];if(Math.abs(det)<1e-12)return null;const i0=A[3]/det,i1=-A[1]/det,i2=-A[2]/det,i3=A[0]/det;return [i0,i1,i2,i3,-(i0*A[4]+i2*A[5]),-(i1*A[4]+i3*A[5])]}
+function tri3(p,q,r){const du1=q[0]-p[0],dv1=q[1]-p[1],du2=r[0]-p[0],dv2=r[1]-p[1],det=du1*dv2-du2*dv1;if(Math.abs(det)<1e-9)return null;
+  const dx1=q[2]-p[2],dy1=q[3]-p[3],dx2=r[2]-p[2],dy2=r[3]-p[3];const A0=(dx1*dv2-dx2*dv1)/det,A2=(du1*dx2-du2*dx1)/det,A1=(dy1*dv2-dy2*dv1)/det,A3=(du1*dy2-du2*dy1)/det;
+  return [A0,A1,A2,A3,p[2]-A0*p[0]-A2*p[1],p[3]-A1*p[0]-A3*p[1]]}
+function solve3(M,b){const m=M.map((r,i)=>[...r,b[i]]);for(let c=0;c<3;c++){let p=c;for(let r=c+1;r<3;r++)if(Math.abs(m[r][c])>Math.abs(m[p][c]))p=r;[m[c],m[p]]=[m[p],m[c]];if(Math.abs(m[c][c])<1e-12)return null;for(let r=0;r<3;r++){if(r===c)continue;const f=m[r][c]/m[c][c];for(let k=c;k<4;k++)m[r][k]-=f*m[c][k]}}return [m[0][3]/m[0][0],m[1][3]/m[1][1],m[2][3]/m[2][2]]}
+function fitSim(P){const n=P.length;let mu=0,mv=0,mx=0,my=0;for(const p of P){mu+=p[0];mv+=p[1];mx+=p[2];my+=p[3]}mu/=n;mv/=n;mx/=n;my/=n;let sa=0,sb=0,k=0;
+  for(const p of P){const u=p[0]-mu,v=p[1]-mv,x=p[2]-mx,y=p[3]-my;sa+=u*x+v*y;sb+=u*y-v*x;k+=u*u+v*v}if(k<1)return null;const a=sa/k,b=sb/k;return {a,b,c:mx-(a*mu-b*mv),d:my-(b*mu+a*mv)}}
+function fitAff(P){if(P.length<3)return null;const M=[[0,0,0],[0,0,0],[0,0,0]],bx=[0,0,0],by=[0,0,0];for(const p of P){const r=[p[0],p[1],1];for(let i=0;i<3;i++){for(let j=0;j<3;j++)M[i][j]+=r[i]*r[j];bx[i]+=r[i]*p[2];by[i]+=r[i]*p[3]}}
+  const X=solve3(M,bx),Y=solve3(M,by);if(!X||!Y)return null;return [X[0],Y[0],X[1],Y[1],X[2],Y[2]]}
+function delaunay(V){const tris=[];const big=1e7;const pts=V.map(p=>[p[0],p[1]]).concat([[-big,-big],[big*2,-big],[-big,big*2]]);const n=V.length;let T=[[n,n+1,n+2]];
+  const circ=t=>{const [a,b,c]=t.map(i=>pts[i]);const d=2*(a[0]*(b[1]-c[1])+b[0]*(c[1]-a[1])+c[0]*(a[1]-b[1]));if(Math.abs(d)<1e-12)return [0,0,Infinity];const a2=a[0]*a[0]+a[1]*a[1],b2=b[0]*b[0]+b[1]*b[1],c2=c[0]*c[0]+c[1]*c[1];const ux=(a2*(b[1]-c[1])+b2*(c[1]-a[1])+c2*(a[1]-b[1]))/d,uy=(a2*(c[0]-b[0])+b2*(a[0]-c[0])+c2*(b[0]-a[0]))/d;return [ux,uy,(a[0]-ux)**2+(a[1]-uy)**2]};
+  for(let i=0;i<n;i++){const p=pts[i];const bad=T.filter(t=>{const [ux,uy,r2]=circ(t);return (p[0]-ux)**2+(p[1]-uy)**2<r2});const edges=[];for(const t of bad)for(const e of [[t[0],t[1]],[t[1],t[2]],[t[2],t[0]]]){const k=edges.findIndex(f=>f[0]===e[1]&&f[1]===e[0]);if(k>=0)edges.splice(k,1);else edges.push(e)}
+    T=T.filter(t=>!bad.includes(t));for(const e of edges)T.push([e[0],e[1],i])}
+  return T.filter(t=>t.every(i=>i<n))}
+function imgFit(im){const P=im.pts||[],fit=P.length>=3?(im.fit||'aff'):'sim';const key=fit+JSON.stringify(P)+im.w+'x'+im.h+im.a+im.b+im.c+im.d;if(im._fk===key)return im._f;let f={kind:'sim'};
+  if(fit==='aff'){const A=fitAff(P),Ai=A&&affInv(A);if(A&&Ai)f={kind:'aff',A,Ai}}
+  else if(fit==='mesh'){const A=fitAff(P);if(A){const V=P.map(p=>p.slice());const W=im.w,H=im.h;for(const [u,v] of [[0,0],[W/2,0],[W,0],[W,H/2],[W,H],[W/2,H],[0,H],[0,H/2]]){if(V.some(p=>Math.hypot(p[0]-u,p[1]-v)<Math.max(W,H)*0.03))continue;const q=affApply(A,u,v);V.push([u,v,q[0],q[1]])}
+    const tris=[];for(const t of delaunay(V)){const [p,q,r]=t.map(i=>V[i]);const T3=tri3(p,q,r),Ti=T3&&affInv(T3);if(T3&&Ti)tris.push({A:T3,Ai:Ti,img:[p,q,r].map(s=>[s[0],s[1]]),wld:[p,q,r].map(s=>[s[2],s[3]])})}
+    if(tris.length)f={kind:'mesh',A,tris}}}
+  im._fk=key;im._f=f;return f}
+function inTri(pt,T){const [a,b,c]=T;const d=(b[1]-c[1])*(a[0]-c[0])+(c[0]-b[0])*(a[1]-c[1]);if(!d)return false;const l1=((b[1]-c[1])*(pt[0]-c[0])+(c[0]-b[0])*(pt[1]-c[1]))/d,l2=((c[1]-a[1])*(pt[0]-c[0])+(a[0]-c[0])*(pt[1]-c[1]))/d;return l1>=-1e-6&&l2>=-1e-6&&1-l1-l2>=-1e-6}
+function imgToWorld(im,u,v){const f=imgFit(im);if(f.kind==='aff')return affApply(f.A,u,v);if(f.kind==='mesh'){for(const t of f.tris)if(inTri([u,v],t.img))return affApply(t.A,u,v);return affApply(f.A,u,v)}return simTo(im,u,v)}
+function worldToImg(im,x,y){const f=imgFit(im);if(f.kind==='aff')return affApply(f.Ai,x,y);if(f.kind==='mesh'){for(const t of f.tris)if(inTri([x,y],t.wld))return affApply(t.Ai,x,y);const Ai=affInv(f.A);if(Ai)return affApply(Ai,x,y)}return simFrom(im,x,y)}
+function drawOneImage(im,el){const f=imgFit(im);ctx.globalAlpha=im.op;
+  if(f.kind==='sim'){ctx.save();ctx.transform(im.a,im.b,-im.b,im.a,im.c,im.d);ctx.drawImage(el,0,0);ctx.restore()}
+  else if(f.kind==='aff'){ctx.save();ctx.transform(...f.A);ctx.drawImage(el,0,0);ctx.restore()}
+  else{const pad=0.8/view.s;for(const t of f.tris){const w=t.wld,cx=(w[0][0]+w[1][0]+w[2][0])/3,cy=(w[0][1]+w[1][1]+w[2][1])/3;ctx.save();ctx.beginPath();w.forEach((p,i)=>{const dx=p[0]-cx,dy=p[1]-cy,L=Math.hypot(dx,dy)||1,q=[p[0]+dx/L*pad,p[1]+dy/L*pad];i?ctx.lineTo(...q):ctx.moveTo(...q)});ctx.closePath();ctx.clip();ctx.transform(...t.A);ctx.drawImage(el,0,0);ctx.restore()}}
+  ctx.globalAlpha=1}
+function refitImage(im){const P=im.pts||[];if(!P.length)return;if(P.length===1){const at=simTo(im,P[0][0],P[0][1]);im.c+=P[0][2]-at[0];im.d+=P[0][3]-at[1]}else{const s=fitSim(P);if(s)Object.assign(im,s)}if(P.length>=4&&!im.fitSet)im.fit='mesh';else if(P.length===3&&!im.fitSet)im.fit='aff';im._fk=null}
+function fitError(im){const P=im.pts||[];if(P.length<3)return null;const f=imgFit(im);const map=f.kind==='sim'?(u,v)=>simTo(im,u,v):(u,v)=>affApply(f.A,u,v);let s=0,mx=0;for(const p of P){const q=map(p[0],p[1]),e=Math.hypot(q[0]-p[2],q[1]-p[3]);s+=e;mx=Math.max(mx,e)}return {avg:s/P.length,max:mx}}
 function loadImageryEl(id,im){if(IMGX[id]&&IMGX[id]._src===im.src)return;const el=new Image();el._src=im.src;el.onload=()=>{draw();try{if(T)renderLayers()}catch(e){console.warn(e)}};el.onerror=()=>console.warn('image did not load',im.name);el.src=im.src;IMGX[id]=el}
 function imgSrc(im){return im.assetId?'/_blob/'+im.assetId:im.local||''}
 let imgSaveT={};
 function saveImageryLater(id){clearTimeout(imgSaveT[id]);imgSaveT[id]=setTimeout(()=>saveImagery(id),500)}
-async function saveImagery(id){const im=imagery.get(id);if(!im)return;const body={name:im.name,assetId:im.assetId||null,w:im.w,h:im.h,a:im.a,b:im.b,c:im.c,d:im.d,op:im.op,on:im.on,design:!!im.design,aligned:!!im.aligned,createdBy:im.createdBy||null,createdAt:im.createdAt,updatedAt:new Date().toISOString()};
+async function saveImagery(id){const im=imagery.get(id);if(!im)return;const body={name:im.name,assetId:im.assetId||null,w:im.w,h:im.h,a:im.a,b:im.b,c:im.c,d:im.d,fit:im.fit||'sim',fitSet:!!im.fitSet,pts:(im.pts||[]).map(p=>p.map(v=>+v.toFixed(2))),op:im.op,on:im.on,design:!!im.design,aligned:!!im.aligned,createdBy:im.createdBy||null,createdAt:im.createdAt,updatedAt:new Date().toISOString()};
   if(live&&im.assetId){try{await db.collection(C('imagery')).doc(id).set(body)}catch(e){toast('Image position did not save.')}}}
 async function addImage(file,design=false){
   if(!file)return;if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Use a PNG, JPEG or WebP image');return}
@@ -1095,28 +1135,49 @@ async function addImage(file,design=false){
   if(!assetId)local=URL.createObjectURL(file);
   const el=new Image();el.src=assetId?'/_blob/'+assetId:local;await el.decode().catch(()=>{});
   const w=el.naturalWidth||1000,h=el.naturalHeight||1000;const sc=Math.min(W*0.7/view.s/w,H*0.7/view.s/h);
-  const im={name:file.name.replace(/\.[^.]+$/,''),assetId,local,src:assetId?'/_blob/'+assetId:local,w,h,a:sc,b:0,c:view.cx-w*sc/2,d:view.cy-h*sc/2,op:0.85,on:true,design,aligned:false,createdBy:myId,createdAt:new Date().toISOString()};
+  const im={name:file.name.replace(/\.[^.]+$/,''),assetId,local,src:assetId?'/_blob/'+assetId:local,w,h,a:sc,b:0,c:view.cx-w*sc/2,d:view.cy-h*sc/2,fit:'sim',pts:[],op:0.85,on:true,design,aligned:false,createdBy:myId,createdAt:new Date().toISOString()};
   imagery.set(id,im);IMGX[id]=el;el._src=im.src;await saveImagery(id);startAlign(id)}
-function startAlign(id){cancelDraft();align={id,mode:'pts',pairs:[],step:0};showTab('layers');renderAlignBar();draw()}
-function endAlign(){if(align){const im=imagery.get(align.id);if(im){im.aligned=true;saveImagery(align.id)}}align=null;$('#drawbar').hidden=true;cv.classList.remove('drawing');renderLayers();draw()}
-function alignClick(w){const im=imagery.get(align.id);if(!im)return;
-  if(align.step===0){align.cur={q:worldToImg(im,...w)};align.step=1}
-  else{align.cur.w=w;align.pairs.push(align.cur);align.cur=null;align.step=0;
-    if(align.pairs.length===1){const p=align.pairs[0];const at=imgToWorld(im,...p.q);im.c+=p.w[0]-at[0];im.d+=p.w[1]-at[1]}
-    else{const [p1,p2]=align.pairs.slice(-2);const qx=p2.q[0]-p1.q[0],qy=p2.q[1]-p1.q[1],wx=p2.w[0]-p1.w[0],wy=p2.w[1]-p1.w[1];const k=qx*qx+qy*qy;if(k<1){toast('Pick two points further apart');align.pairs.pop();renderAlignBar();return}
-      im.a=(wx*qx+wy*qy)/k;im.b=(wy*qx-wx*qy)/k;im.c=p1.w[0]-(im.a*p1.q[0]-im.b*p1.q[1]);im.d=p1.w[1]-(im.b*p1.q[0]+im.a*p1.q[1]);
-      const m=Math.hypot(im.a,im.b);toast(`Aligned: ${(1/m).toFixed(2)} image px per m, rotated ${(Math.atan2(im.b,im.a)*180/Math.PI).toFixed(1)}°`)}
+function startAlign(id){cancelDraft();const im=imagery.get(id);if(im&&!im.pts)im.pts=[];align={id,mode:'pts',step:0,cur:null};showTab('layers');renderAlignBar();draw()}
+function endAlign(){if(align){const im=imagery.get(align.id);if(im){im.aligned=true;saveImagery(align.id)}}align=null;pinDrag=null;$('#drawbar').hidden=true;cv.classList.remove('drawing');renderLayers();draw()}
+let pinDrag=null;
+function pinAt(sx,sy){if(!align||align.mode!=='pts'||align.step!==0)return -1;const im=imagery.get(align.id);if(!im||!im.pts)return -1;let best=-1,bd=14;im.pts.forEach((p,i)=>{const [x,y]=w2s(p[2],p[3]);const d=Math.hypot(x-sx,y-sy);if(d<bd){bd=d;best=i}});return best}
+function alignClick(w,e){const im=imagery.get(align.id);if(!im)return;
+  if(align.step===0){const s=w2s(...w);const hit=pinAt(...s);if(hit>=0&&e&&e.altKey){im.pts.splice(hit,1);refitImage(im);saveImagery(align.id);renderAlignBar();draw();return}
+    const q=worldToImg(im,...w);if(q[0]<-5||q[1]<-5||q[0]>im.w+5||q[1]>im.h+5){toast('Click a feature inside the photo first');return}align.cur={q};align.step=1}
+  else{const q=align.cur.q;im.pts.push([q[0],q[1],w[0],w[1]]);align.cur=null;align.step=0;refitImage(im);
+    const er=fitError(im);if(im.pts.length===2){const m=Math.hypot(im.a,im.b);toast(`Two points: ${(1/m).toFixed(1)} photo pixels per metre, turned ${(Math.atan2(im.b,im.a)*180/Math.PI).toFixed(1)}°. Add more around the area to stretch it to fit.`)}
+    else if(er)toast(`${im.pts.length} points · a plain stretch would be off by ${er.avg.toFixed(1)} m on average${im.fit==='mesh'?'; rubber-sheet pins every point exactly':''}`);
     saveImagery(align.id)}
   renderAlignBar();draw()}
-function nudge(scale,rot){const im=imagery.get(align.id);if(!im)return;const cx=im.w/2,cy=im.h/2,ctr=imgToWorld(im,cx,cy);const r=rot*Math.PI/180,ca=Math.cos(r)*scale,sa=Math.sin(r)*scale;const a=im.a*ca-im.b*sa,b=im.a*sa+im.b*ca;im.a=a;im.b=b;const now=imgToWorld(im,cx,cy);im.c+=ctr[0]-now[0];im.d+=ctr[1]-now[1];saveImageryLater(align.id);draw()}
+function nudge(scale,rot){const im=imagery.get(align.id);if(!im)return;const cx=im.w/2,cy=im.h/2,ctr=imgToWorld(im,cx,cy);const r=rot*Math.PI/180,ca=Math.cos(r)*scale,sa=Math.sin(r)*scale;
+  const a=im.a*ca-im.b*sa,b=im.a*sa+im.b*ca;im.a=a;im.b=b;const sc=simTo(im,cx,cy);im.c+=ctr[0]-sc[0];im.d+=ctr[1]-sc[1];
+  for(const p of im.pts||[]){const dx=p[2]-ctr[0],dy=p[3]-ctr[1];p[2]=ctr[0]+dx*ca-dy*sa;p[3]=ctr[1]+dx*sa+dy*ca}im._fk=null;saveImageryLater(align.id);draw()}
+function shiftImage(im,dx,dy){im.c+=dx;im.d+=dy;for(const p of im.pts||[]){p[2]+=dx;p[3]+=dy}im._fk=null}
+function drawAlignPins(px){if(!align)return;const im=imagery.get(align.id);if(!im)return;const f=imgFit(im);ctx.save();ctx.font=`700 ${10*px}px "IBM Plex Sans",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  (im.pts||[]).forEach((p,i)=>{const at=f.kind==='mesh'?[p[2],p[3]]:(f.kind==='aff'?affApply(f.A,p[0],p[1]):simTo(im,p[0],p[1]));
+    if(Math.hypot(at[0]-p[2],at[1]-p[3])*view.s>2){ctx.strokeStyle='#e8a628';ctx.lineWidth=2*px;ctx.setLineDash([4*px,3*px]);ctx.beginPath();ctx.moveTo(...at);ctx.lineTo(p[2],p[3]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#e8a628';ctx.beginPath();ctx.arc(at[0],at[1],3*px,0,7);ctx.fill()}
+    ctx.fillStyle=pinDrag&&pinDrag.i===i?'#e8a628':'#1d6fb8';ctx.strokeStyle='#fff';ctx.lineWidth=2*px;ctx.beginPath();ctx.arc(p[2],p[3],8*px,0,7);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.fillText(String(i+1),p[2],p[3])});
+  if(align.cur){const at=imgToWorld(im,...align.cur.q);ctx.strokeStyle='#e8a628';ctx.lineWidth=2.5*px;ctx.beginPath();ctx.arc(at[0],at[1],9*px,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(at[0]-13*px,at[1]);ctx.lineTo(at[0]+13*px,at[1]);ctx.moveTo(at[0],at[1]-13*px);ctx.lineTo(at[0],at[1]+13*px);ctx.stroke()}
+  if(f.kind==='mesh'&&align.showMesh){ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1*px;for(const t of f.tris){ctx.beginPath();t.wld.forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q));ctx.closePath();ctx.stroke()}}
+  ctx.restore()}
 function renderAlignBar(){const b=$('#drawbar');const im=imagery.get(align.id);if(!im){endAlign();return}b.hidden=false;cv.classList.add('drawing');
-  const n=align.pairs.length;const help=align.mode==='move'?'Drag the image into place':align.step===0?`Point ${n%2+1} of 2: click a feature on the image (a lot corner, road bend, building)`:'Now click where that feature really is on the terrain';
-  b.innerHTML=`<span class="what">Align ${esc(im.name)}</span><span class="hint">${help}</span>
+  const n=(im.pts||[]).length,er=fitError(im);const fit=n>=3?(im.fit||'aff'):'sim';
+  const help=align.mode==='move'?'Drag the photo into place':align.step===0?(n===0?'Click a sharp feature on the photo (house corner, road bend, tank, car), then where it really is on the map':n<4?`Point ${n+1}: click another feature on the photo. Spread 4–8 points around the area (road edges, house, tracks).`:'Add more points, or drag a numbered pin to fine-tune. Alt-click a pin to remove it.'):'Now click where that feature really is on the map underneath';
+  b.innerHTML=`<span class="what">Align ${esc(im.name)}</span><span class="hint">${help}${er&&fit!=='mesh'?` <b>Off by ${er.avg.toFixed(1)} m on average</b> (worst ${er.max.toFixed(1)} m).`:''}${fit==='mesh'?' <b>Rubber-sheet:</b> the photo passes through every pin.':''}</span>
    <div class="seg"><button aria-pressed="${align.mode==='pts'}" id="amPts">Match points</button><button aria-pressed="${align.mode==='move'}" id="amMove">Drag</button></div>
+   <div class="seg">${FITS.map(([k,l])=>`<button aria-pressed="${fit===k}" data-fit="${k}" ${k!=='sim'&&n<3?'disabled title="Needs 3 or more points"':''}>${l}</button>`).join('')}</div>
    <button class="btn" id="aSm" title="Smaller">−</button><button class="btn" id="aSp" title="Larger">+</button><button class="btn" id="aRl" title="Rotate left">⟲</button><button class="btn" id="aRr" title="Rotate right">⟳</button>
+   <label class="gp">See-through <input type="range" id="aOp" min="0.2" max="1" step="0.05" value="${im.op}"></label>
+   ${n?'<button class="btn" id="aUndo">Undo point</button><button class="btn" id="aClr">Clear points</button>':''}${fit==='mesh'?`<button class="btn" id="aMesh" aria-pressed="${!!align.showMesh}">Show mesh</button>`:''}
    <button class="btn primary" id="aDone">Done</button>`;
-  $('#amPts').onclick=()=>{align.mode='pts';align.step=0;renderAlignBar()};$('#amMove').onclick=()=>{align.mode='move';renderAlignBar()};
-  $('#aSm').onclick=()=>nudge(1/1.02,0);$('#aSp').onclick=()=>nudge(1.02,0);$('#aRl').onclick=()=>nudge(1,-0.5);$('#aRr').onclick=()=>nudge(1,0.5);$('#aDone').onclick=endAlign}
+  $('#amPts').onclick=()=>{align.mode='pts';align.step=0;renderAlignBar()};$('#amMove').onclick=()=>{align.mode='move';align.step=0;align.cur=null;renderAlignBar();draw()};
+  b.querySelectorAll('[data-fit]').forEach(x=>x.onclick=()=>{im.fit=x.dataset.fit;im.fitSet=true;im._fk=null;saveImagery(align.id);renderAlignBar();draw()});
+  $('#aSm').onclick=()=>nudge(1/1.02,0);$('#aSp').onclick=()=>nudge(1.02,0);$('#aRl').onclick=()=>nudge(1,-0.5);$('#aRr').onclick=()=>nudge(1,0.5);
+  $('#aOp').oninput=e=>{im.op=+e.target.value;draw();saveImageryLater(align.id)};
+  if($('#aUndo'))$('#aUndo').onclick=()=>{im.pts.pop();refitImage(im);saveImagery(align.id);renderAlignBar();draw()};
+  if($('#aClr'))$('#aClr').onclick=()=>{im.pts=[];im.fit='sim';im.fitSet=false;im._fk=null;saveImagery(align.id);renderAlignBar();draw()};
+  if($('#aMesh'))$('#aMesh').onclick=()=>{align.showMesh=!align.showMesh;renderAlignBar();draw()};
+  $('#aDone').onclick=endAlign}
 async function deleteImage(id){const im=imagery.get(id);imagery.delete(id);delete IMGX[id];renderLayers();draw();if(live){try{await db.collection(C('imagery')).doc(id).delete()}catch(e){}if(im&&im.assetId&&assets){try{await assets.delete(im.assetId)}catch(e){}}}}
 function imageryHTML(){const gov=IMG.aerial?`<div class="row"><label><input type="checkbox" id="govAer" ${layers.base==='aerial'?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#3f6b3a,#b9a77a)"></i>Government aerial photo <span class="pill">auto</span></label></div><p class="hint" style="padding-left:22px;margin-top:-2px">${SITEDEF.aerialDate?'<b>Captured '+SITEDEF.aerialDate+'.</b> ':''}Loads with the map and lines up by itself. It shows as the Aerial base map; the Strength slider fades it.</p>`:'';const rows=gov+[...imagery.entries()].filter(([id,im])=>!im.design).map(([id,im])=>`<div class="row"><label><input type="checkbox" data-img="${id}" ${im.on?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#6b8f4e,#a7926a)"></i>${esc(im.name)}${im.local?' <span class="pill">this browser</span>':''}</label><input type="range" min="0.2" max="1" step="0.05" value="${im.op}" data-imgop="${id}" aria-label="Opacity of ${esc(im.name)}"></div>
    <div class="seg" style="padding-left:22px"><button class="btn" data-imgalign="${id}">Align</button><button class="btn" data-imgdel="${id}">Remove</button></div><div data-imgconf="${id}"></div>`).join('');
@@ -3752,3 +3813,5 @@ showTab(lsGet('bt.tab','layers')==='feat'?'layers':lsGet('bt.tab','layers'));
 if(isPhone())setSheet('peek');
 boot();
 </script>
+
+</body></html>
