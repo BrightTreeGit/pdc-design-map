@@ -46,6 +46,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v56 | 27 Oct 2026 | trial/firefly-canopy | 3D print: the 3MF file now tells Bambu Studio which AMS slot each colour goes in (orange 1, blue 2, green 3, dark 4), so the model opens in colour instead of all one colour. |
 | Trial v55 | 27 Oct 2026 | trial/firefly-canopy | 3D print: orange only inside the property boundary; never in the extension past the boundary, on the rim along the boundary or on creek banks (removes the orange band along the sides) |
 | Trial v54 | 27 Oct 2026 | trial/firefly-canopy | 3D print: the base and sides are always green; orange ground is only ever a 1 mm skin on top (tree zone, Economy and Display). Display on Firefly drops from about 1,050 to 710 colour changes |
 | Trial v53 | 27 Oct 2026 | trial/firefly-canopy | 3D print: 'Extend past the boundary' (25/50 m west or all round, e.g. to catch Firefly's west creek); tree zone uses a grass map (Firefly from the 2023 LiDAR with paddock tree crowns cut out as rounded green islands; Willow Vale from Sentinel-2 dry-season greenness), grass orange, trees green; the boundary rim and creek banks stay green so no thin orange bands |
