@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-20T04:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        747,
+        933
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "Header tank (recommended)",
+  "notes": "About 41 m above the house, roughly 148 m away: about 4.1 bar at the house, ideal for a household supply without a pressure pump. The very top of the lot is about 300 m higher still, far too much pressure for a house. Fill by pump from the ponds or a spring, or by roof water.",
+  "source": "recommended plan",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-20T04:30:00.000Z"
+}

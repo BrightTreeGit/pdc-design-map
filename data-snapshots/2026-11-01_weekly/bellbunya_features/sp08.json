@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T00:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1317.9,
+        1291
+      ],
+      [
+        1315.2,
+        1297.1
+      ],
+      [
+        1319.7,
+        1299.1
+      ],
+      [
+        1322.4,
+        1293
+      ]
+    ]
+  },
+  "kind": "amenities",
+  "name": "Toilets (2 WCs)",
+  "notes": "Roof outline traced from the government aerial photo; use and name from the community site plan (DD1-01 D).",
+  "source": "site plan",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-20T00:00:00.000Z"
+}

@@ -1,0 +1,112 @@
+{
+  "createdAt": "2026-10-20T04:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        597,
+        978
+      ],
+      [
+        595,
+        976
+      ],
+      [
+        578,
+        975
+      ],
+      [
+        586,
+        921
+      ],
+      [
+        605,
+        922
+      ],
+      [
+        615,
+        918
+      ],
+      [
+        644,
+        889
+      ],
+      [
+        648,
+        879
+      ],
+      [
+        648,
+        863
+      ],
+      [
+        644,
+        853
+      ],
+      [
+        634,
+        843
+      ],
+      [
+        643,
+        834
+      ],
+      [
+        655,
+        834
+      ],
+      [
+        689,
+        822
+      ],
+      [
+        700,
+        845
+      ],
+      [
+        702,
+        869
+      ],
+      [
+        704,
+        871
+      ],
+      [
+        702,
+        873
+      ],
+      [
+        700,
+        897
+      ],
+      [
+        690,
+        919
+      ],
+      [
+        645,
+        964
+      ],
+      [
+        623,
+        974
+      ],
+      [
+        599,
+        976
+      ],
+      [
+        597,
+        978
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · Orchard",
+  "notes": "Recommended draft zone from distance to the house, slope and height: reshape freely. About 35–90 m from the house on gentler ground: orchard, food forest, larger beds, small animals.",
+  "source": "recommended plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T04:30:00.000Z"
+}

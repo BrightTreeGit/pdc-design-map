@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        988.8,
+        994.8
+      ],
+      [
+        989.3,
+        990.7
+      ],
+      [
+        995.1,
+        991.7
+      ],
+      [
+        994.4,
+        995.6
+      ]
+    ]
+  },
+  "kind": "shed",
+  "name": "Garage",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m).",
+  "roof": true,
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

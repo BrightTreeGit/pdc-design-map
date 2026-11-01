@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        969.5,
+        997.4
+      ]
+    ],
+    "r": 3
+  },
+  "kind": "nativetree",
+  "name": "Gum",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m). Native gum on the sketch: confirm on site whether it is an existing tree to keep or a new planting.",
+  "source": "Ange's plan",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

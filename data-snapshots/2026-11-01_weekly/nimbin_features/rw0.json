@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-10-20T04:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        1113,
+        901
+      ],
+      [
+        1151,
+        901
+      ]
+    ]
+  },
+  "kind": "damwall",
+  "name": "P5 wall",
+  "notes": "3 m wall about 40 m long holds about 0.5 ML (524 m³) over 444 m². Wall earthworks roughly 743 m³. 0.4 ha drains to it. Small catchment: the easiest kind of in-gully pond; still needs a spillway. About 118 m above the house: a gravity source, but fit a pressure-reducing valve.",
+  "source": "recommended plan",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-20T04:30:00.000Z"
+}

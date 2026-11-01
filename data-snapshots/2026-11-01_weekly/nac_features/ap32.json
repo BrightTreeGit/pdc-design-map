@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1003.3,
+        1007.3
+      ]
+    ],
+    "r": 1
+  },
+  "kind": "shrub",
+  "name": "Flowering shrub 1",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m). Yellow on the sketch, like the banksia and leucadendron.",
+  "source": "Ange's plan",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        977.5,
+        994.8
+      ]
+    ],
+    "r": 0.8
+  },
+  "kind": "shrub",
+  "name": "Small native 8",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m). Small circle on the sketch: understorey native or shrub.",
+  "source": "Ange's plan",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

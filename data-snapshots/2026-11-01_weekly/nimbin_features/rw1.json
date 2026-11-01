@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-10-20T04:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        1483,
+        1145
+      ],
+      [
+        1499,
+        1129
+      ]
+    ]
+  },
+  "kind": "damwall",
+  "name": "P1 wall",
+  "notes": "3 m wall about 24 m long holds about 0.2 ML (233 m³) over 200 m². Wall earthworks roughly 535 m³. 4.0 ha drains to it. Small catchment: the easiest kind of in-gully pond; still needs a spillway. About 222 m above the house: a gravity source, but fit a pressure-reducing valve.",
+  "source": "recommended plan",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-20T04:30:00.000Z"
+}

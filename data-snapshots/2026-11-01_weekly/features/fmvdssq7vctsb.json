@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-18T12:24:52.411Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        903.4,
+        926.1
+      ],
+      [
+        915.4,
+        940.9
+      ],
+      [
+        909.3,
+        945.9
+      ],
+      [
+        897.3,
+        931.1
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Zone 1 · Daily",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-18T12:24:52.411Z"
+}
