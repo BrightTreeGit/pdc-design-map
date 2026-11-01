@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T00:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1186.3,
+        1424.1
+      ],
+      [
+        1185.1,
+        1443.7
+      ],
+      [
+        1171.6,
+        1442.9
+      ],
+      [
+        1172.8,
+        1423.3
+      ]
+    ]
+  },
+  "kind": "carport",
+  "name": "Carport",
+  "notes": "Roof outline traced from the government aerial photo; use and name from the community site plan (DD1-01 D).",
+  "source": "site plan",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-20T00:00:00.000Z"
+}

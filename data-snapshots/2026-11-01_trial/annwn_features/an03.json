@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        989.5,
+        985.2
+      ],
+      [
+        991.8,
+        985.3
+      ],
+      [
+        991.7,
+        988.9
+      ],
+      [
+        989.3,
+        988.8
+      ]
+    ]
+  },
+  "kind": "shed",
+  "name": "Small shed (north-west)",
+  "notes": "Small shed by the west fence, with sugar cane beside it. (Traced from the satellite photo; drag to fit.)",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T22:30:00.000Z"
+}

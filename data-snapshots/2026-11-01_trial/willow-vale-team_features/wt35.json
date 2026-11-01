@@ -1,0 +1,22 @@
+{
+  "cat": "Erosion",
+  "createdAt": "2026-10-22T00:30:00.000Z",
+  "createdBy": null,
+  "date": "2026-10-21",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1150,
+        1062
+      ]
+    ]
+  },
+  "kind": "obs",
+  "name": "Camp Creek: flooding and bank erosion (owner observed)",
+  "notes": "Owner observation via the team: white-water flow after 100 mm+ over two days; significant stream-bank erosion. Catchment above about 150 ha. (Positions are indicative, traced from the team's bubble plan onto the aerial; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-22T00:30:00.000Z"
+}

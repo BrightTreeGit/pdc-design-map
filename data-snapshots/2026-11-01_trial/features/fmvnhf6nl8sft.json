@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-25T07:04:06.513Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        884,
+        889.1
+      ],
+      [
+        907.9,
+        891.1
+      ],
+      [
+        929.5,
+        894.8
+      ],
+      [
+        950.2,
+        894.8
+      ],
+      [
+        963.7,
+        896.3
+      ],
+      [
+        975.3,
+        895.1
+      ]
+    ]
+  },
+  "kind": "path",
+  "name": "Footpath 3",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T07:04:06.513Z"
+}

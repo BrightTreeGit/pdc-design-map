@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1007.5,
+        987.3
+      ]
+    ]
+  },
+  "kind": "structure",
+  "name": "Round feature, north-east corner (check)",
+  "notes": "A circle drawn in the north-east corner: a tank, tree or compost bin? Check with Bronwen. (From Bronwen's hand sketch, 24 Oct 2026; position approximate: drag to fit.)",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-23T22:30:00.000Z"
+}

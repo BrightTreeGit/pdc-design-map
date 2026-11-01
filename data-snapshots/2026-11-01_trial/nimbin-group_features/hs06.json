@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-24T06:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        611.2,
+        851.4
+      ],
+      [
+        610.2,
+        866.1
+      ],
+      [
+        607.1,
+        881.2
+      ],
+      [
+        601.4,
+        889.9
+      ],
+      [
+        592.7,
+        891
+      ],
+      [
+        586.9,
+        884.1
+      ]
+    ]
+  },
+  "kind": "hedge",
+  "name": "East shelterbelt round the cabin",
+  "notes": "A curved belt of trees on the east and south-east of the cabin: shelter from the south-east to easterly winds and privacy for the cabin. (From Brett's hand sketch of the house area; positions are indicative, so drag to fit what's on the ground.)",
+  "source": "Brett's house-area sketch and render (24 Oct 2026)",
+  "stage": "y1",
+  "status": "idea",
+  "updatedAt": "2026-10-24T06:30:00.000Z"
+}

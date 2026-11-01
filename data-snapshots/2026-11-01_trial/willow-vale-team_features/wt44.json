@@ -1,0 +1,48 @@
+{
+  "createdAt": "2026-10-22T05:20:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        854,
+        1000.8
+      ],
+      [
+        984,
+        1010.8
+      ],
+      [
+        1064,
+        1050.8
+      ],
+      [
+        1092,
+        1090.8
+      ],
+      [
+        1089,
+        1135.8
+      ],
+      [
+        1004,
+        1118.8
+      ],
+      [
+        826,
+        1077.8
+      ],
+      [
+        829,
+        1000.8
+      ]
+    ]
+  },
+  "kind": "goatzone",
+  "name": "Zone 3 · Rear paddocks",
+  "notes": "Team sector map: open rear paddocks south and west of the house (grazing; a grass-fire source). (Traced from the team's sector map, which is a schematic: positions and angles are indicative; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026): sector map and design-area slides",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-22T05:28:32.600Z"
+}

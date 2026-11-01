@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1014.2,
+        992
+      ],
+      [
+        1025.7,
+        993.9
+      ],
+      [
+        1021.8,
+        1006.7
+      ],
+      [
+        1016.3,
+        1006
+      ],
+      [
+        1018.8,
+        996.2
+      ],
+      [
+        1013.4,
+        995.5
+      ]
+    ]
+  },
+  "kind": "zone2",
+  "name": "Zone 2 · Fruit trees (north-east)",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Plums, dwarf mulberry, mandarin, orange; greywater from the laundry arrives here by hose.",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

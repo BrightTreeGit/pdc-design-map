@@ -1,0 +1,38 @@
+{
+  "createdAt": "2026-10-25T12:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        805.1,
+        850.4
+      ],
+      [
+        794.2,
+        919.3
+      ],
+      [
+        809.2,
+        979.1
+      ],
+      [
+        768.3,
+        1122.8
+      ],
+      [
+        710.6,
+        1208.9
+      ]
+    ]
+  },
+  "kind": "greenstrip",
+  "name": "Green firebreak – west (draft)",
+  "notes": "Draft for the west side, 10 m wide just inside the boundary (traced to about 5 m), about 384 m long. No strip on the north side. Drag the corners to trim it, change the width or which side the band sits in the panel, or delete it.\n\nPlanting layers (from the cleared edge outwards):\n- Edge 0–3 m (next to the cleared break or trail, kept short and green): sweet potato, pigface (Carpobrotus glaucescens), warrigal greens, comfrey, aloe, crinum lily, clivia; a mown or slashed grass path.\n- Middle 3–7 m (high-moisture, soft-stemmed): bananas, arrowroot / Queensland arrowroot (Canna edulis), taro, ginger, turmeric.\n- Outer 7–10 m (low-oil evergreen and deciduous fruit, crowns lifted): brush cherry / lilly pilly (Syzygium australe), tuckeroo, foam bark, native gardenia, flame tree / kurrajong, mulberry (moderate: keep its litter cleared), fig, carob, feijoa, persimmon.\n- Beyond 10 m: sparse nut trees, not macadamia; keep eucalypts, paperbarks, tea trees and other oily species out of the strip.\nRules of thumb: Keep it moist (swale or irrigate), clear dead leaves and lift the lower branches, and leave gaps between crowns: no plant is fireproof when it is dry. Check the Queensland vegetation-clearing and firebreak rules before clearing anything (the Rules and hazards and vegetation layers show the categories).\nPlant guidance: Banana Shire Council 'Plants and fires'; Permaculture Australia 'Designing your garden for fire resilience' (2020s); Bright Tree notes 2026.",
+  "side": "left",
+  "source": "claude",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T12:00:00.000Z",
+  "width": 10
+}

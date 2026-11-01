@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        991.5,
+        989.4
+      ],
+      [
+        991.6,
+        988.9
+      ],
+      [
+        996.2,
+        989.1
+      ],
+      [
+        996.1,
+        989.7
+      ]
+    ]
+  },
+  "kind": "raisedbed",
+  "name": "Wicking bed (by the clothes line)",
+  "notes": "Wicking bed north-east of the house. (From Bronwen's hand sketch, 24 Oct 2026; position approximate: drag to fit.)",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T22:30:00.000Z"
+}

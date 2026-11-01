@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-24T06:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        597.4,
+        858.7
+      ],
+      [
+        593.2,
+        865.7
+      ],
+      [
+        592.2,
+        877.2
+      ],
+      [
+        598.9,
+        881.3
+      ]
+    ]
+  },
+  "kind": "path",
+  "name": "Path around the cabin",
+  "notes": "Path from the spur round the west and south of the cabin, with a small garden edge along it. (From Brett's hand sketch of the house area; positions are indicative, so drag to fit what's on the ground.)",
+  "source": "Brett's house-area sketch and render (24 Oct 2026)",
+  "stage": "y1",
+  "status": "idea",
+  "updatedAt": "2026-10-24T06:30:00.000Z"
+}

@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        969.5,
+        991.6
+      ],
+      [
+        999.1,
+        996.6
+      ]
+    ]
+  },
+  "kind": "flow",
+  "name": "Water flow, west to east (north side)",
+  "notes": "From Ange's sector map: surface water runs from the front street end eastward along the block, toward the side street.",
+  "source": "Ange's sector sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "agreed",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

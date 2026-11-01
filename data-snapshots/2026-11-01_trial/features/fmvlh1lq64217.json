@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T21:18:00.510Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        815.5,
+        979.8
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "Tank 1",
+  "notes": "West-edge high tank on the ridge, about 135 m: first priority for the Bunyip. Size: 5–10 kL, added with the Bunyip lines.\nFilled by Bunyip line 1 (the existing 210 m delivery pipe); near the pump's 82 m lift limit, so expect slow filling.\nGravity-feeds the west edge for irrigation and firefighting; a tee with a small solar booster runs on to Tank 5 in the SW corner.",
+  "source": "map",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-23T21:18:00.510Z"
+}

@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-26T02:36:10.324Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        995.9,
+        745.4
+      ],
+      [
+        1045,
+        745.4
+      ],
+      [
+        1045,
+        786.3
+      ],
+      [
+        995.9,
+        786.3
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Zone 1 ·Antonie garden",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-26T02:36:18.144Z"
+}

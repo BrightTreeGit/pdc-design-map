@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        999.1,
+        988.9
+      ]
+    ]
+  },
+  "kind": "clothesline",
+  "name": "Clothes line",
+  "notes": "Clothes line between the house and the shed. (From Bronwen's hand sketch, 24 Oct 2026; position approximate: drag to fit.)",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T22:30:00.000Z"
+}

@@ -1,0 +1,16 @@
+{
+  "about": null,
+  "at": "2026-10-20T05:30:00.000Z",
+  "by": null,
+  "done": false,
+  "replies": [
+    {
+      "at": "2026-10-20T05:40:00.000Z",
+      "text": "The map owner shares it from the Share menu. Once shared, open the same link and sign in with a Claude account; your drawings and notes then save for everyone.",
+      "who": "Claude"
+    }
+  ],
+  "tag": "q",
+  "text": "How can I have access to what you have done? Can you share via Claude?",
+  "who": "Ange"
+}

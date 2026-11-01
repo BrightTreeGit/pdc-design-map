@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-25T09:11:00.000Z",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1070,
+        1145
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "Tank 4 · goats + fire (SE)",
+  "notes": "New tank on the high (south) side of the south-east goat zone, about 124 m, beside the south firebreak. Size: 5–10 kL. Drag it to the exact spot on site.\nJobs: gravity-feeds goat troughs downhill in the goat zone (float valves), and holds a fire reserve with a 50 mm outlet and Storz fitting for a fire pump, kept topped up and marked for the fire service. Put the goat outlet a quarter of the way up the tank, so the bottom quarter is always kept for firefighting.\nFilled by: Bunyip line 2 (southern edge), extended east from Tank 3 along the firebreak; roof catch from a small shed or shelter over the tank where possible.\nReady before goats go in (May 2027).",
+  "source": "map",
+  "stage": "next",
+  "status": "idea",
+  "updatedAt": "2026-10-25T09:11:00.000Z"
+}

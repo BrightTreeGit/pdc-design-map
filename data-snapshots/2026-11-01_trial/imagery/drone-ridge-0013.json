@@ -1,0 +1,20 @@
+{
+  "a": 0.006076528183263653,
+  "aligned": true,
+  "assetId": "9c2053877cf73342b465fb1969933ed0",
+  "b": -0.013908623474657773,
+  "c": 752.2814401274611,
+  "createdAt": "2026-10-27T08:20:00.000Z",
+  "createdBy": null,
+  "d": 1063.1274242629097,
+  "design": false,
+  "fit": "sim",
+  "fitSet": false,
+  "h": 3072,
+  "name": "Upper ridge track, drone 23 Oct (92 m)",
+  "on": true,
+  "op": 0.95,
+  "pts": [],
+  "updatedAt": "2026-10-27T08:20:00.000Z",
+  "w": 4096
+}

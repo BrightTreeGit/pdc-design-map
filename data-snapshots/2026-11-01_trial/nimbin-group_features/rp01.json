@@ -1,0 +1,56 @@
+{
+  "createdAt": "2026-10-23T20:20:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        405,
+        790
+      ],
+      [
+        421,
+        790
+      ],
+      [
+        438,
+        850
+      ],
+      [
+        446,
+        878
+      ],
+      [
+        451,
+        905
+      ],
+      [
+        445,
+        942
+      ],
+      [
+        426,
+        948
+      ],
+      [
+        431,
+        905
+      ],
+      [
+        428,
+        880
+      ],
+      [
+        416,
+        838
+      ]
+    ]
+  },
+  "kind": "customzone",
+  "name": "Creek riparian buffer (at least 10–20 m)",
+  "notes": "No cultivation, stock camping or fertiliser along the creek; riparian planting may get Landcare support. Shown in blue on the west side of the house-area sketch.",
+  "source": "Firefly Farm design review (23 Oct) and Brett's house-area sketch",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T20:20:00.000Z"
+}

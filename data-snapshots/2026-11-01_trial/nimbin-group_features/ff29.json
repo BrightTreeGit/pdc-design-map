@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "a0": 330,
+    "a1": 30,
+    "cx": 574,
+    "cy": 863,
+    "g": "sector",
+    "r": 70
+  },
+  "kind": "wind",
+  "name": "Spring winds (N)",
+  "notes": "Group sector analysis: northerly winds in spring (and autumn and winter in the brief).",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

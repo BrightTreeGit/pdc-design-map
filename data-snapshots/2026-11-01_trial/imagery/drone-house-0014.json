@@ -1,0 +1,20 @@
+{
+  "a": -0.009042274019066099,
+  "aligned": true,
+  "assetId": "879c209074fb8779f2639a5d3164831e",
+  "b": 0.009671128520039929,
+  "c": 932.6965186313807,
+  "createdAt": "2026-10-27T08:20:00.000Z",
+  "createdBy": null,
+  "d": 949.9326137476706,
+  "design": false,
+  "fit": "sim",
+  "fitSet": false,
+  "h": 3072,
+  "name": "House & hairpin turn, drone 23 Oct (44 m)",
+  "on": true,
+  "op": 0.95,
+  "pts": [],
+  "updatedAt": "2026-10-27T08:20:00.000Z",
+  "w": 4096
+}
