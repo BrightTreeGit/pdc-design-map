@@ -54,7 +54,7 @@ for yy, x in zip(y, RES):
 ax.set_yticks(y); ax.set_yticklabels([x[0] for x in RES], fontsize=8.5); ax.set_xlim(0, 105)
 ax.set_xlabel("Share of a 120 m² garden's watering met from the tanks (%)", fontsize=8.5)
 for s in ('top', 'right'): ax.spines[s].set_visible(False)
-ax.legend(fontsize=8, frameon=False, loc='lower right')
+ax.legend(fontsize=8, frameon=False, loc='upper center', bbox_to_anchor=(.45, -.2), ncol=2)
 ax.set_title('A new 5,000 L tank on the shed, linked to the house roof, does most of the work', fontsize=10, loc='left', weight='bold')
 fig.text(.01, .005, 'Day-by-day run through SILO rainfall and evaporation at the block, 1995–2026, with the top 30 cm of soil as a buffer.', fontsize=6.8, color='#666')
 fig.tight_layout(rect=(0, .03, 1, 1)); fig.savefig(OUT + 'annwn-tank-chart-v2.png', facecolor='white'); plt.close(fig)
@@ -278,5 +278,52 @@ for s in ['Bronwen\'s interview answers (27 Oct 2026), sketch (24 Oct 2026) and 
           'PDC Noosa 2026 lecture notes: Urban Permaculture, Water, Methods of Design',
           'Prices are rough 2026 South-East Queensland ranges; get local quotes.']:
     B(s)
+
+# ---------- appendix: climate, sun and principles (carried over from version 1) ----------
+FR = Fu['rain10']; FT = Fu['tmin10']; f0 = dt.date.fromisoformat(Fu['start'])
+dts = [f0 + dt.timedelta(i) for i in range(len(FR))]
+mon = np.array([d.month for d in dts]); yrs = np.array([d.year for d in dts])
+RR = np.array([v / 10 if v >= 0 else 0 for v in FR]); TN = np.array([v / 10 if v > -900 else np.nan for v in FT])
+YY = [y for y in range(1995, 2026)]
+med = [np.median([RR[(mon == m) & (yrs == y)].sum() for y in YY]) for m in range(1, 13)]
+mmin = [np.nanmean(TN[mon == m]) for m in range(1, 13)]; low = [np.nanmin(TN[mon == m]) for m in range(1, 13)]
+MN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 3.4), dpi=170)
+a1.bar(MN, med, color=['#2f6fb3' if m in (7, 8, 9) else '#b8b8b2' for m in range(1, 13)], width=.65)
+for i, v in enumerate(med): a1.text(i, v + 2, f'{v:.0f}', ha='center', fontsize=7)
+a1.set_title('Typical (median) monthly rain, mm', fontsize=9.5, loc='left', weight='bold'); a1.set_yticks([])
+a2.bar(MN, mmin, color=['#2f6fb3' if m in (6, 7, 8) else '#b8b8b2' for m in range(1, 13)], width=.65); a2.scatter(range(12), low, color='#555', s=10, zorder=5)
+for i, v in enumerate(mmin): a2.text(i, v + .4, f'{v:.0f}°', ha='center', fontsize=7)
+a2.axhline(0, color='#c0392b', lw=.8); a2.set_title('Average night minimum, °C (dots: coldest)', fontsize=9.5, loc='left', weight='bold'); a2.set_yticks([])
+for a in (a1, a2):
+    a.tick_params(labelsize=7.5)
+    for s_ in ('top', 'right', 'left'): a.spines[s_].set_visible(False)
+fig.text(.01, .01, 'SILO gridded daily data at the block, 1995–2025. July–September is the dry stretch; no frost in 30 years.', fontsize=7, color='#666')
+fig.tight_layout(rect=(0, .04, 1, 1)); fig.savefig(OUT + 'annwn-climate.png', facecolor='white'); plt.close(fig)
+
+doc.add_page_break()
+H('Appendix: climate, sun and principles')
+P(f'About {RR[(yrs >= 1995) & (yrs <= 2025)].sum() / 31:,.0f} mm of rain falls in an average year, half of it from December to March. The garden has to get through a dry late winter and spring on stored water. '
+  f'The coldest night in the record was {np.nanmin(TN):.1f} °C, so there has been no frost and tropical fruit is safe.')
+IMG(OUT + 'annwn-climate.png', 16)
+TBL(['', 'Sunrise bearing', 'Sunset bearing', 'Noon sun height', 'Daylight'], [
+    ('Midwinter (21 Jun)', '63° (east-north-east)', '297°', '39°', '10 h 15 min'),
+    ('Equinox', '90° (east)', '270°', '62°', '12 h'),
+    ('Midsummer (21 Dec)', '117° (east-south-east)', '243°', '86°', '13 h 45 min')], widths=[3.4, 3.6, 2.6, 3, 2.6])
+P('Twelve permaculture principles at Annwn (David Holmgren):')
+TBL(['Principle', 'At Annwn'], [
+    ('Observe and interact', 'Bronwen\'s notes on soggy spots, sun, wind and wildlife shaped this version; keep noting what changes after the first wet season.'),
+    ('Catch and store energy', 'The shed tank, the rain-garden trench and the pond hold water; the pumps run on the solar by day.'),
+    ('Obtain a yield', 'Vegetables, fruit, herbs and lemon myrtle she eats, plus a cool seat by the pond.'),
+    ('Apply self-regulation and accept feedback', 'Stage the work and adjust after each step; a camera check if drains ever run slowly.'),
+    ('Use and value renewable resources', 'Rain, sun, free arborist mulch, worm castings and the neighbour\'s runoff.'),
+    ('Produce no waste', 'Scraps to the worm farm, prunings to mulch, laundry water to the bananas and citrus.'),
+    ('Design from patterns to details', 'Sewer, water flow, sun and wind first; plant choice last.'),
+    ('Integrate rather than segregate', 'The runoff feeds the creek, the pond feeds frogs, the frogs eat pests, the bees pollinate the fruit.'),
+    ('Use small and slow solutions', 'One stage at a time, within the $15,000.'),
+    ('Use and value diversity', 'Many food plants in small numbers, and natives for birds and bees.'),
+    ('Use edges and value the marginal', 'The soggy west strip becomes a rain garden; the sewer band grows vegetables.'),
+    ('Creatively use and respond to change', 'A dog, an electric car and more time at home are all planned for.'),
+], widths=[5, 11.5])
 doc.save(OUT + 'Annwn preliminary design report v2.docx')
 print('saved', [(n, round(a, 3), round(b, 3)) for n, a, b in RES])
