@@ -1374,14 +1374,15 @@ function build3D(){
 function featItem(f,hw){const g=f.geom;if(g.g==='polygon')return {t:'poly',p:g.pts};if(g.g==='line')return {t:'line',p:g.pts,r:hw((KINDS[f.kind]||{}).w?2:1.2)};if(g.g==='point')return {t:'pt',c:g.pts[0],r:Math.max(g.r||0,hw(3))};return null}
 const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
-function zipStore(files){const enc=new TextEncoder();const parts=[],cd=[];let off=0;
-  for(const f of files){const name=enc.encode(f.name),data=f.data,crc=crc32(data);const h=new DataView(new ArrayBuffer(30));
-    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(8,0,true);h.setUint16(12,0x21,true);h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);
-    parts.push(new Uint8Array(h.buffer),name,data);const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(14,0x21,true);c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
-    cd.push(new Uint8Array(c.buffer),name);off+=30+name.length+data.length}
+async function deflateRaw(data){if(typeof CompressionStream==='undefined')return null;try{const cs=new CompressionStream('deflate-raw');const w=cs.writable.getWriter();w.write(data);w.close();const ab=await new Response(cs.readable).arrayBuffer();return new Uint8Array(ab)}catch(e){return null}}
+async function zipStore(files){const enc=new TextEncoder();const parts=[],cd=[];let off=0;
+  for(const f of files){const name=enc.encode(f.name),data=f.data,crc=crc32(data);const z=f.store?null:await deflateRaw(data);const body=z&&z.length<data.length?z:data,m=body===data?0:8;const h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(8,m,true);h.setUint16(12,0x21,true);h.setUint32(14,crc,true);h.setUint32(18,body.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);
+    parts.push(new Uint8Array(h.buffer),name,body);const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(10,m,true);c.setUint16(14,0x21,true);c.setUint32(16,crc,true);c.setUint32(20,body.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+    cd.push(new Uint8Array(c.buffer),name);off+=30+name.length+body.length}
   const cdLen=cd.reduce((s,a)=>s+a.length,0);const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cdLen,true);e.setUint32(16,off,true);
   return new Blob([...parts,...cd,new Uint8Array(e.buffer)],{type:'model/3mf'})}
-function to3MF(r){const enc=new TextEncoder();const out=[];
+async function to3MF(r){const enc=new TextEncoder();const out=[];
   out.push('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><metadata name="Title">'+esc(SITE.name)+' terrain</metadata><resources><basematerials id="1">');
   r.meshes.forEach(m=>out.push(`<base name="${esc(m.name)}" displaycolor="${m.color}FF"/>`));out.push('</basematerials>');
   r.meshes.forEach((m,mi)=>{out.push(`<object id="${mi+2}" name="${esc(m.name)}" type="model" pid="1" pindex="${mi}"><mesh><vertices>`);const v=m.v;let buf=[];
@@ -1399,10 +1400,10 @@ function toSTL(r){const n=r.meshes.reduce((s,m)=>s+m.t.length/3,0);const b=new A
   return new Blob([b],{type:'model/stl'})}
 async function export3D(fmt){const st=$('#p3status');st.textContent='Building the model…';if(P3.canopy){await loadCG();await loadGrass()}await new Promise(r=>setTimeout(r,30));
   let r;try{r=build3D()}catch(e){st.textContent='The model could not be built: '+e.message;return}
-  const blob=fmt==='3mf'?to3MF(r):toSTL(r);const tris=r.meshes.reduce((s,m)=>s+m.t.length/3,0);
+  const blob=fmt==='3mf'?await to3MF(r):toSTL(r);const tris=r.meshes.reduce((s,m)=>s+m.t.length/3,0);
   const se=swapEst(r);st.innerHTML=`${r.wmm} × ${r.hmm} mm, ${r.zmm} mm tall · scale 1:${r.scale.toLocaleString()} · ${r.meshes.length} part${r.meshes.length>1?'s':''} (${r.meshes.map(m=>esc(m.name)).join(', ')}) · ${(blob.size/1e6).toFixed(1)} MB · about ${se.changes} colour changes, ${se.grams} g purge, +${se.hours} h (rough, A1 + AMS lite)${r.meshes.some(m=>m.name==='Tree canopy (LiDAR)')?` · canopy: ${esc(CANOPY_SRC())}, lifted ${P3.cex}×`:''}`;
   window.__bt3d={r,blob};const inner=`${slug()}-terrain${+P3.terrace?'-terraced':''}.${fmt}`;const name=inner.replace(/\.[^.]+$/,'')+`-${fmt}.zip`;
-  if(downloads){try{const zb=zipStore([{name:inner,data:new Uint8Array(await blob.arrayBuffer())}]);await downloads.save({filename:name,data:zb});toast('Saved '+name+': unzip it to get the '+inner+' file')}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start: '+(e&&e.code||'error'))}}else toast('Downloads are not available in this view')}
+  if(downloads){try{const zb=await zipStore([{name:inner,data:new Uint8Array(await blob.arrayBuffer()),store:true}]);await downloads.save({filename:name,data:zb});toast('Saved '+name+': unzip it to get the '+inner+' file')}catch(e){if(!(e&&e.code==='declined'))toast('Download did not start: '+(e&&e.code||'error'))}}else toast('Downloads are not available in this view')}
 function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`<option value="${k}" ${String(v)===String(k)?'selected':''}>${l}</option>`).join('')}</select>`;
   return `<p class="hint">A printable model of the land with the boundary, creeks and your design raised on top. The 3MF file keeps each layer as its own part, so a multi-colour printer can give terrain, water, zones and features different colours.</p>
   <div class="field"><label for="p3sch">Colours</label>${o('p3sch',[['economy','Economy: green land and trees, orange skin only around the house, thin blue creeks, black buildings (fewer filament changes)'],['display','Display: every layer in its own colour (most filament changes)']],P3.scheme||'economy')}</div>
