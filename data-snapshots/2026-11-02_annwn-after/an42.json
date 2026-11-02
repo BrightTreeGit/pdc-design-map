@@ -1,0 +1,28 @@
+{
+ "kind": "sewer",
+ "name": "Sewer main (north and east fences)",
+ "geom": {
+  "g": "line",
+  "pts": [
+   [
+    988.9,
+    978.0
+   ],
+   [
+    1009.0,
+    981.3
+   ],
+   [
+    1004.9,
+    1009.4
+   ]
+  ]
+ },
+ "notes": "Confirmed by Bronwen and the 1983 council house-drainage plan: runs about 1 m inside the back (north) and east fences and meets the manhole in the north-east corner. About 2.2 m deep at the manhole. Within 2 m: vegetables, herbs, raised or wicking beds and pots only; small shrubs 2\u20135 m; stronger-rooted fruit trees 5 m or more.",
+ "source": "Council house-drainage plan (1983) and Bronwen's answers (27 Oct 2026)",
+ "stage": "existing",
+ "status": "built",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

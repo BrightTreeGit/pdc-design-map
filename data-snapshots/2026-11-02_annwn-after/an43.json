@@ -1,0 +1,28 @@
+{
+ "kind": "sewer",
+ "name": "House drain (approximate, from the 1983 plan)",
+ "geom": {
+  "g": "line",
+  "pts": [
+   [
+    997.8,
+    999.6
+   ],
+   [
+    997.8,
+    988.6
+   ],
+   [
+    1009.0,
+    981.3
+   ]
+  ]
+ },
+ "notes": "Read off a photo of the 1983 plan, so only approximate: it runs along the house's east wall, then diagonally to the manhole, possibly under the big shed's south-east corner. It is shallower than the main. Have a plumber locate it (about $200\u2013300) before digging the pond or new beds.",
+ "source": "Council house-drainage plan (1983)",
+ "stage": "existing",
+ "status": "built",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

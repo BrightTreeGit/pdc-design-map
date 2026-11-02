@@ -1,0 +1,20 @@
+{
+ "kind": "obs",
+ "name": "Soggy after heavy rain (front, east of the driveway)",
+ "geom": {
+  "g": "point",
+  "pts": [
+   [
+    1003.0,
+    1012.4
+   ]
+  ]
+ },
+ "notes": "From the driveway east to the footpath, the first couple of metres of yard stay soggy after heavy rain. Moisture-tolerant screen plants here, not fruit trees.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "existing",
+ "status": "built",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

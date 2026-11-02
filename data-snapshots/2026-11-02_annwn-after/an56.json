@@ -1,0 +1,20 @@
+{
+ "kind": "worms",
+ "name": "Worm farm",
+ "geom": {
+  "g": "point",
+  "pts": [
+   [
+    998.4,
+    997.9
+   ]
+  ]
+ },
+ "notes": "By the back door and the kitchen garden (answer 34): scraps go one step, castings go to the beds.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "now",
+ "status": "idea",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

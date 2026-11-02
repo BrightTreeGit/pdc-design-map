@@ -1,0 +1,20 @@
+{
+ "kind": "obs",
+ "name": "Soggy after heavy rain (west side)",
+ "geom": {
+  "g": "point",
+  "pts": [
+   [
+    986.9,
+    991.6
+   ]
+  ]
+ },
+ "notes": "Water collects on the west side of the house after heavy rain, worst at the north-west corner; part of it comes from the neighbour's patio. See the rain-garden trench.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "existing",
+ "status": "built",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

@@ -1,0 +1,32 @@
+{
+ "kind": "flow",
+ "name": "Small creek (running water)",
+ "geom": {
+  "g": "line",
+  "pts": [
+   [
+    998.5,
+    990.9
+   ],
+   [
+    999.3,
+    991.7
+   ],
+   [
+    1000.0,
+    992.2
+   ],
+   [
+    1000.4,
+    993.0
+   ]
+  ]
+ },
+ "notes": "Bronwen's first priority: a short rocky creek, lined, running to the pond. A small solar pump (or the house solar in the day) lifts pond water back to the head so it runs on sunny days; in storms the west-side trench feeds it too.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "now",
+ "status": "idea",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

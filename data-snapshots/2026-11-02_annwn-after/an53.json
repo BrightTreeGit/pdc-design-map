@@ -1,0 +1,20 @@
+{
+ "kind": "seating",
+ "name": "Movable seat spot (north-west)",
+ "geom": {
+  "g": "point",
+  "pts": [
+   [
+    990.0,
+    980.3
+   ]
+  ]
+ },
+ "notes": "For movable seating in the north-west corner (answer 37).",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "now",
+ "status": "idea",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

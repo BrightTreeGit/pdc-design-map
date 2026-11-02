@@ -1,0 +1,64 @@
+{
+ "kind": "pond",
+ "name": "Frog pond",
+ "geom": {
+  "g": "polygon",
+  "pts": [
+   [
+    1001.9,
+    994.1
+   ],
+   [
+    1001.7325317547305,
+    994.6
+   ],
+   [
+    1001.275,
+    994.9660254037844
+   ],
+   [
+    1000.65,
+    995.1
+   ],
+   [
+    1000.025,
+    994.9660254037844
+   ],
+   [
+    999.5674682452694,
+    994.6
+   ],
+   [
+    999.4,
+    994.1
+   ],
+   [
+    999.5674682452694,
+    993.6
+   ],
+   [
+    1000.025,
+    993.2339745962156
+   ],
+   [
+    1000.65,
+    993.1
+   ],
+   [
+    1001.275,
+    993.2339745962156
+   ],
+   [
+    1001.7325317547305,
+    993.6
+   ]
+  ]
+ },
+ "notes": "About 2.5 \u00d7 2 m in full sun, 40\u201350 cm deep in the middle with a shallow pebble beach and rocks for frogs and skinks. Native fish (Pacific blue-eye) keep mosquito larvae down. Keep it 1.5 m or more off the house drain: locate the drain first.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "now",
+ "status": "idea",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

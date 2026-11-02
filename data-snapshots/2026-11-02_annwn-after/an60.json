@@ -1,0 +1,32 @@
+{
+ "kind": "futurebuilding",
+ "name": "Future covered carport (south-west corner)",
+ "geom": {
+  "g": "polygon",
+  "pts": [
+   [
+    984.5,
+    1006.3
+   ],
+   [
+    990.0,
+    1007.0
+   ],
+   [
+    989.7,
+    1012.9
+   ],
+   [
+    983.7,
+    1012.0
+   ]
+  ]
+ },
+ "notes": "Bronwen's second priority: move the car parking to the south-west corner under cover. Needs a new driveway crossover approved by Redland City Council and a building approval for the carport. Keep the water meter reachable and work around the front camellias. The old carport then frees up for a covered outdoor room or the clothes line.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "y2",
+ "status": "idea",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

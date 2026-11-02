@@ -1,0 +1,28 @@
+{
+ "kind": "diversion",
+ "name": "Rain-garden trench (west side)",
+ "geom": {
+  "g": "line",
+  "pts": [
+   [
+    986.4,
+    1002.5
+   ],
+   [
+    986.9,
+    994.0
+   ],
+   [
+    987.3,
+    990.6
+   ]
+  ]
+ },
+ "notes": "Answers question 39 (using the neighbour's patio runoff): a shallow gravel trench with a slotted pipe along the west side, edged with moisture-lovers (ginger, turmeric, lomandra, native violet). It soaks up the soggy strip and sends the surplus on to the creek head.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "now",
+ "status": "idea",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

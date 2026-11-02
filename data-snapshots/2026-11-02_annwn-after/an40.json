@@ -1,0 +1,21 @@
+{
+ "kind": "tank",
+ "name": "3,000 L tank (carport)",
+ "geom": {
+  "g": "point",
+  "pts": [
+   [
+    1000.9,
+    1006.4
+   ]
+  ]
+ },
+ "notes": "On the south-east corner of the carport, filled from the carport and the south-east part of the house roof. Plastic, about 30 years old, on a pump about 20 years old: both are near the end of their life, so plan to replace them in the next few years. A second 2,000 L tank (about 20 years old) is not in use; its spot is still to be marked.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "existing",
+ "status": "built",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null,
+ "litres": 3000
+}

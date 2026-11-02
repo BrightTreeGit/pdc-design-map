@@ -21,3 +21,11 @@ in anything shared. Map name: "Annwn", area "Capalaba, Qld".
   (x2-3) by the house; sugar cane; Lady Finger banana; a Rangpur-type citrus or similar labelled shrub (check);
   one large existing tree (round canopy) in the front garden; a rockery corner with three shrubs.
 - Sun notes on the sheet: winter noon about 26° (summer about 60°), sunrise/sunset bearings around 60°/300°.
+
+## Update 2 Nov 2026 (Bronwen's answers 27 Oct + 1983 council house-drainage plan)
+- Answers (40 questions) and the council plan photos are in Annwn/Site info on Brett's PC. Health note in answer 7 kept out of all shared outputs.
+- Sewer confirmed: main ~1 m inside north and east fences, manhole NE corner (SL 21.96, IL 19.79, ~2.2 m deep). House drain along house east wall then diagonal to the manhole (approximate).
+- Tanks: only the 3,000 L on the carport SE corner works (~30 yrs, pump ~20 yrs); 2,000 L not in use (spot unknown). Spots A/B rejected (house east windows, shed roller door east). New 5,000 L slimline on the big shed south wall, west of the door.
+- Priorities: 1 creek to a pond; 2 covered carport in SW corner (water meter is there). Budget $15,000.
+- Trial DB: 21 new features an40–an60, an02/an25/an33 updated. Snapshot before: data-snapshots/2026-11-02_annwn-before.
+- Report v2: scripts/analysis/annwn/report_v2.py (+ scratchpad plan.py for the plan figure).

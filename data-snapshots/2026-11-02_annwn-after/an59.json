@@ -1,0 +1,32 @@
+{
+ "kind": "pergola",
+ "name": "Vine trellis on the big shed west wall",
+ "geom": {
+  "g": "polygon",
+  "pts": [
+   [
+    994.5,
+    981.5
+   ],
+   [
+    995.1,
+    981.5
+   ],
+   [
+    994.9,
+    987.3
+   ],
+   [
+    994.3,
+    987.3
+   ]
+  ]
+ },
+ "notes": "The west wall gets the hottest sun. A trellis 30\u201350 cm off the wall with passionfruit shades the metal before it heats. Pair it with foil insulation inside (see the report).",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "now",
+ "status": "idea",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}

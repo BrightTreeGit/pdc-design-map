@@ -1,0 +1,20 @@
+{
+ "kind": "seating",
+ "name": "Movable seat spot (north-east)",
+ "geom": {
+  "g": "point",
+  "pts": [
+   [
+    1006.9,
+    985.6
+   ]
+  ]
+ },
+ "notes": "For movable seating near the north-east corner (answer 37). A seat, not a tree: the sewer runs close by.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "now",
+ "status": "idea",
+ "createdAt": "2026-11-02T10:00:00.000Z",
+ "updatedAt": "2026-11-02T10:00:00.000Z",
+ "createdBy": null
+}
