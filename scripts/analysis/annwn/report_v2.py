@@ -87,6 +87,12 @@ def TBL(head, rows, widths=None):
         for i, v in enumerate(row):
             cells[i].text = ''; run = cells[i].paragraphs[0].add_run(str(v)); run.font.size = Pt(9)
     if widths:
+        from docx.oxml.ns import qn
+        from docx.oxml import OxmlElement
+        t.autofit = False
+        tblPr = t._tbl.tblPr; lay = OxmlElement('w:tblLayout'); lay.set(qn('w:type'), 'fixed'); tblPr.append(lay)
+        grid = t._tbl.tblGrid
+        for i, gc in enumerate(grid.findall(qn('w:gridCol'))): gc.set(qn('w:w'), str(int(widths[i] * 567)))
         for row in t.rows:
             for i, w in enumerate(widths): row.cells[i].width = Cm(w)
     doc.add_paragraph(); return t
@@ -109,7 +115,7 @@ B(f'Only the 3,000 L tank on the carport is working, and it is about 30 years ol
   f'Bronwen\'s idea of a new 5,000 L slimline on the big shed\'s south wall works well. Linked to a house downpipe, it lifts the garden from about {now_s:.0%} to about {link_s:.0%} tank water in a typical year.', 'Water: ')
 B('Her first priority, a small creek running to a pond, fits the sunny grass north of the carport. It can be fed by the soggy west side and the neighbour\'s patio runoff, '
   'with a small solar pump keeping it running on fine days.', 'Running water: ')
-B('About 50 m² of raised and wicking beds in full sun north of the big shed, plus the existing fruit trees and a few more, is a realistic path to half her food.', 'Food: ')
+B('About 35 m² of vegetable garden in full sun north of the big shed (25–30 m² of beds once paths are in), plus the existing wicking beds and fruit trees, could grow most of her vegetables and about half of all her fruit and vegetables.', 'Food: ')
 B('A covered carport in the south-west corner is possible but is the biggest single cost and needs council permits (a new driveway crossover, and the water meter sits there).', 'Car parking: ')
 P('What changed since version 1: the sewer position (confirmed, and now on two sides), the tank plan (the earlier spots A and B are out), '
   'the soggy spots, the wind, the budget and Bronwen\'s priorities. Everything is on the trial design map as the "Annwn" site.')
@@ -118,7 +124,7 @@ IMG(SCR + 'bron2/annwn-design-plan.png', 15.5, 'The updated plan. Colours show w
 
 H('What Bronwen told us, and what it means')
 TBL(['She said', 'Design response'], [
-    ('A peaceful, joyful sanctuary that provides at least 50% of my food', 'Garden "rooms" with a pond and seats, plus about 50 m² of productive beds in full sun and the fruit already growing'),
+    ('A peaceful, joyful sanctuary that provides at least 50% of my food', 'Garden "rooms" with a pond and seats, plus about 35 m² of vegetable garden in full sun and the fruit already growing'),
     ('Lush, easy to move around, ordered in the main vegetable areas', 'Wide, level, firm paths; beds in straight rows in the vegetable room; the lush planting around the pond and edges'),
     ('Taller trees and shrubs, sun-filled areas in winter, "rooms" so you don\'t see everything at once', 'Shrub screens divide the block into rooms; tall plants kept to the south and east edges so winter sun reaches the beds and seats'),
     ('About 8 hours a week now, more from the new year; help needed with heavy manual work', 'Low-lift garden: waist-high beds, no ladders, drip on a timer, mulch delivered close to where it is used; the handyman does the digging jobs'),
@@ -169,6 +175,9 @@ P(f'With the 2,000 L tank out of use, Annwn runs on one 3,000 L tank, which meet
   'The tank is about 30 years old and the pump about 20, so both are near the end of their life.')
 IMG(OUT + 'annwn-tank-chart-v2.png', 16)
 TBL(['Set-up', 'Typical year', '2019 drought'], [(n, f'{a:.0%}', f'{b:.0%}') for n, a, b in RES], widths=[10, 3, 3])
+P('How these figures were worked out: the model runs day by day through the real rain and evaporation at the block since 1995, with the top 30 cm of soil holding some water between rains. '
+  'It is a little more detailed than version 1, which is why the same tank sizes give slightly different percentages. The roof areas are estimates: about 70 m² (the carport and the south-east part of the house roof) fills the old tank, and the shed roof plus one house downpipe (about 77 m²) would fill the new one. '
+  'A photo of the house with the downpipes marked would let me rerun it with real areas.')
 P('Recommendation:')
 B('a 5,000 L slimline (about $1,600–2,400) along the big shed\'s south wall, west of the door, where the clothes line is now. It takes the shed roof and a "charged" line from the nearest house downpipe: a pipe that runs underground and rises into the tank, so the house roof fills it too.', 'Bronwen\'s spot works: ')
 B('a full 5,000 L tank weighs over 5 tonnes. It needs a level compacted base and must not sit on the house drain, so locate the drain first and slide the tank west if needed.', 'Check first: ')
@@ -185,6 +194,7 @@ B('about 2.5 × 2 m in the sunny grass north of the carport, 40–50 cm deep in 
 B('a small pond pump (25–40 W) on a timer during the day, run from the house solar, lifts water back to the creek head so it runs on fine days. A stand-alone solar pond pump kit ($150–300) avoids any wiring.', 'Keep it running: ')
 B('the pond overflows to a mulched rain-garden dip, then on through the yard\'s natural fall to the north-east, not onto the sewer manhole.', 'In big storms: ')
 P('About the neighbour\'s patio water: asking her to drain it to the street is fair, but catching it in the trench turns a nuisance into the creek\'s supply. Water must not then be passed back onto her side.')
+P('Safety: with a dog coming, give the pond gently sloping sides all round so an animal can always climb out, and a low fence or hedge if the dog likes to dig. Queensland pool-fencing rules do not apply to a garden pond this size, but shallow edges are still the safest design.')
 P('Rough cost: $1,200–2,800 for liner, rock, pump, trench, pipe and plants, less with the pavers and stepping stones on hand.')
 
 H('Car parking in the south-west corner')
@@ -194,14 +204,31 @@ B('the old carport becomes a covered outdoor room, a dry spot for the clothes li
 P('This is the largest item on the list and could take a third or more of the $15,000. It is placed last so the water, pond and food garden come first.')
 
 H('Food: growing half of it')
-P('Half of one person\'s fruit and vegetables is realistic on this block with about 50 m² of well-run beds and the fruit trees already in. The plan:')
+P('Half of one person\'s fruit and vegetables is realistic on this block. An adult eats roughly 150 kg of vegetables a year; well-run beds in South-East Queensland grow about 3–5 kg per m² a year. '
+  'So 25–30 m² of beds can supply most of her vegetables, and the citrus, jaboticaba, banana and new fruit add the rest. The plan:')
 B('raised and wicking beds along the north side of the big shed, in full sun all year. They sit over the sewer band, which suits annual vegetables; no deep digging, and keep the manhole clear.', 'Main vegetable garden: ')
 B('the existing wicking beds by the clothes line and on the east side for salad greens and herbs, close to the back door.', 'Kitchen beds: ')
 B('a worm farm by the back door turns scraps into castings for the beds.', 'Worm farm: ')
+P('A bed-by-bed plan for the main vegetable garden (six beds about 1.2 × 4 m, with 0.8 m paths). Rough yields assume good soil, drip and steady picking:')
+TBL(['Bed', 'Cool season (Mar–Aug)', 'Warm season (Sep–Feb)', 'Rough yield a year'], [
+    ('1. Greens', 'Lettuce, Asian greens, silverbeet', 'Asian greens, silverbeet, Surinam spinach', '20–25 kg'),
+    ('2. Greens', 'Kale, silverbeet, coriander, parsley', 'Brazilian spinach, kang kong, snake beans', '20–25 kg'),
+    ('3. Brassicas', 'Broccoli, kale, Asian brassicas', 'Sweet potato (leaves and tubers)', '15–25 kg'),
+    ('4. Alliums and roots', 'Spring onion, leek, garlic, beetroot', 'Climbing beans on a trellis, then a green manure', '12–20 kg'),
+    ('5. Asparagus (permanent)', 'Rest and feed', 'Spears in spring and early summer', '3–5 kg from year 3'),
+    ('6. Rotation bed', 'Peas, broad beans, carrots', 'Yams or pumpkin over the path edge', '15–20 kg'),
+    ('Kitchen wicking beds', 'Herbs and salad close to the back door all year', '', '5–10 kg'),
+], widths=[3.6, 4.6, 4.6, 3.6])
+P('Rotate beds 1–4 and 6 each year so pests and diseases do not build up. Most of these are on Bronwen\'s own list; the beans, peas and green manure feed the soil.')
+P('New fruit placed against the sewer distances (all on the plan and the map):')
+B('in the green zone west of the big shed, kept to about 2.5 m.', 'Custard apple: ')
+B('a clump in the front garden, clear of the future carport. It is shaded in winter, so growth is slower, but bananas cope.', 'Banana: ')
+B('a dwarf low-chill nectarine or peach in a large pot on the pond court: pots can sit anywhere, and the tree stays small enough to net.', 'Stone fruit: ')
+B('on a post by the small shed, in the sun.', 'Dragon fruit: ')
 P('Bronwen\'s list, placed for this block:')
 TBL(['She eats', 'Where it grows best'], [
-    ('Bananas, pineapple', 'Bananas 3 m+ from the sewer in the sunny back yard; pineapples in the beds and along path edges'),
-    ('Stone fruit', 'Only low-chill types (e.g. \'Tropic Beauty\' peach, \'Sherriff\' or \'Gulf\' nectarine), kept small, netted against fruit fly; in the green zone 5 m+ from the sewer'),
+    ('Bananas, pineapple', 'The existing Goldfinger, plus a new clump in the front garden; pineapples along path edges and in the beds'),
+    ('Stone fruit', 'Only low-chill types (for example \'Tropic Beauty\' peach), dwarf, in a large pot on the pond court and netted against fruit fly'),
     ('Citrus, custard apple', 'Citrus already along the east side; a custard apple in the green zone west of the big shed'),
     ('Asian greens, lettuce, kale, silverbeet, broccoli, alliums', 'The main vegetable garden; brassicas and lettuce in the cool season (March–August)'),
     ('Sweet potato, yams', 'A low bed by the pond or as groundcover under the fruit trees'),
@@ -260,12 +287,21 @@ TBL(['Stage', 'What', 'Rough cost', 'Who'], [
 P('Stages 1–4 come to about $6,300–11,800, leaving room in the $15,000 for a modest carport or a second tank. A full carport with a new crossover could push the total over budget, so get quotes before committing.')
 
 H('Still to check')
-B('Where exactly the house drain runs (plumber locate).')
+B('Where exactly the house drain runs (plumber locate). A clean copy of the 1983 drainage plan from Redland City Council would also help: the photos are angled and hard to read.')
+B('Which downpipes feed which tank (a photo with them marked), so the tank figures use real roof areas.')
 B('Where the 2,000 L tank sits and whether it is sound.')
 B('Where the two native bee hives sit, so the pond pump and paths keep clear of their flight path.')
 B('A photo of the "white root" weed.')
 B('Soil test results.')
 B('Which way the existing driveway runs, so the south-east screen and lemon myrtle sit clear of it.')
+
+H('Want to add more?')
+P('Anything else you would like worked into the next version is welcome, in whatever form is easiest:')
+B('phone photos, with arrows or notes drawn on them (downpipes, the driveway, the bee hives, the 2,000 L tank, any weeds);')
+B('a quick voice memo or a few lines by email or text;')
+B('a print of the plan with your changes marked in pen;')
+B('a wish list: plants you love, things you have always wanted to try, or anything in this report that does not feel right.')
+P('Nothing here is fixed. It is a design to shape together, one stage at a time.')
 
 H('Sources')
 for s in ['Bronwen\'s interview answers (27 Oct 2026), sketch (24 Oct 2026) and the council\'s 1983 house-drainage plan',

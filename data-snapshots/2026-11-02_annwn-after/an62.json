@@ -1,0 +1,20 @@
+{
+ "kind": "fruittree",
+ "name": "Banana clump (new)",
+ "geom": {
+  "g": "point",
+  "pts": [
+   [
+    992.0,
+    1009.8
+   ]
+  ]
+ },
+ "notes": "A second banana clump in the front garden, clear of the future carport. Shaded in winter, so slower, but bananas cope. Needs a Queensland banana permit (free).",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "y2",
+ "status": "idea",
+ "createdAt": "2026-11-02T11:00:00.000Z",
+ "updatedAt": "2026-11-02T11:00:00.000Z",
+ "createdBy": null
+}

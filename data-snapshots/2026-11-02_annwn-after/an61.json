@@ -1,0 +1,20 @@
+{
+ "kind": "fruittree",
+ "name": "Custard apple (new)",
+ "geom": {
+  "g": "point",
+  "pts": [
+   [
+    992.8,
+    985.3
+   ]
+  ]
+ },
+ "notes": "Bronwen eats custard apple. In the green zone, about 6 m from the sewer main and the house drain; 'African Pride' fruits young and self-pollinates. Prune each winter to about 2.5 m.",
+ "source": "Bronwen's answers (27 Oct 2026)",
+ "stage": "y2",
+ "status": "idea",
+ "createdAt": "2026-11-02T11:00:00.000Z",
+ "updatedAt": "2026-11-02T11:00:00.000Z",
+ "createdBy": null
+}

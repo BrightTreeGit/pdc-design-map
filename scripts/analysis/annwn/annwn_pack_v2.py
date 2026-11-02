@@ -43,7 +43,7 @@ fig = page('Annwn at a glance', 'Capalaba, Redlands Qld · a first look at the w
            'Sources: Queensland cadastre; 1 m Queensland Government LiDAR; SILO daily climate 1995–2025; Bronwen\'s sketch and answers; council drainage plan (1983).')
 tiles = [('770 m²', f'corner block, {G["zmax"]-G["zmin"]:.1f} m fall'), (f'{np.mean(list(ann.values())):,.0f} mm', 'rain, average year'), ('2.2 m', 'sewer depth at manhole'),
          (f'{best} days', 'longest dry spell'), ('3,000 L', 'working tank (30 years old)'), ('+5,000 L', 'new tank on the shed'),
-         ('$15,000', 'budget over a few years'), ('50 m²', 'sunny vegetable beds')]
+         ('$15,000', 'budget over a few years'), ('35 m²', 'sunny vegetable garden')]
 for i, (big, small) in enumerate(tiles):
     x = .06 + (i % 4) * .225; y = .56 - (i // 4) * .25
     fig.patches.append(FancyBboxPatch((x, y), .2, .2, boxstyle='round,pad=0.005,rounding_size=0.015', transform=fig.transFigure, fc='#f3f2ee', ec='none'))
