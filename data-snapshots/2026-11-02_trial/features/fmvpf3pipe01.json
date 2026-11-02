@@ -1,0 +1,36 @@
+{
+  "createdAt": "2026-10-26T03:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        970,
+        953
+      ],
+      [
+        968,
+        940
+      ],
+      [
+        963,
+        925
+      ],
+      [
+        961,
+        910
+      ],
+      [
+        962,
+        894.5
+      ]
+    ]
+  },
+  "kind": "pipe",
+  "name": "F3 pond fill pipe",
+  "notes": "About 65 m of 50 mm poly from a screened intake in the pool behind weir W12 (side gully, about 7.6 ha catchment, bed about 55 m) down the west side of the creek to the F3 lined pond (water line about 52.9 m): about 2 m of fall. Valve at the intake to shut it off in floods. Keep the pipe below the line between intake and pond so it doesn't airlock.",
+  "source": "map",
+  "stage": "y1",
+  "status": "idea",
+  "updatedAt": "2026-10-26T03:30:00.000Z"
+}

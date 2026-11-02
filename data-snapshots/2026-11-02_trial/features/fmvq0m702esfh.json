@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-27T01:36:58.610Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        877,
+        967.7
+      ]
+    ]
+  },
+  "kind": "hives",
+  "name": "Beehives / native bees 1",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-27T01:36:58.610Z"
+}

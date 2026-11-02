@@ -1,0 +1,48 @@
+{
+  "createdAt": "2026-10-26T03:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        959,
+        883
+      ],
+      [
+        960,
+        882
+      ],
+      [
+        969,
+        882
+      ],
+      [
+        970,
+        883
+      ],
+      [
+        970,
+        893
+      ],
+      [
+        969,
+        894
+      ],
+      [
+        960,
+        894
+      ],
+      [
+        959,
+        893
+      ]
+    ]
+  },
+  "kind": "pond",
+  "name": "F3 lined pond (off-creek)",
+  "notes": "Off-creek pond beside the channel on the F3 flat, lined with Brett's 1.5 mm HDPE. About 11 x 12 m at the water line, 1 m deep, 2:1 sides: about 90 m3 (90,000 L). Water line about 52.9 m, floor about 51.9 m, bund crest about 53.3 m on the creek (east) side. About 130 m3 dug, about 40 m3 into the bund. Liner about 16 x 17 m (250 m2) with a 0.5 m anchor trench; weld patches and seams; geotextile or sand underneath; soil cover on the sides. Floor is only about 0.3 m above the creek bed: keep it part-full or add an under-drain so groundwater can't lift the liner. Filled by pipe from the W12 weir pool; spillway back to the creek below W14. From the 2022 LiDAR: check levels on site and water approvals first.",
+  "source": "map",
+  "stage": "y1",
+  "status": "idea",
+  "updatedAt": "2026-10-26T03:30:00.000Z"
+}

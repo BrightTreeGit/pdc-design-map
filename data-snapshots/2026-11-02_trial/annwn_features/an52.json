@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-11-02T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        999.3,
+        996.9
+      ]
+    ]
+  },
+  "kind": "seating",
+  "name": "Shaded seat under a grape pergola",
+  "notes": "One or two seats on the grass north of the carport, beside the pond. A small pergola with a low-chill grape gives summer shade and lets the winter sun in.",
+  "source": "Bronwen's answers (27 Oct 2026)",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-11-02T10:00:00.000Z"
+}

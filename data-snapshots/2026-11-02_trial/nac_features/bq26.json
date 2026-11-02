@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "a0": 30,
+    "a1": 75,
+    "cx": 1008.6,
+    "cy": 1000.6,
+    "g": "sector",
+    "r": 70
+  },
+  "kind": "view",
+  "name": "Desirable view (north-east)",
+  "notes": "From Ange's sector map: the view worth keeping open is to the north-east.",
+  "source": "Ange's sector sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "agreed",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

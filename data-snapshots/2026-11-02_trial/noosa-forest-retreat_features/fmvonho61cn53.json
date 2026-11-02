@@ -1,0 +1,96 @@
+{
+  "createdAt": "2026-10-26T02:41:46.393Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        951.8,
+        1088.4
+      ],
+      [
+        960.9,
+        1087.4
+      ],
+      [
+        958.6,
+        1081.2
+      ],
+      [
+        1014,
+        1055.8
+      ],
+      [
+        1046.6,
+        1025
+      ],
+      [
+        1088.6,
+        960.4
+      ],
+      [
+        1121.9,
+        898.2
+      ],
+      [
+        1130.2,
+        861.1
+      ],
+      [
+        1126.5,
+        797.1
+      ],
+      [
+        1106.5,
+        767.4
+      ],
+      [
+        1079.8,
+        746.3
+      ],
+      [
+        1050.1,
+        734
+      ],
+      [
+        959.5,
+        687.1
+      ],
+      [
+        923.4,
+        685.2
+      ],
+      [
+        905.1,
+        737
+      ],
+      [
+        962.8,
+        830.5
+      ],
+      [
+        920.1,
+        882.2
+      ],
+      [
+        867.5,
+        942.3
+      ],
+      [
+        883.7,
+        1004.4
+      ],
+      [
+        921.6,
+        1066
+      ]
+    ]
+  },
+  "kind": "cz_drone-flight-inclusion-742",
+  "name": "Drone flight inclusion",
+  "notes": "approx boundaries of drone flight. can go beyond and make straight path optimised for battery life and coerage\n",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-26T02:43:06.010Z"
+}

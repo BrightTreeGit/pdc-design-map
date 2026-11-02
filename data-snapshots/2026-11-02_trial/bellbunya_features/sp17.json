@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T00:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1117.9,
+        1464.7
+      ],
+      [
+        1114.9,
+        1460.2
+      ],
+      [
+        1123,
+        1454.6
+      ],
+      [
+        1126.1,
+        1459.1
+      ]
+    ]
+  },
+  "kind": "container",
+  "name": "Containers",
+  "notes": "From the community site plan (DD1-01 D, July 2023), lined up with the map; check on site. (No matching roof found in the aerial photo; position from the plan.)",
+  "source": "site plan",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-20T00:00:00.000Z"
+}

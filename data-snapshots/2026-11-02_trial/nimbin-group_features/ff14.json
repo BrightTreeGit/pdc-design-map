@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        577,
+        874
+      ],
+      [
+        591,
+        874
+      ],
+      [
+        591,
+        884
+      ],
+      [
+        577,
+        884
+      ]
+    ]
+  },
+  "kind": "bed",
+  "name": "Annual vegetable garden",
+  "notes": "Group plan: annual vegetable and herb garden south of the house. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}

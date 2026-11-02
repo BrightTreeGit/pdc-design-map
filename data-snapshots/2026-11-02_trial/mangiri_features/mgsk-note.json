@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-25T06:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1214.7,
+        1165.1
+      ]
+    ]
+  },
+  "kind": "note",
+  "name": "Sun, wind and rain (Mully's notes)",
+  "notes": "From Mully's sketch, 25 Oct 2026 – approximate. As written on the sketch: \"119° SE – 241° SW Summer Sun Path 14.35 Hours\"; \"61° NE – 299° NW Winter Sun Path 9.45 Hours\"; \"NE – SW Rain fall / Gradient\" (arrow pointing to the south-west); \"SE – NW Prevailing Winds\".",
+  "source": "Mully's zone sketch (25 Oct 2026), fitted to the NSW 2014 aerial",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:00:00.000Z"
+}

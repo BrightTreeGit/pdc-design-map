@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-25T06:46:29.995Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        903.6,
+        932.7
+      ],
+      [
+        906,
+        935.9
+      ],
+      [
+        902.8,
+        938.3
+      ],
+      [
+        900.4,
+        935.1
+      ]
+    ]
+  },
+  "kind": "greenhouse",
+  "name": "Greenhouse / zome 1",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-26T22:06:13.118Z"
+}

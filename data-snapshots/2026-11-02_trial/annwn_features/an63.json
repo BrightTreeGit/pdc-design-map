@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-11-02T11:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1001.9,
+        996.6
+      ]
+    ]
+  },
+  "kind": "fruittree",
+  "name": "Dwarf low-chill nectarine or peach (in a pot)",
+  "notes": "Stone fruit in a large pot on the pond court: pots can sit anywhere near the sewer, and a dwarf tree stays small enough to net against fruit fly.",
+  "source": "Bronwen's answers (27 Oct 2026)",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-11-02T11:00:00.000Z"
+}

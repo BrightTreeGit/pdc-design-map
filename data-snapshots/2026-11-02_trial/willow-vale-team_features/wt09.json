@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-22T00:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1108,
+        1058
+      ],
+      [
+        1113,
+        1058
+      ],
+      [
+        1113,
+        1070
+      ],
+      [
+        1108,
+        1070
+      ]
+    ]
+  },
+  "kind": "greenhouse",
+  "name": "Polytunnel 1",
+  "notes": "Team: existing tunnel; keyhole beds proposed alongside. (Positions are indicative, traced from the team's bubble plan onto the aerial; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-22T00:30:00.000Z"
+}

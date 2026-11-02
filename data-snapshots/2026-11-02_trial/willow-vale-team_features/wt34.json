@@ -1,0 +1,22 @@
+{
+  "cat": "Water / drainage",
+  "createdAt": "2026-10-22T00:30:00.000Z",
+  "createdBy": null,
+  "date": "2026-10-21",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1136,
+        1116
+      ]
+    ]
+  },
+  "kind": "obs",
+  "name": "Driveway bank: inundation and landslides (owner observed)",
+  "notes": "Owner observation via the team. (Positions are indicative, traced from the team's bubble plan onto the aerial; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-22T00:30:00.000Z"
+}

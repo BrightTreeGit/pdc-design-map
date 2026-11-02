@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-25T06:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        1243.2,
+        1143.3
+      ],
+      [
+        1259.4,
+        1142.7
+      ],
+      [
+        1276.4,
+        1141
+      ],
+      [
+        1293.4,
+        1138.5
+      ],
+      [
+        1305,
+        1135.5
+      ],
+      [
+        1315.9,
+        1132.9
+      ]
+    ]
+  },
+  "kind": "swale",
+  "name": "East swale (Zone 2–3)",
+  "notes": "From Mully's sketch, 25 Oct 2026 – approximate. Drawn as a blue water line; check it runs on contour on site.",
+  "source": "Mully's zone sketch (25 Oct 2026), fitted to the NSW 2014 aerial",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:00:00.000Z"
+}

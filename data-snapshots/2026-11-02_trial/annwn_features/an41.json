@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-11-02T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        996.2,
+        988.2
+      ]
+    ]
+  },
+  "kind": "tank",
+  "litres": 5000,
+  "name": "New 5,000 L slimline (big shed, south wall)",
+  "notes": "Bronwen's suggested spot: along the big shed's south wall, west of the standard door, where the clothes line is now (the house's east wall has windows and the shed's roller door faces east, so the earlier spots A and B are out). Fed by the shed roof (about 37 m²) plus a charged line from the nearest house downpipe. Day-by-day model over 1995–2026 rain: together with the 3,000 L tank it meets about 88% of a 120 m² garden's watering in a typical year (71% in the 2019 drought), up from about 54% now. Check first: the 1983 plan suggests the house drain bends close to here. A full tank weighs over 5 tonnes, so it must not sit on the drain; locate the drain and slide the tank west if needed.",
+  "source": "Bronwen's answers (27 Oct 2026)",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-11-02T10:00:00.000Z"
+}

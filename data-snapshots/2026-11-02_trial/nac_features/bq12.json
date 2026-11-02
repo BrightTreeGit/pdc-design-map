@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        993.9,
+        994.8
+      ],
+      [
+        991.7,
+        995.6
+      ],
+      [
+        997.7,
+        1006.8
+      ],
+      [
+        998,
+        1009.5
+      ]
+    ]
+  },
+  "kind": "sewer",
+  "name": "Septic pump-out line",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Pump-out pipe from the septic tank to the boundary on the side street (answer 19). Keep trees 2 m+ away.",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        999.3,
+        991
+      ]
+    ]
+  },
+  "kind": "compost",
+  "name": "Compost bins",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Kitchen scraps, garden biomass and dog poo, with cardboard and leaves. Position approximate (not on the plan).",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

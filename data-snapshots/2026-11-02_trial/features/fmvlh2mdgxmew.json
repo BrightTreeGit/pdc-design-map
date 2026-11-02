@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T21:18:48.004Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        914.7,
+        1170.9
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "Tank 3",
+  "notes": "Southern-edge tank, about 122 m. Size: 5–10 kL, added with the Bunyip lines. Filled by Bunyip line 2, which carries on east to Tank 4.",
+  "source": "map",
+  "stage": "existing",
+  "status": "idea",
+  "updatedAt": "2026-10-23T21:18:56.208Z"
+}

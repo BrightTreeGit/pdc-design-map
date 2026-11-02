@@ -1,0 +1,108 @@
+{
+  "createdAt": "2026-10-26T22:55:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        863.5,
+        994.5
+      ],
+      [
+        874.5,
+        975.5
+      ],
+      [
+        872.5,
+        966.5
+      ],
+      [
+        867.5,
+        960.5
+      ],
+      [
+        858.5,
+        954.5
+      ],
+      [
+        839.5,
+        946.5
+      ],
+      [
+        829.5,
+        937.5
+      ],
+      [
+        826.5,
+        937.5
+      ],
+      [
+        824.5,
+        939.5
+      ],
+      [
+        824.5,
+        945.5
+      ],
+      [
+        822.5,
+        949.5
+      ],
+      [
+        838.5,
+        963.5
+      ],
+      [
+        835.5,
+        971.5
+      ],
+      [
+        839.5,
+        974.5
+      ],
+      [
+        842.5,
+        974.5
+      ],
+      [
+        848.5,
+        970.5
+      ],
+      [
+        853.5,
+        969.5
+      ],
+      [
+        857.5,
+        972.5
+      ],
+      [
+        857.5,
+        974.5
+      ],
+      [
+        854.5,
+        977.5
+      ],
+      [
+        848.5,
+        978.5
+      ],
+      [
+        842.5,
+        982.5
+      ],
+      [
+        861,
+        997
+      ]
+    ]
+  },
+  "kind": "zone3",
+  "name": "Syntropic sandy hillside · above the zen garden",
+  "notes": "Top of the old W3 lobe, between the hairpin, the driveway and the road edge: sandier topsoil, so this is where syntropy starts and builds uphill over time.\nPlanting: dragon fruit climbing posts and pioneer trunks; early pioneers (pigeon pea, cassava, papaya, banana) for fast cover and chop-and-drop; pineapple in rows on contour to hold the soil; other quick perennials in the gaps.\nThen: as the pioneers are cut back, fruit trees go in, and the system creeps up the hill into W3 row by row.\nWater: rain-fed, with half-moon basins and chop-and-drop pushed onto the contour. Keep it low and green on the road edge (fire).",
+  "source": "map",
+  "stage": "y1",
+  "status": "idea",
+  "updatedAt": "2026-10-26T22:55:00.000Z"
+}

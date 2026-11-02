@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        967.9,
+        984.3
+      ],
+      [
+        986.2,
+        987.2
+      ],
+      [
+        985.9,
+        994.5
+      ],
+      [
+        979.4,
+        993.4
+      ],
+      [
+        974.9,
+        989.6
+      ],
+      [
+        968.6,
+        986.8
+      ]
+    ]
+  },
+  "kind": "driveway",
+  "name": "Driveway",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m).",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

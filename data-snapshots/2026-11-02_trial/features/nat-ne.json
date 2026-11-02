@@ -1,0 +1,43 @@
+{
+  "createdAt": "2026-10-25T07:00:00.000Z",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1130.5,
+        899.2
+      ],
+      [
+        1031.6,
+        884.3
+      ],
+      [
+        1025,
+        930
+      ],
+      [
+        1035,
+        975
+      ],
+      [
+        1060,
+        1000
+      ],
+      [
+        1114.9,
+        1000
+      ],
+      [
+        1126.2,
+        926.4
+      ]
+    ]
+  },
+  "kind": "zone5",
+  "name": "Zone 5 · Natural north-east (leave wild)",
+  "notes": "Leave most of the eastern edge natural for now (Brett, Oct 2026). Weed control only (lantana, Singapore daisy, molasses grass); keep habitat trees and hollows; local species from the Land for Wildlife list if anything is planted.\nTreehouse spot in the very north-east corner, between two large trees (no building pad here).\nRough outline – drag it to match the ground. Note: the draft east green firebreak strip runs along this edge; trim or delete it if this stays wild.",
+  "source": "claude",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T07:00:00.000Z"
+}

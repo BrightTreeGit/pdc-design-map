@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        986.2,
+        987.4
+      ],
+      [
+        992.3,
+        988.3
+      ],
+      [
+        992,
+        992.7
+      ],
+      [
+        986,
+        991.9
+      ]
+    ]
+  },
+  "kind": "shed",
+  "name": "Garage",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Roof 36 m²: half to the 30,000 L tank, half to the 5,000 L tank.",
+  "roof": true,
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

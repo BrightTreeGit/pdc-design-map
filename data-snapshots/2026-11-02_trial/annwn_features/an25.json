@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        999.1,
+        988.9
+      ]
+    ]
+  },
+  "kind": "clothesline",
+  "name": "Clothes line",
+  "notes": "Clothes line between the house and the shed. Bronwen suggests moving it so the new tank can go on the big shed's south wall; a fold-down line under the old carport (once the cars move) or on the house's west wall would work.",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-11-02T10:00:00.000Z"
+}

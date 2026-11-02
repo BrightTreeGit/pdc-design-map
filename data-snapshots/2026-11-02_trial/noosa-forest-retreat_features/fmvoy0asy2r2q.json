@@ -1,0 +1,28 @@
+{
+  "createdAt": "2026-10-26T07:36:11.698Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        957,
+        703.4
+      ],
+      [
+        943.8,
+        725.7
+      ],
+      [
+        943.6,
+        725.8
+      ]
+    ]
+  },
+  "kind": "damwall",
+  "name": "Dam wall 2",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-26T07:36:11.698Z"
+}

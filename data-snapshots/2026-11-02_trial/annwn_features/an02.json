@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-23T22:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        995.5,
+        981.4
+      ],
+      [
+        1001.8,
+        981.7
+      ],
+      [
+        1001.6,
+        987.6
+      ],
+      [
+        995.3,
+        987.3
+      ]
+    ]
+  },
+  "kind": "shed",
+  "name": "Big shed",
+  "notes": "Main shed in the back yard: roller door on the east side, a standard door 1–2 m from the south-east corner on the south side. The west wall gets the hottest sun; the north wall has 45–50 cm of stored items along it, which insulates that wall. Full sun on its north side.",
+  "source": "Bronwen's sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-11-02T10:00:00.000Z"
+}

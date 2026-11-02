@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1008.7,
+        1009
+      ]
+    ]
+  },
+  "kind": "guild",
+  "name": "Banana guild (plan item 3)",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Banana, comfrey, nasturtium and sweet potato in Zone 2.",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

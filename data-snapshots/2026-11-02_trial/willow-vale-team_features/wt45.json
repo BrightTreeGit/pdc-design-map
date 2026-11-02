@@ -1,0 +1,44 @@
+{
+  "createdAt": "2026-10-22T05:20:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        828.8,
+        843
+      ],
+      [
+        1096.8,
+        886
+      ],
+      [
+        1124.8,
+        1001
+      ],
+      [
+        1059.8,
+        1036
+      ],
+      [
+        999.8,
+        1001
+      ],
+      [
+        869.8,
+        961
+      ],
+      [
+        824.8,
+        991
+      ]
+    ]
+  },
+  "kind": "zone5",
+  "name": "Zone 5 · Woodland and wildlife habitat",
+  "notes": "Team sector map: woodland and wildlife habitat to the north and west. Leave wild; Land for Wildlife values. (Traced from the team's sector map, which is a schematic: positions and angles are indicative; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026): sector map and design-area slides",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-22T05:31:10.359Z"
+}

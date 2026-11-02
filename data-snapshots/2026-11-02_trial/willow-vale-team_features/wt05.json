@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-22T00:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1129,
+        1034
+      ]
+    ]
+  },
+  "kind": "compost",
+  "name": "Compost bays (proposed)",
+  "notes": "Team: garden residues + bedding; finished compost to beds and trees. Claude: keep 10–20 m+ from the creek bank. (Positions are indicative, traced from the team's bubble plan onto the aerial; check on site.)",
+  "source": "Willow Vale group presentation (draft, 21 Oct 2026)",
+  "stage": "now",
+  "status": "proposed",
+  "updatedAt": "2026-10-22T00:30:00.000Z"
+}

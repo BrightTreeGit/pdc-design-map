@@ -1,0 +1,19 @@
+{
+  "createdAt": "2026-10-25T07:05:00.000Z",
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1009.6,
+        993
+      ]
+    ]
+  },
+  "kind": "teepee",
+  "name": "Teepee and gathering space",
+  "notes": "Teepee near the initiation retreat decks, for gatherings, kids' programs and ceremony. Rough spot – drag it to the real clearing. Earlier idea from the 19 Oct design meeting: a cleared lantana area below the house in the rainforest for a tipi and gathering space. Keep any fire pit well away from the vine forest, with a cleared ring and water on hand.",
+  "source": "claude",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-25T07:33:27.536Z"
+}

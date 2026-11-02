@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-25T06:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        1081.4,
+        1140.6
+      ],
+      [
+        1083.4,
+        1154.7
+      ],
+      [
+        1088.9,
+        1172.7
+      ],
+      [
+        1092.5,
+        1182
+      ],
+      [
+        1092.1,
+        1197.2
+      ],
+      [
+        1094.6,
+        1210
+      ]
+    ]
+  },
+  "kind": "swale",
+  "name": "West swale 2",
+  "notes": "From Mully's sketch, 25 Oct 2026 – approximate. Drawn as a blue water line; check it runs on contour on site.",
+  "source": "Mully's zone sketch (25 Oct 2026), fitted to the NSW 2014 aerial",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:00:00.000Z"
+}

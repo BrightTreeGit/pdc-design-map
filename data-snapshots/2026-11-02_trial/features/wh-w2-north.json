@@ -1,0 +1,144 @@
+{
+  "createdAt": "2026-10-25T06:19:57.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        809.5,
+        917.5
+      ],
+      [
+        808.5,
+        922.5
+      ],
+      [
+        811.5,
+        934.5
+      ],
+      [
+        814.5,
+        939.5
+      ],
+      [
+        814.5,
+        945.5
+      ],
+      [
+        816.5,
+        949.5
+      ],
+      [
+        816.5,
+        952.5
+      ],
+      [
+        832.5,
+        969.5
+      ],
+      [
+        832.5,
+        972.5
+      ],
+      [
+        829.5,
+        975.5
+      ],
+      [
+        829.5,
+        979.5
+      ],
+      [
+        836.5,
+        980.5
+      ],
+      [
+        840.5,
+        982.5
+      ],
+      [
+        848.5,
+        977.5
+      ],
+      [
+        852.5,
+        977.5
+      ],
+      [
+        856.5,
+        975.5
+      ],
+      [
+        856.5,
+        971.5
+      ],
+      [
+        854.5,
+        970.5
+      ],
+      [
+        848.5,
+        971.5
+      ],
+      [
+        842.5,
+        975.5
+      ],
+      [
+        838.5,
+        975.5
+      ],
+      [
+        834.5,
+        971.5
+      ],
+      [
+        834.5,
+        969.5
+      ],
+      [
+        837.5,
+        966.5
+      ],
+      [
+        836.5,
+        961.5
+      ],
+      [
+        821.5,
+        950.5
+      ],
+      [
+        821.5,
+        947.5
+      ],
+      [
+        823.5,
+        945.5
+      ],
+      [
+        823.5,
+        941.5
+      ],
+      [
+        819.5,
+        936.5
+      ],
+      [
+        820.5,
+        925.5
+      ],
+      [
+        813.5,
+        917.5
+      ]
+    ]
+  },
+  "kind": "zone3",
+  "name": "W2 · Upper gaps and benches (draft) – north pocket",
+  "notes": "Job: the least-steep pockets and light gaps just below the lip (still about 24–28°, so bench each tree). Zone 3.\nAvocado just below the runoff basins (never in a wet hollow); white and black sapote; macadamia.\nMango only in the sunniest open gaps; bunya well away from paths and the house (falling cones).\nStart with a pioneer row of pigeon pea and cassava for shade, mulch and nitrogen.\nDragon fruit on posts in sunny gaps; pineapple as the low layer.\nPlant at the start of the wet; no irrigation planned.\nPlaced from the 2022 LiDAR (1 m): slope, flow lines and ground light.\nDraft from the 19–20 Oct western high edge plan – adjust on site.",
+  "source": "claude",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-25T06:19:57.000Z"
+}
