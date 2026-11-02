@@ -4,6 +4,11 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 
 **How this was made.** From v77 on, entries are written as each change is published. Earlier entries were rebuilt by comparing the saved copies of the map code: tools, layers, panels, buttons and drawing types added or removed between each pair. The code behind each entry is exact. Where no copy was saved for every version, the entry covers a range (for example v66–v68), meaning the change landed somewhere in that range. Small fixes and wording tweaks don't show up in that comparison, so they're only listed where known. Times are Brisbane time.
 
+## Trial v57 (2 Nov 2026)
+### Changed
+- In the 3D view, selecting a drawing and pressing "Zoom to" now flies the camera to it (answers Ange's comment that the hairpin road was hard to visualise: open 3D, Features → Hairpin road → Zoom to).
+- Bright Tree: "Road / driveway 1" renamed "Hairpin road" with a note; the duplicate set of three hairpin swales from 26 Oct 11:18 pm removed (the 11:19 pm set stays).
+
 ## Version index
 Each version is one commit on the `main` branch. Click a link to see the code exactly as it was, and what changed.
 
@@ -46,6 +51,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v57 | 2 Nov 2026 | Zoom to flies the 3D camera; Bright Tree hairpin road named, duplicate swales removed |
 | Trial v56 | 27 Oct 2026 | trial/firefly-canopy | Also saved into the repo: the photo-alignment tool (pin points, stretch, rubber-sheet) that another session had published to the trial map but not committed. 3D print: the 3MF file now tells Bambu Studio which AMS slot each colour goes in (orange 1, blue 2, green 3, dark 4), so the model opens in colour instead of all one colour. |
 | Trial v55 | 27 Oct 2026 | trial/firefly-canopy | 3D print: orange only inside the property boundary; never in the extension past the boundary, on the rim along the boundary or on creek banks (removes the orange band along the sides) |
 | Trial v54 | 27 Oct 2026 | trial/firefly-canopy | 3D print: the base and sides are always green; orange ground is only ever a 1 mm skin on top (tree zone, Economy and Display). Display on Firefly drops from about 1,050 to 710 colour changes |
