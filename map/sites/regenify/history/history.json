@@ -1,0 +1,76 @@
+{
+ "x0": 0,
+ "y0": 0,
+ "size": 2000,
+ "source": "NSW Spatial Services Historical Aerial Photography (scanned film frames), CC BY 4.0",
+ "hint": "These are scanned film photos from NSW Spatial Services, lined up by matching creeks, ridges, tracks and forest edges, so allow 20\u201340 m.",
+ "credit": "Imagery \u00a9 NSW Spatial Services (CC BY 4.0)",
+ "note": "Raw frames pinned by matching against the current aerial (or the next pinned year). Not pinned reliably, left out: 1958, 1966.",
+ "runs": [
+  {
+   "y": 1971,
+   "id": "1965_01_086",
+   "from": "1971-08-12",
+   "to": "1971-08-12",
+   "res": 1.64,
+   "f": "n1971_1965_01_086.jpg",
+   "name": "NSW film 1965_01_086 (1:47000)",
+   "old": true,
+   "bw": true,
+   "cover": 1.0,
+   "pinned": "matched to the next pinned year"
+  },
+  {
+   "y": 1979,
+   "id": "2771_09_113",
+   "from": "1979-03-28",
+   "to": "1979-03-28",
+   "res": 1.44,
+   "f": "n1979_2771_09_113.jpg",
+   "name": "NSW film 2771_09_113 (1:41000)",
+   "old": true,
+   "bw": true,
+   "cover": 1.0,
+   "pinned": "matched to the current aerial"
+  },
+  {
+   "y": 1987,
+   "id": "3584_01_146",
+   "from": "1987-08-01",
+   "to": "1987-08-01",
+   "res": 1.4,
+   "f": "n1987_3584_01_146.jpg",
+   "name": "NSW film 3584_01_146 (1:40000)",
+   "old": true,
+   "bw": true,
+   "cover": 1.0,
+   "pinned": "matched to the current aerial"
+  },
+  {
+   "y": 1991,
+   "id": "4024_01_062",
+   "from": "1991-07-26",
+   "to": "1991-07-26",
+   "res": 0.87,
+   "f": "n1991_4024_01_062.jpg",
+   "name": "NSW film 4024_01_062 (1:25000)",
+   "old": true,
+   "bw": true,
+   "cover": 0.91,
+   "pinned": "matched to the current aerial"
+  },
+  {
+   "y": 1997,
+   "id": "4372_01_158",
+   "from": "1997-08-16",
+   "to": "1997-08-16",
+   "res": 0.87,
+   "f": "n1997_4372_01_158.jpg",
+   "name": "NSW film 4372_01_158 (1:25000)",
+   "old": true,
+   "bw": true,
+   "cover": 1.0,
+   "pinned": "matched to the current aerial"
+  }
+ ]
+}

@@ -1,0 +1,89 @@
+{
+ "x0": 0,
+ "y0": 0,
+ "size": 2000,
+ "source": "NSW Spatial Services Historical Aerial Photography (scanned film frames), CC BY 4.0",
+ "hint": "These are scanned film photos from NSW Spatial Services, lined up by matching creeks, ridges, tracks and forest edges, so allow 20\u201340 m.",
+ "credit": "Imagery \u00a9 NSW Spatial Services (CC BY 4.0)",
+ "note": "Raw frames pinned by matching against the current aerial (or the next pinned year). Not pinned reliably, left out: 1958.",
+ "runs": [
+  {
+   "y": 1966,
+   "id": "1466_02_038",
+   "from": "1966-09-22",
+   "to": "1966-09-22",
+   "res": 1.7,
+   "f": "n1966_1466_02_038.jpg",
+   "name": "NSW film 1466_02_038 (1:39000)",
+   "old": true,
+   "bw": true,
+   "cover": 1.0,
+   "pinned": "matched to the next pinned year"
+  },
+  {
+   "y": 1971,
+   "id": "1965_01_079",
+   "from": "1971-08-12",
+   "to": "1971-08-12",
+   "res": 1.64,
+   "f": "n1971_1965_01_079.jpg",
+   "name": "NSW film 1965_01_079 (1:47000)",
+   "old": true,
+   "bw": true,
+   "cover": 1.0,
+   "pinned": "matched to the next pinned year"
+  },
+  {
+   "y": 1979,
+   "id": "2771_09_116",
+   "from": "1979-03-28",
+   "to": "1979-03-28",
+   "res": 1.43,
+   "f": "n1979_2771_09_116.jpg",
+   "name": "NSW film 2771_09_116 (1:41000)",
+   "old": true,
+   "bw": true,
+   "cover": 1.0,
+   "pinned": "matched to the current aerial"
+  },
+  {
+   "y": 1987,
+   "id": "3584_01_151",
+   "from": "1987-08-01",
+   "to": "1987-08-01",
+   "res": 1.4,
+   "f": "n1987_3584_01_151.jpg",
+   "name": "NSW film 3584_01_151 (1:40000)",
+   "old": true,
+   "bw": true,
+   "cover": 0.74,
+   "pinned": "matched to the current aerial"
+  },
+  {
+   "y": 1991,
+   "id": "4024_02_042",
+   "from": "1991-07-26",
+   "to": "1991-07-26",
+   "res": 0.87,
+   "f": "n1991_4024_02_042.jpg",
+   "name": "NSW film 4024_02_042 (1:25000)",
+   "old": true,
+   "bw": true,
+   "cover": 1.0,
+   "pinned": "matched to the current aerial"
+  },
+  {
+   "y": 1997,
+   "id": "4360_02_096",
+   "from": "1997-05-10",
+   "to": "1997-05-10",
+   "res": 0.87,
+   "f": "n1997_4360_02_096.jpg",
+   "name": "NSW film 4360_02_096 (1:25000)",
+   "old": true,
+   "bw": true,
+   "cover": 1.0,
+   "pinned": "matched to the current aerial"
+  }
+ ]
+}
