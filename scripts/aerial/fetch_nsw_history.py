@@ -42,12 +42,12 @@ SITES = {
 }
 WINDOW = 2000  # metres, the map window
 
-def get(url, params=None, what="request", binary=False, quiet_404=False):
-    for wait in (0, 5, 20, 60):
+def get(url, params=None, what="request", binary=False, quiet_404=False, waits=(0, 5, 20, 60), timeout=120):
+    for wait in waits:
         if wait:
             print(f"   retrying {what} in {wait} s"); time.sleep(wait)
         try:
-            r = requests.get(url, params=params, headers=HEADERS, timeout=120)
+            r = requests.get(url, params=params, headers=HEADERS, timeout=timeout)
         except Exception as e:
             print(f"   {what} failed: {e}"); continue
         if r.status_code in (400, 404):
@@ -103,10 +103,19 @@ def find_years(out):
     cache = out / "years.json"
     if cache.exists():
         return json.loads(cache.read_text())
-    print("Checking which years NSW has published (one quick look per year)...")
+    print("Asking NSW for its list of published years...")
     found = {}
-    for y in YEARS:
-        j = get(SVC.format(year=y), {"f": "json"}, what=f"year {y}", quiet_404=True)
+    cat = get(BASE, {"f": "json"}, what="service list", waits=(0, 5, 20), timeout=60)
+    names = [sv.get("name", "") for sv in (cat or {}).get("services", [])] if isinstance(cat, dict) else []
+    listed = sorted({int(n.split("HistoricalImagery")[1][:4]) for n in names if "HistoricalImagery" in n and n.split("HistoricalImagery")[1][:4].isdigit()})
+    if listed:
+        print(f"  the list shows {len(listed)} years: {', '.join(map(str, listed))}")
+        check = listed; waits = (0, 5, 20)
+    else:
+        print("  no list came back, so checking year by year (a missing year is skipped after one quick try)")
+        check = list(YEARS); waits = (0,)
+    for y in check:
+        j = get(SVC.format(year=y), {"f": "json"}, what=f"year {y}", quiet_404=True, waits=waits, timeout=30)
         if j and j.get("tileInfo"):
             lods = {int(l["level"]): float(l["resolution"]) for l in j["tileInfo"]["lods"]}
             found[str(y)] = {"origin": [j["tileInfo"]["origin"]["x"], j["tileInfo"]["origin"]["y"]],
