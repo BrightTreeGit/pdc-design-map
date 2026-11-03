@@ -443,11 +443,15 @@ const imagery=new Map(); const IMGX={}; let align=null, imgDrag=null;
 async function inflate(b64){const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const s=new Blob([bin]).stream().pipeThrough(new DecompressionStream('deflate'));return await new Response(s).arrayBuffer()}
 let CANOPY=null,NICHE=null,HYDRO=null,VEG=null,SERV=null,ECO=null,GEO=null,HAZ=null,SFULL=null,OUTLOOK=null,SOILS=null,WILD=null;
-const PH={data:null,on:false,i:0,op:1,cache:{},timer:0};
+const PH={data:null,on:false,i:0,op:1,cache:{},timer:0,nudge:{}};
+function phOff(r){const n=PH.nudge[r.f];return n?n:[+r.dx||0,+r.dy||0]}
+let phSaveT=0;function phSaveNudge(){clearTimeout(phSaveT);phSaveT=setTimeout(async()=>{if(live){try{await db.doc(C('settings')+'/history').set({nudge:PH.nudge,updatedAt:new Date().toISOString()})}catch(e){toast('The photo nudge did not save.')}}else lsSet('bt.phnudge.'+SITEID,PH.nudge)},700)}
+function phNudge(dx,dy){const r=PH.data&&PH.data.runs[PH.i];if(!r)return;const o=phOff(r);PH.nudge[r.f]=dx===null?[+r.dx||0,+r.dy||0]:[o[0]+dx,o[1]+dy];phSaveNudge();const v=$('#phNv');if(v)v.textContent=phNudgeTxt(r);draw()}
+function phNudgeTxt(r){const [x,y]=phOff(r);if(!x&&!y)return 'not moved';return [x?Math.abs(x)+' m '+(x>0?'east':'west'):'',y?Math.abs(y)+' m '+(y>0?'south':'north'):''].filter(Boolean).join(', ')}
 function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
 function phFmt(d){if(!d)return '';const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const [y,mo,da]=d.split('-');return (+da)+' '+m[+mo-1]+' '+y}
-function phLabel(){const r=PH.data.runs[PH.i];const dt=r.from===r.to?phFmt(r.from):phFmt(r.from)+' – '+phFmt(r.to);return `<b style="font-size:1.25em">${r.y}</b> · ${dt} · `+(r.drone?`our own drone photos, placed by GPS and heading (within about 5–10 m; the flown part at 25 cm detail, the rest is the 2022 photo, dimmed)`:r.old?`scanned film photo${r.bw?' (black & white)':''}, lined up by matching landmarks (within about 20–40 m)`:`${r.res<1?Math.round(r.res*100)+' cm':r.res+' m'} detail${r.res>=2?' (coarse)':''}`)}
+function phLabel(){const r=PH.data.runs[PH.i];const dt=r.from===r.to?phFmt(r.from):phFmt(r.from)+' – '+phFmt(r.to);return `<b style="font-size:1.25em">${r.y}</b> · ${dt} · `+(r.drone?`our own drone photos, placed by GPS and heading (within about 5–10 m; the flown part at 25 cm detail, the rest is the 2022 photo, dimmed)`:r.old?`scanned film photo${r.bw?' (black & white)':''}, lined up by matching landmarks (within about ${r.acc||'20–40 m'})`:`${r.res<1?Math.round(r.res*100)+' cm':r.res+' m'} detail${r.res>=2?' (coarse)':''}`)}
 function phHTML(){if(!PH.data)return '<p class="hint">No photo history for this site yet.</p>';const n=PH.data.runs.length,R=PH.data.runs;
  return `<div class="row"><label><input type="checkbox" id="phOn" ${PH.on?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#5b6b4a,#c9bf9a)"></i>Show photo history</label></div>
  <div id="phLab" class="hint" style="margin:4px 0">${phLabel()}</div>
@@ -455,12 +459,16 @@ function phHTML(){if(!PH.data)return '<p class="hint">No photo history for this 
  <div class="hint" style="display:flex;justify-content:space-between;margin-top:-2px"><span>${R[0].y}</span><span>${R[n-1].y}</span></div>
  <div class="seg"><button class="btn" id="phPrev" aria-label="Earlier">◀ Earlier</button><button class="btn" id="phPlay">${PH.timer?'❚❚ Pause':'▶ Play'}</button><button class="btn" id="phNext" aria-label="Later">Later ▶</button></div>
  <div class="row"><label for="phOp">Fade <span class="pill" id="phOpv">${Math.round(PH.op*100)}%</span></label><input type="range" id="phOp" min="0" max="1" step="0.05" value="${PH.op}"></div>
+ ${R.some(r=>r.old)?`<details class="mini" id="phNbox"><summary>Line this year up by eye</summary><p class="hint">If a house, track bend or creek in this photo sits off today's map, fade to about 50% and nudge the photo until it lines up. Each click moves it 5 m (hold Shift for 1 m). Saved for everyone on this site's map.</p>
+ <div class="seg" style="justify-content:center"><button class="btn" data-phn="0,-5" aria-label="Move photo north">↑ N</button></div><div class="seg" style="justify-content:center"><button class="btn" data-phn="-5,0" aria-label="Move photo west">← W</button><button class="btn" data-phn="5,0" aria-label="Move photo east">E →</button></div><div class="seg" style="justify-content:center"><button class="btn" data-phn="0,5" aria-label="Move photo south">↓ S</button></div>
+ <p class="hint">This year: <b id="phNv">${phNudgeTxt(R[PH.i])}</b> · <button class="linkish" id="phNreset">reset</button></p></details>`:''}
  <p class="hint">${n} aerial photos from ${R[0].y} to ${R[n-1].y}. ${PH.data.hint||'From 1994 they are government orthophotos that line up exactly; earlier years are scanned film photos lined up by matching creeks and ridges, so allow 20–40 m.'} Drag the slider or use the ← → keys; fade it to compare with today's layers underneath. ${PH.data.credit||'Imagery © State of Queensland (CC BY 4.0; older photos public domain)'}${R.some(r=>r.drone)?'; the newest is our own drone survey':''}.</p>`}
-function phSet(i){if(!PH.data)return;PH.i=Math.max(0,Math.min(PH.data.runs.length-1,i));if(!PH.on){PH.on=true;const c=$('#phOn');if(c)c.checked=true}phImg(PH.i);phPre(PH.i);const l=$('#phLab');if(l)l.innerHTML=phLabel();const sl=$('#phSl');if(sl)sl.value=PH.i;draw()}
+function phSet(i){if(!PH.data)return;PH.i=Math.max(0,Math.min(PH.data.runs.length-1,i));if(!PH.on){PH.on=true;const c=$('#phOn');if(c)c.checked=true}phImg(PH.i);phPre(PH.i);const l=$('#phLab');if(l)l.innerHTML=phLabel();const nv=$('#phNv');if(nv)nv.textContent=phNudgeTxt(PH.data.runs[PH.i]);const sl=$('#phSl');if(sl)sl.value=PH.i;draw()}
 function phPlay(){if(PH.timer){clearInterval(PH.timer);PH.timer=0}else{if(PH.i>=PH.data.runs.length-1)phSet(0);PH.timer=setInterval(()=>{if(PH.i>=PH.data.runs.length-1){clearInterval(PH.timer);PH.timer=0;const b=$('#phPlay');if(b)b.textContent='▶ Play';return}phSet(PH.i+1)},1300)}const b=$('#phPlay');if(b)b.textContent=PH.timer?'❚❚ Pause':'▶ Play'}
 function wirePH(el){const c=el.querySelector('#phOn');if(!c)return;c.onchange=()=>{PH.on=c.checked;if(PH.on)phSet(PH.i);else{if(PH.timer)phPlay();draw()}};
  el.querySelector('#phSl').oninput=e=>phSet(+e.target.value);el.querySelector('#phPrev').onclick=()=>phSet(PH.i-1);el.querySelector('#phNext').onclick=()=>phSet(PH.i+1);el.querySelector('#phPlay').onclick=phPlay;
- el.querySelector('#phOp').oninput=e=>{PH.op=+e.target.value;el.querySelector('#phOpv').textContent=Math.round(PH.op*100)+'%';draw()}}
+ el.querySelector('#phOp').oninput=e=>{PH.op=+e.target.value;el.querySelector('#phOpv').textContent=Math.round(PH.op*100)+'%';draw()};
+ el.querySelectorAll('[data-phn]').forEach(b=>b.onclick=e=>{const [x,y]=b.dataset.phn.split(',').map(Number);const k=e.shiftKey?0.2:1;if(!PH.on)phSet(PH.i);phNudge(x*k,y*k)});const rs=el.querySelector('#phNreset');if(rs)rs.onclick=()=>phNudge(null,null)}
 document.addEventListener('keydown',e=>{if(!PH.on||!PH.data||e.target.closest('input[type=text],input[type=search],input[type=number],input:not([type]),textarea,select,[contenteditable]'))return;if(e.key==='ArrowLeft'){e.preventDefault();phSet(PH.i-1)}else if(e.key==='ArrowRight'){e.preventDefault();phSet(PH.i+1)}});
 // estimated tree protection zone: 12 x trunk diameter, trunk estimated from height for tall eucalypts (about h/45 m), capped at 15 m
 const tpzR=h=>Math.min(15,12*h/45);
@@ -583,7 +591,7 @@ function render(){
   if(layers.overlay==='shadow'&&SHC){ctx.globalAlpha=layers.ovOp;ctx.imageSmoothingEnabled=true;ctx.drawImage(SHC,0,0,2000,2000);ctx.globalAlpha=1}
   else if(layers.overlay!=='none'&&IMG[layers.overlay]){ctx.globalAlpha=layers.ovOp;ctx.imageSmoothingEnabled=!(layers.overlay==='slope'||layers.overlay==='aspect');ctx.drawImage(IMG[layers.overlay],0,0,2000,2000);ctx.globalAlpha=1;ctx.imageSmoothingEnabled=true}
   if(photoOnTop)drawImgs(im=>!im.design);
-  if(PH.on&&PH.data){const im=phImg(PH.i);if(im&&im.complete&&im.naturalWidth){const d=PH.data;ctx.globalAlpha=PH.op;ctx.drawImage(im,d.x0,d.y0,d.size,d.size);ctx.globalAlpha=1}}
+  if(PH.on&&PH.data){const im=phImg(PH.i);if(im&&im.complete&&im.naturalWidth){const d=PH.data;const o=phOff(d.runs[PH.i]);ctx.globalAlpha=PH.op;ctx.drawImage(im,d.x0+o[0],d.y0+o[1],d.size,d.size);ctx.globalAlpha=1}}
   drawImgs(im=>!!im.design); // design drawings always sit above the photos and terrain layers
   drawPrivacy(1/s);
   if(!T||!P.lot){return}   // terrain loaded but outlines not built yet (startup)
@@ -1062,7 +1070,9 @@ async function connect(){
   if(db)keepLive('lot',(ok,bad)=>db.doc(CS('meta')+'/lot').onSnapshot(sn=>{ok();if(sn.exists){lotDoc=sn.data();if(lotDoc&&Array.isArray(lotDoc.pts)&&lotDoc.pts.length>=6)applyLot(lotDoc.pts)}},bad));
   if(db)keepLive('notebook',(ok,bad)=>db.collection(C('notebook')).onSnapshot(sn=>{ok();notes.clear();for(const d of sn.docs){const v=d.data();if(v&&v.text)notes.set(d.id,v)}renderNotes()},bad));
   else{const ln=lsGet('bt.notes',{});for(const [k,v] of Object.entries(ln))notes.set(k,v)}
-  if(db)keepLive('czones',(ok,bad)=>db.doc(C('settings')+'/zones').onSnapshot(sn=>{ok();applyCZ(sn.exists?(sn.data()||{}).list:[])},bad));
+  if(db)keepLive('phnudge',(ok,bad)=>db.doc(C('settings')+'/history').onSnapshot(sn=>{ok();PH.nudge=(sn.exists&&(sn.data()||{}).nudge)||{};const v=$('#phNv');if(v&&PH.data)v.textContent=phNudgeTxt(PH.data.runs[PH.i]);if(PH.on)draw()},bad));
+   else PH.nudge=lsGet('bt.phnudge.'+SITEID,{});
+   if(db)keepLive('czones',(ok,bad)=>db.doc(C('settings')+'/zones').onSnapshot(sn=>{ok();applyCZ(sn.exists?(sn.data()||{}).list:[])},bad));
   else applyCZ(lsGet('bt.czones',[]));
   if(db)keepLive('water',(ok,bad)=>db.doc(C('settings')+'/water').onSnapshot(sn=>{ok();if(sn.exists){WB=Object.assign(WB,sn.data());if(!$('#tab-tools').contains(document.activeElement))renderTools()}},bad));
   if(db)keepLive('imagery',(ok,bad)=>db.collection(C('imagery')).onSnapshot(snap=>{ok();const keepLocal=[...imagery.entries()].filter(([k,v])=>v.local);imagery.clear();for(const [k,v] of keepLocal)imagery.set(k,v);

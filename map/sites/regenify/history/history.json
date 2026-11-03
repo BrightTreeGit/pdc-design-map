@@ -3,7 +3,7 @@
  "y0": 0,
  "size": 2000,
  "source": "NSW Spatial Services Historical Aerial Photography (scanned film frames), CC BY 4.0",
- "hint": "These are scanned film photos from NSW Spatial Services, lined up by matching creeks, ridges, tracks and forest edges, so allow 20\u201340 m.",
+ "hint": "These are scanned film photos from NSW Spatial Services, lined up on roads, buildings, tracks and clearings across the whole 2 km window (inside and outside the lot), so allow about 10\u201320 m. If a year still sits off, use \"Line this year up by eye\" above.",
  "credit": "Imagery \u00a9 NSW Spatial Services (CC BY 4.0)",
  "note": "Raw frames pinned by matching against the current aerial (or the next pinned year). Not pinned reliably, left out: 1958, 1966.",
  "runs": [
@@ -18,7 +18,8 @@
    "old": true,
    "bw": true,
    "cover": 1.0,
-   "pinned": "matched to the next pinned year"
+   "pinned": "matched to today's aerial at hundreds of points (roads, buildings, tracks, clearings) across the 2 km window",
+   "acc": "5\u201310 m"
   },
   {
    "y": 1979,
@@ -31,7 +32,8 @@
    "old": true,
    "bw": true,
    "cover": 1.0,
-   "pinned": "matched to the current aerial"
+   "pinned": "matched to today's aerial at hundreds of points (roads, buildings, tracks, clearings) across the 2 km window",
+   "acc": "5\u201310 m"
   },
   {
    "y": 1987,
@@ -44,7 +46,8 @@
    "old": true,
    "bw": true,
    "cover": 1.0,
-   "pinned": "matched to the current aerial"
+   "pinned": "matched to today's aerial at hundreds of points (roads, buildings, tracks, clearings) across the 2 km window",
+   "acc": "5\u201310 m"
   },
   {
    "y": 1991,
@@ -57,7 +60,10 @@
    "old": true,
    "bw": true,
    "cover": 0.91,
-   "pinned": "matched to the current aerial"
+   "pinned": "matched to today's aerial at hundreds of points (roads, buildings, tracks, clearings) across the 2 km window; nudged by eye on the house clearing",
+   "acc": "20\u201340 m",
+   "dx": 25,
+   "dy": 40
   },
   {
    "y": 1997,
@@ -70,7 +76,8 @@
    "old": true,
    "bw": true,
    "cover": 1.0,
-   "pinned": "matched to the current aerial"
+   "pinned": "matched to today's aerial at hundreds of points (roads, buildings, tracks, clearings) across the 2 km window",
+   "acc": "5\u201310 m"
   }
  ]
 }

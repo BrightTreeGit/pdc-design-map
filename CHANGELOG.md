@@ -4,6 +4,12 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 
 **How this was made.** From v77 on, entries are written as each change is published. Earlier entries were rebuilt by comparing the saved copies of the map code: tools, layers, panels, buttons and drawing types added or removed between each pair. The code behind each entry is exact. Where no copy was saved for every version, the entry covers a range (for example v66–v68), meaning the change landed somewhere in that range. Small fixes and wording tweaks don't show up in that comparison, so they're only listed where known. Times are Brisbane time.
 
+## Trial v60 (3 Nov 2026)
+### Fixed
+- NSW history photos for Regenify, Firefly Farm and Willow Vale lined up again, this time on hundreds of points across the whole 2 km window: roads, buildings, tracks and clearings, inside and outside the lot. Brett spotted Regenify's round house and trails sitting off in every year. They now land within about 10–20 m (1997 moved about 55 m, 1987 about 30 m).
+### Added
+- "Line this year up by eye" under the photo history slider: nudge the current old photo north, south, east or west (5 m a click, Shift for 1 m) until a house or track sits on today's map. Saved for everyone on that site's map.
+
 ## Trial v59 (3 Nov 2026)
 ### Added
 - Photo history slider for Willow Vale (1987, 1993), Regenify (1971–1997, five years) and Firefly Farm (1966–1997, six years): NSW Spatial Services' scanned film aerial photos (CC BY 4.0), pinned onto each map by matching creeks, ridges, tracks and forest edges (allow 20–40 m). The oldest frames (Regenify 1958 and 1966, Firefly 1958, Willow Vale 1967) couldn't be pinned reliably and are left out for now.
@@ -62,6 +68,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v60 | 3 Nov 2026 | NSW history photos re-pinned on roads, buildings and tracks; nudge-by-eye control |
 | Trial v59 | 3 Nov 2026 | NSW scanned aerial photos on the history slider for Willow Vale, Regenify and Firefly; Noosa drone quick-look |
 | Trial v58 | 2 Nov 2026 | Compressed 3MF export (files 6–8× smaller) |
 | Trial v57 | 2 Nov 2026 | Zoom to flies the 3D camera; Bright Tree hairpin road named, duplicate swales removed |
