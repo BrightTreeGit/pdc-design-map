@@ -17,3 +17,5 @@
 | **Total** | 148 | 148 | 0 |
 
 No drops of more than 3 features or notes on any site. Empty collections (Bright Tree notebook and tasks; all of bright-tree-gemini, willow-vale and regenify; the other sites' notebook/settings/tasks/meta except where listed) not saved.
+
+Re-checked at 21:45 UTC: a fresh export matched these files exactly (148 records).
