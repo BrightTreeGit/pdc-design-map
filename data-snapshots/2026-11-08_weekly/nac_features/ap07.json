@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        995.1,
+        994
+      ]
+    ]
+  },
+  "kind": "tank",
+  "name": "Slimline tank 5,000 L",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m). Along the garage wall.",
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z",
+  "vol": 5000
+}

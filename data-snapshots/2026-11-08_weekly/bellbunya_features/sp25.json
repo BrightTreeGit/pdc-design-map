@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-20T00:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        1141.5,
+        1532.5
+      ]
+    ]
+  },
+  "kind": "gate",
+  "name": "Site access",
+  "notes": "Main entry from Browns Rd (site plan).",
+  "source": "site plan",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-20T00:00:00.000Z"
+}

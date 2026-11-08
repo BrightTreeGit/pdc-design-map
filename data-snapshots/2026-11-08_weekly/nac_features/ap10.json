@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1006.6,
+        997.4
+      ],
+      [
+        1007.7,
+        993.4
+      ],
+      [
+        1016,
+        994.7
+      ],
+      [
+        1014.6,
+        998.4
+      ]
+    ]
+  },
+  "kind": "zone1",
+  "name": "Zone 1 · Mixed garden beds",
+  "notes": "From Ange's landscaping sketch, fitted to the property boundary (positions about ±1–2 m).",
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:30:00.000Z"
+}

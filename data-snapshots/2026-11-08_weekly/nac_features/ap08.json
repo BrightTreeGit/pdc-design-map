@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-10-20T05:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        996,
+        997.4
+      ]
+    ]
+  },
+  "kind": "structure",
+  "name": "Pump-out septic",
+  "notes": "Pump-out septic system (Ange, 20 Oct): no absorption area, so no planting limit around it. Keep the lids accessible and a clear hose run from the driveway for the pump-out truck.",
+  "source": "Ange's plan",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-20T05:40:00.000Z"
+}

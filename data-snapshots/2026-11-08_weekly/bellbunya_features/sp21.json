@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T00:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1337.6,
+        1358.4
+      ],
+      [
+        1334,
+        1352.6
+      ],
+      [
+        1339.8,
+        1348.7
+      ],
+      [
+        1343.4,
+        1354.4
+      ]
+    ]
+  },
+  "kind": "cabin",
+  "name": "Proposed cabin site 4",
+  "notes": "Proposed cabin location on the site plan (green). Size is a placeholder: adjust to the cabin design.",
+  "source": "site plan",
+  "stage": "y2",
+  "status": "proposed",
+  "updatedAt": "2026-10-20T00:00:00.000Z"
+}

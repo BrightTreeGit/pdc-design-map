@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-20T04:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1499,
+        1148
+      ],
+      [
+        1482,
+        1147
+      ],
+      [
+        1499,
+        1130
+      ],
+      [
+        1502,
+        1135
+      ],
+      [
+        1502,
+        1143
+      ],
+      [
+        1499,
+        1148
+      ]
+    ]
+  },
+  "kind": "pond",
+  "name": "P1 pond (recommended) · ~0.23 ML",
+  "notes": "3 m wall about 24 m long holds about 0.2 ML (233 m³) over 200 m². Wall earthworks roughly 535 m³. 4.0 ha drains to it. Small catchment: the easiest kind of in-gully pond; still needs a spillway. About 222 m above the house: a gravity source, but fit a pressure-reducing valve. Computed from 5 m elevation, so check on site.",
+  "source": "recommended plan",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-20T04:30:00.000Z"
+}

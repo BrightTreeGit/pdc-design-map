@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T04:35:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        591.7,
+        868
+      ],
+      [
+        599.7,
+        868.3
+      ],
+      [
+        599.2,
+        878.3
+      ],
+      [
+        590.8,
+        877.5
+      ]
+    ]
+  },
+  "kind": "shed",
+  "name": "Shed",
+  "notes": "Small existing roof east of the house, traced from the aerial photo; confirm its use.",
+  "source": "traced from aerial",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-20T04:35:00.000Z"
+}

@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T00:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1066.9,
+        1556.4
+      ],
+      [
+        1055.3,
+        1539.5
+      ],
+      [
+        1086.6,
+        1517.9
+      ],
+      [
+        1098.2,
+        1534.9
+      ]
+    ]
+  },
+  "kind": "futurebuilding",
+  "name": "Proposed future restaurant",
+  "notes": "On the site plan, not part of the current application.",
+  "source": "site plan",
+  "stage": "y10",
+  "status": "proposed",
+  "updatedAt": "2026-10-20T00:00:00.000Z"
+}

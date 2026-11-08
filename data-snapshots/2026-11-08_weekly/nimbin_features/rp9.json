@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T04:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        449,
+        1016
+      ],
+      [
+        477,
+        1016
+      ],
+      [
+        477,
+        1034
+      ],
+      [
+        449,
+        1034
+      ]
+    ]
+  },
+  "kind": "pond",
+  "name": "Off-creek pond (recommended) · ~0.6 ML",
+  "notes": "A dug pond about 28 × 18 m and 2 m deep (about 0.6 ML) on the creek flats near the house, filled by a small diversion or pump from the creek rather than built across it. Out of the flood channel, easy to reach, and good for irrigation, stock water and fire-fighting. Keep the creek setback and check NSW water rules (harvestable rights) before digging.",
+  "source": "recommended plan",
+  "stage": "y2",
+  "status": "idea",
+  "updatedAt": "2026-10-20T04:30:00.000Z"
+}

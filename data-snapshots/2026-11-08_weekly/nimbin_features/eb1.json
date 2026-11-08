@@ -1,0 +1,33 @@
+{
+  "createdAt": "2026-10-20T04:35:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        567.2,
+        857.5
+      ],
+      [
+        582.5,
+        860.8
+      ],
+      [
+        579.2,
+        875
+      ],
+      [
+        564.2,
+        870.8
+      ]
+    ]
+  },
+  "kind": "building",
+  "name": "House",
+  "notes": "Existing house, traced from the NSW aerial photo (outline about ±1–2 m). Counts as collecting roof for the water balance.",
+  "roof": true,
+  "source": "traced from aerial",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-20T04:35:00.000Z"
+}
