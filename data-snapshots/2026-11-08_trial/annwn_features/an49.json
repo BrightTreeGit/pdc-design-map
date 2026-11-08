@@ -1,0 +1,28 @@
+{
+  "createdAt": "2026-11-02T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        987.3,
+        990.6
+      ],
+      [
+        997.2,
+        990.7
+      ],
+      [
+        998.5,
+        990.9
+      ]
+    ]
+  },
+  "kind": "pipe",
+  "name": "Overflow pipe to the creek head",
+  "notes": "Carries surplus from the west-side trench (and later a tank overflow) along the north side of the house to the head of the creek, so stormwater feeds the pond instead of pooling.",
+  "source": "Bronwen's answers (27 Oct 2026)",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-11-02T10:00:00.000Z"
+}

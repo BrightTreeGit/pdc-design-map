@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-20T00:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1214.9,
+        1379.6
+      ],
+      [
+        1213.1,
+        1387.6
+      ],
+      [
+        1209.5,
+        1386.7
+      ],
+      [
+        1211.3,
+        1378.8
+      ]
+    ]
+  },
+  "kind": "cabin",
+  "name": "Accommodation building 1",
+  "notes": "Roof outline traced from the government aerial photo; use and name from the community site plan (DD1-01 D).",
+  "source": "site plan",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-20T00:00:00.000Z"
+}

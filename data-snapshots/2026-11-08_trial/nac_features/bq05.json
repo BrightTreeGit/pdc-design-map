@@ -1,0 +1,36 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1025.7,
+        993.9
+      ],
+      [
+        1028.9,
+        994.5
+      ],
+      [
+        1031.6,
+        1000.4
+      ],
+      [
+        1027.3,
+        1007.4
+      ],
+      [
+        1021.8,
+        1006.7
+      ]
+    ]
+  },
+  "kind": "zone3",
+  "name": "Zone 3 · East (rock garden, banksia)",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m).",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

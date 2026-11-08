@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1004.9,
+        1005.8
+      ],
+      [
+        1010.5,
+        1006.5
+      ],
+      [
+        1010.2,
+        1007.7
+      ],
+      [
+        1004.6,
+        1007
+      ]
+    ]
+  },
+  "kind": "herbs",
+  "name": "Herb bed",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Mint, basil, dill, parsley, ginger.",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

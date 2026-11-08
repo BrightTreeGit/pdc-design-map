@@ -1,0 +1,28 @@
+{
+  "createdAt": "2026-11-02T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        1001.2,
+        1013.7
+      ],
+      [
+        1003.8,
+        1012
+      ],
+      [
+        1005,
+        1009.4
+      ]
+    ]
+  },
+  "kind": "screen",
+  "name": "Privacy and wind screen (south-east corner)",
+  "notes": "The south-east wind blows most of the year (Bronwen). Low natives under 2.5 m because the sewer runs along this fence: westringia, grevillea 'Robyn Gordon', dianella and lomandra, with the lemon myrtle behind. They also handle the soggy ground here.",
+  "source": "Bronwen's answers (27 Oct 2026)",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-11-02T10:00:00.000Z"
+}

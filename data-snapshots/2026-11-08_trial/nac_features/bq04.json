@@ -1,0 +1,56 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        967.5,
+        987.1
+      ],
+      [
+        992.1,
+        990.9
+      ],
+      [
+        991.7,
+        995.6
+      ],
+      [
+        1000.1,
+        997.2
+      ],
+      [
+        999,
+        1004.7
+      ],
+      [
+        996,
+        1004.8
+      ],
+      [
+        990.8,
+        1006.9
+      ],
+      [
+        977.9,
+        1006.4
+      ],
+      [
+        969.8,
+        1005.9
+      ],
+      [
+        967.1,
+        1000.3
+      ]
+    ]
+  },
+  "kind": "zone3",
+  "name": "Zone 3 · West (gums and flowering natives)",
+  "notes": "From Ange's updated plan, fitted to the boundary and the house (positions about ±1 m). Existing ironbarks, tallowwoods and the grey gum with flowering natives under them. Ange wants guild planting in the south-west part of this zone.",
+  "source": "Ange's updated plan (24 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-10-24T08:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "cx": 1008.6,
+    "cy": 1000.6,
+    "g": "sun",
+    "r": 70
+  },
+  "kind": "sunS",
+  "name": "Summer sun",
+  "notes": "From Ange's sector map: summer sun arcs from the east-south-east in the morning to the west-north-west in the afternoon; the computed arc is shown.",
+  "source": "Ange's sector sketch (24 Oct 2026)",
+  "stage": "existing",
+  "status": "agreed",
+  "updatedAt": "2026-10-24T08:00:00.000Z"
+}

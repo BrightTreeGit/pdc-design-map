@@ -1,0 +1,44 @@
+{
+  "createdAt": "2026-10-22T00:28:44.354Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1099.7,
+        1063.5
+      ],
+      [
+        1099.7,
+        1067.3
+      ],
+      [
+        1103.9,
+        1068.1
+      ],
+      [
+        1104.3,
+        1063.7
+      ],
+      [
+        1099.8,
+        1063.3
+      ],
+      [
+        1100,
+        1063.3
+      ],
+      [
+        1100,
+        1063.3
+      ]
+    ]
+  },
+  "kind": "rockpool",
+  "name": "Rock pool 1",
+  "notes": "wet spot\n",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-22T00:29:10.709Z"
+}

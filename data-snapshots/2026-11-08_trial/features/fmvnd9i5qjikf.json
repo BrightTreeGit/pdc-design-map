@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-10-25T05:07:43.022Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        826.8,
+        902.3
+      ],
+      [
+        831.9,
+        899
+      ],
+      [
+        835.7,
+        904.9
+      ],
+      [
+        830.6,
+        908.2
+      ]
+    ]
+  },
+  "kind": "cabin",
+  "name": "Cabin / accommodation 1",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-10-26T22:13:06.018Z"
+}

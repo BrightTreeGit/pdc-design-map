@@ -1,0 +1,72 @@
+{
+  "createdAt": "2026-10-25T07:01:20.606Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        809.3,
+        901.4
+      ],
+      [
+        827.1,
+        923.4
+      ],
+      [
+        844,
+        937.4
+      ],
+      [
+        864.6,
+        947.2
+      ],
+      [
+        876.3,
+        953.8
+      ],
+      [
+        893.4,
+        964.2
+      ],
+      [
+        897.8,
+        959.4
+      ],
+      [
+        891.4,
+        949.7
+      ],
+      [
+        883.6,
+        942.2
+      ],
+      [
+        872.5,
+        921.5
+      ],
+      [
+        864.6,
+        904.5
+      ],
+      [
+        861.3,
+        893
+      ],
+      [
+        858,
+        886.8
+      ],
+      [
+        855,
+        881.3
+      ]
+    ]
+  },
+  "kind": "road",
+  "name": "Hairpin road",
+  "notes": "The switchback road from the drive up past the hairpin fruit forest to the hill above. Select it and press Zoom to while the 3D view is open to fly to it. Its upper edge is the top swale of the hairpin fruit forest; the chilli guild sits on the hillside above the bend.",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-11-02T10:40:00.000Z"
+}

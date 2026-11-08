@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-11-03T02:14:48.645Z",
+  "createdBy": "u_KbnYNeWBcGlOimdZ9wZM4Q",
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1562,
+        1236
+      ],
+      [
+        1565.9,
+        1249
+      ],
+      [
+        1574,
+        1247.2
+      ],
+      [
+        1570.1,
+        1234.2
+      ],
+      [
+        1562,
+        1234.8
+      ],
+      [
+        1562,
+        1234.8
+      ]
+    ]
+  },
+  "kind": "shed",
+  "name": "Shed / workshop 1",
+  "notes": "",
+  "source": "map",
+  "stage": "now",
+  "status": "idea",
+  "updatedAt": "2026-11-03T02:14:48.645Z"
+}

@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-26T12:40:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "polygon",
+    "pts": [
+      [
+        1097.9,
+        1105.2
+      ],
+      [
+        1113.4,
+        1115.3
+      ],
+      [
+        1108.3,
+        1122.5
+      ],
+      [
+        1098.9,
+        1115.8
+      ],
+      [
+        1100.8,
+        1112.6
+      ],
+      [
+        1095.9,
+        1108.9
+      ]
+    ]
+  },
+  "kind": "building",
+  "name": "House",
+  "notes": "Existing house: L-shaped, long side running north-west to south-east, deck on the south end. Outline checked against the LiDAR (raised 3–4.5 m) to about ±1–2 m.",
+  "source": "Traced 26 Oct 2026 from current satellite imagery (Airbus/Maxar via Google Maps, screenshots from Brett) and lined up on the map aerial",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-26T12:45:58.481Z"
+}

@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-11-02T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        984.6,
+        1010.6
+      ]
+    ]
+  },
+  "kind": "structure",
+  "name": "Water meter",
+  "notes": "Water meter in the south-west corner (Bronwen). Keep it clear and reachable if a carport goes in here.",
+  "source": "Bronwen's answers (27 Oct 2026)",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-11-02T10:00:00.000Z"
+}

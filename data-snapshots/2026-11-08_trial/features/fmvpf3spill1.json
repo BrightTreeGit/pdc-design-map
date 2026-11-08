@@ -1,0 +1,28 @@
+{
+  "createdAt": "2026-10-26T03:30:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "line",
+    "pts": [
+      [
+        970,
+        883
+      ],
+      [
+        975,
+        882
+      ],
+      [
+        979,
+        881
+      ]
+    ]
+  },
+  "kind": "flow",
+  "name": "F3 pond spillway",
+  "notes": "Rock-lined spillway from the north-east corner of the F3 lined pond, through the bund at about 53.0 m, back to the creek below weir W14.",
+  "source": "map",
+  "stage": "y1",
+  "status": "idea",
+  "updatedAt": "2026-10-26T03:30:00.000Z"
+}

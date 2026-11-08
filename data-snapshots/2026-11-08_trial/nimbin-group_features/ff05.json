@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-10-23T10:00:00.000Z",
+  "createdBy": null,
+  "geom": {
+    "g": "point",
+    "pts": [
+      [
+        563,
+        861
+      ]
+    ]
+  },
+  "kind": "tank",
+  "litres": 10000,
+  "name": "Water tank 2 (about 10,000 L)",
+  "notes": "One of four existing tanks of about 10,000 L each. (Position indicative: traced from the group's drone photo and sketches onto the 2019 aerial; check on site.)",
+  "source": "Firefly Farm group draft (23 Oct 2026): annotated drone plan, zone sketch, sector analysis and design brief",
+  "stage": "existing",
+  "status": "built",
+  "updatedAt": "2026-10-23T10:00:00.000Z"
+}
