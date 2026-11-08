@@ -4,6 +4,10 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 
 **How this was made.** From v77 on, entries are written as each change is published. Earlier entries were rebuilt by comparing the saved copies of the map code: tools, layers, panels, buttons and drawing types added or removed between each pair. The code behind each entry is exact. Where no copy was saved for every version, the entry covers a range (for example v66–v68), meaning the change landed somewhere in that range. Small fixes and wording tweaks don't show up in that comparison, so they're only listed where known. Times are Brisbane time.
 
+## Trial v62 (8 Nov 2026)
+### Added
+- 3D print, "Colour of each part": choose the filament colour for the grass (skin), trees, buildings, water and boundary, with a "Buildings orange" shortcut and a reset. Parts with the same colour share a filament slot, so orange buildings on orange grass need one colour fewer.
+
 ## Trial v61 (8 Nov 2026)
 ### Added
 - Bellbunya: tree heights and a grass map from the Queensland 2022 LiDAR (Sunshine Coast and Noosa surveys, from Brett's 30 Oct point-cloud run). They switch on the canopy layers and trees-plus-grass colouring in the 3D print.
@@ -75,6 +79,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v62 | 8 Nov 2026 | Print: choose the colour of each part (e.g. orange buildings) |
 | Trial v61 | 8 Nov 2026 | Bellbunya LiDAR trees and grass; thin small creeks option; raised trees in tree-zone prints |
 | Trial v60 | 3 Nov 2026 | NSW history photos re-pinned on roads, buildings and tracks; nudge-by-eye control |
 | Trial v59 | 3 Nov 2026 | NSW scanned aerial photos on the history slider for Willow Vale, Regenify and Firefly; Noosa drone quick-look |

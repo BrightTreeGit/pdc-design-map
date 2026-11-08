@@ -11,7 +11,7 @@ try:
     p=b.new_page(viewport={'width':1400,'height':900});errs=[]
     p.on('pageerror',lambda e:errs.append(str(e)[:200]))
     p.goto('http://localhost:8768/index.html')
-    cfg={'scheme':'economy','cmode':'zone','cex':0.5,'detail':'xfine','creeks':'main','minPatch':500,'extend':'none','canopy':True,'size':float(os.environ.get('PSIZE','180')),'area':'lot','fill':'terrain','v46':1,'v47':1,'swid':float(os.environ.get('SWID','1'))}
+    cfg={'scheme':'economy','cmode':'zone','cex':0.5,'detail':'xfine','creeks':'main','minPatch':500,'extend':'none','canopy':True,'size':float(os.environ.get('PSIZE','180')),'area':'lot','fill':'terrain','v46':1,'v47':1,'swid':float(os.environ.get('SWID','1')),**json.loads(os.environ.get('P3EXTRA','{}'))}
     p.evaluate("([k,c,f])=>{localStorage.setItem(k+'p3',JSON.stringify(c));localStorage.setItem(k+'features',f)}",[key,cfg,json.dumps(F)])
     p.goto(f'http://localhost:8768/index.html#site={SP}');p.reload();p.wait_for_timeout(12000)
     r=p.evaluate("""async()=>{await loadCG();await loadGrass();const r=build3D();const se=swapEst(r);return {w:r.wmm,h:r.hmm,z:r.zmm,parts:r.meshes.map(m=>[m.name,m.color,m.t.length/3]),se,n:features.size}}""")
