@@ -7,6 +7,7 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 ## Trial v62 (8 Nov 2026)
 ### Added
 - Bellbunya: the north-west strip the LiDAR missed (about 1.3 ha, mostly just outside the lot) is filled with trees, using heights mirrored from the forest right next to it (typically about 14 m). It prints as forest instead of flat ground.
+- 3D print: the Ground colour choice now works in the Economy scheme too (Brett: orange ground with black buildings). Before, Economy always printed the ground green.
 - 3D print, "Colour of each part": choose the filament colour for the grass (skin), trees, buildings, water and boundary, with a "Buildings orange" shortcut and a reset. Parts with the same colour share a filament slot, so orange buildings on orange grass need one colour fewer.
 
 ## Trial v61 (8 Nov 2026)
