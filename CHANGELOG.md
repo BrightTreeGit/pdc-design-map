@@ -4,6 +4,13 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 
 **How this was made.** From v77 on, entries are written as each change is published. Earlier entries were rebuilt by comparing the saved copies of the map code: tools, layers, panels, buttons and drawing types added or removed between each pair. The code behind each entry is exact. Where no copy was saved for every version, the entry covers a range (for example v66–v68), meaning the change landed somewhere in that range. Small fixes and wording tweaks don't show up in that comparison, so they're only listed where known. Times are Brisbane time.
 
+## Trial v61 (8 Nov 2026)
+### Added
+- Bellbunya: tree heights and a grass map from the Queensland 2022 LiDAR (Sunshine Coast and Noosa surveys, from Brett's 30 Oct point-cloud run). They switch on the canopy layers and trees-plus-grass colouring in the 3D print.
+- 3D print, Creek width: "Thin small creeks (main creek unchanged)" and "Slightly thinner small creeks". These make the small creeks narrower, down to about one nozzle line (0.42 mm), and leave the main creek as it is.
+### Changed
+- 3D print in tree-zone colours: the trees now stand up at their canopy height (times the canopy-height setting) instead of lying flat, with the grass in orange between them.
+
 ## Trial v60 (3 Nov 2026)
 ### Fixed
 - NSW history photos for Regenify, Firefly Farm and Willow Vale lined up again, this time on hundreds of points across the whole 2 km window: roads, buildings, tracks and clearings, inside and outside the lot. Brett spotted Regenify's round house and trails sitting off in every year. They now land within about 10–20 m (1997 moved about 55 m, 1987 about 30 m).
@@ -68,6 +75,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v61 | 8 Nov 2026 | Bellbunya LiDAR trees and grass; thin small creeks option; raised trees in tree-zone prints |
 | Trial v60 | 3 Nov 2026 | NSW history photos re-pinned on roads, buildings and tracks; nudge-by-eye control |
 | Trial v59 | 3 Nov 2026 | NSW scanned aerial photos on the history slider for Willow Vale, Regenify and Firefly; Noosa drone quick-look |
 | Trial v58 | 2 Nov 2026 | Compressed 3MF export (files 6–8× smaller) |

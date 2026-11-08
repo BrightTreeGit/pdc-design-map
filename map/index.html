@@ -396,7 +396,7 @@ function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('ac
 /* ---------------- PDC sites: one map page, one data space per site ---------------- */
 const SITES=[
  {id:'nimbin-group',name:'Firefly Farm',group:'Group 1',area:'Nimbin, NSW · the group plan, house-area sketch and tracks to the upper pads',base:'sites/nimbin/',ready:true,history:true,prosKinds:['pond','tank'],grass:true,cgrid:'NSW LiDAR (Richmond River 2023)',s2:'12 Aug 2026',s2wet:'9 Apr 2026',s2old:'20 Jul 2017',s2mid:'19 Jul 2023',s2part:true},
- {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true,history:true},
+ {id:'bellbunya',name:'Bellbunya',group:'Group 2',area:'Belli Park, Qld',ready:true,history:true,grass:true,cgrid:'Queensland LiDAR 2022 (Sunshine Coast and Noosa surveys)'},
  {id:'bright-tree',name:'Bright Tree',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true,niche:true},
  {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true,history:true,grass:true,cgrid:'NSW LiDAR 2018 (Upper Manning) plus regrowth to 2026 from Sentinel-2',s2:'31 Aug 2026',s2wet:'14 Apr 2026',s2old:'17 Mar 2018',seasonal:[[930,1065,1140,1135]]},
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'PDC host',area:'Kin Kin, Qld',ready:true,history:true},
@@ -1285,7 +1285,7 @@ function build3D(){
     else if(near){const zs=near.geom.pts.map(q=>zAt(q[0],q[1])).filter(v=>isFinite(v)).sort((x,y)=>x-y);if(zs.length)L.push({name:'Dam water'+sf,color:'#2D8FD5',h:0.8,abs:mm(zs[zs.length>>1])+0.5,items:[{t:'poly',p:growPoly(near.geom.pts,+P3.dgrow)}]})}}}
   if(P3.house!==false){let hz=visList().filter(f=>['building','cabin','shed','greenhouse','container','amenities','carport'].includes(f.kind)&&f.geom.g==='polygon');if(!hz.length)hz=visList().filter(f=>f.kind==='zone0'&&f.geom.g==='polygon');add('Buildings','#111111',2.4,hz.map(f=>featItem(f,hw)).filter(Boolean))}
   if(P3.water){const sw=+P3.swid||1;const SZ=SITEDEF.seasonal||[];const seas=P=>SZ.some(([a,b,c2,d])=>{const n=P.filter(q=>q[0]>=a&&q[0]<=c2&&q[1]>=b&&q[1]<=d).length;return n>=P.length/2});
-    const kmin={all:1,main:2,big:3}[P3.creeks||(eco?'main':'all')]||1;const W=eco?[0,0.45,0.8,1.4]:[0,1,1.4,2].map(v=>v*sw);
+    const kmin={all:1,main:2,big:3}[P3.creeks||(eco?'main':'all')]||1;const W=(eco?[0,0.45,0.8,1.4]:[0,1,1.4,2]).map((v,k)=>k===3?(eco||sw<1?v:v*sw):Math.max(0.42,eco&&sw>=1?v:v*sw)); // sw<1 thins the small creeks only; 0.42 mm is about one nozzle line
     const it=T.streams.filter(st=>st.k>=kmin).map(st=>{const P=flat(st.p);return {t:'line',p:P,r:seas(P)?hw(eco?0.4:0.7):hw(W[st.k])}});
     for(const f of visList()){const k=KINDS[f.kind];if(!k||k.g!=='Water'||['pipe','sewer','irrigation','tank','keypoint','soak'].includes(f.kind)||(hasDam&&(f.kind==='pond'||f.kind==='damwall')))continue;it.push(featItem(f,hw))}add('Water','#1E7FD8',0.8,it.filter(Boolean));if(+P3.wdepth>0&&L.length&&L[L.length-1].name==='Water'){L[L.length-1].carve=+P3.wdepth;L[L.length-1].h=Math.min(0.6,+P3.wdepth/2)}}
   if(P3.design)for(const g of ['Access','Built','Landscape','Plants']){const col={Access:'#8A5A2B',Built:'#5A5A5A',Landscape:'#9A7420',Plants:'#3F8F3A'}[g];
@@ -1360,7 +1360,7 @@ function build3D(){
       for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!lotIn[k]||(wl>=0&&own[k]===wl)){for(let dj=-Rr;dj<=Rr;dj++)for(let di=-Rr;di<=Rr;di++){const ii=i+di,jj=j+dj;if(ii>=0&&jj>=0&&ii<nx&&jj<ny)near[jj*nx+ii]=1}}}
       for(let k=0;k<cells;k++)if(near[k])focus[k]=0}
     if(focus||treeLy>=0){const isSkin=k=>(focus&&focus[k])||(!treeMajor&&treeLy>=0&&own[k]===treeLy);const fv=new Uint8Array(W1*(ny+1));for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!inside[k]||!isSkin(k))continue;for(const v of [j*W1+i,j*W1+i+1,(j+1)*W1+i,(j+1)*W1+i+1])fv[v]++}
-      const SK=1.0,gTop=(i,j)=>{const v=j*W1+i;return hn[v]&&fv[v]===hn[v]?Math.max(.6,topT(i,j)-SK):topT(i,j)};
+      const SK=1.0,gTop=(i,j)=>{const v=j*W1+i;return hn[v]&&fv[v]===hn[v]?Math.max(.6,topT(i,j)-SK):topT(i,j)+(treeMajor&&!fv[v]&&+P3.cex>0?Math.max(0,hv(i,j)):0)}; // tree-zone mode: the trees stand up at their canopy height (x the canopy height setting)
       padSmooth(terrM,tOwn,0,nx,ny,X,Y,gTop,()=>0);meshes.push(terrM);
       if(focus){const fo=new Int16Array(cells).fill(-2);for(let k=0;k<cells;k++)if(focus[k]&&tOwn[k]===0&&(own[k]===-1||own[k]===-2||(L[own[k]]&&L[own[k]].soft)))fo[k]=0;
         const om=new Mesh3(skinName||(treeMajor?'Open ground (orange skin)':'Working area (orange skin)'),skinCol);padSmooth(om,fo,0,nx,ny,X,Y,topT,gTop);if(om.t.length)meshes.push(om)}
@@ -1438,7 +1438,7 @@ function p3HTML(){const o=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`
   <div class="field"><label for="p3wd">Creeks</label>${o('p3wd',[[0,'Not carved (use the sink option above)'],[1,'Carved 1 mm into the ground'],[1.5,'Carved 1.5 mm'],[2,'Carved 2 mm'],[3,'Carved 3 mm']],P3.wdepth)}</div>
   <div class="field"><label for="p3ck">Which creeks</label>${o('p3ck',[['all','All flow lines (most colour changes)'],['main','Main creeks and gullies'],['big','Only the main creek (fewest colour changes)']],P3.creeks||((P3.scheme||'economy')==='economy'?'main':'all'))}</div>
   <div class="field"><label for="p3mp">Smallest clearing shown (tree zone)</label>${o('p3mp',[[500,'0.05 ha (most detail)'],[2000,'0.2 ha'],[5000,'0.5 ha'],[10000,'1 ha (fewest colour changes)']],P3.minPatch||5000)}</div>
-  <div class="field"><label for="p3sw">Creek width</label>${o('p3sw',[[1,'Normal'],[1.5,'1.5× wider'],[2,'2× wider'],[3,'3× wider']],P3.swid)}</div>
+  <div class="field"><label for="p3sw">Creek width</label>${o('p3sw',[[0.5,'Thin small creeks (main creek unchanged)'],[0.7,'Slightly thinner small creeks'],[1,'Normal'],[1.5,'1.5× wider'],[2,'2× wider'],[3,'3× wider']],P3.swid)}</div>
   <div class="field"><label for="p3f">Gaps and notches in the boundary</label>${o('p3f',[['off','Leave them open (cut exactly at the boundary)'],['flat','Join narrow gaps (road reserves) with a flat base strip'],['terrain','Fill gaps and notches up to about 120 m wide with the real ground']],P3.fill==='terrain'?'terrain':(P3.fill?'flat':'off'))}</div>
   <div class="field"><label for="p3tc">Ground colour</label>${o('p3tc',[['orange','Orange'],['green','Green'],['tan','Tan']],P3.tcol)}</div>
   <p class="hint">Colours: ground orange, tree canopy green, creeks and water blue, buildings black. Canopy source: ${esc(SITEDEF.canopy||SITEDEF.cgrid?CANOPY_SRC():'none yet')}; creeks: flow lines from the elevation model.</p>
