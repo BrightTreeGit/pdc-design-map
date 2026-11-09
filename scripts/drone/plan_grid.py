@@ -8,10 +8,11 @@ from matplotlib.path import Path
 W='/tmp/claude-0/work/'; D='/mnt/user-data/uploads/Permiculture Noosa PDC/Bright Tree/Lidar-survey data/QLD Government/Canopy outputs/'
 OUT=sys.argv[1] if len(sys.argv)>1 else '.'
 CROSS=len(sys.argv)>2 and sys.argv[2]=='cross'   # second pass at right angles
-CLEAR=45.0      # m above the tallest crown under each stretch
-MINCLEAR=30.0   # never less than this anywhere on the path
-SPACING=20.0 if CROSS else 16.0    # m between lines (75% side overlap at 45 m above crowns, 24 mm lens, 4:3)
-SPEED=4.5       # m/s; with a 2 s timed shot = photo every 9 m (~80% front overlap)
+import os
+CLEAR=float(os.environ.get('CLEAR',45.0))      # m above the tallest crown under each stretch
+MINCLEAR=float(os.environ.get('MINCLEAR',30.0))   # never less than this anywhere on the path
+SPACING=float(os.environ.get('SPACING_X' if CROSS else 'SPACING',20.0 if CROSS else 16.0))    # m between lines (75% side overlap at 45 m above crowns, 24 mm lens, 4:3)
+SPEED=float(os.environ.get('SPEED',4.5))       # m/s; with a 2 s timed shot = photo every 9 m (~80% front overlap)
 ROAD=len(sys.argv)>3 and sys.argv[3]=='road'   # stay inside, but may use the near half of the Cumner Road reserve (west edge)
 BUF=0.0 if ROAD else (float(sys.argv[3]) if len(sys.argv)>3 else 15.0)   # m flown beyond the boundary (0 = stay inside)
 ROADHALF=10.0   # half of an assumed 20 m road reserve
@@ -41,6 +42,8 @@ if ROAD:   # west edges: NW corner (vertex 5) round to the SW corner (vertex 0)
     allowed=lot|strip
 else: allowed=lot
 cover=ndimage.distance_transform_edt(~lot)<=BUF if BUF>0 else ndimage.distance_transform_edt(allowed)>=3
+if os.environ.get('AREA'):   # a smaller survey area (e.g. the fruit forest), kept inside the lot
+    _A=np.array(json.load(open(os.environ['AREA'])),float);cover=Path(_A).contains_points(np.c_[xx.ravel()+.5,yy.ravel()+.5]).reshape(2000,2000)&(ndimage.distance_transform_edt(allowed)>=3)
 inner=ndimage.distance_transform_edt(allowed)>=1.0
 import heapq
 def seg_ok(a,b,skip=6):
@@ -195,6 +198,7 @@ for c in TAKEOFF:
 meta={'clear':CLEAR,'spacing':SPACING,'speed':SPEED,'interval_s':2,'buffer':BUF,'lines':len(lines),'source':'2022 LiDAR (QLD), crowns dilated 2 m'}
 meta['pass']='cross' if CROSS else 'main'
 meta['road']=ROAD
-json.dump({'meta':meta,'plans':res},open(OUT+f"/mission_plan_{'cross' if CROSS else 'main'}_{'road' if ROAD else 'buf'+str(int(BUF))}.json",'w'))
+meta['tag']=os.environ.get('TAG','')
+json.dump({'meta':meta,'plans':res},open(OUT+f"/mission_plan_{meta['tag']+'_' if meta['tag'] else ''}{'cross' if CROSS else 'main'}_{'road' if ROAD else 'buf'+str(int(BUF))}.json",'w'))
 for c,r in res.items():
     print(c,r['takeoff_elev'],'RTH',r['rth_rel'],[{k:v for k,v in m.items() if k!='wps'} for m in r['missions']])
