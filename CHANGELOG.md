@@ -4,6 +4,13 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 
 **How this was made.** From v77 on, entries are written as each change is published. Earlier entries were rebuilt by comparing the saved copies of the map code: tools, layers, panels, buttons and drawing types added or removed between each pair. The code behind each entry is exact. Where no copy was saved for every version, the entry covers a range (for example v66–v68), meaning the change landed somewhere in that range. Small fixes and wording tweaks don't show up in that comparison, so they're only listed where known. Times are Brisbane time.
 
+## Trial v63 (10 Nov 2026)
+### Added
+- Photo history slider for Mangiri (1960, 1976, 1985, 1991, 1997, 1998) and NAC (1974, 1976, 1979, 1987, 1993, 2001): NSW Spatial Services' scanned film aerial photos (CC BY 4.0), lined up on hundreds of roads, buildings, clearings, the creek and the shoreline across the 2 km window (about 5–20 m). Mangiri 1960 and 1985 only reach the top two-thirds of the window. Left out because the site sits at the frame edge or couldn't be matched: Mangiri 1979, NAC 1971, 1975 and 1998.
+- Noosa Forest Retreat: the 26 Oct drone flight is now a proper stitched map (OpenDroneMap, test run using every second photo) at 15 cm detail, lined up to the 2022 government photo within about 1–2 m. It replaces the quick-look patchwork at the end of the history slider.
+### Changed
+- The history slider can show a sharper close-up for part of a year (used for the drone map), drawn in place of that part of the photo so fading still looks even.
+
 ## Trial v62 (8 Nov 2026)
 ### Added
 - Bellbunya: the north-west strip the LiDAR missed (about 1.3 ha, mostly just outside the lot) is filled with trees, using heights mirrored from the forest right next to it (typically about 14 m). It prints as forest instead of flat ground.
@@ -81,6 +88,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v63 | 10 Nov 2026 | NSW history photos for Mangiri and NAC; Noosa drone flight stitched at 15 cm |
 | Trial v62 | 8 Nov 2026 | Print: choose the colour of each part (e.g. orange buildings) |
 | Trial v61 | 8 Nov 2026 | Bellbunya LiDAR trees and grass; thin small creeks option; raised trees in tree-zone prints |
 | Trial v60 | 3 Nov 2026 | NSW history photos re-pinned on roads, buildings and tracks; nudge-by-eye control |

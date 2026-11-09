@@ -400,10 +400,10 @@ const SITES=[
  {id:'bright-tree',name:'Bright Tree',group:'Group 3',area:'Diamond Valley, Qld',base:'',ready:true,canopy:true,history:true,niche:true},
  {id:'willow-vale-team',name:'Willow Vale',group:'Group 4',area:'Bowman, NSW · the group presentation (21 Oct)',base:'sites/willow-vale/',ready:true,history:true,grass:true,cgrid:'NSW LiDAR 2018 (Upper Manning) plus regrowth to 2026 from Sentinel-2',s2:'31 Aug 2026',s2wet:'14 Apr 2026',s2old:'17 Mar 2018',seasonal:[[930,1065,1140,1135]]},
  {id:'noosa-forest-retreat',name:'Noosa Forest Retreat',group:'PDC host',area:'Kin Kin, Qld',ready:true,history:true},
- {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,aerialDate:'1 Sep 2021, 7 cm'},
+ {id:'nac',name:'NAC',group:'Small block',area:'North Arm Cove, NSW',ready:true,small:true,history:true,aerialDate:'1 Sep 2021, 7 cm'},
  {id:'annwn',name:'Annwn',group:'Small block',area:'Capalaba, Qld · 770 m² suburban block',ready:true,small:true},
  {id:'regenify',name:'Regenify',group:'Extra',area:'Koonyum Range, NSW',ready:true,history:true,aerialDate:'22 Apr 2015, 10 cm'},
- {id:'mangiri',name:'Mangiri',group:'Extra',area:'Mongarlowe, NSW',ready:true,aerialDate:'28 Jan 2014 (NSW aerial 2014, web-map tiles about 1 m per pixel)'}];
+ {id:'mangiri',name:'Mangiri',group:'Extra',area:'Mongarlowe, NSW',ready:true,history:true,aerialDate:'28 Jan 2014 (NSW aerial 2014, web-map tiles about 1 m per pixel)'}];
 /* one entry per property: older ids (other versions, the auto-data comparison) open the one kept */
 const SITE_ALIAS={'nimbin':'nimbin-group','nimbin-combined':'nimbin-group','nimbin-house-group':'nimbin-group','nimbin-house-combined':'nimbin-group','willow-vale':'willow-vale-team','bright-tree-gemini':'bright-tree'};
 const SITEID=(()=>{let h='';try{h=(location.hash.match(/site=([\w-]+)/)||[])[1]||''}catch(e){}h=SITE_ALIAS[h]||h;const s=SITES.find(x=>x.id===h&&x.ready);return s?s.id:'bright-tree'})();
@@ -448,10 +448,11 @@ function phOff(r){const n=PH.nudge[r.f];return n?n:[+r.dx||0,+r.dy||0]}
 let phSaveT=0;function phSaveNudge(){clearTimeout(phSaveT);phSaveT=setTimeout(async()=>{if(live){try{await db.doc(C('settings')+'/history').set({nudge:PH.nudge,updatedAt:new Date().toISOString()})}catch(e){toast('The photo nudge did not save.')}}else lsSet('bt.phnudge.'+SITEID,PH.nudge)},700)}
 function phNudge(dx,dy){const r=PH.data&&PH.data.runs[PH.i];if(!r)return;const o=phOff(r);PH.nudge[r.f]=dx===null?[+r.dx||0,+r.dy||0]:[o[0]+dx,o[1]+dy];phSaveNudge();const v=$('#phNv');if(v)v.textContent=phNudgeTxt(r);draw()}
 function phNudgeTxt(r){const [x,y]=phOff(r);if(!x&&!y)return 'not moved';return [x?Math.abs(x)+' m '+(x>0?'east':'west'):'',y?Math.abs(y)+' m '+(y>0?'south':'north'):''].filter(Boolean).join(', ')}
-function phImg(i){const r=PH.data.runs[i];if(!r)return null;let im=PH.cache[r.f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+r.f;PH.cache[r.f]=im}return im}
+function phLoad(f){let im=PH.cache[f];if(!im){im=new Image();im.onload=()=>{if(PH.on)draw()};im.src=SB+'history/'+f;PH.cache[f]=im}return im}
+function phImg(i){const r=PH.data.runs[i];if(!r)return null;return phLoad(r.f)}
 function phPre(i){for(const k of [i-1,i+1,i+2])if(PH.data.runs[k])phImg(k)}
 function phFmt(d){if(!d)return '';const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const [y,mo,da]=d.split('-');return (+da)+' '+m[+mo-1]+' '+y}
-function phLabel(){const r=PH.data.runs[PH.i];const dt=r.from===r.to?phFmt(r.from):phFmt(r.from)+' – '+phFmt(r.to);return `<b style="font-size:1.25em">${r.y}</b> · ${dt} · `+(r.drone?`our own drone photos, placed by GPS and heading (within about 5–10 m; the flown part at 25 cm detail, the rest is the 2022 photo, dimmed)`:r.old?`scanned film photo${r.bw?' (black & white)':''}, lined up by matching landmarks (within about ${r.acc||'20–40 m'})`:`${r.res<1?Math.round(r.res*100)+' cm':r.res+' m'} detail${r.res>=2?' (coarse)':''}`)}
+function phLabel(){const r=PH.data.runs[PH.i];const dt=r.from===r.to?phFmt(r.from):phFmt(r.from)+' – '+phFmt(r.to);return `<b style="font-size:1.25em">${r.y}</b> · ${dt} · `+(r.drone?(r.desc||`our own drone photos, placed by GPS and heading (within about 5–10 m; the flown part at 25 cm detail, the rest is the 2022 photo, dimmed)`):r.old?`scanned film photo${r.bw?' (black & white)':''}, lined up by matching landmarks (within about ${r.acc||'20–40 m'})`:`${r.res<1?Math.round(r.res*100)+' cm':r.res+' m'} detail${r.res>=2?' (coarse)':''}`)}
 function phHTML(){if(!PH.data)return '<p class="hint">No photo history for this site yet.</p>';const n=PH.data.runs.length,R=PH.data.runs;
  return `<div class="row"><label><input type="checkbox" id="phOn" ${PH.on?'checked':''}><i class="swatch" style="background:linear-gradient(135deg,#5b6b4a,#c9bf9a)"></i>Show photo history</label></div>
  <div id="phLab" class="hint" style="margin:4px 0">${phLabel()}</div>
@@ -591,7 +592,12 @@ function render(){
   if(layers.overlay==='shadow'&&SHC){ctx.globalAlpha=layers.ovOp;ctx.imageSmoothingEnabled=true;ctx.drawImage(SHC,0,0,2000,2000);ctx.globalAlpha=1}
   else if(layers.overlay!=='none'&&IMG[layers.overlay]){ctx.globalAlpha=layers.ovOp;ctx.imageSmoothingEnabled=!(layers.overlay==='slope'||layers.overlay==='aspect');ctx.drawImage(IMG[layers.overlay],0,0,2000,2000);ctx.globalAlpha=1;ctx.imageSmoothingEnabled=true}
   if(photoOnTop)drawImgs(im=>!im.design);
-  if(PH.on&&PH.data){const im=phImg(PH.i);if(im&&im.complete&&im.naturalWidth){const d=PH.data;const o=phOff(d.runs[PH.i]);ctx.globalAlpha=PH.op;ctx.drawImage(im,d.x0+o[0],d.y0+o[1],d.size,d.size);ctx.globalAlpha=1}}
+  if(PH.on&&PH.data){const im=phImg(PH.i);if(im&&im.complete&&im.naturalWidth){const d=PH.data;const r=d.runs[PH.i];const o=phOff(r);ctx.globalAlpha=PH.op;
+   // a run can carry a sharper close-up (hi: {f, b:[x,y,w,h]} in map metres) drawn in place of that part of the photo
+   const hi=r.hi&&phLoad(r.hi.f),hb=r.hi&&r.hi.b;
+   if(hi&&hi.complete&&hi.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(d.x0+o[0],d.y0+o[1],d.size,d.size);ctx.rect(hb[0]+o[0],hb[1]+o[1],hb[2],hb[3]);ctx.clip('evenodd');ctx.drawImage(im,d.x0+o[0],d.y0+o[1],d.size,d.size);ctx.restore();ctx.drawImage(hi,hb[0]+o[0],hb[1]+o[1],hb[2],hb[3])}
+   else ctx.drawImage(im,d.x0+o[0],d.y0+o[1],d.size,d.size);
+   ctx.globalAlpha=1}}
   drawImgs(im=>!!im.design); // design drawings always sit above the photos and terrain layers
   drawPrivacy(1/s);
   if(!T||!P.lot){return}   // terrain loaded but outlines not built yet (startup)
