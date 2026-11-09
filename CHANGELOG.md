@@ -4,6 +4,12 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 
 **How this was made.** From v77 on, entries are written as each change is published. Earlier entries were rebuilt by comparing the saved copies of the map code: tools, layers, panels, buttons and drawing types added or removed between each pair. The code behind each entry is exact. Where no copy was saved for every version, the entry covers a range (for example v66–v68), meaning the change landed somewhere in that range. Small fixes and wording tweaks don't show up in that comparison, so they're only listed where known. Times are Brisbane time.
 
+## Trial v65 (10 Nov 2026)
+### Changed
+- Noosa Forest Retreat: the 26 Oct drone map is now the full stitch of all 270 photos (was the half-photo test), still at 15 cm and lined up to the 2022 photo within about 1–2 m.
+### Added
+- Noosa Forest Retreat: tree heights from the drone (drone surface minus the LiDAR 2022 ground) over the 8.5 ha flown, so the light planner's tree shade, the 3D trees and the tree-zone 3D print now work there. Source shown as "drone survey 26 Oct 2026 over LiDAR 2022 ground".
+
 ## Trial v64 (10 Nov 2026)
 ### Added
 - Bright Tree, "Siting, views and carbon" under Terrain analysis (Queensland LiDAR 2022):
@@ -98,6 +104,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v65 | 10 Nov 2026 | Noosa full drone stitch and drone tree heights |
 | Trial v64 | 10 Nov 2026 | Bright Tree cabin site finder, views, privacy and carbon layers |
 | Trial v63 | 10 Nov 2026 | NSW history photos for Mangiri and NAC; Noosa drone flight stitched at 15 cm |
 | Trial v62 | 8 Nov 2026 | Print: choose the colour of each part (e.g. orange buildings) |
