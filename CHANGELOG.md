@@ -4,6 +4,16 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 
 **How this was made.** From v77 on, entries are written as each change is published. Earlier entries were rebuilt by comparing the saved copies of the map code: tools, layers, panels, buttons and drawing types added or removed between each pair. The code behind each entry is exact. Where no copy was saved for every version, the entry covers a range (for example v66–v68), meaning the change landed somewhere in that range. Small fixes and wording tweaks don't show up in that comparison, so they're only listed where known. Times are Brisbane time.
 
+## Trial v64 (10 Nov 2026)
+### Added
+- Bright Tree, "Siting, views and carbon" under Terrain analysis (Queensland LiDAR 2022):
+  - **Cabin and dwelling sites:** every spot on the lot scored for a small building (about 10 × 10 m) on slope, vegetation rules, creek and gully buffers, fire run and fuel, tall trees that could reach it, winter sun, access, cold air and damp, the boundary and privacy. Fourteen best spots (S1–S14) with a table, and your planned cabin, retreat, teepee, zome and treehouse spots checked the same way. Click a spot for its details, including pad cut and fill and winter sun with today's trees.
+  - **Views from a spot:** click anywhere to see what is in sight within 1 km, at standing, deck, treehouse, platform or above-canopy height, with or without today's trees.
+  - **Privacy from the road and neighbours:** how exposed each spot would be if the trees in between were gone. Today the forest hides all but about 100 m² of the lot.
+  - **Carbon stored in the trees:** about 6,600 t of CO₂-e on the lot, adding roughly 80–120 t a year, mapped per cell, with the method and its uncertainty.
+- Doc "Bright Tree carbon and habitat summary" for grant and Land for Wildlife applications.
+- Noosa Forest Retreat: one-click overnight stitch file (starts Docker, keeps the laptop awake, writes a log).
+
 ## Trial v63 (10 Nov 2026)
 ### Added
 - Photo history slider for Mangiri (1960, 1976, 1985, 1991, 1997, 1998) and NAC (1974, 1976, 1979, 1987, 1993, 2001): NSW Spatial Services' scanned film aerial photos (CC BY 4.0), lined up on hundreds of roads, buildings, clearings, the creek and the shoreline across the 2 km window (about 5–20 m). Mangiri 1960 and 1985 only reach the top two-thirds of the window. Left out because the site sits at the frame edge or couldn't be matched: Mangiri 1979, NAC 1971, 1975 and 1998.
@@ -88,6 +98,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v64 | 10 Nov 2026 | Bright Tree cabin site finder, views, privacy and carbon layers |
 | Trial v63 | 10 Nov 2026 | NSW history photos for Mangiri and NAC; Noosa drone flight stitched at 15 cm |
 | Trial v62 | 8 Nov 2026 | Print: choose the colour of each part (e.g. orange buildings) |
 | Trial v61 | 8 Nov 2026 | Bellbunya LiDAR trees and grass; thin small creeks option; raised trees in tree-zone prints |
