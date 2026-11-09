@@ -1,4 +1,5 @@
-Bright Tree fruit forest: dense test flight (made 9 Nov 2026)
+Bright Tree house and fruit forest: dense flight (made 9 Nov 2026)
+This one also covers every tree tall enough to reach the house, cabin or sauna: fly it first.
 
 What it covers: the hairpin fruit forest, the orchards, the terraced fruit forest, the syntropic hillside,
 the house gardens and the cacao guild (about 1.9 ha), plus a 25 m margin. It stays inside the boundary.
@@ -8,8 +9,9 @@ Settings: 30 m above the tallest tree under each line (never less than 25 m), li
 high overlap: about 330 photos on the main pass and 280 on the cross pass, about 16 and 14 minutes.
 Heights come from the 2022 LiDAR; trees have grown since, so watch the first line closely.
 
-Which take-off spot: SE (same spot as the whole-lot missions) is the default. SW works too, but pick
-the matching files: BrightTree_SE_... for the SE spot, BrightTree_SW_... for the SW spot.
+Which take-off spot: SW is recommended, the same corner as the whole-lot missions. SE works too;
+just load the matching files: BrightTree_SW_... for the SW spot, BrightTree_SE_... for the SE spot.
+Return-to-home height in DJI Fly: 65 m from SW, 90 m from SE (same as the whole-lot missions).
 Heights are relative to the take-off spot, so taking off anywhere else is NOT safe.
 
 Camera: straight down, timed shot every 2 s (same as your Noosa flight; if the camera won't go that fast,
@@ -20,7 +22,8 @@ Putting it on the controller (same as before):
 1. In DJI Fly, save 2 dummy waypoint missions (2 points anywhere).
 2. Plug in the controller: Internal storage > Android > data > dji.go.v5 > files > waypoint.
    Copy the 2 long-named folders into this folder.
-3. Double-click "Put mission into DJI Fly.bat" and press Enter (fills SE main, then SE cross).
+3. Double-click "Put mission into DJI Fly.bat" and type the numbers of the two files for your corner
+   (it lists them), or press Enter for SE main + SE cross.
 4. Drag the folders inside "to_controller" back onto the controller's waypoint folder, choose Replace,
    restart DJI Fly. WHICH_IS_WHICH.txt says which dummy is which.
 
