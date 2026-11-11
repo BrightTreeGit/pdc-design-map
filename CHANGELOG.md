@@ -4,6 +4,19 @@ Newest first. Version numbers match the published map and the git tags (`v77`, `
 
 **How this was made.** From v77 on, entries are written as each change is published. Earlier entries were rebuilt by comparing the saved copies of the map code: tools, layers, panels, buttons and drawing types added or removed between each pair. The code behind each entry is exact. Where no copy was saved for every version, the entry covers a range (for example v66–v68), meaning the change landed somewhere in that range. Small fixes and wording tweaks don't show up in that comparison, so they're only listed where known. Times are Brisbane time.
 
+## Trial v66 (12 Nov 2026)
+### Added
+- Tools → **Energy: solar, battery and loads.** Draw roof faces or ground arrays as Solar arrays, then set where they face, pitch, height, panel model, count and string, and the inverter or device input.
+  - Packs panels into the face (portrait or landscape, edge clearance).
+  - Checks strings: cold-corrected open-circuit voltage, hot working voltage, current per input, one string per input, and the AS/NZS 5033 domestic limit.
+  - Shade per array from the LiDAR trees and terrain, including the sky the panels can see for diffuse light. The lop list is applied (2022 survey, today, or with planned lopping).
+  - Real weather: SILO daily radiation and temperature since 1995, split into direct and diffuse, giving kWh per array per day.
+  - Worst cases: dry, wet and lowest years; the 10th-percentile month; the worst 3-, 7- and 14-day runs; the lowest winter day and the lowest day in the wettest summer.
+  - Battery and loads: runs every day on record and reports flat days, flat spells, generator kWh and the extra panels needed.
+  - Ranks the trees that cost the most energy, each with an "Add to lop list" button.
+  - One-page printable report and a daily kWh CSV.
+- Bright Tree: "Add the house roof faces (test)" button with the front, back and deck roof faces.
+
 ## Trial v65 (10 Nov 2026)
 ### Changed
 - Noosa Forest Retreat: the 26 Oct drone map is now the full stitch of all 270 photos (was the half-photo test), still at 15 cm and lined up to the 2022 photo within about 1–2 m.
@@ -104,6 +117,7 @@ per-group mapping-only beta maps (docs/beta-maps.md) from `beta/group-maps`. The
 
 | Version | Saved | Branch | What |
 |---|---|---|---|
+| Trial v66 | 12 Nov 2026 | Energy tool: solar, shade, SILO weather, battery and loads |
 | Trial v65 | 10 Nov 2026 | Noosa full drone stitch and drone tree heights |
 | Trial v64 | 10 Nov 2026 | Bright Tree cabin site finder, views, privacy and carbon layers |
 | Trial v63 | 10 Nov 2026 | NSW history photos for Mangiri and NAC; Noosa drone flight stitched at 15 cm |
